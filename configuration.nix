@@ -107,7 +107,7 @@
     fastfetch
     nfs-utils
     neovim
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    discord  #All-in-one cross-platform voice and text chat for gamers
   #  wget
   ];
 
