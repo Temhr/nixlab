@@ -110,6 +110,7 @@
     lsof  #A tool to list open files
     screen  #A window manager that multiplexes a physical terminal
     tmux  #Terminal multiplexer
+    tealdeer #Very fast implementation of tldr in Rust
 
     ## Task Scheduling
     at  #The classical Unix `at' job scheduling command
