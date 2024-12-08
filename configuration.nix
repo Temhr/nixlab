@@ -105,7 +105,7 @@
     busybox  #Tiny versions of common UNIX utilities in a single small executable
     colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
     doas  #Executes the given command as another user
-    unstable.fastfetch  #Like neofetch, but much faster because written in C
+    fastfetch  #Like neofetch, but much faster because written in C
     logrotate  #Rotates and compresses system logs
     lsof  #A tool to list open files
     screen  #A window manager that multiplexes a physical terminal
