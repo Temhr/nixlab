@@ -101,16 +101,115 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    alejandra
-    git
-    github-desktop
-    keepassxc
-    kdePackages.partitionmanager
-    fastfetch
-    nfs-utils
-    neovim
+    ## Terminal Utilities
+    busybox  #Tiny versions of common UNIX utilities in a single small executable
+    colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
+    doas  #Executes the given command as another user
+    unstable.fastfetch  #Like neofetch, but much faster because written in C
+    logrotate  #Rotates and compresses system logs
+    lsof  #A tool to list open files
+    screen  #A window manager that multiplexes a physical terminal
+    tmux  #Terminal multiplexer
+
+    ## Task Scheduling
+    at  #The classical Unix `at' job scheduling command
+    cron  #Daemon for running commands at specific times (Vixie Cron)
+    kdePackages.kcron  #Task scheduler by KDE
+
+    ## Dev Tools
+    android-tools  #Android SDK platform tools
+    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    gdb  #The GNU Project debugger
+    gdbgui  #A browser-based frontend for GDB
+    gnumake  #A tool to control the generation of non-source files from sources
+
+    ## Network Management
+    #autofs5  #Kernel-based automounter
+    ethtool  #Utility for controlling network drivers and hardware
+    iperf  #Tool to measure IP bandwidth using UDP or TCP
+    nettools  #A set of tools for controlling the network subsystem in Linux
+    nfs-utils  #Linux user-space NFS utilities
+    nmap  #A free and open source utility for network discovery and security auditing
+    traceroute  #Tracks the route taken by packets over an IP network
+    whois  #Intelligent WHOIS client from Debian
+
+    ## Device Management
+    kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
+    #switcheroo-control  #D-Bus service to check the availability of dual-GPU
+    pciutils  #A collection of programs for inspecting and manipulating configuration of PCI devices
+    ncdu  #Disk usage analyzer with an ncurses interface
+    #furmark  #OpenGL and Vulkan Benchmark and Stress Test
+    cachix  #Command-line client for Nix binary cache hosting https://cachix.org
+    clinfo  #Print all known information about all available OpenCL platforms and devices in the system
+    vulkan-tools  #Khronos official Vulkan Tools and Utilities
+    cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
+    glxinfo  #Test utilities for OpenGL
+    lshw-gui  #Provide detailed information on the hardware configuration of the machine
+    usbutils  #Tools for working with USB devices, such as lsusb
+
+    ## File Management
+    syncthing  #Open Source Continuous File Synchronization
+    syncthingtray  #Tray application and Dolphin/Plasma integration for Syncthing
+    wget  #Tool for retrieving files using HTTP, HTTPS, and FTP
+    rsync  #Fast incremental file transfer utility
+    curl  #A command line tool for transferring files with URL syntax
+
+    ## System Resource Monitors
+    iotop  #A tool to find out the processes doing the most IO
+    htop  #An interactive process viewer
+    btop  #A monitor of resources
+
+    ## Text Editors
+    nano  #Small, user-friendly console text editor
+    vim  #The most popular clone of the VI editor
+    neovim  #Vim text editor fork focused on extensibility and agility
+      alejandra #Uncompromising Nix Code Formatter
+
+    ## Version Control
+    git  #Distributed version control system
+    github-desktop #GUI for managing Git and GitHub
+
+    ## Secret Management
+    keepassxc  #Offline password manager with many features.
+
+    ## Terminal File Managers
+    mc  #File Manager and User Shell for the GNU Project, known as Midnight Commander
+    #ranger  #File manager with minimalistic curses interface
+    #lf  #Terminal file manager written in Go and heavily inspired by ranger
+    #nnn  #Small ncurses-based file browser forked from noice
+    #vifm-full  #Vi-like file manager; Includes support for optional features
+
+    ## Browsers
+    brave  #Privacy-oriented browser for Desktop and Laptop computers
+    microsoft-edge  #The web browser from Microsoft
+    #google-chrome  #Freeware web browser developed by Google
+    #vivaldi  #A Browser for our Friends, powerful and personal
+
+    ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
-  #  wget
+    obs-studio  #Free and open source software for video recording and live streaming
+    scrcpy  #Display and control Android devices over USB or TCP/IP
+    ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
+
+    ## Games
+    lutris  #Open Source gaming platform for GNU/Linux
+    superTuxKart  #A Free 3D kart racing game
+
+    ## Media
+    audacity  #Sound editor with graphical UI
+    kdePackages.kdenlive  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+    simplescreenrecorder  #A screen recorder for Linux
+    spotify  #Play music from the Spotify music service
+    vlc  #Cross-platform media player and streaming server
+
+    ## Productivity
+    calibre  #Comprehensive e-book software
+    libreoffice-fresh  #Comprehensive, professional-quality productivity suite
+
+    ## Virtualizations
+    incus #Powerful system container and virtual machine manager
+    distrobox  #Wrapper around podman or docker to create and start containers
+    podman  #A program for managing pods, containers and container images
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
