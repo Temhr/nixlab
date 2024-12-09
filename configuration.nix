@@ -179,6 +179,7 @@
     #lf  #Terminal file manager written in Go and heavily inspired by ranger
     #nnn  #Small ncurses-based file browser forked from noice
     #vifm-full  #Vi-like file manager; Includes support for optional features
+    #yazi  #Blazing fast terminal file manager written in Rust, based on async I/O
 
     ## Browsers
     brave  #Privacy-oriented browser for Desktop and Laptop computers
