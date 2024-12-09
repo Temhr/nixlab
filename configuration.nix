@@ -111,6 +111,7 @@
     screen  #A window manager that multiplexes a physical terminal
     tmux  #Terminal multiplexer
     tealdeer #Very fast implementation of tldr in Rust
+    moreutils #Growing collection of the unix tools that nobody thought to write long ago when unix was young
 
     ## Task Scheduling
     at  #The classical Unix `at' job scheduling command
@@ -236,11 +237,11 @@
   # Limit the number of generations to keep
   boot.loader.systemd-boot.configurationLimit = 5;
   #boot.loader.grub.configurationLimit = 10;
-  # Perform garbage collection weekly to maintain low disk usage
+  # Perform garbage collection daily to maintain low disk usage
   nix.gc = {
     automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 1w";
+    dates = "*-*-* 03:050:00";
+    options = "--delete-older-than 3d";
   };
   # Optimize storage
   # You can also manually optimize the store via:
