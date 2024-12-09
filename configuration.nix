@@ -240,8 +240,8 @@
   # Perform garbage collection daily to maintain low disk usage
   nix.gc = {
     automatic = true;
-    dates = "*-*-* 03:050:00";
-    options = "--delete-older-than 3d";
+    dates = "*-*-* 03:57:00";
+    options = "--delete-old +10";
   };
   # Optimize storage
   # You can also manually optimize the store via:
