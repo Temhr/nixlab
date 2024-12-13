@@ -241,7 +241,7 @@
   nix.gc = {
     automatic = true;
     dates = "*-*-* 02:00:00";
-    options = "--delete-older-than 3d";
+    options = "--delete-older-than 10d";
   };
   # Optimize storage for incoming new files
   nix.settings.auto-optimise-store = true;
