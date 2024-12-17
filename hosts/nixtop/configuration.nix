@@ -166,6 +166,7 @@
     vim  #The most popular clone of the VI editor
     neovim  #Vim text editor fork focused on extensibility and agility
       alejandra #Uncompromising Nix Code Formatter
+    zed  #Novel data lake based on super-structured data
 
     ## Version Control
     git  #Distributed version control system
@@ -241,7 +242,7 @@
   nix.gc = {
     automatic = true;
     dates = "*-*-* 02:00:00";
-    options = "--delete-older-than 15d";
+    options = "--delete-older-than 10d";
   };
   # Optimize storage for incoming new files
   nix.settings.auto-optimise-store = true;

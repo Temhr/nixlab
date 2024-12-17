@@ -9,14 +9,38 @@
     unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs, ... }@inputs: {
+  # Outputs field: Defines what this flake provides (such as NixOS configurations, packages, etc.).
+  outputs = inputs@{ self, nixpkgs, ... }: {
     nixosConfigurations = {
+
+#      nixace = nixpkgs.lib.nixosSystem {
+#        system = "x86_64-linux";
+#        modules = [
+#          ./configuration.nix
+#        ];
+#      };
+#      nixbase = nixpkgs.lib.nixosSystem {
+#        system = "x86_64-linux";
+#        modules = [
+#          ./configuration.nix
+#        ];
+#      };
+#      nixser = nixpkgs.lib.nixosSystem {
+#        system = "x86_64-linux";
+#        modules = [
+#          ./configuration.nix
+#        ];
+#      };
       nixtop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./configuration.nix
+          ./hosts/nixtop/configuration.nix
+          {
+            _module.args = { inherit inputs; };
+          }
         ];
       };
+
     };
   };
 }
