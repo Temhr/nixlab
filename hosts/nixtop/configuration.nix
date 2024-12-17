@@ -106,13 +106,18 @@
     busybox  #Tiny versions of common UNIX utilities in a single small executable
     colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
     doas  #Executes the given command as another user
+    eza  #Modern, maintained replacement for ls
     fastfetch  #Like neofetch, but much faster because written in C
+    fzf  #Command-line fuzzy finder written in Go
+    jq  #Lightweight and flexible command-line JSON processor
     logrotate  #Rotates and compresses system logs
     lsof  #A tool to list open files
     screen  #A window manager that multiplexes a physical terminal
     tmux  #Terminal multiplexer
     tealdeer #Very fast implementation of tldr in Rust
     moreutils #Growing collection of the unix tools that nobody thought to write long ago when unix was young
+    yadm  #Yet Another Dotfiles Manager
+    zoxide  # Fast cd command that learns your habits
 
     ## Task Scheduling
     at  #The classical Unix `at' job scheduling command
@@ -133,6 +138,7 @@
     nettools  #A set of tools for controlling the network subsystem in Linux
     nfs-utils  #Linux user-space NFS utilities
     nmap  #A free and open source utility for network discovery and security auditing
+    tcpdump  #Network sniffer
     traceroute  #Tracks the route taken by packets over an IP network
     whois  #Intelligent WHOIS client from Debian
 

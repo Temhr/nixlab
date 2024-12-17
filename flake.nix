@@ -13,33 +13,42 @@
   outputs = inputs@{ self, nixpkgs, ... }: {
     nixosConfigurations = {
 
-#      nixace = nixpkgs.lib.nixosSystem {
-#        system = "x86_64-linux";
-#        modules = [
-#          ./configuration.nix
-#        ];
-#      };
-#      nixbase = nixpkgs.lib.nixosSystem {
-#        system = "x86_64-linux";
-#        modules = [
-#          ./configuration.nix
-#        ];
-#      };
-#      nixser = nixpkgs.lib.nixosSystem {
-#        system = "x86_64-linux";
-#        modules = [
-#          ./configuration.nix
-#        ];
-#      };
-      nixtop = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ./hosts/nixtop/configuration.nix
-          {
-            _module.args = { inherit inputs; };
-          }
-        ];
-      };
+#       nixace = nixpkgs.lib.nixosSystem {
+#         system = "x86_64-linux";
+#         modules = [
+#           ./configuration.nix
+#           {
+#             _module.args = { inherit inputs; };
+#           }
+#         ];
+#       };
+#       nixbase = nixpkgs.lib.nixosSystem {
+#         system = "x86_64-linux";
+#         modules = [
+#           ./configuration.nix
+#           {
+#             _module.args = { inherit inputs; };
+#           }
+#         ];
+#       };
+#       nixser = nixpkgs.lib.nixosSystem {
+#         system = "x86_64-linux";
+#         modules = [
+#           ./configuration.nix
+#           {
+#             _module.args = { inherit inputs; };
+#           }
+#         ];
+#       };
+        nixtop = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./hosts/nixtop/configuration.nix
+            {
+              _module.args = { inherit inputs; };
+            }
+          ];
+        };
 
     };
   };
