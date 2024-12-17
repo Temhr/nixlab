@@ -102,6 +102,7 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     ## Terminal Utilities
+    bat  #Cat(1) clone with syntax highlighting and Git integration
     busybox  #Tiny versions of common UNIX utilities in a single small executable
     colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
     doas  #Executes the given command as another user
