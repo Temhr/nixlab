@@ -166,6 +166,7 @@
     vim  #The most popular clone of the VI editor
     neovim  #Vim text editor fork focused on extensibility and agility
       alejandra #Uncompromising Nix Code Formatter
+    zed  #Novel data lake based on super-structured data
 
     ## Version Control
     git  #Distributed version control system
