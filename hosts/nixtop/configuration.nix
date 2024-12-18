@@ -65,6 +65,15 @@
     # Opinionated: make flake registry and nix path match flake inputs
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
+
+    ## Perform garbage collection daily to maintain low disk usage
+    gc = {
+      automatic = true;
+      dates = "*-*-* 02:00:00";
+      options = "--delete-older-than 10d";
+    };
+    ## Optimize storage for incoming new files
+    settings.auto-optimise-store = true;
   };
 
   # FIXME: Add the rest of your current configuration
@@ -75,14 +84,6 @@
   ## Limit the number of generations to keep
   boot.loader.systemd-boot.configurationLimit = 5;
   #boot.loader.grub.configurationLimit = 10;
-  ## Perform garbage collection daily to maintain low disk usage
-  nix.gc = {
-    automatic = true;
-    dates = "*-*-* 02:00:00";
-    options = "--delete-older-than 10d";
-  };
-  ## Optimize storage for incoming new files
-  nix.settings.auto-optimise-store = true;
 
   # TODO: Set your hostname
   networking.hostName = "nixtop";
