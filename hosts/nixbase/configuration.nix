@@ -79,14 +79,14 @@
   # FIXME: Add the rest of your current configuration
 
   # Bootloader.
-  boot.loader.grub.enable = true;
+#  boot.loader.grub.enable = true;
 #  boot.loader.grub.device = "/dev/sda";
 #  boot.loader.grub.useOSProber = true;
-#  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.enable = true;
 #  boot.loader.efi.canTouchEfiVariables = true;
 #  ## Limit the number of generations to keep
-#  boot.loader.systemd-boot.configurationLimit = 5;
-  boot.loader.grub.configurationLimit = 10;
+  boot.loader.systemd-boot.configurationLimit = 5;
+#  boot.loader.grub.configurationLimit = 10;
 
   # TODO: Set your hostname
   networking.hostName = "nixbase";
