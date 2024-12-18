@@ -80,8 +80,8 @@
 
   # Bootloader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+#  boot.loader.grub.device = "/dev/sda";
+#  boot.loader.grub.useOSProber = true;
 #  boot.loader.systemd-boot.enable = true;
 #  boot.loader.efi.canTouchEfiVariables = true;
 #  ## Limit the number of generations to keep
@@ -89,7 +89,7 @@
   boot.loader.grub.configurationLimit = 10;
 
   # TODO: Set your hostname
-  networking.hostName = "nixtop";
+  networking.hostName = "nixbase";
 
   ## Enable networking
   networking.networkmanager.enable = true;
@@ -291,5 +291,5 @@
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "24.05";
+  system.stateVersion = "24.11";
 }
