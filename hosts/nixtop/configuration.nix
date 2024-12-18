@@ -78,7 +78,8 @@
 
   # FIXME: Add the rest of your current configuration
 
-  ## Bootloader.
+  ## Bootloader
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   ## Limit the number of generations to keep
