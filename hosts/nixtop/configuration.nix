@@ -143,13 +143,13 @@
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "temhr";
 
-    # Install firefox.
+  ## Install firefox.
   programs.firefox = {
     enable = true;
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  ## List packages installed in system profile. To search, run:
+  ## $ nix search wget
   environment.systemPackages = with pkgs; [
     ## Terminal Utilities
     bat  #Cat(1) clone with syntax highlighting and Git integration
