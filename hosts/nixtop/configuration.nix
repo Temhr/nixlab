@@ -173,10 +173,15 @@
 
     ## Dev Tools
     android-tools  #Android SDK platform tools
-    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
     gdb  #The GNU Project debugger
     gdbgui  #A browser-based frontend for GDB
     gnumake  #A tool to control the generation of non-source files from sources
+
+    ## Godot Dev Tools
+    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
+    scons  #Improved, cross-platform substitute for Make
+    python3Full  #High-level dynamically-typed programming language
 
     ## Network Management
     #autofs5  #Kernel-based automounter
