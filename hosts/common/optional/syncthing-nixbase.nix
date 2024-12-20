@@ -22,7 +22,7 @@
       # Manually grab the device IDs of the other syncthing devices
       devices = {
         "pve" = { id = "AG43EPZ-VGVQGHH-WABHCQF-3M4VXSB-7G6J3J6-OWHNULZ-IXIK3TJ-TGZX7Q4"; };
-        "nixtop" = { id = ""; };
+        "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
       };
       # all machines must have same declaration, but "devices" reflect the opposite device
       folders = {
