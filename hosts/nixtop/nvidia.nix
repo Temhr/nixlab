@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }: {
 
   imports = [
+    ../../cachix.nix
   ];
 
   # Enable OpenGL

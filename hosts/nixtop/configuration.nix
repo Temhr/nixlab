@@ -23,7 +23,6 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../../cachix.nix
     ../common/global/locale.nix
   ];
 
