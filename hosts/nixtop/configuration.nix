@@ -202,10 +202,7 @@
     pciutils  #A collection of programs for inspecting and manipulating configuration of PCI devices
     ncdu  #Disk usage analyzer with an ncurses interface
     furmark  #OpenGL and Vulkan Benchmark and Stress Test
-    cachix  #Command-line client for Nix binary cache hosting https://cachix.org
     clinfo  #Print all known information about all available OpenCL platforms and devices in the system
-    vulkan-tools  #Khronos official Vulkan Tools and Utilities
-    cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
     glxinfo  #Test utilities for OpenGL
     lshw-gui  #Provide detailed information on the hardware configuration of the machine
     usbutils  #Tools for working with USB devices, such as lsusb

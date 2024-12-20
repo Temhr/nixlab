@@ -1,5 +1,9 @@
 { config, lib, pkgs, ... }: {
 
+  imports = [
+   ./cachix
+  ];
+
   # Enable OpenGL
   hardware.graphics = {
     enable = true;
@@ -52,4 +56,9 @@
       intelBusId = "PCI:0:2:0";
     };
   };
+  environment.systemPackages = with pkgs; [
+    cachix  #Command-line client for Nix binary cache hosting https://cachix.org
+    vulkan-tools  #Khronos official Vulkan Tools and Utilities
+    cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
+  ];
 }
