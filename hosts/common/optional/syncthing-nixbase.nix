@@ -27,7 +27,7 @@
       # all machines must have same declaration, but "devices" reflect the opposite device
       folders = {
         # Name of folder in Syncthing, also the folder ID
-        "nixbase-home" = {
+        "home-nixbase" = {
           # Which folder to add to Syncthing
           path = "/home/temhr";
           # Which devices to share the folder with
