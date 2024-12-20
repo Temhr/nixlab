@@ -23,6 +23,7 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
+    ../common/optional/syncthing-nixtop.nix
     ../common/global/utilities.nix
     ../common/global/locale.nix
   ];
