@@ -12,7 +12,7 @@
   services.xserver.videoDrivers = ["nvidia"];
 
   # Below command lists GPU and their drivers
-  # $ grep VGA -A3
+  # $ #lspci -k | grep VGA -A3
   hardware.nvidia = {
 
     # Modesetting is required.
