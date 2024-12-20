@@ -44,11 +44,6 @@
         "mirror" = {
           path = "/run/media/temhr/HGST A";
           devices = [ "pve" ];
-          versioning = {
-            type = "simple";
-            params = {
-              keep = "1";
-            };
           };
         };
       };
