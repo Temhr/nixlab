@@ -21,6 +21,7 @@
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+    ./nvidia.nix
 
     ../common/global/utilities.nix
     ../common/global/locale.nix
