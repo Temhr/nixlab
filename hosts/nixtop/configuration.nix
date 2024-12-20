@@ -201,7 +201,7 @@
     #switcheroo-control  #D-Bus service to check the availability of dual-GPU
     pciutils  #A collection of programs for inspecting and manipulating configuration of PCI devices
     ncdu  #Disk usage analyzer with an ncurses interface
-    #furmark  #OpenGL and Vulkan Benchmark and Stress Test
+    furmark  #OpenGL and Vulkan Benchmark and Stress Test
     cachix  #Command-line client for Nix binary cache hosting https://cachix.org
     clinfo  #Print all known information about all available OpenCL platforms and devices in the system
     vulkan-tools  #Khronos official Vulkan Tools and Utilities
