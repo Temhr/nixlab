@@ -44,7 +44,6 @@
         "mirror" = {
           path = "/run/media/temhr/HGST A";
           devices = [ "pve" ];
-          };
         };
       };
     };
