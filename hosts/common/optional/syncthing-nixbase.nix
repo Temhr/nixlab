@@ -31,7 +31,7 @@
           # Which folder to add to Syncthing
           path = "/home/temhr";
           # Which devices to share the folder with
-          devices = [ "pve" "nixtop"];
+          devices = [ "pve" ];
           # optional, keeps all changes to files for 180 days
           versioning = {
             type = "staggered";
