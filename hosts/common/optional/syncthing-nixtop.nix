@@ -15,10 +15,10 @@
     group = "users";
     # Sets the Web Interface to listen on all interfaces (headless 0.0.0.0, otherwise 127.0.0.1)
     guiAddress = "0.0.0.0:8384";
-    declarative = {
-      # Override the devices / folders that are configured in the web interface
-      overrideDevices = true;
-      overrideFolders = true;
+    # Override the devices / folders that are configured in the web interface
+    overrideDevices = true;
+    overrideFolders = true;
+    settings = {
       # Manually grab the device IDs of the other syncthing devices
       devices = {
         "pve" = { id = "AG43EPZ-VGVQGHH-WABHCQF-3M4VXSB-7G6J3J6-OWHNULZ-IXIK3TJ-TGZX7Q4"; };
