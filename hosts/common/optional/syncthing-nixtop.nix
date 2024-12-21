@@ -4,7 +4,7 @@
     # Enables the Syncthing Service
     enable = true;
     # Sets the Data/default sync directory (but we won’t use this)
-    dataDir = "/home/temhr";
+    #dataDir = "/home/temhr";
     # Opens the default ports (21027/tcp & 22000) - note this doesn’t include the web interface
     openDefaultPorts = true;
     # Sets the Config Directory (important part of .config files)
