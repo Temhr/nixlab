@@ -46,8 +46,6 @@
     usbutils  #Tools for working with USB devices, such as lsusb
 
     ## File Management
-    syncthing  #Open Source Continuous File Synchronization
-    syncthingtray  #Tray application and Dolphin/Plasma integration for Syncthing
     wget  #Tool for retrieving files using HTTP, HTTPS, and FTP
     rsync  #Fast incremental file transfer utility
     curl  #A command line tool for transferring files with URL syntax

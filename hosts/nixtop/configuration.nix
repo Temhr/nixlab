@@ -101,6 +101,14 @@
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
   services.desktopManager.plasma6.enable = true;
+
+  systemd.sleep.extraConfig = ''
+    AllowSuspend=no
+    AllowHibernation=no
+    AllowHybridSleep=no
+    AllowSuspendThenHibernate=no
+  '';
+
   ## Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -142,6 +150,8 @@
   ## Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "temhr";
+
+
 
   ## Install firefox.
   programs.firefox = {
