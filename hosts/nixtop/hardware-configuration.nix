@@ -29,7 +29,7 @@
       fsType = "ext4";
     };
 
-  fileSystems."/home/temhr/mnt/hdd-r0" =
+  fileSystems."/mnt/hdd-r0" =
     { device = "192.168.0.210:/hdd-r0";
       fsType = "nfs";
       options = [
