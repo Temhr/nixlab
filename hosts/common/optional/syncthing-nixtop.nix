@@ -22,7 +22,7 @@
       # Manually grab the device IDs of the other syncthing devices
       devices = {
         "pve" = { id = "AG43EPZ-VGVQGHH-WABHCQF-3M4VXSB-7G6J3J6-OWHNULZ-IXIK3TJ-TGZX7Q4"; };
-        "nixbase" = { id = ""; };
+        "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
       };
       # all machines must have same declaration, but "devices" reflect the opposite device
       folders = {
@@ -31,7 +31,7 @@
           # Which folder to add to Syncthing
           path = "/home/temhr";
           # Which devices to share the folder with
-          devices = [ "pve" "nixbase"];
+          devices = [ "pve" ];
           # optional, keeps all changes to files for 180 days
           versioning = {
             type = "staggered";
