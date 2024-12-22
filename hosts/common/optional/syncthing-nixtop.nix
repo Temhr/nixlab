@@ -14,7 +14,7 @@
     # Sets the group that Syncthing runs as
     group = "users";
     # Sets the Web Interface to listen on all interfaces (headless 0.0.0.0, otherwise 127.0.0.1)
-    guiAddress = "127.0.0.1:8384";
+    guiAddress = "0.0.0.0:8384";
     # Override the devices / folders that are configured in the web interface
     overrideDevices = true;
     overrideFolders = true;
