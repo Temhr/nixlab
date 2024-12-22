@@ -159,6 +159,7 @@
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
 
     ## Dev Tools
+    unstable.blender  #3D Creation/Animation/Publishing System
     android-tools  #Android SDK platform tools
     gdb  #The GNU Project debugger
     gdbgui  #A browser-based frontend for GDB
