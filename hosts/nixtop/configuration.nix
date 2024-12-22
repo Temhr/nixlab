@@ -186,7 +186,7 @@
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
     obs-studio  #Free and open source software for video recording and live streaming
-    scrcpy  #Display and control Android devices over USB or TCP/IP
+    unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
 
     ## Games
