@@ -36,7 +36,7 @@
     whois  #Intelligent WHOIS client from Debian
 
     ## Device Management
-    #switcheroo-control  #D-Bus service to check the availability of dual-GPU
+    switcheroo-control  #D-Bus service to check the availability of dual-GPU
     pciutils  #A collection of programs for inspecting and manipulating configuration of PCI devices
     ncdu  #Disk usage analyzer with an ncurses interface
     furmark  #OpenGL and Vulkan Benchmark and Stress Test
