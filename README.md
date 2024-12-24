@@ -18,7 +18,7 @@ Asperational
 - Secrets
 
 # Implementation
-- **Installation**: protocol not established et
+- **Installation**: protocol not established yet, helper shell scripts being developed
 - Updating system:
   - **Flakes**: $ nix flake update --flake ./nixlab
   - **Home Manager**: $ home-manager switch --flake ./nixlab
