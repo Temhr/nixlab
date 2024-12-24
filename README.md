@@ -4,12 +4,12 @@ My ad hoc initial Nix implementation for my Linux laptops, desktops, or homelab 
 
 # Features
 Contains
-- Flakes: entrypoint; version-pins pkg dependencies in a lock file
-- Home Manager: declarative configuration for user environment (non-global packages and dotfiles)
-- Overlays: extends and applies changes to package sets (nixpkgs)
+- **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
+- **Home Manager**: declarative configuration for user environment (non-global packages and dotfiles)
+- **Overlays**: extends and applies changes to package sets (nixpkgs)
 
 Asperational
-- Togglable Modules: provides a combinatorial number of configuration options per system
+- **Togglable Modules**: provides a combinatorial number of configuration options per system
 - Automatic daily updates
 - Setup hardware configurations
 - Support for various GUIs and desktop environments including  KDE, XFCE, and Sway
@@ -18,11 +18,11 @@ Asperational
 - Secrets
 
 # Implementation
-- Installation: protocol not established et
+- **Installation**: protocol not established et
 - Updating system:
-  - Flakes: $ nix flake update --flake ./nixlab
-  - Home Manager: $ home-manager switch --flake ./nixlab
-  - NixOS: $ sudo nixos-rebuild switch
+  - **Flakes**: $ nix flake update --flake ./nixlab
+  - **Home Manager**: $ home-manager switch --flake ./nixlab
+  - **NixOS**: $ sudo nixos-rebuild switch
 
 # Layout:
 - **bin**: shell scripts for various functions
