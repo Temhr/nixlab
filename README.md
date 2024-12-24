@@ -21,6 +21,7 @@ Asperational
 - Installation: protocol not established et
 - Updating system:
   - Flakes: $ nix flake update --flake ./nixlab
+  - Home Manager: $ home-manager switch --flake ./nixlab
   - NixOS: $ sudo nixos-rebuild switch
 
 # Layout:
