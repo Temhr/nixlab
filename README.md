@@ -23,7 +23,7 @@ Asperational
   - Flakes: $ nix flake update --flake ./nixlab
   - NixOS: $ sudo nixos-rebuild switch
 
-# Repository structure:
+# Layout:
 - **bin**: shell scripts for various functions
   - empty
 - **home-manager**: stand alone from root and shared across hosts
