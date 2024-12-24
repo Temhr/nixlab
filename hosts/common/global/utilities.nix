@@ -70,5 +70,9 @@
     #vifm-full  #Vi-like file manager; Includes support for optional features
     #yazi  #Blazing fast terminal file manager written in Rust, based on async I/O
 
+    ##Applicatio
+    home-manager  #Nix-based user environment configurator
+
+
   ];
 }
