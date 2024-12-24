@@ -4,8 +4,8 @@ My ad hoc initial Nix implementation for my Linux laptops, desktops, or homelab 
 
 # Features
 Contains
-- Flakes: entrypoint to nix and version-pins pkg dependencies in a lock file
-- Home Manager: declarative configuration for user environment (non global packages and dotfiles)
+- Flakes: entrypoint; version-pins pkg dependencies in a lock file
+- Home Manager: declarative configuration for user environment (non-global packages and dotfiles)
 - Overlays: extends and applies changes to package sets (nixpkgs)
 
 Asperational
