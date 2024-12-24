@@ -23,6 +23,7 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
+    ../common/optional/steam.nix
     ../common/optional/syncthing-nixtop.nix
     ../common/global/utilities.nix
     ../common/global/locale.nix
@@ -144,8 +145,6 @@
   ## Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "temhr";
-
-
 
   ## Install firefox.
   programs.firefox = {
