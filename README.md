@@ -1,15 +1,15 @@
-# Nix sys configuration
+# Nix system configuration
 
 My ad hoc initial Nix implementation for my Linux laptops, desktops, or homelab servers. A work-in-progress mostly adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs).
 
 # Features
 Contains
-- Flakes: entrypoint to nix and
+- Flakes: entrypoint; version-pins pkg dependencies in a lock file
+- Home Manager: declarative configuration for user environment (non-global packages and dotfiles)
 - Overlays: extends and applies changes to package sets (nixpkgs)
 
 Asperational
 - Togglable Modules: provides a combinatorial number of configuration options per system
-- Home Manager: home directory organizational and dotfile management system
 - Automatic daily updates
 - Setup hardware configurations
 - Support for various GUIs and desktop environments including  KDE, XFCE, and Sway
@@ -21,9 +21,10 @@ Asperational
 - Installation: protocol not established et
 - Updating system:
   - Flakes: $ nix flake update --flake ./nixlab
+  - Home Manager: $ home-manager switch --flake ./nixlab
   - NixOS: $ sudo nixos-rebuild switch
 
-# Repository structure:
+# Layout:
 - **bin**: shell scripts for various functions
   - empty
 - **home-manager**: stand alone from root and shared across hosts
