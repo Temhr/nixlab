@@ -32,6 +32,10 @@
   fileSystems."/home/temhr/mnt/shelf" =
     { device = "/dev/disk/by-uuid/39d1a447-348b-4d86-9104-c4bae37c46fc";
       fsType = "ext4";
+<<<<<<< HEAD
+=======
+      options = [ "mode=775"  "gid=001" ];
+>>>>>>> parent of 61fa774 (Update hardware-configuration.nix)
     };
 
   fileSystems."/mnt/hdd-r0" =
