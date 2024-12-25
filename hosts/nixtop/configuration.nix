@@ -23,10 +23,12 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
+    ../common/global/locale.nix
+    ../common/global/users.nix
+    ../common/global/utilities.nix
+
     ../common/optional/steam.nix
     ../common/optional/syncthing-nixtop.nix
-    ../common/global/utilities.nix
-    ../common/global/locale.nix
   ];
 
   nixpkgs = {
