@@ -23,8 +23,6 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../../modules/nixos
-
     ../common/global/locale.nix
     ../common/global/users.nix
     ../common/global/utilities.nix
@@ -135,8 +133,6 @@
   programs.firefox = {
     enable = true;
   };
-
-  module1.enable = true;
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
