@@ -9,7 +9,7 @@ Contains
 - **Overlays**: extends and applies changes to package sets (nixpkgs)
 
 Asperational
-- **Togglable Modules**: provides a combinatorial number of configuration options per system
+- **Togglable Modules**: allows a combinatorial number of configuration options
 - Automatic daily updates
 - Setup hardware configurations
 - Support for various GUIs and desktop environments including  KDE, XFCE, and Sway
