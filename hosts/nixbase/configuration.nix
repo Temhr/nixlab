@@ -23,9 +23,11 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../common/optional/syncthing-nixbase.nix
-    ../common/global/utilities.nix
     ../common/global/locale.nix
+    ../common/global/users.nix
+    ../common/global/utilities.nix
+
+    ../common/optional/syncthing-nixbase.nix
   ];
 
   nixpkgs = {
@@ -90,7 +92,7 @@
   boot.loader.systemd-boot.enable = true;
 #  boot.loader.efi.canTouchEfiVariables = true;
 #  ## Limit the number of generations to keep
-  boot.loader.systemd-boot.configurationLimit = 5;
+  boot.loader.systemd-boot.configurationLimit = 10;
 #  boot.loader.grub.configurationLimit = 10;
 
   # TODO: Set your hostname
@@ -126,27 +128,6 @@
     # no need to redefine it in your config for now)
     #media-session.enable = true;
   };
-
-  # TODO: Configure your system-wide user settings (groups, etc), add more users as needed.
-  users.users = {
-    # FIXME: Replace with your username
-    temhr = {
-      # TODO: You can set an initial password for your user. If you do, you can skip setting a root password by passing '--no-root-passwd' to nixos-install. Be sure to change it (using passwd) after rebooting!
-      initialPassword = "correcthorsebatterystaple";
-      isNormalUser = true;
-      openssh.authorizedKeys.keys = [
-        # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
-      ];
-      # TODO: Be sure to add any other groups you need (such as networkmanager, audio, docker, etc)
-      extraGroups = [ "networkmanager" "wheel" ];
-      packages = with pkgs; [
-      #  thunderbird
-      ];
-    };
-  };
-  ## Enable automatic login for the user.
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "temhr";
 
   ## Install firefox.
   programs.firefox = {
