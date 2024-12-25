@@ -30,7 +30,7 @@
     };
 
   fileSystems."/home/temhr/shelf" =
-    { device = "/dev/disk/by-uuid/39d1a447-348b-4d86-9104-c4bae37c46fc";
+    { device = "/dev/disk/by-label/shelf";
       fsType = "ext4";
     };
   systemd.tmpfiles.rules = [ "d /home/temhr/shelf 1777 root root " ];
