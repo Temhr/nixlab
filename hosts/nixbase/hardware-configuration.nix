@@ -25,21 +25,15 @@
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/c27eabda-5471-487c-8c45-3421e165c873";
+    { device = "/dev/disk/by-label/home";
       fsType = "ext4";
     };
 
-#  fileSystems."/home" =
-#    { device = "/dev/disk/by-label/home";
-#      fsType = "ext4";
-#    };
-#
-#  fileSystems."/home/temhr/shelf" =
-#    { device = "/dev/disk/by-label/shelf";
-#      fsType = "ext4";
-#    };
-#  systemd.tmpfiles.rules = [ "d /home/temhr/shelf 1777 root root " ];
-
+  fileSystems."/home/temhr/shelf" =
+    { device = "/dev/disk/by-label/shelf";
+      fsType = "ext4";
+    };
+  systemd.tmpfiles.rules = [ "d /home/temhr/shelf 1777 root root " ];
 
   swapDevices =
     [ { device = "/dev/disk/by-uuid/49490a04-28db-4318-94a0-d6606bdfdb2e"; }
