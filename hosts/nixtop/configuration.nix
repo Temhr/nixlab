@@ -23,7 +23,7 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../../modules
+    ../../modules/nixos
 
     ../common/global/locale.nix
     ../common/global/users.nix
