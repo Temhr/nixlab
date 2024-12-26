@@ -54,6 +54,7 @@ in
 
       # Specify the user who owns the configuration directory
       user = lib.mkOption {
+        default = "temhr";
         type = lib.types.str;
         description = "The user who owns the configDir.";
       };
