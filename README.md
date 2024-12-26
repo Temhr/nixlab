@@ -29,9 +29,9 @@ Asperational
   - empty
 - **home-manager**: stand alone from root and shared across hosts
 - **hosts**: host-specific configuration files
-  - common: shared and compartmentalized for machine/role/group
-  - nixbase: multi-purpose stationary system
-  - nixtop: multi-purpose mobile system
+  - **common**: shared and compartmentalized by role or function
+  - **nixbase**: multi-purpose stationary system
+  - **nixtop**: multi-purpose mobile system
 - **lib**: helper functions relating to config
   - empty
 - **modules**: applications, services, user accounts, etc
