@@ -12,7 +12,7 @@ Contains
 
 Asperational
 - Declaraitive virtualization systems
-- Scripting initial hardware configurations
+- Initial hardware configuration scripting
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
 - Flatpak support
@@ -26,19 +26,13 @@ Asperational
   - **NixOS**: ` $ sudo nixos-rebuild switch `
 
 # Layout:
-- **bin**: shell scripts for various functions
-  - empty
 - **home-manager**: user-specific environment; unified across hosts
 - **hosts**: host-relevant, system configuration files and modules 
   - **common**: shared modules (applications, services, user accounts, etc)
   - **nixbase**: system 1
   - **nixtop**: system 2
-- **lib**: helper functions relating to config
-  - empty
 - **modules**: user/host agnostic modules (applications, services, etc)
   - home-manager: empty
   - **nixos**: gaming
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
-- **pkgs**: custom packages
-  - empty
