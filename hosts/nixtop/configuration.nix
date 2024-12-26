@@ -132,6 +132,7 @@
 
   ## Togglable Programs
   synctop.enable = true;
+  syncbase.enable = false;
   steam.enable = true;
 
   ## Install firefox.

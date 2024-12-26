@@ -9,16 +9,18 @@
         };
     };
 
-    config = lib.mkIf config.syncbase.enable {
+    config = lib.mkMerge [
+        (lib.mkIf config.syncbase.enable {
             environment.systemPackages = [
                 pkgs.kittysay
             ];
-        };
+        })
 
-        config.synctop.enable {
+        (lib.mkIf config.synctop.enable {
             environment.systemPackages = [
-                pkgs.cowsay
+                pkgs.kittysay
             ];
-        };
+        })
+    ];
 
 }
