@@ -9,7 +9,6 @@ Contains
 - **Overlays**: extends and applies changes to package sets
 - **Modules**: shared configuration files compartmentalized by role or function
   - **Togglables**: allows for a combinatorial amount of simple configuration options
-- Auto-updates (within channel)
 
 Asperational
 - Declaraitive virtualization systems
