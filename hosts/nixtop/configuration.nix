@@ -86,6 +86,14 @@
   ## Limit the number of generations to present
   boot.loader.systemd-boot.configurationLimit = 10;
 
+  aux.system.services.autoUpgrade = {
+    enable = true;
+    pushUpdates = true; # Update automatically and push updates back up to Forgejo
+    configDir = "/etc/nixos";
+    onCalendar = "daily";
+    user = "temhr";
+  };
+
   # TODO: Set your hostname
   networking.hostName = "nixtop";
 
