@@ -7,7 +7,8 @@ Contains
 - **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Overlays**: extends and applies changes to package sets
-- **Togglables**: allows for a combinatorial amount of simple configuration options
+- **Modules**: shared configuration files compartmentalized by role or function
+  - **Togglables**: allows for a combinatorial amount of simple configuration options
 
 Asperational
 - Declaraitive virtualization systems
@@ -28,16 +29,16 @@ Asperational
 # Layout:
 - **bin**: shell scripts for various functions
   - empty
-- **home-manager**: stand-alone and unified across hosts
-- **hosts**: host-specific configuration files
-  - **common**: shared and compartmentalized by role or function
+- **home-manager**: stand-alone user environment; unified across hosts
+- **hosts**: host-relevant configuration files and modules 
+  - **common**: shared modules (applications, services, user accounts, etc)
   - **nixbase**: my stationary system
   - **nixtop**: my mobile system
 - **lib**: helper functions relating to config
   - empty
-- **modules**: applications, services, user accounts, etc
+- **modules**: host-agnostic modules (applications, services, etc)
   - home-manager: empty
-  - nixos: empty
+  - nixos: Gaming
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
