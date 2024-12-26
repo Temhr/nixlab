@@ -23,11 +23,8 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../common/global/
-
-    ../common/optional/desk-env.nix
-    ../common/optional/games.nix
-    ../common/optional/syncthing.nix
+    ../common/global
+    ../common/optional
   ];
 
   nixpkgs = {
