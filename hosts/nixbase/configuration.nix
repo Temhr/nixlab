@@ -27,6 +27,7 @@
     ../common/global/users.nix
     ../common/global/utilities.nix
 
+    ../common/optional/desk-env.nix
     ../common/optional/syncthing.nix
   ];
 
@@ -100,12 +101,9 @@
 
   ## Enable networking
   networking.networkmanager.enable = true;
-  ## Enable the X11 windowing system.
-  services.xserver.enable = true;
-  ## Enable Plasma6
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
-  services.desktopManager.plasma6.enable = true;
+
+  ## Desktop Environment
+  plasma.enable = true;
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
