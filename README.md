@@ -10,8 +10,9 @@ Contains
 - **Togglables**: allows for a combinatorial amount of simple configuration options
 
 Asperational
+- Declaraitive virtualization systems
 - Automatic daily update system
-- Initial Hardware configuration scripting 
+- Scripting initial hardware configurations
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
 - Flatpak support
