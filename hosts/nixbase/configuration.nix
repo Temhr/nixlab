@@ -11,6 +11,7 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
     # outputs.nixosModules.example
+    ../../modules/nixos
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
@@ -98,11 +99,14 @@
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
-  ## Togglable Programs
+  ##Gaming
   #openSourceGames.enable = true;
   #steam.enable = true;
-  syncbase.enable = true;
-  #synctop.enable = true;
+
+  ## Mutually Exclusive Togglables
+  #Syncthing
+    syncbase.enable = true;
+    #synctop.enable = true;
 
   ## Install firefox.
   programs.firefox = {
