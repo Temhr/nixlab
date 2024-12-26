@@ -2,6 +2,7 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
+    ./audio.nix
     ./locale.nix
     ./users.nix
     ./utilities.nix

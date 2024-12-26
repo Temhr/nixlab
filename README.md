@@ -7,15 +7,15 @@ Contains
 - **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (non-global packages and dotfiles)
 - **Overlays**: extends and applies changes to package sets (nixpkgs)
+- **Togglables**: allows for a combinatorial number of configuration options
 
 Asperational
-- **Togglable Modules**: allows a combinatorial number of configuration options
-- Automatic daily updates
-- Setup hardware configurations
-- Support for various GUIs and desktop environments including  KDE, XFCE, and Sway
+- Automatic daily update system
+- Initial Hardware configuration scripting 
+- Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
-- Flatpaks
-- Secrets
+- Flatpak support
+- Secret management system
 
 # Implementation
 - **Installation**: protocol not established yet, helper shell scripts being developed
