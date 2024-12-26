@@ -9,10 +9,10 @@ Contains
 - **Overlays**: extends and applies changes to package sets
 - **Modules**: shared configuration files compartmentalized by role or function
   - **Togglables**: allows for a combinatorial amount of simple configuration options
+- Auto-updates (within channel)
 
 Asperational
 - Declaraitive virtualization systems
-- Automatic daily update system
 - Scripting initial hardware configurations
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
