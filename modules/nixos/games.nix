@@ -12,7 +12,7 @@
     config = lib.mkMerge [
         (lib.mkIf config.openSourceGames.enable {
           environment.systemPackages = with pkgs; [
-            lutris  #Open Source gaming platform for GNU/Linux
+            unstable.lutris  #Open Source gaming platform for GNU/Linux
             superTuxKart  #A Free 3D kart racing game
           ];
         })
