@@ -129,6 +129,9 @@
     #media-session.enable = true;
   };
 
+  ## Togglable Programs
+  steam.enable = true;
+
   ## Install firefox.
   programs.firefox = {
     enable = true;
