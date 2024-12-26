@@ -5,7 +5,7 @@ My ad hoc initial Nix implementation for my Linux laptops, desktops, or homelab 
 # Features
 Contains
 - **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
-- **Home Manager**: declarative configuration for user environment (non-global packages and dotfiles)
+- **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Overlays**: extends and applies changes to package sets (nixpkgs)
 - **Togglables**: allows for a combinatorial number of configuration options
 
