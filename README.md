@@ -38,7 +38,7 @@ Asperational
   - empty
 - **modules**: host-agnostic modules (applications, services, etc)
   - home-manager: empty
-  - nixos: Gaming
+  - **nixos**: gaming
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
