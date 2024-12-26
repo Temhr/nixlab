@@ -23,8 +23,8 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../common/global
-    ../common/optional
+    ../common/globals
+    ../common/optionals
   ];
 
   nixpkgs = {
