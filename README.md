@@ -28,14 +28,14 @@ Asperational
 # Layout:
 - **bin**: shell scripts for various functions
   - empty
-- **home-manager**: stand-alone user environment; unified across hosts
-- **hosts**: host-relevant configuration files and modules 
+- **home-manager**: user-specific environment; unified across hosts
+- **hosts**: host-relevant, system configuration files and modules 
   - **common**: shared modules (applications, services, user accounts, etc)
-  - **nixbase**: my stationary system
-  - **nixtop**: my mobile system
+  - **nixbase**: system 1
+  - **nixtop**: system 2
 - **lib**: helper functions relating to config
   - empty
-- **modules**: host-agnostic modules (applications, services, etc)
+- **modules**: user/host agnostic modules (applications, services, etc)
   - home-manager: empty
   - **nixos**: gaming
 - **overlays**: contains one overlay
