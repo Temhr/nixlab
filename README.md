@@ -7,7 +7,7 @@ Contains
 - **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Overlays**: extends and applies changes to package sets
-- **Togglables**: allows for a combinatorial number of configuration options
+- **Togglables**: allows for a combinatorial amount of simple configuration options
 
 Asperational
 - Automatic daily update system
