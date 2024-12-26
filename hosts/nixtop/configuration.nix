@@ -27,6 +27,7 @@
     ../common/global/users.nix
     ../common/global/utilities.nix
 
+    ../common/optional/cowsay.nix
     ../common/optional/steam.nix
     ../common/optional/syncthing-nixtop.nix
   ];
@@ -130,6 +131,7 @@
   };
 
   ## Togglable Programs
+  synctop.enable = true;
   steam.enable = true;
 
   ## Install firefox.
