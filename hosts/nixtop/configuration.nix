@@ -11,6 +11,7 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
     # outputs.nixosModules.example
+    ../../modules/nixos
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
@@ -101,8 +102,9 @@
   ## Togglable Programs
   openSourceGames.enable = true;
   steam.enable = true;
-  #syncbase.enable = true;
-  synctop.enable = true;
+  # Syncthing
+    #syncbase.enable = true;
+    synctop.enable = true;
 
   ## Install firefox.
   programs.firefox = {

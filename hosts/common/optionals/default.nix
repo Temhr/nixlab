@@ -3,7 +3,6 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./graphical-shells.nix
-    ./games.nix
     ./syncthing.nix
   ];
 
