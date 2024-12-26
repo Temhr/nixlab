@@ -27,6 +27,7 @@
     ../common/global/users.nix
     ../common/global/utilities.nix
 
+    ../common/optional/desk-env.nix
     ../common/optional/steam.nix
     ../common/optional/syncthing.nix
   ];
@@ -100,17 +101,9 @@
   networking.networkmanager.enable = true;
   ## Enable the X11 windowing system.
   services.xserver.enable = true;
-  ## Enable Plasma6
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
-  services.desktopManager.plasma6.enable = true;
 
+  plasma.enable = true;
 
-  ## Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
   ## Enable CUPS to print documents.
   services.printing.enable = true;
   ## Enable sound with pipewire.
@@ -189,19 +182,6 @@
     distrobox  #Wrapper around podman or docker to create and start containers
     podman  #A program for managing pods, containers and container images
   ];
-
-  # This setups a SSH server. Very important if you're setting up a headless system.
-  # Feel free to remove if you don't need it.
-  services.openssh = {
-    enable = true;
-    settings = {
-      # Opinionated: forbid root login through SSH.
-      PermitRootLogin = "no";
-      # Opinionated: use keys only.
-      # Remove if you want to SSH using passwords
-      PasswordAuthentication = false;
-    };
-  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";

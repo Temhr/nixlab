@@ -106,11 +106,7 @@
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
   services.desktopManager.plasma6.enable = true;
-  ## Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
+
   ## Enable CUPS to print documents.
   services.printing.enable = true;
   ## Enable sound with pipewire.
@@ -150,13 +146,6 @@
     gdbgui  #A browser-based frontend for GDB
     gnumake  #A tool to control the generation of non-source files from sources
 
-    ## Version Control
-    git  #Distributed version control system
-    github-desktop #GUI for managing Git and GitHub
-
-    ## Secret Management
-    keepassxc  #Offline password manager with many features.
-
     ## Browsers
     brave  #Privacy-oriented browser for Desktop and Laptop computers
     microsoft-edge  #The web browser from Microsoft
@@ -189,19 +178,6 @@
     distrobox  #Wrapper around podman or docker to create and start containers
     podman  #A program for managing pods, containers and container images
   ];
-
-  # This setups a SSH server. Very important if you're setting up a headless system.
-  # Feel free to remove if you don't need it.
-  services.openssh = {
-    enable = true;
-    settings = {
-      # Opinionated: forbid root login through SSH.
-      PermitRootLogin = "no";
-      # Opinionated: use keys only.
-      # Remove if you want to SSH using passwords
-      PasswordAuthentication = false;
-    };
-  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";
