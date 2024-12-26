@@ -2,7 +2,7 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./desk-env.nix
+    ./graphical-shells.nix
     ./games.nix
     ./syncthing.nix
   ];

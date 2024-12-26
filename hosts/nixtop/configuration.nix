@@ -91,8 +91,9 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Desktop Environment
-  plasma.enable = true;
+  ## Graphical Shells
+  plasma.enable = true; #Desktop Environment
+  #sway.enable = true;  #Wayland Compositor
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;

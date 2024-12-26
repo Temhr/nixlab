@@ -5,7 +5,7 @@
             enable = lib.mkEnableOption "enables KDE Plasma";
         };
         sway = {
-            enable = lib.mkEnableOption "enables sway";
+            enable = lib.mkEnableOption "enables Sway";
         };
     };
 
