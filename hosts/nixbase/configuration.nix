@@ -86,11 +86,6 @@
   ## Limit the number of generations to present
   boot.loader.systemd-boot.configurationLimit = 10;
 
-
-  ## Automatic $ nixos-rebuild switch --upgrade
-  system.autoUpgrade.enable = true;
-  system.autoUpgrade.allowReboot = false;
-
   # TODO: Set your hostname
   networking.hostName = "nixbase";
 
