@@ -20,9 +20,9 @@ Asperational
 # Implementation
 - **Installation**: protocol not established yet, helper shell scripts being developed
 - Updating system:
-  - **Flakes**: $ nix flake update --flake ./nixlab
-  - **Home Manager**: $ home-manager switch --flake ./nixlab
-  - **NixOS**: $ sudo nixos-rebuild switch
+  - **Flakes**: ` $ nix flake update --flake ./nixlab `
+  - **Home Manager**: ` $ home-manager switch --flake ./nixlab `
+  - **NixOS**: ` $ sudo nixos-rebuild switch `
 
 # Layout:
 - **bin**: shell scripts for various functions
