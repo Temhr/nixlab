@@ -6,7 +6,7 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 Contains
 - **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
-- **Overlays**: extends and applies changes to package sets (nixpkgs)
+- **Overlays**: extends and applies changes to package sets
 - **Togglables**: allows for a combinatorial number of configuration options
 
 Asperational
@@ -18,8 +18,8 @@ Asperational
 - Secret management system
 
 # Implementation
-- **Installation**: protocol not established yet, helper shell scripts being developed
-- Updating system:
+- **Installation**: haven't established a protocol yet, will develop helper shell scripts 
+- Updating systems:
   - **Flakes**: ` $ nix flake update --flake ./nixlab `
   - **Home Manager**: ` $ home-manager switch --flake ./nixlab `
   - **NixOS**: ` $ sudo nixos-rebuild switch `
@@ -36,7 +36,7 @@ Asperational
   - empty
 - **modules**: applications, services, user accounts, etc
   - home-manager: empty
-  - nixOS: empty
+  - nixos: empty
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
