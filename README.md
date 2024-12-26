@@ -36,3 +36,5 @@ Asperational
   - **nixos**: gaming
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
+- **pkgs**: custom packages
+  - empty
