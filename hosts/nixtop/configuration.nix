@@ -87,7 +87,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
   ## Limit the number of generations to keep
   boot.loader.systemd-boot.configurationLimit = 10;
-  #boot.loader.grub.configurationLimit = 10;
 
   # TODO: Set your hostname
   networking.hostName = "nixtop";
@@ -117,9 +116,10 @@
   };
 
   ## Togglable Programs
-  synctop.enable = true;
   openSourceGames.enable = true;
   steam.enable = true;
+  #syncbase.enable = true;
+  synctop.enable = true;
 
   ## Install firefox.
   programs.firefox = {
