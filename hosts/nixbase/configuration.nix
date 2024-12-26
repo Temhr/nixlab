@@ -27,7 +27,7 @@
     ../common/global/users.nix
     ../common/global/utilities.nix
 
-    ../common/optional/syncthing-nixbase.nix
+    ../common/optional/syncthing.nix
   ];
 
   nixpkgs = {
@@ -128,6 +128,9 @@
     # no need to redefine it in your config for now)
     #media-session.enable = true;
   };
+
+  ## Togglable Programs
+  syncbase.enable = true;
 
   ## Install firefox.
   programs.firefox = {

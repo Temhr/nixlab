@@ -27,9 +27,8 @@
     ../common/global/users.nix
     ../common/global/utilities.nix
 
-    ../common/optional/cowsay.nix
     ../common/optional/steam.nix
-    ../common/optional/syncthing-nixtop.nix
+    ../common/optional/syncthing.nix
   ];
 
   nixpkgs = {
@@ -132,7 +131,6 @@
 
   ## Togglable Programs
   synctop.enable = true;
-  syncbase.enable = false;
   steam.enable = true;
 
   ## Install firefox.
