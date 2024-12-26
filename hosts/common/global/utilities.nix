@@ -22,10 +22,8 @@
     ## Task Scheduling
     at  #The classical Unix `at' job scheduling command
     cron  #Daemon for running commands at specific times (Vixie Cron)
-    kdePackages.kcron  #Task scheduler by KDE
 
     ## Network Management
-    #autofs5  #Kernel-based automounter
     ethtool  #Utility for controlling network drivers and hardware
     iperf  #Tool to measure IP bandwidth using UDP or TCP
     nettools  #A set of tools for controlling the network subsystem in Linux
@@ -50,6 +48,9 @@
     rsync  #Fast incremental file transfer utility
     curl  #A command line tool for transferring files with URL syntax
 
+    ## Secret Management
+    keepassxc  #Offline password manager with many features.
+
     ## System Resource Monitors
     iotop  #A tool to find out the processes doing the most IO
     htop  #An interactive process viewer
@@ -70,7 +71,11 @@
     #vifm-full  #Vi-like file manager; Includes support for optional features
     #yazi  #Blazing fast terminal file manager written in Rust, based on async I/O
 
-    ##Applicatio
+    ## Version Control
+    git  #Distributed version control system
+    github-desktop #GUI for managing Git and GitHub
+
+    ##Applications
     home-manager  #Nix-based user environment configurator
 
 

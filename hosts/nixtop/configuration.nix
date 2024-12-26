@@ -157,13 +157,6 @@
     scons  #Improved, cross-platform substitute for Make
     python3Full  #High-level dynamically-typed programming language
 
-    ## Version Control
-    git  #Distributed version control system
-    github-desktop #GUI for managing Git and GitHub
-
-    ## Secret Management
-    keepassxc  #Offline password manager with many features.
-
     ## Browsers
     brave  #Privacy-oriented browser for Desktop and Laptop computers
     microsoft-edge  #The web browser from Microsoft
