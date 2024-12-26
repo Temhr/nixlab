@@ -23,12 +23,10 @@
     ./hardware-configuration.nix
     ./nvidia.nix
 
-    ../common/global/locale.nix
-    ../common/global/users.nix
-    ../common/global/utilities.nix
+    ../common/global/
 
     ../common/optional/desk-env.nix
-    ../common/optional/steam.nix
+    ../common/optional/games.nix
     ../common/optional/syncthing.nix
   ];
 
@@ -123,6 +121,7 @@
 
   ## Togglable Programs
   synctop.enable = true;
+  openSourceGames.enable = true;
   steam.enable = true;
 
   ## Install firefox.
@@ -160,10 +159,6 @@
     obs-studio  #Free and open source software for video recording and live streaming
     unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
-
-    ## Games
-    lutris  #Open Source gaming platform for GNU/Linux
-    superTuxKart  #A Free 3D kart racing game
 
     ## Media
     audacity  #Sound editor with graphical UI
