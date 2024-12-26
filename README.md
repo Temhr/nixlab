@@ -1,6 +1,6 @@
-# Nix system configuration
+# NixOS systems configuration
 
-My ad hoc initial Nix implementation for my Linux laptops, desktops, or homelab servers. A work-in-progress mostly adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs).
+A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Mostly adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs).
 
 # Features
 Contains
@@ -27,17 +27,17 @@ Asperational
 # Layout:
 - **bin**: shell scripts for various functions
   - empty
-- **home-manager**: stand alone from root and shared across hosts
+- **home-manager**: stand-alone and unified across hosts
 - **hosts**: host-specific configuration files
   - **common**: shared and compartmentalized by role or function
-  - **nixbase**: multi-purpose stationary system
-  - **nixtop**: multi-purpose mobile system
+  - **nixbase**: my stationary system
+  - **nixtop**: my mobile system
 - **lib**: helper functions relating to config
   - empty
 - **modules**: applications, services, user accounts, etc
   - home-manager: empty
   - nixOS: empty
 - **overlays**: contains one overlay
-  - default: makes the nixos-unstable repository available as pkgs.unstable
+  - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
   - empty
