@@ -99,10 +99,12 @@
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
-  ## Togglable Programs
+  ##Gaming
   openSourceGames.enable = true;
   steam.enable = true;
-  # Syncthing
+
+  ## Mutually Exclusive Togglables
+  #Syncthing
     #syncbase.enable = true;
     synctop.enable = true;
 
