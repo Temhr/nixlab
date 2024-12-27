@@ -77,6 +77,11 @@
                   install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
                   installation_mode = "force_installed";
                 };
+                # Privacy Badger:
+                "jid1-MnnxcxisBPnSXQ@jetpack" = {
+                  install_url = "https://addons.mozilla.org/firefox/downloads/latest/privacy-badger17/latest.xpi";
+                  installation_mode = "force_installed";
+                };
                 # Reddit Enhancement Suite:
                 "jid1-xUfzOsOFlzSOXg@jetpack" = {
                   install_url = "https://addons.mozilla.org/firefox/downloads/latest/reddit-enhancement-suite/latest.xpi";
