@@ -15,14 +15,6 @@
       #  thunderbird
       ];
     };
-    guest = {
-      isNormalUser = true;
-      initialPassword = "guest";
-    };
-    guest2 = {
-      isNormalUser = true;
-      initialPassword = "";
-    };
   };
 
   ## Enable automatic login for the user.
