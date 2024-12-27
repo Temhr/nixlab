@@ -19,8 +19,9 @@
       isNormalUser = true;
       initialPassword = "guest";
     };
-    guest1 = {
+    guest2 = {
       isNormalUser = true;
+      initialPassword = "";
     };
   };
 
