@@ -8,7 +8,7 @@
     doas  #Executes the given command as another user
     eza  #Modern, maintained replacement for ls
     unstable.fastfetch  #Like neofetch, but much faster because written in C
-    fzf  #Command-line fuzzy finder written in Go
+    unstable.fzf  #Command-line fuzzy finder written in Go
     jq  #Lightweight and flexible command-line JSON processor
     logrotate  #Rotates and compresses system logs
     lsof  #A tool to list open files
@@ -16,7 +16,6 @@
     tmux  #Terminal multiplexer
     tealdeer #Very fast implementation of tldr in Rust
     moreutils #Growing collection of the unix tools that nobody thought to write long ago when unix was young
-    yadm  #Yet Another Dotfiles Manager
     zoxide  # Fast cd command that learns your habits
 
     ## Task Scheduling
@@ -34,10 +33,8 @@
     whois  #Intelligent WHOIS client from Debian
 
     ## Device Management
-    switcheroo-control  #D-Bus service to check the availability of dual-GPU
     pciutils  #A collection of programs for inspecting and manipulating configuration of PCI devices
     ncdu  #Disk usage analyzer with an ncurses interface
-    furmark  #OpenGL and Vulkan Benchmark and Stress Test
     clinfo  #Print all known information about all available OpenCL platforms and devices in the system
     glxinfo  #Test utilities for OpenGL
     lshw-gui  #Provide detailed information on the hardware configuration of the machine
@@ -84,5 +81,6 @@
   ];
 
   programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group
+
 
 }

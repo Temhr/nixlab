@@ -20,10 +20,10 @@
           home.packages = [ pkgs.brave ];  #Privacy-oriented browser for Desktop and Laptop computerse
         })
         (lib.mkIf config.chrome.enable {
-          home.packages = [ pkgs.google-chrome ];  #The web browser from Microsoft
+          home.packages = [ pkgs.google-chrome ];  #Freeware web browser developed by Google
         })
         (lib.mkIf config.edge.enable {
-          home.packages = [ pkgs.microsoft-edge ];  #Freeware web browser developed by Google
+          home.packages = [ pkgs.microsoft-edge ];  #The web browser from Microsoft
         })
         (lib.mkIf config.vivaldi.enable {
           home.packages = [ pkgs.vivaldi ];  #A Browser for our Friends, powerful and personal
