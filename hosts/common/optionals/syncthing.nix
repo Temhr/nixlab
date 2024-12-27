@@ -53,7 +53,7 @@
                     };
                     };
                     "mirror" = {
-                    path = "/run/media/temhr/HGST A";
+                    path = "/run/media/temhr/HGST";
                     devices = [ "pve" ];
                     };
                 };

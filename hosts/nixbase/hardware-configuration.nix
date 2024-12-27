@@ -34,7 +34,7 @@
       fsType = "ext4";
     };
 
-  fileSystems."/run/media/temhr" =
+  fileSystems."/run/media/temhr/HGST" =
     { device = "/dev/disk/by-label/HGST";
       fsType = "ext4";
     };
