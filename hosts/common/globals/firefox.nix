@@ -33,6 +33,11 @@
       # "force_installed" and "normal_installed".
       ExtensionSettings = {
         "*".installation_mode = "blocked"; # blocks all addons except the ones specified below
+        # Augmented Steam:
+        "augmentedsteam@isthereanydeal.com" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/augmented-steam/latest.xpi";
+          installation_mode = "force_installed";
+        };
         # Enhancer for YouTube:
         "enhancerforyoutube@maximerf.addons.mozilla.org" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi";
@@ -56,6 +61,11 @@
         # Reddit Enhancement Suite:
         "jid1-xUfzOsOFlzSOXg@jetpack" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/reddit-enhancement-suite/latest.xpi";
+          installation_mode = "force_installed";
+        };
+        # To Google Translate:
+        "juanmauricioescobar@gmail.com" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/to-google-translate/latest.xpi";
           installation_mode = "force_installed";
         };
         # Sort Bookmarks:
