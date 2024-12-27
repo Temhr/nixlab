@@ -10,6 +10,7 @@
     unstable.fastfetch  #Like neofetch, but much faster because written in C
     unstable.fzf  #Command-line fuzzy finder written in Go
     jq  #Lightweight and flexible command-line JSON processor
+    less  #More advanced file pager (program that displays text files) than 'more'
     logrotate  #Rotates and compresses system logs
     lsof  #A tool to list open files
     screen  #A window manager that multiplexes a physical terminal
@@ -49,6 +50,7 @@
     keepassxc  #Offline password manager with many features.
 
     ## System Resource Monitors
+    iftop  #Display bandwidth usage on a network interface
     iotop  #A tool to find out the processes doing the most IO
     htop  #An interactive process viewer
     btop  #A monitor of resources
@@ -74,12 +76,14 @@
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
     unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
     simplescreenrecorder  #A screen recorder for Linux
-    # Version Control
-    github-desktop #GUI for managing Git and GitHub
 
   ];
 
   programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group
-
   programs.git.enable = true;  #Distributed version control system
+  programs.lazygit.enable = true;  #A simple terminal UI for git commands
+  programs.obs-studio = {
+    enable = true;  #Distributed version control system
+    enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
+  };
 }

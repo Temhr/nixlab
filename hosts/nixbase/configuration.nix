@@ -103,6 +103,13 @@
   #openSourceGames.enable = true;
   #steam.enable = true;
 
+  ## Media
+  audacity.enable = true;  #Sound editor with graphical UI
+  kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+  obs.enable = true;  #Free and open source software for video recording and live streaming
+  spotify.enable = true;  #Play music from the Spotify music service
+  vlc.enable = true;  #Cross-platform media player and streaming server
+
   ## Mutually Exclusive Togglables
   #Syncthing
     syncbase.enable = true;
@@ -122,13 +129,6 @@
 
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
-    obs-studio  #Free and open source software for video recording and live streaming
-
-    ## Media
-    audacity  #Sound editor with graphical UI
-    kdePackages.kdenlive  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-    spotify  #Play music from the Spotify music service
-    vlc  #Cross-platform media player and streaming server
 
     ## Productivity
     calibre  #Comprehensive e-book software
