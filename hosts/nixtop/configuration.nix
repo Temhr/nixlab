@@ -129,7 +129,7 @@
 
     ## Browsers
     brave  #Privacy-oriented browser for Desktop and Laptop computers
-    microsoft-edge  #The web browser from Microsoft
+    #microsoft-edge  #The web browser from Microsoft
     #google-chrome  #Freeware web browser developed by Google
     #vivaldi  #A Browser for our Friends, powerful and personal
 

@@ -1,8 +1,14 @@
 { config, lib, pkgs, ... }: {
 
     options = {
+        brave = {
+            enable = lib.mkEnableOption "enables Brave browser";
+        };
         chrome = {
             enable = lib.mkEnableOption "enables Chrome browser";
+        };
+        edge = {
+            enable = lib.mkEnableOption "enables Edge browser";
         };
         firefox = {
             enable = lib.mkEnableOption "enables Firefox browser";
@@ -13,8 +19,14 @@
     };
 
     config = lib.mkMerge [
+        (lib.mkIf config.brave.enable {
+          home.packages = [ pkgs.brave ];  #Privacy-oriented browser for Desktop and Laptop computerse
+        })
         (lib.mkIf config.chrome.enable {
-          home.packages = [ pkgs.google-chrome ];  #Freeware web browser developed by Google
+          home.packages = [ pkgs.google-chrome ];  #The web browser from Microsoft
+        })
+        (lib.mkIf config.edge.enable {
+          home.packages = [ pkgs.microsoft-edge ];  #Freeware web browser developed by Google
         })
         (lib.mkIf config.firefox.enable {
           programs.firefox = {
