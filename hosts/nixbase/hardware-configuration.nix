@@ -33,7 +33,15 @@
     { device = "/dev/disk/by-label/shelf";
       fsType = "ext4";
     };
-  systemd.tmpfiles.rules = [ "d /home/temhr/shelf 1777 root root " ];
+
+  fileSystems."/run/media/temhr" =
+    { device = "/dev/disk/by-label/HGST";
+      fsType = "ext4";
+    };
+  systemd.tmpfiles.rules = [
+    "d /home/temhr/shelf 1777 root root "
+    "d /run/media/temhr 1770 root root "
+  ];
 
   swapDevices =
     [ { device = "/dev/disk/by-uuid/49490a04-28db-4318-94a0-d6606bdfdb2e"; }

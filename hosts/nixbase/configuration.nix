@@ -138,6 +138,9 @@
     incus #Powerful system container and virtual machine manager
     distrobox  #Wrapper around podman or docker to create and start containers
     podman  #A program for managing pods, containers and container images
+
+    # Version Control
+    github-desktop #GUI for managing Git and GitHub
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
