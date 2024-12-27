@@ -33,7 +33,6 @@
     { device = "/dev/disk/by-label/shelf";
       fsType = "ext4";
     };
-  systemd.tmpfiles.rules = [ "d /home/temhr/shelf 1777 root root " ];
 
   fileSystems."/mnt/hdd-r0" =
     { device = "192.168.0.210:/hdd-r0";
@@ -43,6 +42,10 @@
         "x-systemd.idle-timeout=60" # disconnects after 60 seconds
       ];
     };
+
+  systemd.tmpfiles.rules = [
+    "d /home/temhr/shelf 1777 root root "
+    "d /mnt/hdd-r0 1770 root root "];
 
   swapDevices =
     [ { device = "/dev/disk/by-uuid/e9330b4c-54e3-4792-bfbd-f2325acde0ea"; }
