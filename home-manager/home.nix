@@ -61,7 +61,7 @@
   programs.git.enable = true;
 
   #Browsers
-  vivaldi.enable = true; #enables Vivaldi browser
+  chrome.enable = true; #enables Chrome browser
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
