@@ -15,9 +15,9 @@
       #  thunderbird
       ];
     };
-    guest1 = {
+    guest = {
       isNormalUser = true;
-      initialPassword = "guest1";
+      initialPassword = "guest";
     };
   };
 
