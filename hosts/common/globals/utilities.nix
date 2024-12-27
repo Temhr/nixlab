@@ -7,7 +7,7 @@
     colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
     doas  #Executes the given command as another user
     eza  #Modern, maintained replacement for ls
-    fastfetch  #Like neofetch, but much faster because written in C
+    unstable.fastfetch  #Like neofetch, but much faster because written in C
     fzf  #Command-line fuzzy finder written in Go
     jq  #Lightweight and flexible command-line JSON processor
     logrotate  #Rotates and compresses system logs
@@ -79,18 +79,8 @@
     home-manager  #Nix-based user environment configurator
   ];
 
-  # This setups a SSH server. Very important if you're setting up a headless system.
-  # Feel free to remove if you don't need it.
-  services.openssh = {
-    enable = true;
-    settings = {
-      # Opinionated: forbid root login through SSH.
-      PermitRootLogin = "no";
-      # Opinionated: use keys only.
-      # Remove if you want to SSH using passwords
-      PasswordAuthentication = false;
-    };
-  };
+  programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group
 
+  programs.firefox.enable = true; #Install firefox as default
 
 }

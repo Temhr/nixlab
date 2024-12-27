@@ -12,6 +12,7 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
     # outputs.homeManagerModules.example
+    ../modules/home-manager
 
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
@@ -58,6 +59,9 @@
   # Enable home-manager and git
   programs.home-manager.enable = true;
   programs.git.enable = true;
+
+  #Browsers
+  vivaldi.enable = true; #enables Vivaldi browser
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";

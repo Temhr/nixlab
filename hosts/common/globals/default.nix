@@ -4,6 +4,7 @@
     # Compose this module out of smaller ones.
     ./audio.nix
     ./locale.nix
+    ./open-ssh.nix
     ./users.nix
     ./utilities.nix
   ];

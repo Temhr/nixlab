@@ -10,7 +10,7 @@
         # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
       ];
       # TODO: Be sure to add any other groups you need (such as networkmanager, audio, docker, etc)
-      extraGroups = [ "root" "networkmanager" "wheel" ];
+      extraGroups = [ "root" "wheel" "networkmanager" "adbusers"];
       packages = with pkgs; [
       #  thunderbird
       ];

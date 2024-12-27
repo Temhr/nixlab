@@ -108,11 +108,6 @@
     syncbase.enable = true;
     #synctop.enable = true;
 
-  ## Install firefox.
-  programs.firefox = {
-    enable = true;
-  };
-
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -127,7 +122,7 @@
     gnumake  #A tool to control the generation of non-source files from sources
 
     ## Browsers
-    brave  #Privacy-oriented browser for Desktop and Laptop computers
+
     microsoft-edge  #The web browser from Microsoft
     google-chrome  #Freeware web browser developed by Google
     #vivaldi  #A Browser for our Friends, powerful and personal
