@@ -63,7 +63,7 @@
   #Browsers
   brave.enable = true;
   chrome.enable = true;
-  egde.enable = true;
+  edge.enable = true;
   firefox.enable = true;
   vivaldi.enable = false;
 
