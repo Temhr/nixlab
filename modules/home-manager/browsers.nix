@@ -11,9 +11,7 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.vivaldi.enable {
-          environment.systemPackages = [
-            pkgs.vivaldi  #A Browser for our Friends, powerful and personal
-          ];
+          home.packages = [ pkgs.vivaldi ];  #A Browser for our Friends, powerful and personal
         })
         (lib.mkIf config.firefox.enable {
           programs.firefox = {
