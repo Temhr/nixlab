@@ -68,19 +68,18 @@
     #vifm-full  #Vi-like file manager; Includes support for optional features
     #yazi  #Blazing fast terminal file manager written in Rust, based on async I/O
 
-    ## Version Control
-    git  #Distributed version control system
-    github-desktop #GUI for managing Git and GitHub
-
     ##Applications
     home-manager  #Nix-based user environment configurator
-      # Media
-      ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
-      unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
-      simplescreenrecorder  #A screen recorder for Linux
+    # Media
+    ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
+    unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
+    simplescreenrecorder  #A screen recorder for Linux
+    # Version Control
+    github-desktop #GUI for managing Git and GitHub
+
   ];
 
   programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group
 
-
+  programs.git.enable = true;  #Distributed version control system
 }
