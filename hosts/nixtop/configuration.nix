@@ -116,7 +116,6 @@
 
     ## Dev Tools
     unstable.blender  #3D Creation/Animation/Publishing System
-    android-tools  #Android SDK platform tools
     gdb  #The GNU Project debugger
     gdbgui  #A browser-based frontend for GDB
     gnumake  #A tool to control the generation of non-source files from sources
@@ -130,13 +129,10 @@
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
     obs-studio  #Free and open source software for video recording and live streaming
-    unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
-    ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
 
     ## Media
     audacity  #Sound editor with graphical UI
     kdePackages.kdenlive  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-    simplescreenrecorder  #A screen recorder for Linux
     spotify  #Play music from the Spotify music service
     vlc  #Cross-platform media player and streaming server
 
