@@ -19,6 +19,9 @@
       isNormalUser = true;
       initialPassword = "guest";
     };
+    guest1 = {
+      isNormalUser = true;
+    };
   };
 
   ## Enable automatic login for the user.
