@@ -15,6 +15,7 @@
       #  thunderbird
       ];
     };
+    guest = { isNormalUser = true; };
   };
 
   ## Enable automatic login for the user.
