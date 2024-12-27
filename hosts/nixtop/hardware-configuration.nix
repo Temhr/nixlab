@@ -45,7 +45,8 @@
 
   systemd.tmpfiles.rules = [
     "d /home/temhr/shelf 1777 root root "
-    "d /mnt/hdd-r0 1770 root root "];
+    "d /mnt 1770 root root "
+  ];
 
   swapDevices =
     [ { device = "/dev/disk/by-uuid/e9330b4c-54e3-4792-bfbd-f2325acde0ea"; }
