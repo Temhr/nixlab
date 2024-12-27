@@ -127,12 +127,6 @@
     scons  #Improved, cross-platform substitute for Make
     python3Full  #High-level dynamically-typed programming language
 
-    ## Browsers
-    brave  #Privacy-oriented browser for Desktop and Laptop computers
-    #microsoft-edge  #The web browser from Microsoft
-    #google-chrome  #Freeware web browser developed by Google
-    #vivaldi  #A Browser for our Friends, powerful and personal
-
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
     obs-studio  #Free and open source software for video recording and live streaming
