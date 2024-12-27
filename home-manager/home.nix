@@ -64,7 +64,6 @@
   brave.enable = true;
   chrome.enable = true;
   edge.enable = true;
-  firefox.enable = true;
   vivaldi.enable = false;
 
   # Nicely reload system units when changing configs
