@@ -13,6 +13,7 @@
     less  #More advanced file pager (program that displays text files) than 'more'
     logrotate  #Rotates and compresses system logs
     lsof  #A tool to list open files
+    parted  #Create, destroy, resize, check, and copy partitions
     screen  #A window manager that multiplexes a physical terminal
     tmux  #Terminal multiplexer
     tealdeer #Very fast implementation of tldr in Rust
