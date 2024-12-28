@@ -89,7 +89,7 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ##Graphical Shells (Mutually Exclusive)
+  ## Graphical Shells (Mutually Exclusive)
   plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor
 

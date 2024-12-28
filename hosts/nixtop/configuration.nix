@@ -89,7 +89,7 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ##Graphical Shells (Mutually Exclusive)
+  ## Graphical Shells (Mutually Exclusive)
   plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor
 
@@ -144,7 +144,6 @@
     ## Productivity
     calibre  #Comprehensive e-book software
     libreoffice-fresh  #Comprehensive, professional-quality productivity suite
-
 
     # Version Control
     github-desktop #GUI for managing Git and GitHub
