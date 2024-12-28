@@ -104,10 +104,10 @@
   #steam.enable = true;
 
   ## Media
-  audacity.enable = true;  #Sound editor with graphical UI
-  kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-  obs.enable = true;  #Free and open source software for video recording and live streaming
-  spotify.enable = true;  #Play music from the Spotify music service
+  #audacity.enable = true;  #Sound editor with graphical UI
+  #kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+  #obs.enable = true;  #Free and open source software for video recording and live streaming
+  #spotify.enable = true;  #Play music from the Spotify music service
   vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Mutually Exclusive Togglables
