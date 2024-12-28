@@ -1,8 +1,8 @@
 {lib, ...}: {
 
-  ## Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
+  ## Enable sound with pipewire.
   services.pipewire = {
     enable = true;
     alsa.enable = true;

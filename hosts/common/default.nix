@@ -2,10 +2,14 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
+    ./audio.nix
     ./graphical-shells.nix
-    ./media.nix
+    ./firefox.nix
+    ./locale.nix
+    ./open-ssh.nix
     ./syncthing.nix
-    ./terminal-emulators.nix
+    ./users.nix
+    ./utilities.nix
   ];
 
   options = {

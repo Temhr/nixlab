@@ -19,8 +19,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
-    ../common/globals
-    ../common/optionals
+    ../common
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -99,6 +98,11 @@
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
+  ## Mutually Exclusive Togglables
+    #Syncthing service
+    #syncbase.enable = true;
+    synctop.enable = true;
+
   ##Gaming
   openSourceGames.enable = true;
   steam.enable = true;
@@ -115,10 +119,6 @@
   kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   konsole.enable = true;  #Terminal emulator by KDE
 
-  ## Mutually Exclusive Togglables
-  #Syncthing
-    #syncbase.enable = true;
-    synctop.enable = true;
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
