@@ -19,7 +19,7 @@ Asperational
 - Secret management system
 
 # Implementation
-- **Installation**: haven't established any persnal methods or protocols yet
+- **Installation**: haven't established any personal methods or protocols yet
 - Updating systems:
   - **Flakes**: ` $ nix flake update --flake ./nixlab `
   - **Home Manager**: ` $ home-manager switch --flake ./nixlab `
