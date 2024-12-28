@@ -16,7 +16,7 @@
   services.xserver.videoDrivers = ["nvidia"];
 
   # Below command lists GPU and their drivers
-  # $ #lspci -k | grep VGA -A3
+  # $ lspci -k | grep VGA -A3
   hardware.nvidia = {
 
     # Modesetting is required.
@@ -46,6 +46,7 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    # Nvidia Quadro k4100m
     package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
 
     prime = {
