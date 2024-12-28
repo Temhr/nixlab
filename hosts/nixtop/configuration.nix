@@ -116,11 +116,14 @@
   spotify.enable = true;  #Play music from the Spotify music service
   vlc.enable = true;  #Cross-platform media player and streaming server
 
+  ## Virtualizations
+  distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
+  incus.enable = true;   #Powerful system container and virtual machine manager
+  podman.enable = true;    #A program for managing pods, containers and container images
+
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
-
-    kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
 
     ## Dev Tools
     unstable.blender  #3D Creation/Animation/Publishing System
@@ -142,10 +145,6 @@
     calibre  #Comprehensive e-book software
     libreoffice-fresh  #Comprehensive, professional-quality productivity suite
 
-    ## Virtualizations
-    incus #Powerful system container and virtual machine manager
-    distrobox  #Wrapper around podman or docker to create and start containers
-    podman  #A program for managing pods, containers and container images
 
     # Version Control
     github-desktop #GUI for managing Git and GitHub

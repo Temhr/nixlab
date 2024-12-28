@@ -5,6 +5,7 @@
     ./games.nix
     ./media.nix
     ./terminal-emulators.nix
+    ./virtualizations.nix
   ];
 
   options = {
