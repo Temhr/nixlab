@@ -111,7 +111,7 @@
 
   ## Productivity
   calibre.enable = true;  #Comprehensive e-book software
-  libreoffice-fresh.enable = true;  #Comprehensive, professional-quality productivity suite
+  libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
 
   ## Media Packages
   audacity.enable = true;  #Sound editor with graphical UI
