@@ -31,7 +31,7 @@ Asperational
   - **globals**: system agnostic (shared) applications, services, user accounts, etc
   - **nixbase**: system 1 config
   - **nixtop**: system 2 config
-- **modules**: user/host togglable modules (applications, services, etc)
+- **modules**: togglable user/host applications, services, etc
   - **home-manager**: user-specific modules
   - **nixos**: system-specific modules
 - **overlays**: contains one overlay
