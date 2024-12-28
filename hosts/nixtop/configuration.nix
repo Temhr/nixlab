@@ -92,7 +92,7 @@
   ## Graphical Shells (Mutually Exclusive)
   #gnome.enable = true; #Gnome - Desktop Environment
   plasma.enable = true; #KDE - Desktop Environment
-  #sway.enable = true;  #Wayland Compositor
+  #sway.enable = true;  #Wayland Compositor NEEDS WORK
 
   ## Terminal Emulators
   alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
