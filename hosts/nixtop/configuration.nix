@@ -18,8 +18,7 @@
     # inputs.hardware.nixosModules.common-ssd
 
     # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-    ../common
+    ../globals
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -69,17 +68,17 @@
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
 
-    ## Perform garbage collection daily to maintain low disk usage
+    ## Garbage collection to maintain low disk usage
     gc = {
       automatic = true;
       dates = "*-*-* 02:00:00";
       options = "--delete-older-than 10d";
     };
-    ## Optimize storage for incoming new files
+    ## Optimize storage (only for incoming/new files)
     settings.auto-optimise-store = true;
   };
 
-  ## Bootloader
+  ## Bootloader - systemd-boot
   boot.loader.systemd-boot.enable = true;
   ## Limit the number of generations to present
   boot.loader.systemd-boot.configurationLimit = 10;
@@ -90,34 +89,32 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Graphical Shells
+  ##Graphical Shells (Mutually Exclusive)
   plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor
-
-  ## Enable CUPS to print documents.
-  services.printing.enable = true;
-
-  ## Mutually Exclusive Togglables
-    # Syncthing service
-    #syncbase.enable = true;
-    synctop.enable = true;
-
-  ## Gaming
-  openSourceGames.enable = true;
-  steam.enable = true;  #Video game digital distribution service and storefront from Valve
-
-  ## Media
-  audacity.enable = true;  #Sound editor with graphical UI
-  kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-  obs.enable = true;  #Free and open source software for video recording and live streaming
-  spotify.enable = true;  #Play music from the Spotify music service
-  vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Terminal Emulators
   alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
   kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   konsole.enable = true;  #Terminal emulator by KDE
 
+  ## Enable CUPS to print documents.
+  services.printing.enable = true;
+
+  ## Syncthing (Mutually Exclusive)
+  #syncbase.enable = true;
+  synctop.enable = true;
+
+  ## Gaming Packages
+  openSourceGames.enable = true;
+  steam.enable = true;  #Video game digital distribution service and storefront from Valve
+
+  ## Media Packages
+  audacity.enable = true;  #Sound editor with graphical UI
+  kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+  obs.enable = true;  #Free and open source software for video recording and live streaming
+  spotify.enable = true;  #Play music from the Spotify music service
+  vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
