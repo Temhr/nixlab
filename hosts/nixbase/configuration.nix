@@ -109,6 +109,10 @@
   #openSourceGames.enable = true;
   #steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
+  ## Productivity
+  calibre.enable = true;  #Comprehensive e-book software
+  #libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
+
   ## Media Packages
   #audacity.enable = true;  #Sound editor with graphical UI
   #kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
@@ -136,10 +140,6 @@
 
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
-
-    ## Productivity
-    calibre  #Comprehensive e-book software
-    libreoffice-fresh  #Comprehensive, professional-quality productivity suite
 
     # Version Control
     github-desktop #GUI for managing Git and GitHub

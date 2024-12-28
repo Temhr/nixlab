@@ -109,6 +109,10 @@
   openSourceGames.enable = true;
   steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
+  ## Productivity
+  calibre.enable = true;  #Comprehensive e-book software
+  libreoffice-fresh.enable = true;  #Comprehensive, professional-quality productivity suite
+
   ## Media Packages
   audacity.enable = true;  #Sound editor with graphical UI
   kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
@@ -127,9 +131,6 @@
 
     ## Dev Tools
     unstable.blender  #3D Creation/Animation/Publishing System
-    gdb  #The GNU Project debugger
-    gdbgui  #A browser-based frontend for GDB
-    gnumake  #A tool to control the generation of non-source files from sources
 
     ## Godot Dev Tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
@@ -139,10 +140,6 @@
 
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
-
-    ## Productivity
-    calibre  #Comprehensive e-book software
-    libreoffice-fresh  #Comprehensive, professional-quality productivity suite
 
     # Version Control
     github-desktop #GUI for managing Git and GitHub

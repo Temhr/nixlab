@@ -3,6 +3,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./games.nix
+    ./productivity.nix
     ./media.nix
     ./terminal-emulators.nix
     ./virtualizations.nix
