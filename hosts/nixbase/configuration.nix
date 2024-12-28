@@ -136,7 +136,6 @@
 
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
-    obs-studio  #Free and open source software for video recording and live streaming
 
     ## Productivity
     calibre  #Comprehensive e-book software
