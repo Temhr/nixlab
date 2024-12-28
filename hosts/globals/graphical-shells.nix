@@ -51,6 +51,7 @@
                 enable = true;
                 wrapperFeatures.gtk = true;
             };
+            programs.waybar.enable = true;
 
         })
     ];
