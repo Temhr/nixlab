@@ -3,9 +3,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./games.nix
-    ./graphical-shells.nix
     ./media.nix
-    ./syncthing.nix
     ./terminal-emulators.nix
   ];
 
