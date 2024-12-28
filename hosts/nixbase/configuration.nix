@@ -115,6 +115,8 @@
     syncbase.enable = true;
     #synctop.enable = true;
 
+  environment.systemPackages = [ ghostty.packages.x86_64-linux.default ];
+
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
