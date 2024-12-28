@@ -120,7 +120,6 @@
   environment.systemPackages = with pkgs; [
 
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
-    ghostty.packages.x86_64-linux.default
 
     ## Dev Tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
