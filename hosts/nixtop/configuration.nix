@@ -81,7 +81,6 @@
 
   ## Bootloader
   boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
   ## Limit the number of generations to present
   boot.loader.systemd-boot.configurationLimit = 10;
 
@@ -92,20 +91,20 @@
   networking.networkmanager.enable = true;
 
   ## Graphical Shells
-  plasma.enable = true; #Desktop Environment
+  plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
   ## Mutually Exclusive Togglables
-    #Syncthing service
+    # Syncthing service
     #syncbase.enable = true;
     synctop.enable = true;
 
-  ##Gaming
+  ## Gaming
   openSourceGames.enable = true;
-  steam.enable = true;
+  steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Media
   audacity.enable = true;  #Sound editor with graphical UI
