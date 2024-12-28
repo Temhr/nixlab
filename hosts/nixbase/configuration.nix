@@ -115,13 +115,12 @@
     syncbase.enable = true;
     #synctop.enable = true;
 
-  environment.systemPackages = [ ghostty.packages.x86_64-linux.default ];
-
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
 
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
+    ghostty.packages.x86_64-linux.default
 
     ## Dev Tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
