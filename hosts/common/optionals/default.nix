@@ -5,6 +5,7 @@
     ./graphical-shells.nix
     ./media.nix
     ./syncthing.nix
+    ./terminal-emulators.nix
   ];
 
   options = {
