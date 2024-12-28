@@ -18,8 +18,7 @@
     # inputs.hardware.nixosModules.common-ssd
 
     # You can also split up your configuration and import pieces of it here:
-    # ./users.nix
-    ../common
+    ../globals
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -69,19 +68,18 @@
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
 
-    ## Perform garbage collection daily to maintain low disk usage
+    ## Garbage collection to maintain low disk usage
     gc = {
       automatic = true;
       dates = "*-*-* 02:00:00";
       options = "--delete-older-than 10d";
     };
-    ## Optimize storage for incoming new files
+    ## Optimize storage (only for incoming/new files)
     settings.auto-optimise-store = true;
   };
 
-  ## Bootloader.
+  ## Bootloader - systemd-boot
   boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
   ## Limit the number of generations to present
   boot.loader.systemd-boot.configurationLimit = 10;
 
@@ -91,28 +89,32 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Graphical Shells
-  plasma.enable = true; #Desktop Environment
+  ##Graphical Shells (Mutually Exclusive)
+  plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor
+
+  ## Terminal Emulators
+  #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
+  #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
+  konsole.enable = true;  #Terminal emulator by KDE
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
-  ##Gaming
-  #openSourceGames.enable = true;
-  #steam.enable = true;
+  ## Syncthing (Mutually Exclusive)
+  syncbase.enable = true;
+  #synctop.enable = true;
 
-  ## Media
+  ## Gaming Packages
+  #openSourceGames.enable = true;
+  #steam.enable = true;  #Video game digital distribution service and storefront from Valve
+
+  ## Media Packages
   #audacity.enable = true;  #Sound editor with graphical UI
   #kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
   #obs.enable = true;  #Free and open source software for video recording and live streaming
   #spotify.enable = true;  #Play music from the Spotify music service
   vlc.enable = true;  #Cross-platform media player and streaming server
-
-  ## Mutually Exclusive Togglables
-  #Syncthing
-    syncbase.enable = true;
-    #synctop.enable = true;
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
@@ -121,13 +123,20 @@
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
 
     ## Dev Tools
-    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    unstable.blender  #3D Creation/Animation/Publishing System
     gdb  #The GNU Project debugger
     gdbgui  #A browser-based frontend for GDB
     gnumake  #A tool to control the generation of non-source files from sources
 
+    ## Godot Dev Tools
+    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
+    scons  #Improved, cross-platform substitute for Make
+    python3Full  #High-level dynamically-typed programming language
+
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
+    obs-studio  #Free and open source software for video recording and live streaming
 
     ## Productivity
     calibre  #Comprehensive e-book software
