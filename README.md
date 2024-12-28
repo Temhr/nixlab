@@ -8,7 +8,7 @@ Contains
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Overlays**: extends (applys changes) to package sets
 - **Modules**: shared configuration files, compartmentalized by role or function
-  - **Togglable**: allows for a combinatorial amount of simple configuration options
+  - **Togglable**: abstracts complexity from frontend configuration file
 
 Asperational
 - Declaraitive virtualization systems
