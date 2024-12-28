@@ -35,21 +35,32 @@
         })
         (lib.mkIf config.sway.enable {
 
-            environment.systemPackages = with pkgs; [
-                grim # screenshot functionality
-                slurp # screenshot functionality
-                wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
-                mako # notification system developed by swaywm maintainer
-            ];
-
             # Enable the gnome-keyring secrets vault.
             # Will be exposed through DBus to programs willing to store secrets.
             services.gnome.gnome-keyring.enable = true;
-
             # enable sway window manager
             programs.sway = {
                 enable = true;
-                wrapperFeatures.gtk = true;
+                wrapperFeatures.gtk = true; # so that gtk works properly
+                extraPackages = with pkgs; [
+                swaylock
+                swayidle
+                wl-clipboard  # wl-copy and wl-paste for copy/paste from stdin / stdout
+                wf-recorder
+                mako # notification daemon developed by swaywm maintainer
+                grim # screenshot functionality
+                #kanshi
+                slurp # screenshot functionality
+                alacritty # Alacritty is the default terminal in the config
+                dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+                ];
+                extraSessionCommands = ''
+                export SDL_VIDEODRIVER=wayland
+                export QT_QPA_PLATFORM=wayland
+                export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+                export _JAVA_AWT_WM_NONREPARENTING=1
+                export MOZ_ENABLE_WAYLAND=1
+                '';
             };
             programs.waybar.enable = true;
 
