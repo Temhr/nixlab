@@ -59,7 +59,7 @@
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixtop/configuration.nix
-          #{ environment.systemPackages = [ ghostty.packages.x86_64-linux.default ]; }
+          { environment.systemPackages = [ ghostty.packages.x86_64-linux.default ]; }
         ];
       };
     };
