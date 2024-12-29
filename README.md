@@ -1,6 +1,6 @@
 # NixOS systems configuration
 
-A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Mostly adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs).
+A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs).
 
 # Features
 Contains
