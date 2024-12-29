@@ -26,7 +26,7 @@ Asperational
   - **NixOS**: ` $ sudo nixos-rebuild switch `
 
 # Layout:
-- **home-manager**: unified user environment across hosts
+- **home-manager**: user-environment configuration files
 - **hosts**: host-relevant, system configuration files
   - **globals**: system agnostic (shared) applications, services, user accounts, etc
   - **nixbase**: system 1 config
