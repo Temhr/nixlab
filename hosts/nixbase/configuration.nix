@@ -125,6 +125,8 @@
   distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
   incus.enable = true;   #Powerful system container and virtual machine manager
   podman.enable = true;    #A program for managing pods, containers and container images
+  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  virt-manager.enable = true;    #Desktop user interface for managing virtual machines
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

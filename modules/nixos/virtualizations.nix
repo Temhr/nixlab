@@ -10,6 +10,9 @@
         podman = {
             enable = lib.mkEnableOption "enables Podman";
         };
+        quickemu = {
+            enable = lib.mkEnableOption "enables Quickemu";
+        };
         virt-manager = {
             enable = lib.mkEnableOption "enables Virt-Manager";
         };
@@ -24,6 +27,9 @@
         })
         (lib.mkIf config.podman.enable {
           environment.systemPackages = [ pkgs.podman ];  #A program for managing pods, containers and container images
+        })
+        (lib.mkIf config.quickemu.enable {
+          environment.systemPackages = [ pkgs.quickemu ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
