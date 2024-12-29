@@ -10,6 +10,9 @@
         podman = {
             enable = lib.mkEnableOption "enables Podman";
         };
+        virt-manager = {
+            enable = lib.mkEnableOption "enables Virt-Manager";
+        };
     };
 
     config = lib.mkMerge [
@@ -21,6 +24,11 @@
         })
         (lib.mkIf config.podman.enable {
           environment.systemPackages = [ pkgs.podman ];  #A program for managing pods, containers and container images
+        })
+        (lib.mkIf config.virt-manager.enable {
+          programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
+          virtualisation.libvirtd.enable = true;
+          virtualisation.spiceUSBRedirection.enable = true;
         })
     ];
 

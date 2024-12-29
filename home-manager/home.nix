@@ -46,6 +46,14 @@
     };
   };
 
+  ## Removes initial warning
+  dconf.settings = {
+    "org/virt-manager/virt-manager/connections" = {
+      autoconnect = ["qemu:///system"];
+      uris = ["qemu:///system"];
+    };
+  };
+
   # TODO: Set your username
   home = {
     username = "temhr";

@@ -95,9 +95,9 @@
   #sway.enable = true;  #Wayland Compositor NEEDS WORK
 
   ## Terminal Emulators
-  alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
-  kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
-  konsole.enable = true;  #Terminal emulator by KDE
+  #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
+  #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
+  #konsole.enable = true;  #Terminal emulator by KDE
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
@@ -125,6 +125,7 @@
   distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
   incus.enable = true;   #Powerful system container and virtual machine manager
   podman.enable = true;    #A program for managing pods, containers and container images
+  virt-manager.enable = true;    #Desktop user interface for managing virtual machines
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
