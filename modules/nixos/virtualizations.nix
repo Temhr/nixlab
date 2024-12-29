@@ -29,7 +29,7 @@
           environment.systemPackages = [ pkgs.podman ];  #A program for managing pods, containers and container images
         })
         (lib.mkIf config.quickemu.enable {
-          environment.systemPackages = [ pkgs.quickemu pkgs.qemu ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+          environment.systemPackages = [ pkgs.quickemu ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
