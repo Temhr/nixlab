@@ -51,6 +51,7 @@
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixbase/configuration.nix
+          { environment.systemPackages = [ ghostty.packages.x86_64-linux.default ]; }
         ];
       };
       nixtop = nixpkgs.lib.nixosSystem {
