@@ -1,4 +1,4 @@
-{ inputs, outputs, config, lib, pkgs, ... }: {
+{ inputs, outputs, ghostty, config, lib, pkgs, ... }: {
 
     options = {
         alacritty = {

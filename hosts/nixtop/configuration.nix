@@ -5,6 +5,7 @@
   lib,
   config,
   pkgs,
+  ghostty,
   ...
 }: {
   # You can import other NixOS modules here
@@ -96,6 +97,7 @@
 
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
+  ghostty.enable = true;  #
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   #konsole.enable = true;  #Terminal emulator by KDE
 
