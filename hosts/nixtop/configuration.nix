@@ -5,7 +5,6 @@
   lib,
   config,
   pkgs,
-  ghostty,
   ...
 }: {
   # You can import other NixOS modules here
@@ -97,7 +96,6 @@
 
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
-  ghostty.enable = true;  #
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   #konsole.enable = true;  #Terminal emulator by KDE
 
@@ -132,22 +130,22 @@
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = [
 
     ## Dev Tools
-    unstable.blender  #3D Creation/Animation/Publishing System
+    pkgs.unstable.blender  #3D Creation/Animation/Publishing System
 
     ## Godot Dev Tools
-    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
-    pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
-    scons  #Improved, cross-platform substitute for Make
-    python3Full  #High-level dynamically-typed programming language
+    pkgs.gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkgs.pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
+    pkgs.scons  #Improved, cross-platform substitute for Make
+    pkgs.python3Full  #High-level dynamically-typed programming language
 
     ## Communication
-    discord  #All-in-one cross-platform voice and text chat for gamers
+    pkgs.discord  #All-in-one cross-platform voice and text chat for gamers
 
     # Version Control
-    github-desktop #GUI for managing Git and GitHub
+    pkgs.github-desktop #GUI for managing Git and GitHub
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
