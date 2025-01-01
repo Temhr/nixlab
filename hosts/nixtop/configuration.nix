@@ -89,10 +89,10 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Graphical Shells (Mutually Exclusive)
+  ## Graphical Shells
   #gnome.enable = true; #Gnome - Desktop Environment
-  plasma.enable = true; #KDE - Desktop Environment
-  #sway.enable = true;  #Wayland Compositor NEEDS WORK
+  #plasma.enable = true; #KDE - Desktop Environment
+  sway.enable = true;  #Wayland Compositor NEEDS WORK
 
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
