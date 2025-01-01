@@ -21,9 +21,9 @@ Asperational
 # Implementation
 - **Installation**: haven't established any personal methods or protocols yet
 - Updating systems:
-  - **Flakes**: ` $ nix flake update --flake ./nixlab `
-  - **Home Manager**: ` $ home-manager switch --flake ./nixlab `
-  - **NixOS**: ` $ sudo nixos-rebuild switch `
+  - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab `
+  - **Home Manager**: ` $ home-manager switch --flake /home/temhr/nixlab`
+  - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
 
 # Layout:
 - **home-manager**: user-environment configuration files
