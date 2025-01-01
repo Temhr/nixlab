@@ -38,6 +38,11 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/augmented-steam/latest.xpi";
           installation_mode = "force_installed";
         };
+        # BetterTTV:
+        "firefox@betterttv.net" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/betterttv/latest.xpi";
+          installation_mode = "force_installed";
+        };
         # Enhancer for YouTube:
         "enhancerforyoutube@maximerf.addons.mozilla.org" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi";
