@@ -23,7 +23,7 @@ Asperational
 - Updating systems:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab `
   - **Home Manager**: ` $ home-manager switch --flake /home/temhr/nixlab`
-  - **NixOS**: ` $ nixos-rebuild switch --flake /home/temhr/nixlab`
+  - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
 
 # Layout:
 - **home-manager**: user-environment configuration files
