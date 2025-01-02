@@ -93,6 +93,11 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/youtube-playlist-duration-calc/latest.xpi";
           installation_mode = "force_installed";
         };
+        # YT Block:
+        "edoan.rodrigues@gmail.com" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/yt-block/latest.xpi";
+          installation_mode = "force_installed";
+        };
       };
     };
   };
