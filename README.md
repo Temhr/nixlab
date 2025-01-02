@@ -17,6 +17,7 @@ Asperational
 - Custom packages and services
 - Flatpak support
 - Secret management system
+- Impermanent system; declaratively built on boot and connected to storage drives for data persistence. 
 
 # Implementation
 - **Installation**: haven't established any personal methods or protocols yet
