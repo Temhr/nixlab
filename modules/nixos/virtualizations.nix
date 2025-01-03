@@ -34,7 +34,8 @@
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
           virtualisation.libvirtd.enable = true;
-          virtualisation.libvirtd.qemuOvmf = true; #For UEFI boot of Home Assistant OS guest image
+          #Allows libvirtd to take advantage of OVMF when creating new QEMU VMs with UEFI boot
+          virtualisation.libvirtd.qemu.ovmf.enable = true; #For UEFI boot of Home Assistant OS guest image
           virtualisation.spiceUSBRedirection.enable = true;
         })
     ];
