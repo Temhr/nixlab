@@ -2,7 +2,6 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-
   fileSystems."/home" =
     { device = "/dev/disk/by-label/home";
       fsType = "ext4";
