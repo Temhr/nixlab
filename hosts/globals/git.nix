@@ -7,14 +7,12 @@
       };
       git-credential-keepassxc = {
           enable = lib.mkEnableOption "enables git-credential-keepassxc";
-          default = true;
       };
   };
 
   config = lib.mkMerge [
       (lib.mkIf config.github-desktop.enable {
         environment.systemPackages = [ pkgs.github-desktop ]; #GUI for managing Git and GitHub
-        programs.git.enable = true;
       })
 
       (lib.mkIf config.git-credential-keepassxc.enable {

@@ -130,6 +130,7 @@
   virt-manager.enable = true;    #Desktop user interface for managing virtual machines
 
   # Version Control
+  programs.git.enable = true;
   github-desktop = true;  #GUI for managing Git and GitHub
   #git-credential-keepassxc = true;  #GUI for managing Git and GitHub
 
