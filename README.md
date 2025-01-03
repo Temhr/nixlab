@@ -33,7 +33,7 @@ Aspirational
   - **nixbase**: stationary config file
   - **nixtop**: laptop config file
   - **nixser**: server config file
-- **modules**: togglable applications, services, etc
+- **modules**: togglable configuration elements
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
 - **overlays**: contains one overlay
