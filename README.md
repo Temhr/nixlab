@@ -10,7 +10,7 @@ Contains
 - **Modules**: shared configuration files, compartmentalized by role or function
   - **Togglable**: abstracts complexity from frontend configuration file
 
-Asperational
+Aspirational
 - Declaraitive virtualization systems
 - Initial hardware configuration scripting
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
