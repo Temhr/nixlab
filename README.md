@@ -6,9 +6,9 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 Contains
 - **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
-- **Overlays**: extends (applys changes) to package sets
-- **Modules**: shared configuration files, compartmentalized by role or function
-  - **Togglable**: abstracts complexity from frontend configuration file
+- **Overlays**: extends (applies changes to) package sets
+- **Modules**: configurations encapsulated by role or function
+  - **Togglable**: abstracts lengthy complexity from frontend config.nix file
 
 Aspirational
 - Declaraitive virtualization systems
@@ -27,12 +27,12 @@ Aspirational
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
 
 # Layout:
-- **home-manager**: user-environment config file
+- **home-manager**: user-environment config.nix file
 - **hosts**: host-specific configuration files
-  - **globals**: system agnostic applications, programs, services, or user-account configs
-  - **nixbase**: stationary config file
-  - **nixtop**: laptop config file
-  - **nixser**: server config file
+  - **globals**: system agnostic configurations (applications, programs, services, user-account, etc.)
+  - **nixbase**: stationary config.nix file
+  - **nixtop**: laptop config.nix file
+  - **nixser**: server config.nix file
 - **modules**: togglable configuration elements
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
