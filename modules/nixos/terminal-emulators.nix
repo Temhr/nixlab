@@ -20,7 +20,7 @@
           environment.systemPackages = [ pkgs.unstable.alacritty ];  #Cross-platform, GPU-accelerated terminal emulator
         })
         (lib.mkIf config.ghostty.enable {
-          environment.systemPackages = [ inputs.ghostty.packages.x86_64-linux.default ];  #
+          environment.systemPackages = [ inputs.ghostty.packages.x86_64-linux.default ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
         })
         (lib.mkIf config.kitty.enable {
           environment.systemPackages = [ pkgs.unstable.kitty ];  #Modern, hackable, featureful, OpenGL based terminal emulator

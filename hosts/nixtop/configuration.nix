@@ -96,6 +96,7 @@
 
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
+  ghostty.enable = true;  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   #konsole.enable = true;  #Terminal emulator by KDE
 
