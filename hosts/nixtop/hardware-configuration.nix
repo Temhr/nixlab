@@ -24,30 +24,6 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  fileSystems."/home" =
-    { device = "/dev/disk/by-label/home";
-      fsType = "ext4";
-    };
-
-  fileSystems."/home/temhr/shelf" =
-    { device = "/dev/disk/by-label/shelf";
-      fsType = "ext4";
-    };
-
-  fileSystems."/mnt/hdd-r0" =
-    { device = "192.168.0.210:/hdd-r0";
-      fsType = "nfs";
-      options = [
-        "x-systemd.automount" "noauto"
-        "x-systemd.idle-timeout=60" # disconnects after 60 seconds
-      ];
-    };
-
-  systemd.tmpfiles.rules = [
-    "d /home/temhr/shelf 1777 root root "
-    "d /mnt 1770 root root "
-  ];
-
   swapDevices =
     [ { device = "/dev/disk/by-uuid/e9330b4c-54e3-4792-bfbd-f2325acde0ea"; }
     ];
