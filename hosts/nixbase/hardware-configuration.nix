@@ -24,25 +24,6 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  fileSystems."/home" =
-    { device = "/dev/disk/by-label/home";
-      fsType = "ext4";
-    };
-
-  fileSystems."/home/temhr/shelf" =
-    { device = "/dev/disk/by-label/shelf";
-      fsType = "ext4";
-    };
-
-  fileSystems."/run/media/temhr/HGST" =
-    { device = "/dev/disk/by-label/HGST";
-      fsType = "ext4";
-    };
-  systemd.tmpfiles.rules = [
-    "d /home/temhr/shelf 1777 root root "
-    "d /run/media/temhr 1770 root root "
-  ];
-
   swapDevices =
     [ { device = "/dev/disk/by-uuid/c90241f2-bc29-44b1-9066-8ba586f879ea"; }
     ];
