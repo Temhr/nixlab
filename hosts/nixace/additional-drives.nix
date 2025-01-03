@@ -1,0 +1,23 @@
+
+{ config, lib, pkgs, modulesPath, ... }:
+
+{
+  fileSystems."/home/temhr/shelf" =
+    { device = "/dev/disk/by-label/shelf";
+      fsType = "ext4";
+    };
+
+  fileSystems."/mnt/hdd-r0" =
+    { device = "192.168.0.210:/hdd-r0";
+      fsType = "nfs";
+      options = [
+        "x-systemd.automount" "noauto"
+        "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+      ];
+    };
+
+  systemd.tmpfiles.rules = [
+    "d /home/temhr/shelf 1777 root root "
+    "d /mnt 1770 root root "
+  ];
+}
