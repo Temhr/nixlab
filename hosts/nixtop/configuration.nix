@@ -103,7 +103,8 @@
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
-  ## Syncthing (Mutually Exclusive)
+  ## Enable Syncthing (only for this host)
+  #syncace.enable = true;
   #syncbase.enable = true;
   synctop.enable = true;
 
