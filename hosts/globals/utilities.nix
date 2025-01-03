@@ -82,7 +82,4 @@
   ];
 
   programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group
-  programs.git.enable = true;  #Distributed version control system
-  programs.lazygit.enable = true;  #A simple terminal UI for git commands
-
 }

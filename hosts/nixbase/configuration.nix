@@ -129,11 +129,6 @@
   quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
   virt-manager.enable = true;    #Desktop user interface for managing virtual machines
 
-  # Version Control
-  programs.git.enable = true;
-  github-desktop = true;  #GUI for managing Git and GitHub
-  #git-credential-keepassxc = true;  #GUI for managing Git and GitHub
-
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
