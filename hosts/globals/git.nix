@@ -20,7 +20,7 @@
       (lib.mkIf config.git-credential-keepassxc.enable {
         environment.systemPackages = [ pkgs.git-credential-keepassxc ]; #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
       })
-      (lib.mkDefault 'gitFull'; programs.git.package;)  #Distributed version control system
+      (lib.mkDefault true; programs.chromium.enable;)  #Distributed version control system
 
   ];
 
