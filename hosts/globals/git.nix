@@ -5,6 +5,10 @@
       github-desktop = {
           enable = lib.mkEnableOption "enables github-desktop";
       };
+      git-credential-keepassxc = {
+          enable = lib.mkEnableOption "enables git-credential-keepassxc";
+          default = true;
+      };
   };
 
   config = lib.mkMerge [
@@ -12,10 +16,10 @@
         environment.systemPackages = [ pkgs.github-desktop ]; #GUI for managing Git and GitHub
       })
 
-    (environment.systemPackages = with pkgs; [
-      git-credential-keepassxc #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
-    ];)
-    (programs.git.enable = true;)  #Distributed version control system
+      (lib.mkIf config.git-credential-keepassxc.enable {
+        environment.systemPackages = [ pkgs.git-credential-keepassxc ]; #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
+      })
+      (programs.git.enable = true;)  #Distributed version control system
 
   ];
 
