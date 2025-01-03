@@ -28,13 +28,14 @@ Aspirational
 
 # Layout:
 - **home-manager**: user-environment configuration files
-- **hosts**: host-relevant, system configuration files
-  - **globals**: system agnostic (shared) applications, services, user accounts, etc
-  - **nixbase**: system 1 config
-  - **nixtop**: system 2 config
-- **modules**: togglable user/host applications, services, etc
-  - **home-manager**: user-specific modules
-  - **nixos**: system-specific modules
+- **hosts**: host-specific configuration files
+  - **globals**: system agnostic applications, programs, services, or user-account configs
+  - **nixbase**: base config file
+  - **nixtop**: base config file
+  - **nixser**: base config file
+- **modules**: togglable applications, services, etc
+  - **home-manager**: user-relevant modules
+  - **nixos**: system-relevant modules
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
