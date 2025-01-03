@@ -27,7 +27,7 @@ Aspirational
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
 
 # Layout:
-- **home-manager**: user-environment configuration files
+- **home-manager**: user-environment config file
 - **hosts**: host-specific configuration files
   - **globals**: system agnostic applications, programs, services, or user-account configs
   - **nixbase**: stationary config file
