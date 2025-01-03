@@ -87,6 +87,11 @@
   # TODO: Set your hostname
   networking.hostName = "nixtop";
 
+  ## Enable Syncthing (only for this host)
+  #syncace.enable = true;
+  #syncbase.enable = true;
+  synctop.enable = true;
+
   ## Enable networking
   networking.networkmanager.enable = true;
 
@@ -103,11 +108,6 @@
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
-
-  ## Enable Syncthing (only for this host)
-  #syncace.enable = true;
-  #syncbase.enable = true;
-  synctop.enable = true;
 
   ## Gaming Packages
   openSourceGames.enable = true;
@@ -133,19 +133,19 @@
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
-  environment.systemPackages = [
+  environment.systemPackages = with pkgs; [
 
     ## Dev Tools
-    pkgs.unstable.blender  #3D Creation/Animation/Publishing System
+    unstable.blender  #3D Creation/Animation/Publishing System
 
     ## Godot Dev Tools
-    pkgs.gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
-    pkgs.pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
-    pkgs.scons  #Improved, cross-platform substitute for Make
-    pkgs.python3Full  #High-level dynamically-typed programming language
+    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
+    scons  #Improved, cross-platform substitute for Make
+    python3Full  #High-level dynamically-typed programming language
 
     ## Communication
-    pkgs.discord  #All-in-one cross-platform voice and text chat for gamers
+    discord  #All-in-one cross-platform voice and text chat for gamers
 
   ];
 

@@ -87,6 +87,11 @@
   # TODO: Set your hostname
   networking.hostName = "nixbase";
 
+  ## Enable Syncthing (only for this host)
+  #syncace.enable = true;
+  syncbase.enable = true;
+  #synctop.enable = true;
+
   ## Enable networking
   networking.networkmanager.enable = true;
 
@@ -103,11 +108,6 @@
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
-
-  ## Enable Syncthing (only for this host)
-  #syncace.enable = true;
-  syncbase.enable = true;
-  #synctop.enable = true;
 
   ## Gaming Packages
   #openSourceGames.enable = true;
