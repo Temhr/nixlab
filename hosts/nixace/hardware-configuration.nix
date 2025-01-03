@@ -14,19 +14,36 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/d5173f96-08f6-44be-9337-f2e16794296d";
+    { device = "/dev/disk/by-uuid/67f4808d-bd17-40da-9427-1b8f04c7b9a6";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/53CCFFB5-1BE2-486C-A9FB-8EC188BBA9F1";
+    { device = "/dev/disk/by-uuid/2613-08E9";
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/49490a04-28db-4318-94a0-d6606bdfdb2e"; }
-    ];
+  fileSystems."/home/temhr/shelf" =
+    { device = "/dev/disk/by-label/shelf";
+      fsType = "ext4";
+    };
+
+  fileSystems."/mnt/hdd-r0" =
+    { device = "192.168.0.210:/hdd-r0";
+      fsType = "nfs";
+      options = [
+        "x-systemd.automount" "noauto"
+        "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+      ];
+    };
+
+  systemd.tmpfiles.rules = [
+    "d /home/temhr/shelf 1777 root root "
+    "d /mnt 1770 root root "
+  ];
+
+  swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
