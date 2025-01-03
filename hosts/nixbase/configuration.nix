@@ -131,6 +131,7 @@
 
   # Version Control
   github-desktop = true;  #GUI for managing Git and GitHub
+  git-credential-keepassxc;  #GUI for managing Git and GitHub
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

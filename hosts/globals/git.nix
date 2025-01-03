@@ -14,12 +14,13 @@
   config = lib.mkMerge [
       (lib.mkIf config.github-desktop.enable {
         environment.systemPackages = [ pkgs.github-desktop ]; #GUI for managing Git and GitHub
+        programs.git.enable = true;
       })
 
       (lib.mkIf config.git-credential-keepassxc.enable {
         environment.systemPackages = [ pkgs.git-credential-keepassxc ]; #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
       })
-      (lib.mkDefault true; programs.git.enable)  #Distributed version control system
+      (lib.mkDefault 'gitFull'; programs.git.package;)  #Distributed version control system
 
   ];
 
