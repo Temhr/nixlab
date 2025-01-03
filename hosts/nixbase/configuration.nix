@@ -129,6 +129,9 @@
   quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
   virt-manager.enable = true;    #Desktop user interface for managing virtual machines
 
+  # Version Control
+  github-desktop = true;  #GUI for managing Git and GitHub
+
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -145,8 +148,6 @@
     ## Communication
     discord  #All-in-one cross-platform voice and text chat for gamers
 
-    # Version Control
-    github-desktop #GUI for managing Git and GitHub
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

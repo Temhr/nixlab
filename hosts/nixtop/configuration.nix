@@ -145,8 +145,6 @@
     ## Communication
     pkgs.discord  #All-in-one cross-platform voice and text chat for gamers
 
-    # Version Control
-    pkgs.github-desktop #GUI for managing Git and GitHub
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

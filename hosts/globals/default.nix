@@ -3,6 +3,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./audio.nix
+    ./git.nix
     ./graphical-shells.nix
     ./firefox.nix
     ./locale.nix
