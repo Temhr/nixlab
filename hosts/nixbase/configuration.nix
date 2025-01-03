@@ -89,7 +89,7 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Graphical Shells (Mutually Exclusive)
+  ## Graphical Shells
   #gnome.enable = true; #Gnome - Desktop Environment
   plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor NEEDS WORK
@@ -97,7 +97,7 @@
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
-  konsole.enable = true;  #Terminal emulator by KDE
+  #konsole.enable = true;  #Terminal emulator by KDE
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
