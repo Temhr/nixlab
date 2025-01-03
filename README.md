@@ -30,9 +30,9 @@ Aspirational
 - **home-manager**: user-environment config.nix file
 - **hosts**: host-specific configuration files
   - **globals**: system agnostic configurations (applications, programs, services, user-account, etc.)
+  - **nixace**: workstation config.nix file
   - **nixbase**: stationary config.nix file
   - **nixtop**: laptop config.nix file
-  - **nixser**: server config.nix file
 - **modules**: togglable configuration elements
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
