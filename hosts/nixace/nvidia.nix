@@ -46,8 +46,8 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    # Nvidia Quadro k4100m
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
+    # Nvidia Quadro p5000
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
 
     prime = {
       offload.enable = false;

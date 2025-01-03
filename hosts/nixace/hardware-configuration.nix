@@ -14,42 +14,18 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/c73582d5-dea2-45d9-8be6-0e3a8abe9292";
+    { device = "/dev/disk/by-uuid/d5173f96-08f6-44be-9337-f2e16794296d";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/FABC-A90E";
+    { device = "/dev/disk/by-uuid/53CCFFB5-1BE2-486C-A9FB-8EC188BBA9F1";
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  fileSystems."/home" =
-    { device = "/dev/disk/by-label/home";
-      fsType = "ext4";
-    };
-
-  fileSystems."/home/temhr/shelf" =
-    { device = "/dev/disk/by-label/shelf";
-      fsType = "ext4";
-    };
-
-  fileSystems."/mnt/hdd-r0" =
-    { device = "192.168.0.210:/hdd-r0";
-      fsType = "nfs";
-      options = [
-        "x-systemd.automount" "noauto"
-        "x-systemd.idle-timeout=60" # disconnects after 60 seconds
-      ];
-    };
-
-  systemd.tmpfiles.rules = [
-    "d /home/temhr/shelf 1777 root root "
-    "d /mnt 1770 root root "
-  ];
-
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/e9330b4c-54e3-4792-bfbd-f2325acde0ea"; }
+    [ { device = "/dev/disk/by-uuid/49490a04-28db-4318-94a0-d6606bdfdb2e"; }
     ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

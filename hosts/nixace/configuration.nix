@@ -84,14 +84,14 @@
   boot.loader.systemd-boot.configurationLimit = 10;
 
   # TODO: Set your hostname
-  networking.hostName = "nixser";
+  networking.hostName = "nixace";
 
   ## Enable networking
   networking.networkmanager.enable = true;
 
   ## Graphical Shells
   #gnome.enable = true; #Gnome - Desktop Environment
-  #plasma.enable = true; #KDE - Desktop Environment
+  plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor NEEDS WORK
 
   ## Terminal Emulators
@@ -106,45 +106,32 @@
   ## Syncthing (Mutually Exclusive)
   #syncbase.enable = true;
   #synctop.enable = true;
-  syncser.enable = true;
 
   ## Gaming Packages
-  #openSourceGames.enable = true;
-  #steam.enable = true;  #Video game digital distribution service and storefront from Valve
+  openSourceGames.enable = true;
+  steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Productivity
-  #calibre.enable = true;  #Comprehensive e-book software
-  #libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
+  calibre.enable = true;  #Comprehensive e-book software
+  libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
 
   ## Media Packages
-  #audacity.enable = true;  #Sound editor with graphical UI
-  #kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-  #obs.enable = true;  #Free and open source software for video recording and live streaming
-  #spotify.enable = true;  #Play music from the Spotify music service
-  #vlc.enable = true;  #Cross-platform media player and streaming server
+  audacity.enable = true;  #Sound editor with graphical UI
+  kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+  obs.enable = true;  #Free and open source software for video recording and live streaming
+  spotify.enable = true;  #Play music from the Spotify music service
+  vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Virtualizations
-  distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  incus.enable = true;   #Powerful system container and virtual machine manager
-  podman.enable = true;    #A program for managing pods, containers and container images
+  #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
+  #incus.enable = true;   #Powerful system container and virtual machine manager
+  #podman.enable = true;    #A program for managing pods, containers and container images
   quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
   virt-manager.enable = true;    #Desktop user interface for managing virtual machines
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = [
-
-    ## Dev Tools
-    pkgs.unstable.blender  #3D Creation/Animation/Publishing System
-
-    ## Godot Dev Tools
-    pkgs.gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
-    pkgs.pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
-    pkgs.scons  #Improved, cross-platform substitute for Make
-    pkgs.python3Full  #High-level dynamically-typed programming language
-
-    ## Communication
-    pkgs.discord  #All-in-one cross-platform voice and text chat for gamers
 
   ];
 

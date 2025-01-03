@@ -46,18 +46,18 @@
 
     # NixOS configuration entrypoint. Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
+      nixace = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          # > Our main nixos configuration file <
+          ./hosts/nixace/configuration.nix
+        ];
+      };
       nixbase = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixbase/configuration.nix
-        ];
-      };
-      nixser = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixser/configuration.nix
         ];
       };
       nixtop = nixpkgs.lib.nixosSystem {
