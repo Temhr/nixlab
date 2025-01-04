@@ -15,7 +15,6 @@ Aspirational
 - Initial hardware configuration scripting
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
-- Flatpak support
 - Secret management system
 - Impermanent system; declaratively built on boot and connected to storage drives for data persistence. 
 
