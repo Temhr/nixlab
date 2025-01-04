@@ -6,6 +6,7 @@
     ./git.nix
     ./graphical-shells.nix
     ./firefox.nix
+    ./flatpak.nix
     ./locale.nix
     ./open-ssh.nix
     ./syncthing.nix

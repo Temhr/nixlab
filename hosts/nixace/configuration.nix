@@ -125,11 +125,13 @@
   vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Virtualizations
-  #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  #incus.enable = true;   #Powerful system container and virtual machine manager
-  #podman.enable = true;    #A program for managing pods, containers and container images
+  bottles.enable = true;    #Easy-to-use wineprefix manager
+  distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
+  incus.enable = true;   #Powerful system container and virtual machine manager
+  podman.enable = true;    #A program for managing pods, containers and container images
   quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
   virt-manager.enable = true;    #Desktop user interface for managing virtual machines
+  wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

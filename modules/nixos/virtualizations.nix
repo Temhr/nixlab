@@ -1,6 +1,9 @@
 { config, lib, pkgs, ... }: {
 
     options = {
+        bottles = {
+            enable = lib.mkEnableOption "enables Bottles";
+        };
         distrobox = {
             enable = lib.mkEnableOption "enables Distrobox";
         };
@@ -16,9 +19,15 @@
         virt-manager = {
             enable = lib.mkEnableOption "enables Virt-Manager";
         };
+        wine = {
+            enable = lib.mkEnableOption "enables Wine";
+        };
     };
 
     config = lib.mkMerge [
+        (lib.mkIf config.bottles.enable {
+          environment.systemPackages = [ pkgs.bottles ];  #Easy-to-use wineprefix manager
+        })
         (lib.mkIf config.distrobox.enable {
           environment.systemPackages = [ pkgs.distrobox ];  #Wrapper around podman or docker to create and start containers
         })
@@ -37,6 +46,17 @@
           #Allows libvirtd to take advantage of OVMF when creating new QEMU VMs with UEFI boot
           virtualisation.libvirtd.qemu.ovmf.enable = true; #For UEFI boot of Home Assistant OS guest image
           virtualisation.spiceUSBRedirection.enable = true;
+        })
+        (lib.mkIf config.wine.enable {  #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
+          environment.systemPackages = with pkgs; [
+            wineWowPackages.stable #support both 32-bit and 64-bit applications
+            wine  #support 42-bit only
+            (wine.override { wineBuild = "wine64"; })  #support 64-bit only
+            wine64   #support 64-bit only
+            wineWowPackages.staging  #wine-staging (version with experimental features)
+            winetricks  #winetricks (all versions)
+            wineWowPackages.waylandFull  #native wayland support (unstable)
+          ];
         })
     ];
 
