@@ -22,6 +22,9 @@
         wine = {
             enable = lib.mkEnableOption "enables Wine";
         };
+        home-assistant = {
+            enable = lib.mkEnableOption "enables Home-Assistant";
+        };
     };
 
     config = lib.mkMerge [
@@ -62,6 +65,9 @@
             winetricks  #winetricks (all versions)
             wineWowPackages.waylandFull  #native wayland support (unstable)
           ];
+        })
+        (lib.mkIf config.home-assistant.enable {
+          networking.firewall.allowedTCPPorts = [ 8123 ];
         })
     ];
 
