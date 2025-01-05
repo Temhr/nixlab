@@ -29,6 +29,6 @@
   boot.initrd.supportedFilesystems = [ "nfs" ];
   boot.initrd.kernelModules = [ "nfs" ];
   services.nfs.server.enable = true;
-  services.nfs.server.exports = '' /mirror 0.0.0.0(rw,fsid=0,no_subtree_check) '';
+  services.nfs.server.exports = '' /mirror 0.0.0.0/255.255.255.0(rw,fsid=0,no_subtree_check) '';
 
 }
