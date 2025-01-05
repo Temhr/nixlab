@@ -26,8 +26,8 @@
 #    "d /mnt 1770 root root "
 #  ];
 
-  boot.supportedFilesystems = [ "nfs" ];
-  boot.kernelModules = [ "nfs" ];
+  boot.initrd.supportedFilesystems = [ "nfs" ];
+  boot.initrd.kernelModules = [ "nfs" ];
   services.nfs.server.enable = true;
   services.nfs.server.exports = '' /mirror 0.0.0.0(rw,fsid=0,no_subtree_check) '';
 
