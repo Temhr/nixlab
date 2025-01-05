@@ -49,14 +49,6 @@
           #Allows libvirtd to take advantage of OVMF when creating new QEMU VMs with UEFI boot
           virtualisation.libvirtd.qemu.ovmf.enable = true; #For UEFI boot of Home Assistant OS guest image
           virtualisation.spiceUSBRedirection.enable = true;
-<<<<<<< Updated upstream
-
-          networking.bridges.virbr0.interfaces = ["wlo1"];
-          networking.interfaces.virbr0 = {
-            useDHCP = true;
-          };
-=======
->>>>>>> Stashed changes
         })
         (lib.mkIf config.wine.enable {  #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
           environment.systemPackages = with pkgs; [
@@ -68,9 +60,6 @@
             winetricks  #winetricks (all versions)
             wineWowPackages.waylandFull  #native wayland support (unstable)
           ];
-        })
-        (lib.mkIf config.home-assistant.enable {
-          networking.firewall.allowedTCPPorts = [ 8123 ];
         })
     ];
 
