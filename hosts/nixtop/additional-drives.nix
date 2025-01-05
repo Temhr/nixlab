@@ -12,8 +12,8 @@
       fsType = "ext4";
     };
 
-  fileSystems."/mnt/hdd-r0" =
-    { device = "192.168.0.210:/hdd-r0";
+  fileSystems."/mnt/mirser" =
+    { device = "192.168.0.203:/mirror";
       fsType = "nfs";
       options = [
         "x-systemd.automount" "noauto"
