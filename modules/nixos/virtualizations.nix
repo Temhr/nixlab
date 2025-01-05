@@ -35,6 +35,8 @@
           environment.systemPackages = [ pkgs.distrobox ];  #Wrapper around podman or docker to create and start containers
         })
         (lib.mkIf config.incus.enable {
+          virtualisation.incus.enable = true;
+          networking.nftables.enable = true;
           environment.systemPackages = [ pkgs.incus ];  #Powerful system container and virtual machine manager
         })
         (lib.mkIf config.podman.enable {
