@@ -50,8 +50,8 @@
           virtualisation.libvirtd.qemu.ovmf.enable = true; #For UEFI boot of Home Assistant OS guest image
           virtualisation.spiceUSBRedirection.enable = true;
 
-          networking.bridges.vmbr0.interfaces = ["wlo1"];
-          networking.interfaces.vmbr0 = {
+          networking.bridges.virbr0.interfaces = ["wlo1"];
+          networking.interfaces.virbr0 = {
             useDHCP = true;
           };
         })
