@@ -25,8 +25,10 @@
     cron  #Daemon for running commands at specific times (Vixie Cron)
 
     ## Network Management
+    bridge-utils  #Userspace tool to configure linux bridges (deprecated in favour or iproute2)
     ethtool  #Utility for controlling network drivers and hardware
     iperf  #Tool to measure IP bandwidth using UDP or TCP
+    iproute2  #Collection of utilities for controlling TCP/IP networking and traffic control in Linux
     nettools  #A set of tools for controlling the network subsystem in Linux
     nfs-utils  #Linux user-space NFS utilities
     nmap  #A free and open source utility for network discovery and security auditing

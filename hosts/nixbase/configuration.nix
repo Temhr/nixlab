@@ -87,6 +87,20 @@
   # TODO: Set your hostname
   networking.hostName = "nixbase";
 
+  networking = {
+    interfaces.br0.ipv4.addresses = [
+      {
+        address = "192.168.0.122";
+        prefixLength = 24;
+      }
+    ];
+    bridges = {
+      br0 = {
+        interfaces = [ "virbr0" ];
+      };
+    };
+  };
+
   ## Enable Syncthing (only for this host)
   #syncace.enable = true;
   syncbase.enable = true;
