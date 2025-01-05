@@ -15,10 +15,7 @@
   fileSystems."/mnt/mirser" =
     { device = "192.168.0.203:/mirror";
       fsType = "nfs";
-      options = [
-        "x-systemd.automount" "noauto"
-        "x-systemd.idle-timeout=60" # disconnects after 60 seconds
-      ];
+      options = [ "x-systemd.automount" "noauto" "x-systemd.after=network-online.target" "x-systemd.mount-timeout=90" ];
     };
 
   systemd.tmpfiles.rules = [
