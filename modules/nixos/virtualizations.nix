@@ -37,7 +37,6 @@
         (lib.mkIf config.incus.enable {
           virtualisation.incus.enable = true;
           networking.nftables.enable = true;
-          environment.systemPackages = [ pkgs.incus ];  #Powerful system container and virtual machine manager
           #preseed provides a basic directory backed storage pool and a bridged NAT network with DHCP
           virtualisation.incus.preseed = {
             networks = [
