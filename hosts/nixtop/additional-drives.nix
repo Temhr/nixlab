@@ -15,12 +15,16 @@
   fileSystems."/mnt/mirser" =
     { device = "192.168.0.203:/mirror";
       fsType = "nfs";
-      options = [ "x-systemd.automount" "noauto" "x-systemd.after=network-online.target" "x-systemd.mount-timeout=90" ];
+      options = [
+        "x-systemd.automount" "noauto"
+        "x-systemd.after=network-online.target"
+        "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+      ];
     };
 
   systemd.tmpfiles.rules = [
     "d /home/temhr/shelf 1777 root root "
-    "d /mnt 1770 root root "
+    #"d /mnt 1770 root root "
   ];
 
 }
