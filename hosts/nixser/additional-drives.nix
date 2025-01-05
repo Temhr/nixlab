@@ -27,6 +27,6 @@
 #  ];
 
   services.nfs.server.enable = true;
-  services.nfs.server.exports = '' /mirror 192.168.0.0(rw,fsid=0,no_subtree_check) '';
+  services.nfs.server.exports = '' /mirror 0.0.0.0(rw,fsid=0,no_subtree_check) '';
 
 }
