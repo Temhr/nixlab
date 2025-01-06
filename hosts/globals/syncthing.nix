@@ -18,7 +18,10 @@
     config = lib.mkMerge [
 
         (lib.mkIf config.syncace.enable {
-            networking.firewall = { allowedTCPPorts = [ 8384 ];};
+            networking.firewall = {
+                allowedTCPPorts = [ 8384 ];
+                allowedUDPPorts = [ 8384 ];
+            };
             services.syncthing = {
                 # Enables the Syncthing Service
                 enable = true;
@@ -66,7 +69,10 @@
             };
         })
         (lib.mkIf config.syncbase.enable {
-            networking.firewall = { allowedTCPPorts = [ 8384 ];};
+            networking.firewall = {
+                allowedTCPPorts = [ 8384 ];
+                allowedUDPPorts = [ 8384 ];
+            };
             services.syncthing = {
                 # Enables the Syncthing Service
                 enable = true;
@@ -104,7 +110,10 @@
             };
         })
         (lib.mkIf config.syncser.enable {
-            networking.firewall = { allowedTCPPorts = [ 8384 ];};
+            networking.firewall = {
+                allowedTCPPorts = [ 8384 ];
+                allowedUDPPorts = [ 8384 ];
+            };
             services.syncthing = {
                 # Enables the Syncthing Service
                 enable = true;
@@ -142,7 +151,10 @@
             };
         })
         (lib.mkIf config.synctop.enable {
-            networking.firewall = { allowedTCPPorts = [ 8384 ];};
+            networking.firewall = {
+                allowedTCPPorts = [ 8384 ];
+                allowedUDPPorts = [ 8384 ];
+            };
             services.syncthing = {
                 # Enables the Syncthing Service
                 enable = true;
