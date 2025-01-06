@@ -109,7 +109,7 @@
                     };
                     "mirror" = {
                     path = "/mirror";
-                    devices = [ "nixser" ];
+                    devices = [ "nixbase" ];
                     };
                 };
                 };
