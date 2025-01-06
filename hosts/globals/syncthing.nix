@@ -40,7 +40,7 @@
                     # Manually grab the device IDs of the other syncthing devices
                     devices = {
                         "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                        "nixser" = { id = ""; };
+                        "nixser" = { id = "LII2CUD-JGQU6W2-6YAOQGP-7XC3C4V-WYN2Z2M-2ITLBIE-EZWIGJ5-Q4FFIQC"; };
                         "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
@@ -87,7 +87,7 @@
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
                     "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
-                    "nixser" = { id = ""; };
+                    "nixser" = { id = "LII2CUD-JGQU6W2-6YAOQGP-7XC3C4V-WYN2Z2M-2ITLBIE-EZWIGJ5-Q4FFIQC"; };
                     "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
@@ -138,7 +138,7 @@
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
                     "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
-                    "nixser" = { id = ""; };
+                    "nixser" = { id = "LII2CUD-JGQU6W2-6YAOQGP-7XC3C4V-WYN2Z2M-2ITLBIE-EZWIGJ5-Q4FFIQC"; };
                     "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
@@ -190,7 +190,7 @@
                     devices = {
                         "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
                         "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                        "nixser" = { id = ""; };
+                        "nixser" = { id = "LII2CUD-JGQU6W2-6YAOQGP-7XC3C4V-WYN2Z2M-2ITLBIE-EZWIGJ5-Q4FFIQC"; };
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {
