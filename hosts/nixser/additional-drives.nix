@@ -20,8 +20,8 @@
       ];
     };
   systemd.tmpfiles.rules = [
-    "d /mirror 1770 root root "
-    "d /mnt 1770 root root "
+    "d /mirror 1744 temhr users "
+    "d /mnt 1744 temhr users "
   ];
 
   services.nfs.server.enable = true;
