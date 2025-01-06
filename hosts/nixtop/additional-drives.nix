@@ -11,7 +11,6 @@
     { device = "/dev/disk/by-label/shelf";
       fsType = "ext4";
     };
-
   fileSystems."/mnt/mirser" =
     { device = "192.168.0.203:/mirror";
       fsType = "nfs";
@@ -21,9 +20,6 @@
         "x-systemd.idle-timeout=60" # disconnects after 60 seconds
       ];
     };
-
-  boot.initrd.supportedFilesystems = [ "nfs" ];
-  boot.initrd.kernelModules = [ "nfs" ];
 
   systemd.tmpfiles.rules = [
     "d /home/temhr/shelf 1777 root root "
