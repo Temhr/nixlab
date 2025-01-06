@@ -91,6 +91,7 @@
   ## Enable Syncthing (only for this host)
   #syncace.enable = true;
   #syncbase.enable = true;
+  syncser.enable = true;
   #synctop.enable = true;
 
   ## Enable networking
