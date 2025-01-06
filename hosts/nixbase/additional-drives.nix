@@ -32,5 +32,5 @@
 
   services.nfs.server.enable = true;
   services.nfs.server.exports = '' /mirror 192.168.0.0/255.255.255.0(rw,no_root_squash,fsid=0,no_subtree_check) '';
-  networking.firewall.enable = false;
+  networking.firewall = { allowedTCPPorts = [ 2049 ]; };
 }
