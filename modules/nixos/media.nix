@@ -10,6 +10,9 @@
         obs = {
             enable = lib.mkEnableOption "enables OBS-studio";
         };
+        openshot = {
+            enable = lib.mkEnableOption "enables Openshot";
+        };
         spotify = {
             enable = lib.mkEnableOption "enables Spotify";
         };
@@ -30,6 +33,9 @@
                 enable = true;  #Distributed version control system
                 enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
             };
+        })
+        (lib.mkIf config.openshot.enable {
+          environment.systemPackages = [ pkgs.openshot-qt ];  #Free, open-source video editor
         })
         (lib.mkIf config.spotify.enable {
           environment.systemPackages = [ pkgs.spotify ];  #Play music from the Spotify music service
