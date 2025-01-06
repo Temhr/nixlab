@@ -27,6 +27,6 @@
 
   systemd.tmpfiles.rules = [
     "d /home/temhr/shelf 1777 root root "
-    #"d /mnt 1770 root root "
+    "d /mnt 1770 root root "
   ];
 }
