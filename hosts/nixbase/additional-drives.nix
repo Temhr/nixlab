@@ -12,8 +12,8 @@
       fsType = "ext4";
     };
 
-  fileSystems."/run/media/temhr/HGST" =
-    { device = "/dev/disk/by-label/HGST";
+  fileSystems."/mirror" =
+    { device = "/dev/disk/by-uuid/a777497d-228b-47a2-bd3c-71f8eb8d1315";
       fsType = "ext4";
     };
   fileSystems."/mnt/mirser" =
