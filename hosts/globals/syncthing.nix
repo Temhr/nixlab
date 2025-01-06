@@ -18,6 +18,7 @@
     config = lib.mkMerge [
 
         (lib.mkIf config.syncace.enable {
+            systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
             networking.firewall = {
                 allowedTCPPorts = [ 8384 ];
                 allowedUDPPorts = [ 8384 ];
@@ -69,6 +70,7 @@
             };
         })
         (lib.mkIf config.syncbase.enable {
+            systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
             networking.firewall = {
                 allowedTCPPorts = [ 8384 ];
                 allowedUDPPorts = [ 8384 ];
@@ -110,6 +112,7 @@
             };
         })
         (lib.mkIf config.syncser.enable {
+            systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
             networking.firewall = {
                 allowedTCPPorts = [ 8384 ];
                 allowedUDPPorts = [ 8384 ];
@@ -151,6 +154,7 @@
             };
         })
         (lib.mkIf config.synctop.enable {
+            systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
             networking.firewall = {
                 allowedTCPPorts = [ 8384 ];
                 allowedUDPPorts = [ 8384 ];
