@@ -93,20 +93,6 @@
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {
                     # Name of folder in Syncthing, also the folder ID
-                    "home-nixbase" = {
-                    # Which folder to add to Syncthing
-                    path = "/home/temhr";
-                    # Which devices to share the folder with
-                    devices = [ "nixser" ];
-                    # optional, keeps all changes to files for 180 days
-                    versioning = {
-                        type = "staggered";
-                        params = {
-                        cleanInterval = "3600"; # 1 hour in seconds
-                        maxAge = "15768000"; # 180 days in seconds
-                        };
-                    };
-                    };
                     "mirror" = {
                     path = "/mirror";
                     devices = [ "nixser" ];
@@ -144,20 +130,6 @@
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {
                     # Name of folder in Syncthing, also the folder ID
-                    "home-nixser" = {
-                    # Which folder to add to Syncthing
-                    path = "/home/temhr";
-                    # Which devices to share the folder with
-                    devices = [ "nixbase" ];
-                    # optional, keeps all changes to files for 180 days
-                    versioning = {
-                        type = "staggered";
-                        params = {
-                        cleanInterval = "3600"; # 1 hour in seconds
-                        maxAge = "15768000"; # 180 days in seconds
-                        };
-                    };
-                    };
                     "mirror" = {
                     path = "/mirror";
                     devices = [ "nixbase" ];
