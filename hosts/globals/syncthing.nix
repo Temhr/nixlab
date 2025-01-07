@@ -79,7 +79,7 @@
                 # Enables the Syncthing Service
                 enable = true;
                 # Sets the Data/default sync directory (but we won’t use this)
-                #dataDir = "/home/temhr";
+                dataDir = "/mirror";
                 # Opens the default ports (21027/tcp & 22000) - note this doesn’t include the web interface
                 openDefaultPorts = true;
                 # Sets the Config Directory (important part of .config files)
@@ -94,34 +94,34 @@
                 overrideDevices = true;
                 overrideFolders = true;
                 settings = {
-                # Manually grab the device IDs of the other syncthing devices
-                devices = {
-                    "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
-                    "nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
-                    "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
-                };
-                # all machines must have same declaration, but "devices" reflect the opposite device
-                folders = {                        # Name of folder in Syncthing, also the folder ID
-                    "home-nixbase" = {
-                    # Which folder to add to Syncthing
-                        path = "/home/temhr";
-                        # Which devices to share the folder with
-                        devices = [ "nixser" ];
-                        # optional, keeps all changes to files for 180 days
-                        versioning = {
-                            type = "staggered";
-                            params = {
-                                cleanInterval = "3600"; # 1 hour in seconds
-                                maxAge = "15768000"; # 180 days in seconds
+                    # Manually grab the device IDs of the other syncthing devices
+                    devices = {
+                        "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
+                        "nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
+                        "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                    };
+                    # all machines must have same declaration, but "devices" reflect the opposite device
+                    folders = {                        # Name of folder in Syncthing, also the folder ID
+                        "home-nixbase" = {
+                        # Which folder to add to Syncthing
+                            path = "/home/temhr";
+                            # Which devices to share the folder with
+                            devices = [ "nixser" ];
+                            # optional, keeps all changes to files for 180 days
+                            versioning = {
+                                type = "staggered";
+                                params = {
+                                    cleanInterval = "3600"; # 1 hour in seconds
+                                    maxAge = "15768000"; # 180 days in seconds
+                                };
                             };
                         };
+                        # Name of folder in Syncthing, also the folder ID
+                        "mirror" = {
+                        path = "/mirror";
+                        devices = [ "nixser" ];
+                        };
                     };
-                    # Name of folder in Syncthing, also the folder ID
-                    "mirror" = {
-                    path = "/mirror";
-                    devices = [ "nixser" ];
-                    };
-                };
                 };
             };
         })
@@ -135,7 +135,7 @@
                 # Enables the Syncthing Service
                 enable = true;
                 # Sets the Data/default sync directory (but we won’t use this)
-                #dataDir = "/home/temhr";
+                dataDir = "/mirror";
                 # Opens the default ports (21027/tcp & 22000) - note this doesn’t include the web interface
                 openDefaultPorts = true;
                 # Sets the Config Directory (important part of .config files)
@@ -150,34 +150,34 @@
                 overrideDevices = true;
                 overrideFolders = true;
                 settings = {
-                # Manually grab the device IDs of the other syncthing devices
-                devices = {
-                    "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
-                    "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                    "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
-                };
-                # all machines must have same declaration, but "devices" reflect the opposite device
-                folders = {                        # Name of folder in Syncthing, also the folder ID
-                    "home-nixser" = {
-                    # Which folder to add to Syncthing
-                        path = "/home/temhr";
-                        # Which devices to share the folder with
-                        devices = [ "nixbase" ];
-                        # optional, keeps all changes to files for 180 days
-                        versioning = {
-                            type = "staggered";
-                            params = {
-                                cleanInterval = "3600"; # 1 hour in seconds
-                                maxAge = "15768000"; # 180 days in seconds
+                    # Manually grab the device IDs of the other syncthing devices
+                    devices = {
+                        "nixace" = { id = "MMNJWSJ-7MDL6F3-XQYWKWM-JX77ZH7-SZ4U7UT-ZP6D47B-XLYRYFZ-3F3BXQK"; };
+                        "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
+                        "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                    };
+                    # all machines must have same declaration, but "devices" reflect the opposite device
+                    folders = {                        # Name of folder in Syncthing, also the folder ID
+                        "home-nixser" = {
+                        # Which folder to add to Syncthing
+                            path = "/home/temhr";
+                            # Which devices to share the folder with
+                            devices = [ "nixbase" ];
+                            # optional, keeps all changes to files for 180 days
+                            versioning = {
+                                type = "staggered";
+                                params = {
+                                    cleanInterval = "3600"; # 1 hour in seconds
+                                    maxAge = "15768000"; # 180 days in seconds
+                                };
                             };
                         };
+                        # Name of folder in Syncthing, also the folder ID
+                        "mirror" = {
+                        path = "/mirror";
+                        devices = [ "nixbase" ];
+                        };
                     };
-                    # Name of folder in Syncthing, also the folder ID
-                    "mirror" = {
-                    path = "/mirror";
-                    devices = [ "nixbase" ];
-                    };
-                };
                 };
             };
         })
