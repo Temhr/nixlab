@@ -5,7 +5,7 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 # Features
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up my builds
-- **Flakes**: entrypoint; version-pins pkg dependencies in a lock file
+- **Flakes**: entrypoint; version-pins nixpkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends (applies changes to) package sets
@@ -43,4 +43,4 @@ Aspirational
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
   - empty
--  flake: cache of prebuilt binaries for nixpkgs to speed up builds
+-  flake: the flake.nix (entry config) and flake.lock (version pinner) files
