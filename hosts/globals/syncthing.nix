@@ -56,14 +56,6 @@
                             path = "/home/temhr";
                             # Which devices to share the folder with
                             devices = [ "nixser" ];
-                            # optional, keeps all changes to files for 180 days
-                            versioning = {
-                                type = "staggered";
-                                params = {
-                                    cleanInterval = "3600"; # 1 hour in seconds
-                                    maxAge = "15768000"; # 180 days in seconds
-                                };
-                            };
                         };
                     };
                 };
@@ -107,14 +99,6 @@
                             path = "/home/temhr";
                             # Which devices to share the folder with
                             devices = [ "nixser" ];
-                            # optional, keeps all changes to files for 180 days
-                            versioning = {
-                                type = "staggered";
-                                params = {
-                                    cleanInterval = "3600"; # 1 hour in seconds
-                                    maxAge = "15768000"; # 180 days in seconds
-                                };
-                            };
                         };
                         # Name of folder in Syncthing, also the folder ID
                         "mirror" = {
@@ -163,14 +147,6 @@
                             path = "/home/temhr";
                             # Which devices to share the folder with
                             devices = [ "nixbase" ];
-                            # optional, keeps all changes to files for 180 days
-                            versioning = {
-                                type = "staggered";
-                                params = {
-                                    cleanInterval = "3600"; # 1 hour in seconds
-                                    maxAge = "15768000"; # 180 days in seconds
-                                };
-                            };
                         };
                         # Name of folder in Syncthing, also the folder ID
                         "mirror" = {
@@ -220,14 +196,6 @@
                             path = "/home/temhr";
                             # Which devices to share the folder with
                             devices = [ "nixser" ];
-                            # optional, keeps all changes to files for 180 days
-                            versioning = {
-                                type = "staggered";
-                                params = {
-                                    cleanInterval = "3600"; # 1 hour in seconds
-                                    maxAge = "15768000"; # 180 days in seconds
-                                };
-                            };
                         };
                     };
                 };
