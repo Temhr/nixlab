@@ -95,7 +95,7 @@
         };
         # YT Block:
         "edoan.rodrigues@gmail.com" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/yt-block/latest.xpi";
+          install_url = "https://addons.mozilla.org/firefox/downloads/file/4405118/yt_block-5.10.1.xpi";
           installation_mode = "force_installed";
         };
       };
