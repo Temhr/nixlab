@@ -4,7 +4,7 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 
 # Features
 Contains
-- **Cachix**: cache of prebuilt nixpkgs binaries to speed up my builds
+- **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
 - **Flakes**: entrypoint; version-pins nixpkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
