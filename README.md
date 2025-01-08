@@ -17,7 +17,7 @@ Aspirational
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
 - Secret management system
-- Impermanent system; declaratively built on boot and connected to storage drives for data persistence. 
+- Impermanent system; declaratively built on boot and connected to storage drives for data persistence
 
 # Implementation
 - **Installation**: haven't established any personal methods or protocols yet
