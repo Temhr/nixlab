@@ -48,21 +48,21 @@ LOCAL_HASH=$(git rev-parse HEAD)
 if [ "$REMOTE_HASH" != "$LOCAL_HASH" ]; then
     log_message "Updates found. Pulling changes..."
 
-    # Check for local changes
-    if ! git diff --quiet; then
-        log_message "Warning: Local changes detected. Stashing changes..."
-        git stash &>> "$LOG_FILE"
-    fi
+#    # Check for local changes
+#    if ! git diff --quiet; then
+#        log_message "Warning: Local changes detected. Stashing changes..."
+#        git stash &>> "$LOG_FILE"
+#    fi
 
     # Pull updates
     if git pull origin "$CURRENT_BRANCH" &>> "$LOG_FILE"; then
         log_message "Successfully updated repository"
 
-        # Apply stashed changes if any
-        if git stash list | grep -q "stash@{0}"; then
-            log_message "Applying stashed changes..."
-            git stash pop &>> "$LOG_FILE"
-        fi
+#        # Apply stashed changes if any
+#        if git stash list | grep -q "stash@{0}"; then
+#            log_message "Applying stashed changes..."
+#            git stash pop &>> "$LOG_FILE"
+#        fi
     else
         log_message "Error: Failed to pull updates"
         exit 1
