@@ -1,6 +1,9 @@
 { config, lib, pkgs, ... }: {
 
   environment.systemPackages = with pkgs; [
+
+    cachix  #Command-line client for Nix binary cache hosting https://cachix.org
+
     ## Terminal Utilities
     bat  #Cat(1) clone with syntax highlighting and Git integration
     busybox  #Tiny versions of common UNIX utilities in a single small executable
