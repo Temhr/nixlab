@@ -8,7 +8,6 @@
     ./firefox.nix
     ./flatpak.nix
     ./locale.nix
-    ./nixlab-repo-auto-update.nix
     ./open-ssh.nix
     ./syncthing.nix
     ./users.nix
