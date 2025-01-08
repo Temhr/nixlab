@@ -7,7 +7,9 @@
 
   ];
 
-  programs.git.enable = true;  #Distributed version control system
+  programs.git = {
+    enable = true;  #Distributed version control system
+  };
   programs.lazygit.enable = true;  #A simple terminal UI for git commands
 
 }
