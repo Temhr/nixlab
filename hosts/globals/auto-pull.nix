@@ -1,20 +1,20 @@
 { config, lib, pkgs, ... }: {
 
-  systemd.timers.git-update = {
+  systemd.timers.b = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
       OnUnitActiveSec = "5min";
-      Unit = "git-update.service";
+      Unit = "b.service";
     };
   };
 
-  systemd.services.git-update = {
+  systemd.services.b = {
     description = "Git Repository Update Service";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/etc/nixos/bin/hello.sh";
-      User = "temhr";
+      ExecStart = /tmp/hello.sh;
+      User = "root";
     };
   };
 }
