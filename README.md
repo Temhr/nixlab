@@ -10,6 +10,7 @@ Contains
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends (applies changes to) package sets
   - **Togglables**: abstracts lengthy complexity from frontend config.nix file
+- Auto-update - Cronjob invoked shell script to check this repo and pull if updated
 
 Aspirational
 - Declaraitive virtualization systems
