@@ -2,13 +2,13 @@
 # The NixOS Operations Script (NOS) is a wrapper script for nixos-rebuild and Flake-based configurations.
 # It handles pulling the latest version of your repository using Git, running system updates, and pushing changes back up.
 
-# Exit on error
+## Exit on error
 set -e
 
-# Configuration parameters
+## Configuration parameters
 operation="switch"                              # The nixos-rebuild operation to use
-hostname=$(/run/current-system/sw/bin/hostname) # The name of the host to build
-flakeDir="/home/temhr/nixlab"                         # Path to the flake file (and optionally the hostname)
+hostname=$(/run/current-system/sw/bin/hostname) # Dynamically determines the system's hostname
+flakeDir="/home/temhr/nixlab"                   # Path to the flake file (and optionally the hostname)
 update=false                                    # Whether to update and commmit flake.lock
 user=$(/run/current-system/sw/bin/whoami)       # Which user account to use for git commands
 buildHost=""                                    # Which host to use to generate the build (defaults to the local host)
@@ -34,7 +34,10 @@ function usage() {
   exit 0
 }
 
-# Argument processing logic shamelessly stolen from https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+# Processes command-line arguments to override default values.
+# Argument processing logic stolen from https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+
+## Argument Parsing
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -79,16 +82,28 @@ done
 remainingArgs=${POSITIONAL_ARGS[*]}
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
+# Ensures the flakeDir is specified; otherwise, the script exits with an error
+
+## Flake Directory Validation
 if [ -z "${flakeDir}" ]; then
   echo "Flake directory not specified. Use '--flake <path>' or set \$FLAKE_DIR."
   exit 1
 fi
 
+# 1) Navigates to the Flake directory
+# 2) Pulls the latest changes from the Git repository using the specified user
+
+## Git Repository Updates
 cd "$flakeDir" || exit 1
 
 echo "Pulling the latest version of the repository..."
 /run/wrappers/bin/sudo -u "$user" /run/current-system/sw/bin/git pull
 
+# If --update is enabled:
+  # 1) Updates the flake.lock file
+  # 2) Commits and pushes changes back to the repository
+
+## Flake Updates
 if [ $update = true ]; then
   echo "Updating flake.lock..."
   /run/wrappers/bin/sudo -u "$user" /run/current-system/sw/bin/nix flake update --commit-lock-file
@@ -97,17 +112,33 @@ else
   echo "Skipping 'nix flake update'..."
 fi
 
-options="--flake ${flakeDir}#${hostname} ${remainingArgs} --use-remote-sudo --log-format multiline-with-logs"
+# Constructs the arguments for nixos-rebuild:
+    # --flake: Specifies the Flake directory and hostname.
+    # --use-remote-sudo: Enables remote sudo for operations.
+    # --log-format multiline-with-logs: Improves logging readability
 
+## System Rebuild Options
+options="--flake ${flakeDir}#${hostname} ${remainingArgs} --use-remote-sudo"
+
+# If a remote host is specified and the operation isn't build or a dry run:
+    # Performs a preliminary remote build
+
+## Remote Build Handling
 if [[ -n "${buildHost}" && "$operation" != "build" && "$operation" != *"dry"* ]]; then
   echo "Remote build detected, running this operation first: nixos-rebuild build ${options} --build-host $buildHost"
   /run/current-system/sw/bin/nixos-rebuild build $options --build-host $buildHost
   echo "Remote build complete!"
 fi
 
+# Runs the nixos-rebuild command with the specified operation and options
+
+## System Rebuild Execution
 echo "Running this operation: nixos-rebuild ${operation} ${options}"
 /run/current-system/sw/bin/nixos-rebuild $operation $options
 
+# For boot or switch operations: Lists the new system generations created
+
+## Post-Rebuild Actions
 case "$operation" in
   boot|switch)
     echo ""
@@ -116,4 +147,5 @@ case "$operation" in
     ;;
 esac
 
+## Exit on Success
 exit 0
