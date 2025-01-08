@@ -11,6 +11,7 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
     # outputs.nixosModules.example
+    ../../cachix.nix
     ../../modules/nixos
 
     # Or modules from other flakes (such as nixos-hardware):
