@@ -8,7 +8,6 @@
     enable = true;
   };
 
-  nixpkgs.config.allowUnfree = true;
   nixpkgs.config.nvidia.acceptLicense = true;
 
   # Load nvidia driver for Xorg and Wayland
