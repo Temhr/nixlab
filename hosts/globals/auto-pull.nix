@@ -12,7 +12,7 @@
     description = "Git Repository Update Service";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/home/temhr/nixlab/bin/auto-pull.sh";
+      ExecStart = '/home/temhr/nixlab/bin/auto-pull.sh';
       User = "temhr";
     };
   };
