@@ -94,12 +94,12 @@
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {                        # Name of folder in Syncthing, also the folder ID
-                        "home-nixbase" = {
-                        # Which folder to add to Syncthing
-                            path = "/home/temhr";
-                            # Which devices to share the folder with
-                            devices = [ "nixser" ];
-                        };
+                    #    "home-nixbase" = {
+                    #    # Which folder to add to Syncthing
+                    #        path = "/home/temhr";
+                    #        # Which devices to share the folder with
+                    #        devices = [ "nixser" ];
+                    #    };
                         # Name of folder in Syncthing, also the folder ID
                         "mirror" = {
                         path = "/mirror";
@@ -142,12 +142,12 @@
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {                        # Name of folder in Syncthing, also the folder ID
-                        "home-nixser" = {
-                        # Which folder to add to Syncthing
-                            path = "/home/temhr";
-                            # Which devices to share the folder with
-                            devices = [ "nixbase" ];
-                        };
+                    #    "home-nixser" = {
+                    #    # Which folder to add to Syncthing
+                    #        path = "/home/temhr";
+                    #        # Which devices to share the folder with
+                    #        devices = [ "nixbase" ];
+                    #    };
                         # Name of folder in Syncthing, also the folder ID
                         "mirror" = {
                         path = "/mirror";
