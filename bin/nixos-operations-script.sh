@@ -10,7 +10,7 @@ operation="switch"                              # The nixos-rebuild operation to
 hostname=$(/run/current-system/sw/bin/hostname) # Dynamically determines the system's hostname
 flakeDir="/home/temhr/nixlab"                   # Path to the flake file (and optionally the hostname)
 update=false                                    # Whether to update and commmit flake.lock
-user=$(/run/current-system/sw/bin/whoami)       # Which user account to use for git commands
+user="temhr"                                    # Which user account to use for git commands -> $(/run/current-system/sw/bin/whoami)
 buildHost=""                                    # Which host to use to generate the build (defaults to the local host)
 remainingArgs=""                                # All remaining arguments that haven't yet been processed (will be passed to nixos-rebuild)
 
