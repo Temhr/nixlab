@@ -1,3 +1,5 @@
+#working shell script trigger .nix file
+
 { config, lib, pkgs, ... }:
 
 let
