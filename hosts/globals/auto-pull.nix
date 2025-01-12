@@ -3,14 +3,14 @@
 { config, lib, pkgs, ... }:
 
 let
-  myscript = pkgs.writeShellScript "hello" ( builtins.readFile ../../bin/nixos-operations-script.sh );
+  myscript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-git-pull.sh );
 in
 {
-  systemd.timers."every5m" = {
+  systemd.timers."every15m" = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
-      OnUnitActiveSec = "5min";
+      OnUnitActiveSec = "15min";
       Unit = "git-pull.service";
     };
   };
