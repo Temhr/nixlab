@@ -11,11 +11,6 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     # Ghostty flake
     ghostty.url = "github:ghostty-org/ghostty";
-    # Snowfall Library to manage Nix flake by imposing an opinionated file structure
-    snowfall-lib = {
-        url = "github:snowfallorg/lib";
-        inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {
@@ -36,13 +31,6 @@
     ];
     # This is a function that generates an attribute by calling a function you pass to it, with each system as an argument
     forAllSystems = nixpkgs.lib.genAttrs systems;
-    # Create Snowfall Library's flake output
-    lib = inputs.snowfall-lib.mkFlake {
-      # Takes Snowfall Lib's flake inputs. For basic config tips -> https://snowfall.org/guides/lib/quickstart/#configure-snowfall-lib
-      inherit inputs;
-      # The `src` must be the root of the flake.
-      src = ./.;
-    };
   in {
     # Your custom packages. Accessible through 'nix build', 'nix shell', etc
     packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});

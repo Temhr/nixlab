@@ -1,11 +1,9 @@
 #working shell script trigger .nix file; with writeShellScriptBin + shBang bash
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs,... }:
 
 let
-  myscript = pkgs.writeShellScriptBin "hello" (
-    builtins.readFile (lib.snowfall.fs.get-file "bin/hello.sh")
-  );
+  myscript = pkgs.writeShellScriptBin "hello" ( builtins.readFile "../../bin/hello.sh"  );
 in
 {
   systemd.timers.a = {
