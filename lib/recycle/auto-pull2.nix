@@ -1,10 +1,9 @@
-#working shell script trigger .nix file; with writeShellScriptBin + shBang bash
+#working shell script trigger .nix file
 
 { config, lib, pkgs, ... }:
 
 let
-  myscript = pkgs.writeShellScriptBin "hi" ''
-      #!/usr/bin/env bash
+  myscript = pkgs.writeShellScript "hi" ''
       echo "hi" >> /home/temhr/hi.txt
     '';
 in
