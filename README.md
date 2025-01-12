@@ -1,6 +1,6 @@
 # NixOS systems configuration
 
-A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs).
+A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs) with inspiration from [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration).
 
 # Features
 Contains
@@ -38,6 +38,7 @@ Aspirational
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
+- **lib**: Various, as of yet, unused nix code 
 - **modules**: togglable configuration elements
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
