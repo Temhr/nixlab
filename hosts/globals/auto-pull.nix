@@ -18,7 +18,7 @@ in
   systemd.services.c = {
     description = "script write";
     serviceConfig = {
-      ExecStart = ["" myscript];
+      ExecStart = myscript;
       Type = "oneshot";
       User = "temhr";
     };
