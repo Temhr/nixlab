@@ -8,7 +8,7 @@ Contains
 - **Flakes**: entrypoint; version-pins nixpkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
-  - **Togglable**: abstracts complexity away from frontend config.nix file
+  - Togglable: abstracts complexity away from frontend config.nix file
 - **Overlays**: extends (applies changes to) package sets
 - Single source of truth - systemd timer & service invokes shell script to periodcally pull this repo 
 
