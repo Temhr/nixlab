@@ -1,5 +1,3 @@
-#working shell script trigger .nix file
-
 { config, lib, pkgs, ... }:
 let
   gitpullShellScript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-git-pull.sh );
