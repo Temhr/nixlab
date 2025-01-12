@@ -7,7 +7,7 @@ set -e
 operation="switch"                              # The nixos-rebuild operation to use
 hostname=$(/run/current-system/sw/bin/hostname) # Dynamically determines the system's hostname
 flakeDir="/home/temhr/nixlab"                   # Path to the flake file (and optionally the hostname)
-user="temhr"                                    # Which user account to use for git commands -> $(/run/current-system/sw/bin/whoami)
+user=$(/run/current-system/sw/bin/whoami)       # Which user account to use for git commands -> $(/run/current-system/sw/bin/whoami)
 
 # 1) Navigates to the Flake directory
 # 2) Pulls the latest changes from the Git repository using the specified user

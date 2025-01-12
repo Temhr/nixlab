@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  nixBuildScript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-build.sh );
+  nixBuildScript = pkgs.writeShellScript "nixlab-build" ( builtins.readFile ../../bin/nixlab-build.sh );
 in
 {
   systemd.timers.nix-build = {
