@@ -4,7 +4,7 @@
 
 let
   myscript = pkgs.writeShellScriptBin "hello" (
-    builtins.readFile (lib.snowfall.fs.get-file "./bin/hello.sh")
+    builtins.readFile (lib.snowfall.fs.get-file "bin/hello.sh")
   );
 in
 {
