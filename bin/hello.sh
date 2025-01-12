@@ -1,2 +1,2 @@
 #!/bin/bash
-    echo "hello" >> /home/temhr/test.txt
+    echo "hello" >> /home/temhr/hi.txt

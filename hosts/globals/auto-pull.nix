@@ -3,10 +3,9 @@
 { config, lib, pkgs, ... }:
 
 let
-  myscript = pkgs.writeShellScriptBin "hi" ''
-      #!/usr/bin/env bash
-      echo "hi" >> /home/temhr/hi.txt
-    '';
+  myscript = pkgs.writeShellScriptBin "hello" (
+    builtins.readFile (lib.snowfall.fs.get-file "./bin/hello.sh")
+  );
 in
 {
   systemd.timers.a = {
