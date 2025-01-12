@@ -4,51 +4,19 @@
 set -e
 
 ## Configuration parameters
-operation="switch"                              # The nixos-rebuild operation to use
 hostname=$(/run/current-system/sw/bin/hostname) # Dynamically determines the system's hostname
-flakeDir="/home/temhr/nixlab"                   # Path to the flake file (and optionally the hostname)
 user=$(/run/current-system/sw/bin/whoami)       # Which user account to use for git commands -> $(/run/current-system/sw/bin/whoami)
 
-# 1) Navigates to the Flake directory
-# 2) Pulls the latest changes from the Git repository using the specified user
-
-## Git Repository Updates
-cd "${flakeDir}" || exit 1
-
-# Constructs the arguments for nixos-rebuild:
-    # --flake: Specifies the Flake directory and hostname.
-    # --use-remote-sudo: Enables remote sudo for operations.
-    # --log-format multiline-with-logs: Improves logging readability
-
-## System Rebuild Options
-options="--flake ${flakeDir}#${hostname}"
-
-# If a remote host is specified and the operation isn't build or a dry run:
-    # Performs a preliminary remote build
-
-## Remote Build Handling
-if [[ -n "${buildHost}" && "$operation" != "build" && "$operation" != *"dry"* ]]; then
-  echo "Remote build detected, running this operation first: nixos-rebuild build ${options} --build-host $buildHost"
-  /run/current-system/sw/bin/nixos-rebuild build $options --build-host $buildHost
-  echo "Remote build complete!"
-fi
-
-# Runs the nixos-rebuild command with the specified operation and options
+echo "${user}" > /home/temhr/who.txt
 
 ## System Rebuild Execution
-echo "Running this operation: nixos-rebuild ${operation} ${options}"
-/run/current-system/sw/bin/nixos-rebuild $operation $options
+echo "Running this operation: nixos-rebuild switch --flake /home/temhr/nixlab#${hostname}" >> /home/temhr/who.txt
+/run/current-system/sw/bin/nixos-rebuild switch --flake /home/temhr/nixlab#${hostname} >> /home/temhr/who.txt
 
-# For boot or switch operations: Lists the new system generations created
+echo "" >> /home/temhr/who.txt
+echo "New generation created: " >> /home/temhr/who.txt
+/run/current-system/sw/bin/nixos-rebuild list-generations >> /home/temhr/who.txt
 
-## Post-Rebuild Actions
-case "$operation" in
-  boot|switch)
-    echo ""
-    echo "New generation created: "
-    /run/current-system/sw/bin/nixos-rebuild list-generations
-    ;;
-esac
 
 ## Exit on Success
 exit 0

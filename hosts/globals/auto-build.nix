@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
-  nixBuildScript = pkgs.writeShellScript "nixlab-build" ( builtins.readFile ../../bin/nixlab-build.sh );
+  nixBuildShellScript = pkgs.writeShellScript "nixlab-build" ( builtins.readFile ../../bin/nixlab-build.sh );
 in
 {
   systemd.timers.nix-build = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
-      OnUnitActiveSec = "5min";
+      OnUnitActiveSec = "1440min";
       Unit = "nix-build.service";
     };
   };
@@ -15,7 +15,7 @@ in
   systemd.services.nix-build = {
     description = "Build nix, then switch";
     serviceConfig = {
-      ExecStart = nixBuildScript;
+      ExecStart = nixBuildShellScript;
       Type = "oneshot";
       User = "root";
     };
