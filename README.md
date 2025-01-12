@@ -9,7 +9,7 @@ Contains
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends (applies changes to) package sets
-  - **Togglables**: abstracts lengthy complexity from frontend config.nix file
+  - **Togglables**: abstracts complexity away from frontend config.nix file
 - Single source of truth - systemd timer & service invokes shell script to periodcally pull this repo 
 
 Aspirational
