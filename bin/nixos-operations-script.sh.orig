@@ -99,6 +99,19 @@ cd "$flakeDir" || exit 1
 echo "Pulling the latest version of the repository..."
 /run/wrappers/bin/sudo -u "$user" /run/current-system/sw/bin/git pull
 
+# If --update is enabled:
+  # 1) Updates the flake.lock file
+  # 2) Commits and pushes changes back to the repository
+
+## Flake Updates
+if [ $update = true ]; then
+  echo "Updating flake.lock..."
+  /run/wrappers/bin/sudo -u "$user" /run/current-system/sw/bin/nix flake update --commit-lock-file
+  /run/wrappers/bin/sudo -u "$user" git push
+else
+  echo "Skipping 'nix flake update'..."
+fi
+
 # Constructs the arguments for nixos-rebuild:
     # --flake: Specifies the Flake directory and hostname.
     # --use-remote-sudo: Enables remote sudo for operations.
