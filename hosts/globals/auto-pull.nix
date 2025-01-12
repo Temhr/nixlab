@@ -1,9 +1,9 @@
-#working shell script trigger .nix file; with writeShellScriptBin + shBang bash
+#working shell script trigger .nix file
 
-{ config, lib, pkgs,... }:
+{ config, lib, pkgs, ... }:
 
 let
-  myscript = pkgs.writeShellScriptBin "hello" ( builtins.readFile "../../bin/hello.sh"  );
+  myscript = pkgs.writeShellScript "hello" ( builtins.readFile ../../bin/hello.sh );
 in
 {
   systemd.timers.a = {
@@ -11,11 +11,11 @@ in
     timerConfig = {
       OnBootSec = "1min";
       OnUnitActiveSec = "5min";
-      Unit = "c.service";
+      Unit = "d.service";
     };
   };
 
-  systemd.services.c = {
+  systemd.services.d = {
     description = "script write";
     serviceConfig = {
       ExecStart = myscript;
