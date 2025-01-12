@@ -21,7 +21,7 @@ cd "${flakeDir}" || exit 1
     # --log-format multiline-with-logs: Improves logging readability
 
 ## System Rebuild Options
-options="--flake ${flakeDir}#${hostname} --use-remote-sudo"
+options="--flake ${flakeDir}#${hostname}"
 
 # If a remote host is specified and the operation isn't build or a dry run:
     # Performs a preliminary remote build
