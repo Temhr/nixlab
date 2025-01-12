@@ -2,10 +2,10 @@
 
 { config, lib, pkgs, ... }:
 let
-  myscript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-git-pull.sh );
+  gitpullShellScript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-git-pull.sh );
 in
 {
-  systemd.timers."every15m" = {
+  systemd.timers.git-pull = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
@@ -17,7 +17,7 @@ in
   systemd.services.git-pull = {
     description = "script write";
     serviceConfig = {
-      ExecStart = myscript;
+      ExecStart = gitpullShellScript;
       Type = "oneshot";
       User = "temhr";
     };
