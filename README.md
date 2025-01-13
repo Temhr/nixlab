@@ -5,20 +5,21 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 # Features
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
-- **Flakes**: entrypoint; version-pins nixpkg dependencies in a lock file
+- **Flakes**: version-pins nixpkg dependencies in a lock file
 - **Home Manager**: declarative configuration for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends (applies changes to) package sets
 - Togglables: abstracts complexity away from frontend config.nix file
-- Single source of truth - systemd timer & service invokes shell script to periodcally pull this repo 
+- Single source of truth - systemd timer & service invokes shell script to periodcally pull this git repo 
 
 Aspirational
 - Declaraitive virtualization systems
-- Initial hardware configuration scripting
+- Scripting for initial hardware configuration
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
 - Secret management system
 - Impermanent system; declaratively built on boot and connected to storage drives for data persistence
+- Making possible use of nix related libraries (Snowfall)
 
 # Implementation
 - **Installation**: haven't established any personal methods or protocols yet
@@ -38,7 +39,7 @@ Aspirational
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
-- **lib**: Various, as of yet, unused nix code 
+- **lib**: Unused nix code 
 - **modules**: togglable configuration elements
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
@@ -46,4 +47,4 @@ Aspirational
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
   - empty
--  flake: the flake.nix (entry config) and flake.lock (version pinner) files.
+-  flake: the flake.nix (entry point of config) and flake.lock (version pinner) files.
