@@ -45,6 +45,7 @@
     clinfo  #Print all known information about all available OpenCL platforms and devices in the system
     glxinfo  #Test utilities for OpenGL
     lshw-gui  #Provide detailed information on the hardware configuration of the machine
+    unetbootin  #Tool to create bootable live USB drives from ISO images
     usbutils  #Tools for working with USB devices, such as lsusb
 
     ## File Management
