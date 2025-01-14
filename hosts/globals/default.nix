@@ -15,7 +15,6 @@
     ./syncthing.nix
     ./users.nix
     ./utilities.nix
-    ${rootPath}hosts/globals/btop.nix
   ];
 
   options = {
