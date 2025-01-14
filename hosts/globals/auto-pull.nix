@@ -28,7 +28,7 @@ in
     #flake = "path:${rootPath}";  #local repo
     allowReboot = false;
     #randomizedDelaySec = "5m";
-    dates = "11:23";
-    flags = ["--update-input" "nixpkgs" "--commit-lock-file" ];
+    dates = "11:28";
+    flags = ["--update-input" "nixpkgs" "--no-write-lock-file" ];
   };
 }
