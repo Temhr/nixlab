@@ -1,23 +1,18 @@
-{ config, lib, pkgs, ... }:
-let
-  nixBuildShellScript = pkgs.writeShellScript "nixlab-build" ( builtins.readFile ../../bin/nixlab-build.sh );
-in
+{ rootPath, ... }:
 {
-  systemd.timers.nix-build = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnBootSec = "1min";
-      OnUnitActiveSec = "1440min";
-      Unit = "nix-build.service";
-    };
-  };
-
-  systemd.services.nix-build = {
-    description = "Build nix, then switch";
-    serviceConfig = {
-      ExecStart = nixBuildShellScript;
-      Type = "oneshot";
-      User = "root";
-    };
+  system.autoUpgrade = {
+    enable = true;
+    operation = "switch"; #switch or boot
+    flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
+    #flake = "path:${rootPath}";  #local repo
+    allowReboot = false;
+    #randomizedDelaySec = "5m";
+    dates = "06:05";
+    #flags = [
+    #  "--update-input"
+    #  "nixpkgs"
+    #  "-L"  # print build logs
+    #  "--no-write-lock-file"  # don't write to the lock file
+    #];
   };
 }

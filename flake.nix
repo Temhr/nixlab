@@ -47,28 +47,28 @@
     # NixOS configuration entrypoint. Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
       nixace = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs; rootPath = ./.; };
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixace/configuration.nix
         ];
       };
       nixbase = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs; rootPath = ./.; };
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixbase/configuration.nix
         ];
       };
       nixser = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs; rootPath = ./.; };
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixser/configuration.nix
         ];
       };
       nixtop = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = {inherit inputs outputs; rootPath = ./.; };
         modules = [
           # > Our main nixos configuration file <
           ./hosts/nixtop/configuration.nix
@@ -80,7 +80,7 @@
     homeConfigurations = {
       "temhr" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
+        extraSpecialArgs = {inherit inputs outputs; rootPath = ./.; };
         modules = [
           # > Our main home-manager configuration file <
           ./home-manager/home.nix
