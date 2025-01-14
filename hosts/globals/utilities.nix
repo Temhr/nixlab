@@ -59,7 +59,7 @@
     iftop  #Display bandwidth usage on a network interface
     iotop  #A tool to find out the processes doing the most IO
     htop  #An interactive process viewer
-    btop  #A monitor of resources
+    #btop  #A monitor of resources
 
     ## Text Editors
     nano  #Small, user-friendly console text editor

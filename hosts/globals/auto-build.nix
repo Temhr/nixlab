@@ -9,9 +9,9 @@
     #randomizedDelaySec = "5m";
     dates = "06:33";
     flags = [
-      "--update-input"
-      "nixpkgs"
-      "-L"  # print build logs
+    #  "--update-input"
+    #  "nixpkgs"
+    #  "-L"  # print build logs
     #  "--no-write-lock-file"  # don't write to the lock file
     ];
   };

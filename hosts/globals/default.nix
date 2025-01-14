@@ -1,3 +1,4 @@
+{ rootPath, ... }:
 {
   imports = [
     # Paths to other modules.
@@ -14,6 +15,7 @@
     ./syncthing.nix
     ./users.nix
     ./utilities.nix
+    ${rootPath}hosts/globals/btop.nix
   ];
 
   options = {
