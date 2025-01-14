@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   gitpullShellScript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-git-pull.sh );
 in
@@ -24,11 +24,17 @@ in
   system.autoUpgrade = {
     enable = true;
     operation = "switch"; #switch or boot
-    flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
-    #flake = "path:${rootPath}";  #local repo
+    #flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
+    flake = inputs.self.outPath;  #local repo
     allowReboot = false;
     #randomizedDelaySec = "5m";
-    dates = "11:28";
-    flags = ["--update-input" "nixpkgs" "--no-write-lock-file" ];
+    dates = "11:45";
+    flags = [
+      "--update-input"
+      "nixpkgs"
+      "-L" # print build logs
+      "--commit-lock-file"
+      #"--no-write-lock-file"
+    ];
   };
 }
