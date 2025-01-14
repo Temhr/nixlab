@@ -15,6 +15,7 @@
     ./syncthing.nix
     ./users.nix
     ./utilities.nix
+    ./btop.nix
   ];
 
   options = {
