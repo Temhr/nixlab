@@ -26,8 +26,8 @@ in
     operation = "switch"; #switch or boot
     flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
     allowReboot = false;
-    #randomizedDelaySec = "5m";
-    dates = "11:50";
+    randomizedDelaySec = "30m";
+    dates = "02:00";
     flags = [
       "--update-input"
       "nixpkgs"
