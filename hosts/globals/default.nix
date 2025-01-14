@@ -3,7 +3,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./audio.nix
-    ./auto-build.nix
+    #./auto-build.nix
     ./auto-pull.nix
     ./git.nix
     ./graphical-shells.nix
