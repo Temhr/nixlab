@@ -24,11 +24,11 @@ in
   system.autoUpgrade = {
     enable = true;
     operation = "switch"; #switch or boot
-    #flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
+    flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
     #flake = "path:${rootPath}";  #local repo
     allowReboot = false;
     #randomizedDelaySec = "5m";
-    dates = "11:16";
+    dates = "11:23";
     flags = ["--update-input" "nixpkgs" "--commit-lock-file" ];
   };
 }
