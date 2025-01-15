@@ -6,10 +6,6 @@
     { device = "/dev/disk/by-label/home";
       fsType = "ext4";
     };
-  fileSystems."/home/temhr/shelf" =
-    { device = "/dev/disk/by-label/shelf";
-      fsType = "ext4";
-    };
   fileSystems."/mirror" =
     { device = "/dev/disk/by-uuid/a777497d-228b-47a2-bd3c-71f8eb8d1315";
       fsType = "ext4";
@@ -25,7 +21,6 @@
     };
 
   systemd.tmpfiles.rules = [
-    "d /home/temhr/shelf 1744 temhr users "
     "d /mirror 1744 temhr users "
     "d /mnt 1744 temhr users "
   ];
