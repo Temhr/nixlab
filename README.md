@@ -22,7 +22,7 @@ Aspirational
 - Making possible use of nix related libraries (Snowfall)
 
 # Implementation
-- **Installation**: haven't established any personal methods or protocols yet
+- **Installation**: 1) Install NixOS, 2) Rebuild with: flakes, a proper hostname, and an autoUpgrade.service from this repo, 3) Wait for autoUpgrade.service to rebuild.      
 - Updating systems:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab `
   - **Home Manager**: ` $ home-manager switch --flake /home/temhr/nixlab`
