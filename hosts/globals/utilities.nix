@@ -62,6 +62,10 @@
     iftop  #Display bandwidth usage on a network interface
     iotop  #A tool to find out the processes doing the most IO
     htop  #An interactive process viewer
+    nvtopPackages.intel  #(h)top like task monitor for AMD, Adreno, Intel and NVIDIA GPUs
+    nvtopPackages.nvidia  #(h)top like task monitor for AMD, Adreno, Intel and NVIDIA GPUs
+    perf-tools  #Performance analysis tools based on Linux perf_events (aka perf) and ftrace
+    wavemon  #Ncurses-based monitoring application for wireless network devices
 
     ## Text Editors
     nano  #Small, user-friendly console text editor
