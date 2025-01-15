@@ -57,10 +57,11 @@
     keepassxc  #Offline password manager with many features.
 
     ## System Resource Monitors
+    atop  #Console system performance monitor
+    btop  #A monitor of resources
     iftop  #Display bandwidth usage on a network interface
     iotop  #A tool to find out the processes doing the most IO
     htop  #An interactive process viewer
-    #btop  #A monitor of resources
 
     ## Text Editors
     nano  #Small, user-friendly console text editor
