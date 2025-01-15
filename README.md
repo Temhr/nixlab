@@ -10,7 +10,7 @@ Contains
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends, applies changes to, nixpkgs (nix package sets)
 - Togglables: abstracts complexity away from frontend config.nix file
-- Single source of truth - systemd timer & service invokes shell script to periodcally pull this git repo 
+- Single source of truth - systemd timer & service invokes shell script to periodcally pull and build from this repo 
 
 Aspirational
 - Declaraitive virtualization systems
