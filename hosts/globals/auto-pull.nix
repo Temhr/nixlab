@@ -7,7 +7,7 @@ in
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
-      OnUnitActiveSec = "15min";
+      OnUnitActiveSec = "60min";
       Unit = "git-pull.service";
     };
   };
