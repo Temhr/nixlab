@@ -26,7 +26,7 @@ Aspirational
   1) Install NixOS,
   2) Rebuild with: flakes, proper hostname, and enable a `system.autoUpgrade.flake` pointing to this repo,
   3) Wait for autoUpgrade.service to rebuild from `github:temhr/nixlab` (with hostname's configuration)   
-- Updating systems:
+- Updating systems imperatively:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab `
   - **Home Manager**: ` $ home-manager switch --flake /home/temhr/nixlab`
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
