@@ -6,6 +6,7 @@
     ./audio.nix
     ./auto-pull.nix
     ./auto-build.nix
+    ./auto-hm-build
     ./git.nix
     ./graphical-shells.nix
     ./firefox.nix
