@@ -25,7 +25,6 @@
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
       ./additional-drives.nix
-      ./networking.nix
       ./nvidia.nix
   ];
 
