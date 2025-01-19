@@ -10,7 +10,7 @@ set -e
 cd "/home/temhr/nixlab" || exit 1
 
 echo "Updating Home Manager..."
-/run/current-system/sw/bin/home-manager switch --flake /home/temhr/nixlab
+/run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/home-manager switch --flake /home/temhr/nixlab
 
 ## Exit on Success
 exit 0
