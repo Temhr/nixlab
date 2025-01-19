@@ -11,8 +11,8 @@ set -e
 cd "/home/temhr/nixlab" || exit 1
 
 echo "Updating flake.lock..."
-/run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/nix flake update --commit-lock-file
-/run/wrappers/bin/sudo -u "temhr" git push
+/run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/nix flake update --flake /home/temhr/nixlab --commit-lock-file
+#/run/wrappers/bin/sudo -u "temhr" git push
 
 ## Exit on Success
 exit 0
