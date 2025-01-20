@@ -20,6 +20,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     ../globals
+    ../globals/dotbashfiles.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -143,6 +144,9 @@
 
     ## Dev Tools
     unstable.blender  #3D Creation/Animation/Publishing System
+    unstable.gimp-with-plugins #GNU Image Manipulation Program
+    unstable.krita #Free and open source painting application
+    unstable.inkscape-with-extensions #Vector graphics editor
 
     ## Godot Dev Tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
