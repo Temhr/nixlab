@@ -1,10 +1,11 @@
 { config, lib, pkgs, ... }:
 
 {
-  testers.runCommand {
-    name = "access-the-internet";
-    script = ''
-      echo "hello" > /home/tmp/hello.txt
+  pkgs.writeTextFile = {
+    name = "my-file.txt";
+    text = ''
+      Contents of File
     '';
-  }
+    destination = "/home/temhr/my-cool-script";
+  };
 }
