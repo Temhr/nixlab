@@ -11,6 +11,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     # Ghostty flake
     ghostty.url = "github:ghostty-org/ghostty";
+    rootPath = ./.;
   };
 
   outputs = {
@@ -18,6 +19,7 @@
     nixpkgs,
     home-manager,
     ghostty,
+    rootPath,
     ...
   } @ inputs: let
     inherit (self) outputs;
