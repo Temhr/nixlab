@@ -29,8 +29,8 @@ Aspirational
   4) Reboot
 - Updating systems imperatively:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab `
-  - **Home Manager**: ` $ home-manager switch --flake /home/temhr/nixlab`
-  - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
+  - **Home Manager**: ` $ home-manager switch --flake github:temhr/nixlab`
+  - **NixOS**: ` $ sudo nixos-rebuild switch --flake github:temhr/nixlab`
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
 # Layout:
