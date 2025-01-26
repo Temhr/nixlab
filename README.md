@@ -23,7 +23,7 @@ Aspirational
 
 # Implementation
 - **Installation**:
-  1) Install NixOS with appropriate labelled partitions (root, boot, swap)
+  1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
   2) Rebuild with: flakes enabled and a proper hostname,
   3) ` sudo nixos-rebuild boot --flake github:temhr/nixlab ` in Terminal
   4) Reboot
