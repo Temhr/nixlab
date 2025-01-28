@@ -1,4 +1,21 @@
-{ config, lib, pkgs, inputs, ... }: {
+{ config, lib, pkgs, inputs, ... }:
+
+let
+  themes = [
+    "Fahrenheit"
+    "Argonaut"
+    "GruvboxDark"
+    "Adventure"
+    "Gruvbox"
+    "Breeze"
+  ];
+
+  # Get random index using current time hash
+  randomIndex = 1;
+  randomTheme = builtins.elemAt themes randomIndex;
+in
+
+{
 
     options = {
         alacritty = {
@@ -20,10 +37,10 @@
           home.packages = [ pkgs.alacritty ];  #Cross-platform, GPU-accelerated terminal emulator
         })
         (lib.mkIf config.ghostty.enable {
-          home.packages = [ inputs.ghostty.packages.x86_64-linux.default ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
-          #programs.ghostty.enable = true;
+          #home.packages = [ inputs.ghostty.packages.x86_64-linux.default ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
+          programs.ghostty.enable = true;
           programs.ghostty.settings = {
-            theme = "Fahrenheit";
+            theme = randomTheme;
           };
         })
         (lib.mkIf config.kitty.enable {
