@@ -21,8 +21,9 @@
         })
         (lib.mkIf config.ghostty.enable {
           home.packages = [ inputs.ghostty.packages.x86_64-linux.default ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
+          #programs.ghostty.enable = true;
           programs.ghostty.settings = {
-            theme = "catppuccin-mocha";
+            theme = "Fahrenheit";
           };
         })
         (lib.mkIf config.kitty.enable {
