@@ -17,16 +17,19 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.alacritty.enable {
-          home.packages = [ pkgs.unstable.alacritty ];  #Cross-platform, GPU-accelerated terminal emulator
+          home.packages = [ pkgs.alacritty ];  #Cross-platform, GPU-accelerated terminal emulator
         })
         (lib.mkIf config.ghostty.enable {
           home.packages = [ inputs.ghostty.packages.x86_64-linux.default ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
+          programs.ghostty.settings = {
+            theme = "catppuccin-mocha";
+          };
         })
         (lib.mkIf config.kitty.enable {
-          home.packages = [ pkgs.unstable.kitty ];  #Modern, hackable, featureful, OpenGL based terminal emulator
+          home.packages = [ pkgs.kitty ];  #Modern, hackable, featureful, OpenGL based terminal emulator
         })
         (lib.mkIf config.konsole.enable {
-          home.packages = [ pkgs.unstable.kdePackages.konsole ];  #Terminal emulator by KDE
+          home.packages = [ pkgs.kdePackages.konsole ];  #Terminal emulator by KDE
         })
     ];
 
