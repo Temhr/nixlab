@@ -66,8 +66,6 @@
 
   # Enable home-manager
   programs.home-manager.enable = true;
-  services.home-manager.autoUpgrade.enable = true;
-  services.home-manager.autoUpgrade.frequency = "*:0/5";
 
   #Browsers
   brave.enable = true;
