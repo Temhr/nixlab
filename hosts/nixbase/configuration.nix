@@ -104,12 +104,6 @@
   plasma.enable = true; #KDE - Desktop Environment
   #sway.enable = true;  #Wayland Compositor NEEDS WORK
 
-  ## Terminal Emulators
-  #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
-  ghostty.enable = true;  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
-  #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
-  #konsole.enable = true;  #Terminal emulator by KDE
-
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
