@@ -5,7 +5,6 @@
     ./games.nix
     ./productivity.nix
     ./media.nix
-    ./terminal-emulators.nix
     ./virtualizations.nix
   ];
 
