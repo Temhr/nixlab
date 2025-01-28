@@ -16,4 +16,14 @@
       "--no-write-lock-file"
     ];
   };
+
+  systemd.services.hm-build = {
+    description = "script write";
+    serviceConfig ={
+      ExecStart = "/run/current-system/sw/bin/home-manager switch --flake github:temhr/nixla";
+      Type = "oneshot";
+      User = "temhr";
+    };
+    startAt = "*:0/5";
+  };
 }
