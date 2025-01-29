@@ -1,4 +1,12 @@
-{ config, lib, pkgs, ... }:{
+{ config, lib, pkgs, ... }:
+
+let
+    myscript = pkgs.writeShellScript "hi.sh" ''
+      /run/current-system/sw/bin/home-manager switch
+    '';
+in
+
+{
   system.autoUpgrade = {
     enable = true;
     operation = "switch"; #switch or boot
@@ -13,5 +21,15 @@
       #"--commit-lock-file"
       "--no-write-lock-file"
     ];
+  };
+
+  systemd.services.hm-build = {
+    description = "script write";
+    serviceConfig ={
+      ExecStart = myscript;
+      Type = "oneshot";
+      User = "temhr";
+    };
+    #startAt = "*:0/2";
   };
 }

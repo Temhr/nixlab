@@ -1,1 +1,0 @@
-/home/temhr/nixlab/home-manager/home.nix
