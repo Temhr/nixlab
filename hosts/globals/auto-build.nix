@@ -1,5 +1,11 @@
 { config, lib, pkgs, ... }:
 
+let
+    myscript = pkgs.writeShellScript "hi.sh" ''
+      /run/current-system/sw/bin/home-manager switch
+    '';
+in
+
 {
   system.autoUpgrade = {
     enable = true;
@@ -20,10 +26,10 @@
   systemd.services.hm-build = {
     description = "script write";
     serviceConfig ={
-      ExecStart = "/run/current-system/sw/bin/home-manager switch --flake github:temhr/nixla";
+      ExecStart = myscript;
       Type = "oneshot";
       User = "temhr";
     };
-    startAt = "*:0/5";
+    #startAt = "*:0/2";
   };
 }
