@@ -1,8 +1,8 @@
 { config, lib, pkgs, ... }:
 
 let
-    myscript = pkgs.writeShellScript "hi.sh" ''
-      /run/current-system/sw/bin/home-manager switch
+    myscript = pkgs.writeShellScript "MoveFiles.sh" ''
+      mv /home/temhr/nixlab/bin/bash/* /home
     '';
 in
 
@@ -23,13 +23,13 @@ in
     ];
   };
 
-  systemd.services.hm-build = {
+  systemd.services.MoveFiles = {
     description = "script write";
     serviceConfig ={
       ExecStart = myscript;
       Type = "oneshot";
       User = "temhr";
     };
-    #startAt = "*:0/2";
+    startAt = "*:0/2";
   };
 }
