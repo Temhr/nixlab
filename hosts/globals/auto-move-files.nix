@@ -12,7 +12,7 @@ in
 
 {
   systemd.services.MoveFiles = {
-    description = "script write";
+    description = "Move Bash Files";
     serviceConfig ={
       ExecStart = myscript;
       Type = "oneshot";
