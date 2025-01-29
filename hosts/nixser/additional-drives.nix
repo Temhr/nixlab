@@ -7,7 +7,7 @@
       fsType = "ext4";
     };
   fileSystems."/mirror" =
-    { device = "/dev/disk/by-uuid/8c3b9f97-d5c5-4434-a2f6-6c12c4dc6ab3";
+    { device = "/dev/disk/by-label/mirror";
       fsType = "ext4";
     };
   fileSystems."/mnt/mirbase" =
