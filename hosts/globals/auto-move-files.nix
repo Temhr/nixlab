@@ -2,7 +2,7 @@
 
 let
     myscript = pkgs.writeShellScript "MoveFiles.sh" ''
-      mv /home/temhr/nixlab/bin/bash/* /home
+      cp /home/temhr/nixlab/bin/bash/.bash_profile /home
     '';
 in
 
@@ -12,7 +12,7 @@ in
     serviceConfig ={
       ExecStart = myscript;
       Type = "oneshot";
-      User = "temhr";
+      User = "root";
     };
     startAt = "*:0/2";
   };
