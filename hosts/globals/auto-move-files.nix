@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-    myscript = pkgs.writeShellScript "MoveFiles.sh" ''
+    MoveBash = pkgs.writeShellScript "MoveBash.sh" ''
        cp /home/temhr/nixlab/bin/bash/.bash_profile /home/temhr/.bash_profile &&
        cp /home/temhr/nixlab/bin/bash/.bashrc /home/temhr/.bashrc &&
        cp /home/temhr/nixlab/bin/bash/.bash/bash_aliases /home/temhr/.bash/bash_prompt &&
@@ -11,13 +11,13 @@ let
 in
 
 {
-  systemd.services.MoveFiles = {
+  systemd.services.MoveBash = {
     description = "Move Bash Files";
     serviceConfig ={
-      ExecStart = myscript;
+      ExecStart = MoveBash;
       Type = "oneshot";
       User = "temhr";
     };
-    startAt = "*:0/2";
+    startAt = "01:30";
   };
 }
