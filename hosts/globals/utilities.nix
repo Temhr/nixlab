@@ -83,6 +83,7 @@
 
     ##Applications
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
+    kdePackages.kalk  #Kalk is a powerful cross-platform calculator application built with the Kirigami framework
     home-manager  #Nix-based user environment configurator
     # Media
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
