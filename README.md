@@ -34,7 +34,7 @@ Aspirational
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
 # Layout:
-- **bin**: shell scripts for various functions
+- **bin**: various user files and shell scripts
 - **cachix**: prebuilt nixpkgs binaries to pull
 - **home-manager**: user-environment config.nix file
 - **hosts**: host-specific configuration files
