@@ -21,3 +21,17 @@ WHITE_SPACE=" "
 HASH="#"
 
 tty -s && export PS1="$CLOCK_COLOR\t$WHITE_SPACE$BRACKET_COLOR[$JOB_COLOR\j$BRACKET_COLOR]$WHITE_SPACE\H:$PATH_COLOR\w$BRACKET_COLOR\n$END_CHARACTER\[$(tput sgr0)\]$(RANDOM_EMOJI)$HASH\[$(tput sgr0)\]"
+
+##Random ghostty theme on reload
+# Define the file to store the variable
+file="/home/temhr/.config/ghostty/config"
+
+# Define an array of themes FAVOURITES -> #variables=("Argonaut" "GruvboxDark" "Adventure" "Fahrenheit")
+mapfile -t variables < /home/temhr/nixlab/bin/ghostty/themes.txt
+
+# Get a random index within the range of the array
+random_index=$((RANDOM % ${#variables[@]}))
+
+# Echo the randomly selected value to config file
+echo "background = 000000" > "$file"
+echo "theme = ${variables[$random_index]}" >> "$file"
