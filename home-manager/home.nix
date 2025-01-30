@@ -72,8 +72,8 @@
   #Browsers
   brave.enable = true;
   chrome.enable = true;
-  edge.enable = true;
-  vivaldi.enable = false;
+  #edge.enable = true;
+  #vivaldi.enable = false;
 
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
