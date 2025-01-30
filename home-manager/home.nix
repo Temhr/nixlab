@@ -72,7 +72,7 @@
   #Browsers
   brave.enable = true;
   chrome.enable = true;
-  #edge.enable = true;
+  edge.enable = false;
   #vivaldi.enable = false;
 
   ## Terminal Emulators
