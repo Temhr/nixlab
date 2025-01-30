@@ -66,6 +66,8 @@
 
   # Enable home-manager
   programs.home-manager.enable = true;
+  xdg.enable = true;
+  xdg.configHome = "/home/temhr/.config";
 
   #Browsers
   brave.enable = true;
