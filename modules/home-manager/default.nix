@@ -4,7 +4,7 @@
     # Compose this module out of smaller ones.
     ./browsers.nix
     ./terminal-emulators.nix
-    ./config-fastfetch.nix
+    #./config-fastfetch.nix
   ];
 
   options = {
