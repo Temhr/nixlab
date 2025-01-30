@@ -8,13 +8,13 @@
         binaryPrefix = "si";
       };
       color = "blue";
-      separator = "  ";
+      separator = " • ";
     };
     modules = [
       "title"
       "separator"
-      "os"
       "host"
+      "os"
       "kernel"
       "initsystem"
       "uptime"
