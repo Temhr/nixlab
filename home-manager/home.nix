@@ -67,9 +67,7 @@
   # Enable home-manager
   programs.home-manager.enable = true;
   xdg.enable = true;
-  xdg.configHome = "/home/temhr/.config";
-  xdg.configFile.fastfetch.source = /home/temhr/.config/fastfetch/config.jsonc.bkk;
-  xdg.configFile.fastfetch.target = fastfetch/config.jsonc;
+  xdg.configHome = /home/temhr/.config;
 
   #Browsers
   brave.enable = true;
