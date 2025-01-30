@@ -2,12 +2,7 @@
 
   programs.fastfetch.enable = true;
   programs.fastfetch.settings = {
-    logo = {
-      source = "nixos_small";
-      padding = {
-        right = 1;
-      };
-    };
+
     display = {
       size = {
         binaryPrefix = "si";
@@ -16,55 +11,55 @@
       separator = "  ";
     };
     modules = [
-      "title",
-      "separator",
-      "os",
-      "host",
-      "kernel",
-      "initsystem",
-      "uptime",
-      "loadavg",
-      "processes",
-      "packages",
-      "shell",
-      "editor",
-      "display",
-      "lm",
-      "de",
-      "wm",
-      "theme",
-      "terminal",
+      "title"
+      "separator"
+      "os"
+      "host"
+      "kernel"
+      "initsystem"
+      "uptime"
+      "loadavg"
+      "processes"
+      "packages"
+      "shell"
+      "editor"
+      "display"
+      "lm"
+      "de"
+      "wm"
+      "theme"
+      "terminal"
       {
-          "type": "cpu",
-          "showPeCoreCount": true,
-          "temp": true
-      },
-      "cpuusage",
+          "type" = "cpu";
+          "showPeCoreCount" = true;
+          "temp" = true;
+      }
+      "cpuusage"
       {
-          "type": "gpu",
-          "driverSpecific": true,
-          "temp": true
-      },
-      "memory",
-      "physicalmemory",
-      "swap",
-      "disk",
-      "btrfs",
-      "zpool",
+          "type" = "gpu";
+          "driverSpecific" = true;
+          "temp" = true;
+      }
+      "memory"
+      "physicalmemory"
+      "swap"
+      "disk"
+      "btrfs"
+      "zpool"
       {
-          "type": "battery",
-          "temp": true
-      },
-      "poweradapter",
+          "type" = "battery";
+          "temp" = true;
+      }
+      "poweradapter"
       {
-          "type": "localip",
-      },
-      "datetime",
+          "type" = "localip";
+      }
+      "datetime"
       {
-        "type": "weather",
-        "timeout": 1000
-      },
-      "break",
+        "type" = "weather";
+        "timeout" = 1000;
+      }
+      "break"
       "colors"
     ];
   };
