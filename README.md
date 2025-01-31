@@ -37,13 +37,13 @@ Aspirational
 - **bin**: various user files and shell scripts
 - **cachix**: prebuilt nixpkgs binaries to pull
 - **home-manager**: user-environment config.nix file
-- **hosts**: host-specific configuration files
-  - **globals**: system agnostic configurations (applications, programs, services, user-account, etc.)
+- **hosts**: host-specific, system configurations
+  - **globals**: host-agnostic, system configurations (applications, programs, services, user-account, etc.)
   - **nixace**: workstation config.nix file
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
-- **lib**: Unused nix code 
+- **lib**: Unused nix-code dump
 - **modules**: togglable configuration elements
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
