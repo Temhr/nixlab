@@ -59,7 +59,6 @@
     homeDirectory = "/home/temhr";
     #Environment Variables
     sessionVariables = {
-      EDITOR = "nano";
     };
     packages = with pkgs; [
       # steam
