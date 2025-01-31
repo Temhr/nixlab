@@ -26,7 +26,7 @@ Aspirational
   1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
   2) First rebuild, with: flakes enabled and a proper hostname,
   3) Second rebuild, with `sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot`
-  4) Lastly, build Home-manager, with the below command, next
+  4) Lastly, with the below command, build Home Manager next
 - Updating systems imperatively:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab`
   - **Home Manager**: ` $ home-manager switch --flake github:temhr/nixlab`
