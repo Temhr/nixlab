@@ -70,21 +70,21 @@ alias cpu10='ps auxf | sort -nr -k 3 | head -10'
 alias dir5='du -cksh * | sort -hr | head -n 5'
 alias dir10='du -cksh * | sort -hr | head -n 10'
 
-# Safetynets
+## Safetynets
 # do not delete / or prompt if deleting more than 3 files at a time #
 alias rm='rm -I --preserve-root'
 
-# confirmation #
+## confirmation #
 alias mv='mv -i'
 alias cp='cp -i'
 alias ln='ln -i'
 
-# Parenting changing perms on / #
+## Parenting changing perms on / #
 alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
-# reload bash config
+## reload bash config
 alias reload="source ~/.bashrc"
 
 # Manage packages easier
