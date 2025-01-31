@@ -70,7 +70,7 @@
   #Browsers
   brave.enable = true;
   chrome.enable = true;
-  edge.enable = false;
+  edge.enable = true;
   zen.enable = true;
 
   ## Terminal Emulators
