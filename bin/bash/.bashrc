@@ -1,3 +1,6 @@
+# source Ghostty Theme Randomizer
+source ~/.bash/ghostty_theme_randomizer
+
 # source bash prompt
 source ~/.bash/bash_prompt
 
