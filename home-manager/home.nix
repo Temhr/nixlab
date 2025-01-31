@@ -46,6 +46,13 @@
     };
   };
 
+  programs.git = {
+    enable = true;
+    userName = "Temhr";
+    userEmail = "temhr@temhrfakeemail.org";
+  };
+
+
   # TODO: Set your username
   home = {
     username = "temhr";
