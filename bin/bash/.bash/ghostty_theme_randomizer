@@ -4,7 +4,7 @@
 file="/home/temhr/.config/ghostty/config"
 
 # Define an array of themes FAVOURITES -> #variables=("Argonaut" "GruvboxDark" "Adventure" "Fahrenheit")
-mapfile -t variables < /home/temhr/nixlab/bin/ghostty/themes.txt
+mapfile -t variables < /home/temhr/nixlab/bin/bash/.bash/ghostty_themes.txt
 
 # Get a random index within the range of the array
 random_index=$((RANDOM % ${#variables[@]}))
