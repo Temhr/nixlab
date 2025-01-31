@@ -57,6 +57,10 @@
   home = {
     username = "temhr";
     homeDirectory = "/home/temhr";
+    #Environment Variables
+    sessionVariables = {
+      EDITOR = "nano";
+    };
   };
 
   # Add stuff for your user as you see fit:
