@@ -38,7 +38,7 @@ Aspirational
 - **cachix**: prebuilt nixpkgs binaries to pull
 - **home-manager**: user-environment config.nix file
 - **hosts**: host-specific, system configurations
-  - **globals**: host-agnostic, system configurations (applications, programs, services, user-account, etc.)
+  - **globals**: host-agnostic configs (applications, programs, services, user-account, etc.)
   - **nixace**: workstation config.nix file
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
