@@ -10,9 +10,8 @@ source ~/.bash/bash_aliases
 # Source bash functions
 source ~/.bash/bash_functions
 
-# Env
-export TERM=xterm-256color
-export EDITOR=vim
+# Source bash Environment Variables
+source ~/.bash/environment_variables
 
 # Show system information at login
 if [ -t 0 ]; then
