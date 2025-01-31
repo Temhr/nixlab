@@ -5,6 +5,7 @@
     ./browsers.nix
     ./terminal-emulators.nix
     ./config-fastfetch.nix
+    ./config-virt-manager.nix
   ];
 
   options = {

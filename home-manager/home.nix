@@ -46,14 +46,6 @@
     };
   };
 
-  ## Removes initial virt-manager warning
-  dconf.settings = {
-    "org/virt-manager/virt-manager/connections" = {
-      autoconnect = ["qemu:///system"];
-      uris = ["qemu:///system"];
-    };
-  };
-
   # TODO: Set your username
   home = {
     username = "temhr";
@@ -67,13 +59,13 @@
   # Enable home-manager
   programs.home-manager.enable = true;
 
-  #Browsers
+  # Extra Browsers
   brave.enable = true;
   chrome.enable = true;
   edge.enable = true;
   zen.enable = true;
 
-  ## Terminal Emulators
+  ## Extra Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
   ghostty.enable = true;  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
