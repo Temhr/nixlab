@@ -53,7 +53,7 @@
   };
 
 
-  # TODO: Set your username
+  # Add stuff for your user as you see fit:
   home = {
     username = "temhr";
     homeDirectory = "/home/temhr";
@@ -61,11 +61,10 @@
     sessionVariables = {
       EDITOR = "nano";
     };
+    packages = with pkgs; [
+      # steam
+    ];
   };
-
-  # Add stuff for your user as you see fit:
-  # programs.neovim.enable = true;
-  # home.packages = with pkgs; [ steam ];
 
   # Enable home-manager
   programs.home-manager.enable = true;
