@@ -45,7 +45,7 @@ Aspirational
   - **nixtop**: laptop config.nix file
 - **lib**: Unused nix-code dump
 - **modules**: togglable configuration elements
-  - **home-manager**: user-relevant modules
+  - **home-manager**: user-relevant modules and HM supported extensions
   - **nixos**: system-relevant modules
 - **overlays**: contains one overlay
   - **default**: allows for nixos-unstable repository as pkgs.unstable
