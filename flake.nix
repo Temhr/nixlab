@@ -11,6 +11,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     # Ghostty flake
     ghostty.url = "github:ghostty-org/ghostty";
+    # Zen flake
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
   outputs = {
@@ -18,6 +20,7 @@
     nixpkgs,
     home-manager,
     ghostty,
+    zen,
     ...
   } @ inputs: let
     inherit (self) outputs;
