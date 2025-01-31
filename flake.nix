@@ -20,7 +20,7 @@
     nixpkgs,
     home-manager,
     ghostty,
-    zen,
+    zen-browser,
     ...
   } @ inputs: let
     inherit (self) outputs;
