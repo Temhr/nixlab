@@ -71,7 +71,7 @@
   brave.enable = true;
   chrome.enable = true;
   edge.enable = false;
-  #zen.enable = true;
+  zen.enable = true;
 
   ## Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
