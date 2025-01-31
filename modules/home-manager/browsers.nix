@@ -10,8 +10,8 @@
         edge = {
             enable = lib.mkEnableOption "enables Edge browser";
         };
-        vivaldi = {
-            enable = lib.mkEnableOption "enables Vivaldi browser";
+        zen = {
+            enable = lib.mkEnableOption "enables Zen browser";
         };
     };
 
@@ -25,8 +25,8 @@
         (lib.mkIf config.edge.enable {
           home.packages = [ pkgs.microsoft-edge ];  #The web browser from Microsoft
         })
-        (lib.mkIf config.vivaldi.enable {
-          home.packages = [ pkgs.vivaldi ];  #A Browser for our Friends, powerful and personal
+        (lib.mkIf config.zen.enable {
+          home.packages = [ inputs.zen-browser.packages.x86_64-linux.beta ];  #
         })
     ];
 
