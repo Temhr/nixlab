@@ -48,6 +48,7 @@ alias nixtop='ssh temhr@192.168.0.203'
 alias fup='nix flake update --flake /home/temhr/nixlab'
 alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
 alias nswitch='sudo nixos-rebuild switch --flake /home/temhr/nixlab'
+alias ntest='sudo nixos-rebuild test --flake /home/temhr/nixlab'
 alias nboot='sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot'
 alias nlist='nixos-rebuild list-generations'
 
