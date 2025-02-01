@@ -6,7 +6,7 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
 - **Flakes**: version-pins nixpkg dependencies in a lock file
-- **Home Manager**: declarative configuration for user environment (packages and dotfiles)
+- **Home Manager**: declarative config module, specifically for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends, applies changes to, nixpkgs (nix package sets)
 - Togglables: abstracts complexity away from frontend config.nix file
@@ -26,10 +26,8 @@ Aspirational
   1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
   2) First rebuild, with: flakes enabled and a proper hostname,
   3) Second rebuild, with `sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot`
-  4) Lastly, with the below command, build Home Manager next
 - Updating systems imperatively:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab`
-  - **Home Manager**: ` $ home-manager switch --flake github:temhr/nixlab`
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
