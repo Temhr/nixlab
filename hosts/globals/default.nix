@@ -7,10 +7,11 @@
     ./auto-build.nix
     ./auto-move-files.nix
     ./auto-pull.nix
-    ./git.nix
-    ./graphical-shells.nix
     ./firefox.nix
     ./flatpak.nix
+    ./git.nix
+    ./graphical-shells.nix
+    ./home-manager.nix
     ./locale.nix
     ./open-ssh.nix
     ./syncthing.nix
