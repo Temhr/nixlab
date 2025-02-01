@@ -49,4 +49,5 @@ Aspirational
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom packages
   - empty
--  flake: the flake.nix (entry point of config) and flake.lock (version pinner) files.
+-  flake.nix: entry point
+-  flake.lock: version pinner
