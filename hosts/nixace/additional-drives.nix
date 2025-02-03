@@ -2,10 +2,10 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-  fileSystems."/home/temhr/shelf" =
-    { device = "/dev/disk/by-label/shelf";
-      fsType = "ext4";
-    };
+#  fileSystems."/home/temhr/shelf" =
+#    { device = "/dev/disk/by-label/shelf";
+#      fsType = "ext4";
+#    };
   fileSystems."/mnt/mirbase" =
     { device = "192.168.0.201:/mirror";
       fsType = "nfs";
@@ -26,7 +26,7 @@
     };
 
   systemd.tmpfiles.rules = [
-    "d /home/temhr/shelf 1744 temhr users "
+#   "d /home/temhr/shelf 1744 temhr users "
     "d /mnt 1744 temhr users "
   ];
 }
