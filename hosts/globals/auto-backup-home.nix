@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
-  backuphomeShellScript = pkgs.writeShellScript "backup-home" (''PATH=$PATH:${lib.makeBinPath [ pkgs.rsync ]}'')( builtins.readFile ../../bin/backup-home.sh );
+  backuphomeShellScript = pkgs.writeShellScript "backup-home" ( builtins.readFile ../../bin/backup-home.sh );
 in
 {
 
   systemd.services.backup-home = {
     description = "script write";
     serviceConfig = {
-      ExecStart = backuphomeShellScript;
+      ExecStart = backuphomeShellScript ++ PATH=$PATH:${lib.makeBinPath [ pkgs.rsync ]};
       Type = "oneshot";
       User = "root";
     };
