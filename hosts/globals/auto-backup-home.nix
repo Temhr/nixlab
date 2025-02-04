@@ -9,8 +9,9 @@ in
     serviceConfig = {
       ExecStart = backuphomeShellScript;
       Type = "oneshot";
-      User = "temhr";
+      User = "root";
     };
+    path = ["/run/current-system/sw/bin"];
     startAt = "03:30";
   };
 }
