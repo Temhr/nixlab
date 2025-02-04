@@ -8,11 +8,9 @@ mirrorDir="/mirror"
 mntDir="/mnt/mirser"
 
 if [ -d "$mirrorDir" ]; then
-    #rsync -rva --delete --exclude '.cache/' /home/temhr/ ${mirrorDir}/home/${hostname}/ &&
-    echo "hello" > /home/temhr/hello
+    /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync -rva --delete --exclude '.cache/' /home/temhr/ ${mirrorDir}/home/${hostname}/
 else
-    #rsync -rva --delete --exclude '.cache/' /home/temhr/ ${mntDir}/home/${hostname}/ &&
-    echo "howdy" > /home/temhr/howdy
+    /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync -rva --delete --exclude '.cache/' /home/temhr/ ${mntDir}/home/${hostname}/
 fi
 
 ## Exit on Success
