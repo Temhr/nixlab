@@ -11,7 +11,7 @@ in
       Type = "oneshot";
       User = "root";
     };
-    path = [ pkgs.rsync ];
+    path = [ pkgs.rsync "/root"];
     startAt = "03:30";
   };
 }
