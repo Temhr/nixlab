@@ -9,8 +9,10 @@ mntDir="/mnt/mirser"
 
 if [ -d "$mirrorDir" ]; then
     rsync -rva --delete --exclude '.cache/' /home/temhr/ ${mirrorDir}/home/${hostname}/
+    && echo "hello"
 else
     rsync -rva --delete --exclude '.cache/' /home/temhr/ ${mntDir}/home/${hostname}/
+    && echo "howdy"
 fi
 
 ## Exit on Success
