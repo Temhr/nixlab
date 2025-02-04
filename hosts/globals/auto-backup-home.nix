@@ -11,7 +11,9 @@ in
       Type = "oneshot";
       User = "root";
     };
-    path = ["/run/current-system/sw/bin"];
+    path = with pkgs; [
+      rsync
+      ];
     startAt = "03:30";
   };
 }
