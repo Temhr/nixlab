@@ -9,7 +9,7 @@ in
     serviceConfig = {
       ExecStart = backuphomeShellScript;
       Type = "oneshot";
-      User = "root";
+      User = "temhr";
     };
     startAt = "03:30";
   };
