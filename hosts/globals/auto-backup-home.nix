@@ -11,9 +11,7 @@ in
       Type = "oneshot";
       User = "root";
     };
-    path = with pkgs; [
-      rsync
-      ];
+    PATH=$PATH:${lib.makeBinPath [ pkgs.rsync ]};
     startAt = "03:30";
   };
 }
