@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  backuphomeShellScript = pkgs.writeShellScript "backup-home" (PATH=$PATH:${lib.makeBinPath [ pkgs.rsync ]})( builtins.readFile ../../bin/backup-home.sh );
+  backuphomeShellScript = pkgs.writeShellScript "backup-home" (''PATH=$PATH:${lib.makeBinPath [ pkgs.rsync ]}'')( builtins.readFile ../../bin/backup-home.sh );
 in
 {
 
