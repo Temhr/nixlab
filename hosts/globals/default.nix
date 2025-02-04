@@ -4,6 +4,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./audio.nix
+    ./auto-backup-home.nix
     ./auto-build.nix
     ./auto-move-files.nix
     ./auto-pull.nix
