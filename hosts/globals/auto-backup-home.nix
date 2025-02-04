@@ -7,7 +7,7 @@ in
   systemd.services.backup-home = {
     description = "script write";
     serviceConfig = {
-      ExecStart = "${pkgs.rsync} ${backuphomeShellScript}";
+      ExecStart = backuphomeShellScript;
       Type = "oneshot";
       User = "root";
     };
