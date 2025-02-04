@@ -7,10 +7,11 @@ in
   systemd.services.backup-home = {
     description = "script write";
     serviceConfig = {
-      ExecStart = backuphomeShellScript ++ PATH=$PATH:${lib.makeBinPath [ pkgs.rsync ]};
+      ExecStart = "${pkgs.rsync}" backuphomeShellScript;
       Type = "oneshot";
       User = "root";
     };
+    PATH= [ pkgs.rsync ];
     startAt = "03:30";
   };
 }
