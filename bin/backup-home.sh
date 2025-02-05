@@ -15,7 +15,7 @@ if [ -d "$mirrorDir" ]; then
         /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync -rva --delete --exclude '*cache*' --exclude '*Cache*' --exclude '*Trash*' /home/temhr/ ${mirrorDir}/home/${hostname}/
     fi
 elif [ -d "$serDir" ]; then
-    if [ -d "$serDir/home/${hostname}/" ]; then
+    if [ -d "${serDir}/home/${hostname}/" ]; then
         /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync -rva --delete --exclude '*cache*' --exclude '*Cache*' --exclude '*Trash*' --link-dest=${serDir}/home/${hostname}/ /home/temhr/ ${serDir}/home/${hostname}/
     else
         /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync -rva --delete --exclude '*cache*' --exclude '*Cache*' --exclude '*Trash*' /home/temhr/ ${serDir}/home/${hostname}/
