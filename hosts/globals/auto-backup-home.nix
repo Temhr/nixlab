@@ -12,6 +12,6 @@ in
       User = "root";
     };
     path = [ pkgs.rsync "/root"];
-    startAt = "Wed 03:30:00";
+    startAt = "03:30:00";
   };
 }
