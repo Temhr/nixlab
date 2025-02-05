@@ -14,7 +14,7 @@ Contains
 
 Aspirational
 - Declaraitive virtualization systems
-- Scripting for initial hardware configuration
+- Scripting for initial hardware configuration (disko)
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
 - Secret management system
