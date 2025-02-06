@@ -15,7 +15,6 @@
     ./home-manager.nix
     ./locale.nix
     ./open-ssh.nix
-    ./syncthing.nix
     ./users.nix
     ./utilities.nix
   ];

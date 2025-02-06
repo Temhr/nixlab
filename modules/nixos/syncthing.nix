@@ -46,7 +46,7 @@
                     devices = {
                         "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
                         "nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
-                        "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                        #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {
@@ -88,9 +88,9 @@
                 settings = {
                     # Manually grab the device IDs of the other syncthing devices
                     devices = {
-                        "nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
+                        #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
                         "nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
-                        "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                        #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {                        # Name of folder in Syncthing, also the folder ID
@@ -136,9 +136,9 @@
                 settings = {
                     # Manually grab the device IDs of the other syncthing devices
                     devices = {
-                        "nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
+                        #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
                         "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                        "nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                        #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {                        # Name of folder in Syncthing, also the folder ID
@@ -186,7 +186,7 @@
                     devices = {
                         "nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
                         "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                        "nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
+                        #"nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
                     };
                     # all machines must have same declaration, but "devices" reflect the opposite device
                     folders = {

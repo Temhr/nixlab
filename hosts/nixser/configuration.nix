@@ -90,10 +90,7 @@
   networking.hostName = "nixser";
 
   ## Enable Syncthing (only for this host)
-  #syncace.enable = true;
-  #syncbase.enable = true;
   syncser.enable = true;
-  #synctop.enable = true;
 
   ## Enable networking
   networking.networkmanager.enable = true;

@@ -91,10 +91,7 @@
   networking.hostName = "nixace";
 
   ## Enable Syncthing (only for this host)
-  syncace.enable = true;
-  #syncbase.enable = true;
-  #syncser.enable = true;
-  #synctop.enable = true;
+  #syncace.enable = true;
 
   ## Enable networking
   networking.networkmanager.enable = true;
