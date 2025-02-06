@@ -91,7 +91,7 @@
   networking.hostName = "nixtop";
 
   ## Enable Syncthing (only for this host)
-  #synctop.enable = true;
+  synctop.enable = false;
 
   ## Enable networking
   networking.networkmanager.enable = true;
