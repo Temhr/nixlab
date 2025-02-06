@@ -13,7 +13,7 @@ Contains
 - Single source of truth - systemd timer & service invokes shell script to periodcally pull and build from this repo 
 
 Aspirational
-- Declaraitive virtualization systems
+- Declarative virtualization systems
 - Scripting for initial hardware configuration (disko)
 - Support for various WMs and desktop environments (KDE, XFCE, and Sway)
 - Custom packages and services
