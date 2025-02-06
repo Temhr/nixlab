@@ -53,28 +53,28 @@
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixace/configuration.nix
+          ./systems/nixace/configuration.nix
         ];
       };
       nixbase = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixbase/configuration.nix
+          ./systems/nixbase/configuration.nix
         ];
       };
       nixser = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixser/configuration.nix
+          ./systems/nixser/configuration.nix
         ];
       };
       nixtop = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixtop/configuration.nix
+          ./systems/nixtop/configuration.nix
         ];
       };
     };
