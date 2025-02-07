@@ -25,7 +25,7 @@
             };
             services.syncthing = {
                 # Enables the Syncthing Service
-                enable = true;
+                #enable = true;
                 # Sets the Data/default sync directory (but we won’t use this)
                 #dataDir = "/home/temhr";
                 # Opens the default ports (21027/tcp & 22000) - note this doesn’t include the web interface
@@ -165,7 +165,7 @@
             };
             services.syncthing = {
                 # Enables the Syncthing Service
-                enable = true;
+                #enable = true;
                 # Sets the Data/default sync directory (but we won’t use this)
                 #dataDir = "/home/temhr";
                 # Opens the default ports (21027/tcp & 22000) - note this doesn’t include the web interface
