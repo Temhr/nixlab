@@ -24,6 +24,6 @@ in
       Type = "oneshot";
       User = "temhr";
     };
-    startAt = "01:30";
+    startAt = "03:00";
   };
 }
