@@ -135,6 +135,7 @@
 
     ## Dev Tools
     #unstable.blender  #3D Creation/Animation/Publishing System
+    blender  #3D Creation/Animation/Publishing System
 
     ## Godot Dev Tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)

@@ -134,7 +134,7 @@
   environment.systemPackages = with pkgs; [
 
     ## Dev Tools
-    unstable.blender  #3D Creation/Animation/Publishing System
+    blender  #3D Creation/Animation/Publishing System
     unstable.gimp-with-plugins #GNU Image Manipulation Program
     unstable.krita #Free and open source painting application
     unstable.inkscape-with-extensions #Vector graphics editor
