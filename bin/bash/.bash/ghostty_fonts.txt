@@ -1,9 +1,3 @@
 Hack
-Noto Sans
 TeX Gyre Chorus
-TeX Gyre Cursor
-TeX Gyre Heros
-TeX Gyre Heros Cn
-TeX Gyre Pagella
-TeX Gyre Termes
 Unifont
