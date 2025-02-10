@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:{
   system.autoUpgrade = {
     enable = true;
-    operation = "switch"; #switch or boot
+    operation = "boot"; #switch or boot
     flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build
-    allowReboot = false;
+    allowReboot = true;
     randomizedDelaySec = "30m";
     dates = "02:00";
     flags = [
