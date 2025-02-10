@@ -1,3 +1,0 @@
-Hack
-TeX Gyre Chorus
-Unifont
