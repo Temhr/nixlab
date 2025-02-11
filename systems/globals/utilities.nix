@@ -4,7 +4,7 @@
 
     ## NixOS Related Tools
     cachix  #Command-line client for Nix binary cache hosting https://cachix.org
-    unstable.nh #Yet another nix cli helper
+    unstable.nix-output-monitor #Processes output of Nix commands to show helpful and pretty information
 
     ## Terminal Utilities
     bat  #Cat(1) clone with syntax highlighting and Git integration

@@ -46,9 +46,9 @@ alias nixtop='ssh temhr@192.168.0.203'
 
 ##NixOS Shortcuts
 alias fup='nix flake update --flake /home/temhr/nixlab'
-alias nhswitch='nh os switch github:temhr/nixlab'
-alias nhtest='nh os test /home/temhr/nixlab'
-alias nhboot='nh os boot github:temhr/nixlab && sudo reboot'
+alias nomswitch='sudo nom switch --flake github:temhr/nixlab'
+alias nomtest='sudo nom test --flake /home/temhr/nixlab'
+alias nomboot='sudo nom boot --flake github:temhr/nixlab && sudo reboot'
 alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
 alias nswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
 alias ntest='sudo nixos-rebuild test --flake /home/temhr/nixlab'
