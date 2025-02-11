@@ -70,7 +70,7 @@
         };
         # To Google Translate:
         "juanmauricioescobar@gmail.com" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/to-google-translate/latest.xpi";
+          install_url = "https://addons.mozilla.org/firefox/downloads/file/3798719/to_google_translate-4.2.0.xpi";
           installation_mode = "force_installed";
         };
         # Sort Bookmarks:
@@ -91,11 +91,6 @@
         # Youtube Playlist Duration Calculator:
         "{36d78ab3-8f38-444a-baee-cb4a0cadbf98}" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/youtube-playlist-duration-calc/latest.xpi";
-          installation_mode = "force_installed";
-        };
-        # YT Block:
-        "edoan.rodrigues@gmail.com" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/file/4405118/yt_block-5.10.1.xpi";
           installation_mode = "force_installed";
         };
       };
