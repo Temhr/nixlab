@@ -46,12 +46,9 @@
     };
   };
 
-  programs.git = {
-    enable = true;
-    userName = "Temhr";
-    userEmail = "temhr@temhrfakeemail.org";
-  };
 
+  # Git Config
+  git.enable = true;
 
   # Add stuff for your user as you see fit:
   home = {
