@@ -10,7 +10,6 @@
     ./auto-pull.nix
     ./firefox.nix
     ./flatpak.nix
-    ./git.nix
     ./graphical-shells.nix
     ./home-manager.nix
     ./locale.nix

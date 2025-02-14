@@ -11,15 +11,16 @@
 
       home.packages = with pkgs; [
         git
-        git-credential-manager
+        github-desktop  #GUI for managing Git and GitHub
+        git-credential-keepassxc  #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
       ];
 
       programs.git = {
-        extraConfig.credential.helper = "manager";
-        extraConfig.credential."https://github.com".username = "Temhr";
-        extraConfig.credential.credentialStore = "cache";
-        enable = true;
+        enable = true;  #Distributed version control system
+        userName  = "Temhr";
+        userEmail = "temhr@temhrfakeemail.org";
       };
+      programs.lazygit.enable = true;  #A simple terminal UI for git commands
     })
   ];
 }
