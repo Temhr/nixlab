@@ -35,19 +35,19 @@ Aspirational
 - **bin**: various user files and shell scripts
 - **cachix**: prebuilt nixpkgs binaries to pull
 - **home-manager**: user-environment config.nix file
-- **lib**: Unused nix-code dump
-- **modules**: togglable configuration elements
-  - **home-manager**: user-relevant modules and HM supported extensions
-  - **nixos**: system-relevant modules
-- **overlays**: contains one overlay
-  - **default**: allows for nixos-unstable repository as pkgs.unstable
-- **pkgs**: custom packages
-  - empty
-- **systems**: host-specific configurations
+- **hosts**: host-specific configurations
   - **globals**: host-agnostic configs (applications, programs, services, user-account, etc.)
   - **nixace**: workstation config.nix file
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
+- **lib**: Unused nix-code dump
+- **modules**: togglable configuration elements
+  - **home-manager**: user-relevant preferences and extensions
+  - **nixos**: system-relevant modules
+- **overlays**: contains one overlay
+  - **default**: allows for nixos-unstable repository as pkgs.unstable
+- **pkgs**: custom packages
+  - empty
 -  flake.nix: entry point
 -  flake.lock: version pinner
