@@ -31,6 +31,7 @@
             services.displayManager.sddm.enable = true;
             services.displayManager.sddm.wayland.enable = true;   #enables wayland as default
             services.desktopManager.plasma6.enable = true;  #installs plasma 6
+            environment.systemPackages = with pkgs; [ unstable.kdePackages.plasma-desktop ];
 
         })
         (lib.mkIf config.sway.enable {
