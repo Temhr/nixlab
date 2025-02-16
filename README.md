@@ -21,6 +21,7 @@ Contains
     - metadata about the flake
     - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
     - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) which are given as **Nix values** usable by **Nix package manager**
+  - updates **Nix package manager**'s CLI to the new/experimental commands
   - also, increases reproducibity by pinning version-controled dependencies via flake.lock file
 - **Home Manager**: declarative config module, specifically for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
