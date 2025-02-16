@@ -2,6 +2,19 @@
 
 A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs) with inspiration from [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration)
 
+Nix Ecosystem Terminology
+- **Nix Language**: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
+- **Nix Expressions**: **Nix-lang** code which describes, ultimately, how to build packages or configure systems
+  - **Derivations**: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
+- **Nix Store**: complex abstrations of immutable file system data (software packages, dependencies, etc.)
+- **Nix Package Manager**:
+  - a toolset which:
+    - evaluates **expressions** into **derivations**
+    - builds packages from **derivations** 
+    - manages the **Nix Store** where built packages are kept (handles dependencies, ensures reproducibility)
+  - **Nix CLI**: the command-line interface for interacting with the **Nix package manager**
+- **Nixpkgs**: the Nix Packages collection - a large repository of **Nix expressions**
+
 # Features
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
