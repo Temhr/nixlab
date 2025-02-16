@@ -1,5 +1,10 @@
 A work-in-progress, Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs) with inspiration from [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration) and many others.
 
+- [Basic Nix Ecosystem Terminology](#basic-nix-ecosystem-terminology)
+- [Nixlab Features](#nixlab-features)
+- [Implementations](#implementations)
+- [Repository Layout](#repository-layout)
+
 # Basic Nix Ecosystem Terminology
 - Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
   - Nix values: data types that are immutable, can be whole **expressions** themselves, are only computed when needed, and type-error detected at evaluation
@@ -48,7 +53,7 @@ Aspirational
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
-# Repo Layout:
+# Repository Layout
 - **bin**: various user files and shell scripts
 - **cachix**: prebuilt nixpkgs binaries to pull
 - **home-manager**: user-environment config.nix file
