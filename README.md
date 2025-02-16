@@ -2,7 +2,7 @@
 
 A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs) with inspiration from [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration)
 
-Nix Ecosystem Terminology
+Basic Nix Ecosystem Terminology
 - Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
 - Nix Expressions: **Nix-lang** code which describes, ultimately, how to build packages or configure systems
   - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
