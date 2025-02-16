@@ -6,8 +6,8 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
 - **Flakes**: schema for writing, referencing, and sharing Nix expressions (to build derivations, run programs, etc.)
-  - takes inputs (Nix expressions, pkg repos, other flakes) to produce outputs (pkg defs, dev-envs, NixOS configs) which are usable by Nix
-  - adds reproducibity features (like version-pinning of pkgs and dependencies) with lock file
+  - takes inputs (Nix expressions, pkg repos, other flakes) to produce outputs (pkg defs, dev-envs, NixOS configs) which become usable by Nix package manager
+  - increases reproducibity by pinning version-controled dependencies via lock file
 - **Home Manager**: declarative config module, specifically for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends, applies changes to, nixpkgs (nix package sets)
