@@ -9,7 +9,7 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
 - Nix Package Manager: a command-line toolset which:
   1) evaluates **expressions** into **derivations**
   2) builds packages from **derivations** 
-  3) manages the **Nix Store** where packages are kept (handles dependencies, ensures reproducibility)
+  3) manages the **Nix Store** (handles dependencies, ensures reproducibility), where packages are kept
 - NixOS: Linux distro with a system configuration thats entirely built with Nix
 
 # Features
