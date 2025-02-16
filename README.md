@@ -8,12 +8,12 @@ Nix Ecosystem Terminology
   - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
 - Nix Store: complex abstrations of immutable file system data (software packages, dependencies, etc.)
 - Nix Package Manager:
-  - a toolset which:
-    - evaluates **expressions** into **derivations**
-    - builds packages from **derivations** 
-    - manages the **Nix Store** where built packages are kept (handles dependencies, ensures reproducibility)
-  - Nix CLI: the command-line interface for interacting with the **Nix package manager**
-- Nixpkgs: the Nix Packages collection - a large repository of **Nix expressions**
+  - a command-line toolset which:
+    1) evaluates **expressions** into **derivations**
+    2) builds packages from **derivations** 
+    3) manages the **Nix Store** where packages are kept (handles dependencies, ensures reproducibility)
+- Nix Packages Collection (Nixpkgs): a large repository of **Nix expressions**
+- 
 
 # Features
 Contains
