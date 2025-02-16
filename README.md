@@ -6,14 +6,13 @@ Nix Ecosystem Terminology
 - Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
 - Nix Expressions: **Nix-lang** code which describes, ultimately, how to build packages or configure systems
   - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
-- Nix Store: complex abstrations of immutable file system data (software packages, dependencies, etc.)
-- Nix Package Manager:
-  - a command-line toolset which:
-    1) evaluates **expressions** into **derivations**
-    2) builds packages from **derivations** 
-    3) manages the **Nix Store** where packages are kept (handles dependencies, ensures reproducibility)
 - Nix Packages Collection (Nixpkgs): a large repository of **Nix expressions**
-- 
+- Nix Store: complex abstrations of immutable file system data (software packages, dependencies, etc.)
+- Nix Package Manager: a command-line toolset which:
+  1) evaluates **expressions** into **derivations**
+  2) builds packages from **derivations** 
+  3) manages the **Nix Store** where packages are kept (handles dependencies, ensures reproducibility)
+- NixOS: Linux distro with a system configuration thats entirely built with Nix
 
 # Features
 Contains
