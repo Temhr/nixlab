@@ -38,7 +38,7 @@ Aspirational
 - Impermanent system; declaratively built on boot and connected to storage drives for data persistence
 - Making possible use of nix related libraries (Snowfall)
 
-# Nixlab Implementation
+# Implementations
 - **Installation**:
   1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
   2) First rebuild, with: flakes enabled and a proper hostname,
