@@ -2,7 +2,8 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
 
 # Basic Nix Ecosystem Terminology
 - Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
-- Nix Expressions: **Nix lang** code which describes how to build packages or configure systems
+  - Nix values: data types that are immutable, can be whole **expressions** themselves, are only computed when needed, and type-error detected at evaluation
+- Nix Expressions: **Nix lang** code (functions) that describes how to build packages or configure systems
   - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
 - Nix Packages Collection (Nixpkgs): a large repository of **Nix expressions**
 - Nix Store: complex abstrations of immutable file system data (software packages, dependencies, etc.)
@@ -15,9 +16,12 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
 # Features
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
-- **Flakes**: schema for writing, referencing, and sharing Nix expressions (to build derivations, run programs, etc.)
-  - takes inputs (Nix expressions, pkg repos, other flakes) to produce outputs (pkg defs, dev-envs, NixOS configs) which become usable by Nix package manager
-  - increases reproducibity by pinning version-controled dependencies via lock file
+- **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
+  - consits of a filesystem tree with a flake.nix file in its root directory; specifies:
+    - metadata about the flake
+    - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
+    - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) which are given as **Nix values** usable by **Nix package manager**
+  - also, increases reproducibity by pinning version-controled dependencies via flake.lock file
 - **Home Manager**: declarative config module, specifically for user environment (packages and dotfiles)
 - **Modules**: configurations encapsulated by role or function
 - **Overlays**: extends, applies changes to, nixpkgs (nix package sets)
