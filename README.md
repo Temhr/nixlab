@@ -15,7 +15,7 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
 
 # Features
 Contains
-- **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
+- **Cachix**: mirror to downloadable prebuilt binaries; avoids compilation and speeds up installation
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
   - consists of a filesystem tree with a flake.nix file in its root directory; specifies:
     - metadata about the flake
