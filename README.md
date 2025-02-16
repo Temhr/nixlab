@@ -17,7 +17,7 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
 Contains
 - **Cachix**: cache of prebuilt nixpkgs binaries to speed up buildtime
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
-  - consits of a filesystem tree with a flake.nix file in its root directory; specifies:
+  - consists of a filesystem tree with a flake.nix file in its root directory; specifies:
     - metadata about the flake
     - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
     - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) which are given as **Nix values** usable by **Nix package manager**
