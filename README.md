@@ -13,7 +13,7 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
   3) manages the **Nix Store** (handles dependencies, ensures reproducibility), where packages are kept
 - NixOS: Linux distro with a system configuration thats entirely built with Nix
 
-# Features
+# Nixlab Features
 Contains
 - **Cachix**: mirror to downloadable prebuilt binaries; avoids compilation and speeds up installation
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
@@ -38,7 +38,7 @@ Aspirational
 - Impermanent system; declaratively built on boot and connected to storage drives for data persistence
 - Making possible use of nix related libraries (Snowfall)
 
-# Implementation
+# Nixlab Implementation
 - **Installation**:
   1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
   2) First rebuild, with: flakes enabled and a proper hostname,
@@ -48,7 +48,7 @@ Aspirational
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
-# Layout:
+# Repo Layout:
 - **bin**: various user files and shell scripts
 - **cachix**: prebuilt nixpkgs binaries to pull
 - **home-manager**: user-environment config.nix file
