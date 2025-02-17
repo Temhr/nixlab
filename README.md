@@ -20,18 +20,18 @@ A work-in-progress, Nix implementation for my Linux laptops, desktops, and homel
 
 # Nixlab Features
 Contains
-- **Cachix**: mirror to downloadable prebuilt binaries; avoids compilation and speeds up installation
+- **Cachix**: cache service of prebuilt binaries; speeds installs, avoids compilation 
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
-  - consists of a filesystem tree with a flake.nix file in its root directory; specifies:
+  - consists of a filesystem tree with a flake.nix file in root directory; specifies:
     - metadata about the flake
     - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
     - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) which are given as **Nix values** usable by **Nix package manager**
-  - updates **Nix package manager**'s CLI to the new/experimental commands
-  - also, increases reproducibity by pinning version-controled dependencies via flake.lock file
-- **Home Manager**: declarative config module, specifically for user environment (packages and dotfiles)
-- **Modules**: configurations encapsulated by role or function
-- **Overlays**: extends, applies changes to, nixpkgs (nix package sets)
-- Togglables: abstracts complexity away from frontend config.nix file
+  - updates **Nix package manager**'s CLI with the new/experimental commands
+  - increases reproducibity by pinning version-controled dependencies via flake.lock file
+- **Home Manager**: home-directory managment module; installs user programs, pkgs, and config files, sets env-variables, dotfiles, and any other arbitrary file.
+- **Modules**: library of **Nix expressions** (structured nix files) encapsulated by role or function
+  - Togglable, with complexity abstracted away from frontend host config.nix file
+- **Overlays**: custom modifications and extensions of Nixpkgs and other pkg sets
 - Single source of truth - systemd timer & service invokes shell script to periodcally pull and build from this repo 
 
 Aspirational
