@@ -131,6 +131,7 @@
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
   #gimp.enable = true;    #GNU Image Manipulation Program
+  #godot.enable = true;    #Free and Open Source 2D and 3D game engine
   #krita.enable = true;    #Free and open source painting application
   #inkscape.enable = true;    #Vector graphics editor
 
