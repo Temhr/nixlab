@@ -13,6 +13,8 @@
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"];
 
+  boot.blacklistedKernelModules = [ "nouveau" ];
+
   # Below command lists GPU and their drivers
   # $ lspci -k | grep VGA -A3
   hardware.nvidia = {
@@ -45,7 +47,7 @@
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     # Nvidia Quadro p5000
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
 
     prime = {
       offload.enable = false;
@@ -57,6 +59,6 @@
   };
   environment.systemPackages = with pkgs; [
     vulkan-tools  #Khronos official Vulkan Tools and Utilities
-    cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
+    unstable.cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
   ];
 }
