@@ -47,6 +47,7 @@
     glxinfo  #Test utilities for OpenGL
     lshw-gui  #Provide detailed information on the hardware configuration of the machine
     usbutils  #Tools for working with USB devices, such as lsusb
+    sysfsutils   # For systool
 
     ## File Management
     wget  #Tool for retrieving files using HTTP, HTTPS, and FTP
