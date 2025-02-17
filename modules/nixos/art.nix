@@ -20,7 +20,7 @@
           environment.systemPackages = with pkgs; [ (blender.override {cudaSupport=true;}) ];  #3D Creation/Animation/Publishing System
         })
         (lib.mkIf config.gimp.enable {
-          environment.systemPackages = with pkgs; [ unstable.gimp-with-plugin ];  #GNU Image Manipulation Program
+          environment.systemPackages = with pkgs; [ unstable.gimp-with-plugins ];  #GNU Image Manipulation Program
         })
         (lib.mkIf config.krita.enable {
           environment.systemPackages = with pkgs; [ unstable.krita ];  #Free and open source painting application
