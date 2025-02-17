@@ -10,11 +10,11 @@
         godot = {
             enable = lib.mkEnableOption "enables godot";
         };
-        krita = {
-            enable = lib.mkEnableOption "enables krita";
-        };
         inkscape = {
             enable = lib.mkEnableOption "enables inkscape";
+        };
+        krita = {
+            enable = lib.mkEnableOption "enables krita";
         };
     };
 
@@ -28,11 +28,11 @@
         (lib.mkIf config.godot.enable {
           environment.systemPackages = with pkgs; [ unstable.godot_4 ];  #Free and Open Source 2D and 3D game engine
         })
-        (lib.mkIf config.krita.enable {
-          environment.systemPackages = with pkgs; [ unstable.krita ];  #Free and open source painting application
-        })
         (lib.mkIf config.inkscape.enable {
           environment.systemPackages = with pkgs; [ unstable.inkscape-with-extensions ];  #Vector graphics editor
+        })
+        (lib.mkIf config.krita.enable {
+          environment.systemPackages = with pkgs; [ unstable.krita ];  #Free and open source painting application
         })
     ];
 
