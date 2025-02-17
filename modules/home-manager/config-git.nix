@@ -18,7 +18,7 @@
       programs.git = {
         enable = true;  #Distributed version control system
         userName  = "Temhr";
-        userEmail = "temhr@temhrfakeemail.org";
+        userEmail = "temhr@nixlab.local";
       };
       programs.lazygit.enable = true;  #A simple terminal UI for git commands
     })
