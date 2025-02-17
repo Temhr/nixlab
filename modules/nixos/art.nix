@@ -17,7 +17,7 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.blender.enable {
-          environment.systemPackages = with pkgs; [ (blender.override {cudaSupport=true;}) ];  #3D Creation/Animation/Publishing System
+          environment.systemPackages = with pkgs; [ (unstable.blender.override {cudaSupport=true;}) ];  #3D Creation/Animation/Publishing System
         })
         (lib.mkIf config.gimp.enable {
           environment.systemPackages = with pkgs; [ unstable.gimp-with-plugins ];  #GNU Image Manipulation Program
