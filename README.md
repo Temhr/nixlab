@@ -32,7 +32,7 @@ Contains
 - **Modules**: library of **Nix expressions** (structured nix files) encapsulated by role or function
   - Togglable, with complexity abstracted away from frontend host config.nix file
 - **Overlays**: custom modifications and extensions of Nixpkgs and other pkg sets
-- Single source of truth - systemd timer & service invokes shell script to periodcally pull and build from this repo 
+- Single source of truth - systemd timer & service to invoke periodic pulls & builds of this repo 
 
 Aspirational
 - Declarative virtualization systems
