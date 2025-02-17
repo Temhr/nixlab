@@ -129,16 +129,15 @@
   virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
+  ## Art Dev Tools
+  blender.enable = true;    #3D Creation/Animation/Publishing System
+  gimp.enable = true;    #GNU Image Manipulation Program
+  krita.enable = true;    #Free and open source painting application
+  inkscape.enable = true;    #Vector graphics editor
+
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
-
-    ## Dev Tools
-    #unstable.blender  #3D Creation/Animation/Publishing System
-    blender  #3D Creation/Animation/Publishing System
-    unstable.gimp-with-plugins #GNU Image Manipulation Program
-    unstable.krita #Free and open source painting application
-    unstable.inkscape-with-extensions #Vector graphics editor
 
     ## Godot Dev Tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
