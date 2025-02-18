@@ -25,7 +25,7 @@ Contains
   - consists of a filesystem tree with a flake.nix file in root directory; specifies:
     - metadata about the flake
     - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
-    - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) which are given as **Nix values** usable by **Nix package manager**
+    - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) what is produced; given as **Nix values** usable by **Nix package manager**
   - updates **Nix package manager**'s CLI with the new/experimental commands
   - increases reproducibity by pinning version-controled dependencies via flake.lock file
 - **Home Manager**: home-directory managment module; installs user programs, pkgs, and config files, sets env-variables, dotfiles, and any other arbitrary file
