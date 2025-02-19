@@ -19,7 +19,7 @@
     # inputs.hardware.nixosModules.common-ssd
 
     # You can also split up your configuration and import pieces of it here:
-    ../globals
+    ../common
     #../globals/auto-flake-push.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
