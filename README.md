@@ -27,7 +27,7 @@ Contains
     - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
     - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) are whatever the flake produces; given as **Nix values** usable by **Nix package manager**
   - updates **Nix package manager**'s CLI with the new/experimental commands
-  - increases reproducibity by pinning version-controled dependencies via flake.lock file
+  - version-pinning of pkgs and dependencies via flake.lock file (increases reproducibity)
 - **Home Manager**: home-directory managment module; installs user programs, pkgs, and config files, sets env-variables, dotfiles, and any other arbitrary file
 - **Modules**: library of **Nix expressions** structured into nix files
   - Togglable, encapsulated by role or function, and abstracted away from host file
