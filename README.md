@@ -1,4 +1,4 @@
-A work-in-progress Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs) with inspiration from [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration) and many others.
+Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted from [Misterio77's standard starter config](https://github.com/Misterio77/nix-starter-configs) with inspiration from [EmergentMind](https://www.youtube.com/watch?v=YHm7e3f87iY&list=PLAWyx2BxU4OyERRTbzNAaRHK08DQ0DD_l&index=1)'s youtube tutorials, [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration), and many others.
 
 - [Nix Ecosystem Terminology](#nix-ecosystem-terminology)
 - [Nixlab Features](#nixlab-features)
@@ -11,12 +11,12 @@ A work-in-progress Nix implementation for my Linux laptops, desktops, and homela
 - Nix Expressions: **Nix lang** code (functions) that describes how to build packages or configure systems
   - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
 - Nix Packages Collection (Nixpkgs): a large repository of **Nix expressions**
-- Nix Store: complex abstrations of immutable file system data (software packages, dependencies, etc.)
+- Nix Store: complex abstractions of immutable file system data (software packages, dependencies, etc.)
 - Nix Package Manager: a command-line toolset which:
   1) evaluates **expressions** into **derivations**
   2) builds packages from **derivations** 
   3) manages the **Nix Store** (handles dependencies, ensures reproducibility), where packages are kept
-- NixOS: Linux distro with a system configuration thats entirely built with Nix
+- NixOS: Linux distro with a system configuration that's entirely built with Nix
 
 # Nixlab Features
 Contains
@@ -24,15 +24,16 @@ Contains
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
   - consists of a filesystem tree with a flake.nix file in root directory; specifies:
     - metadata about the flake
-    - inputs (**Nix expressions**, pkg repos, other flakes) which are taken as dependencies
-    - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) which are given as **Nix values** usable by **Nix package manager**
+    - inputs (**expressions**, pkg repos, other flakes) which are taken as dependencies
+    - outputs (pkg defs, dev-envs, NixOS configs, modules, etc.) are whatever the flake produces; ultimately given as **Nix values**, evaluated by the **Nix package manager**
   - updates **Nix package manager**'s CLI with the new/experimental commands
-  - increases reproducibity by pinning version-controled dependencies via flake.lock file
-- **Home Manager**: home-directory managment module; installs user programs, pkgs, and config files, sets env-variables, dotfiles, and any other arbitrary file.
-- **Modules**: library of **Nix expressions** (structured nix files) encapsulated by role or function
-  - Togglable, with complexity abstracted away from frontend host config.nix file
-- **Overlays**: custom modifications and extensions of Nixpkgs and other pkg sets
-- Single source of truth - systemd timer & service to invoke periodic pulls & builds of this repo 
+  - version-pinning of pkgs and dependencies via flake.lock file (increases reproducibity)
+- **Home Manager**: home-directory management module; installs user programs, pkgs, and config files, sets env-variables, dotfiles, and any other arbitrary file
+- **Modules**: library of **expressions** to help customize options, settings, and functionality in config
+  - system level modules isolated from user level modules
+  - togglables; encapsulated by role or function, and abstracted away from host file
+- **Overlays**: custom modifications, extensions, and patches of Nixpkgs
+- Single source of truth: repo serves as the reference point where all systems auto-pull from, and push to
 
 Aspirational
 - Declarative virtualization systems
@@ -55,21 +56,21 @@ Aspirational
 
 # Repository Layout
 - **bin**: various user files and shell scripts
-- **cachix**: prebuilt nixpkgs binaries to pull
-- **home-manager**: user-environment config.nix file
-- **hosts**: host-specific configurations
-  - **globals**: host-agnostic configs (applications, programs, services, user-account, etc.)
+- **cachix**: prebuilt cached binaries to pull
+- **home-manager**: user level configurations
+- **hosts**: system level configurations
+  - **common**: host-agnostic configs (applications, programs, services, user-account, etc.)
   - **nixace**: workstation config.nix file
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
 - **lib**: Unused nix-code dump
-- **modules**: togglable configuration elements
+- **modules**: custom configuration settings and options
   - **home-manager**: user-relevant preferences and extensions
   - **nixos**: system-relevant modules
-- **overlays**: contains one overlay
+- **overlays**: custom overrides of nixpkgs
   - **default**: allows for nixos-unstable repository as pkgs.unstable
-- **pkgs**: custom packages
+- **pkgs**: custom written packages
   - empty
 -  flake.nix: entry point
 -  flake.lock: version pinner
