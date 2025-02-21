@@ -32,7 +32,7 @@ Contains
 - **Modules**: library of **expressions** to help customize options, settings, and functionality in config
   - system level modules isolated from user level modules
   - togglables; encapsulated by role or function, and abstracted away from host file
-- **Overlays**: custom modifications, extensions, and overrides of Nixpkgs and other pkg sets
+- **Overlays**: custom modifications, extensions, and patches of Nixpkgs
 - Single source of truth: repo serves as the reference point where all systems auto-pull from, and push to
 
 Aspirational
@@ -56,7 +56,7 @@ Aspirational
 
 # Repository Layout
 - **bin**: various user files and shell scripts
-- **cachix**: prebuilt nixpkgs binaries to pull
+- **cachix**: prebuilt cached binaries to pull
 - **home-manager**: user-environment config.nix file
 - **hosts**: host-specific configurations
   - **common**: host-agnostic configs (applications, programs, services, user-account, etc.)
@@ -65,12 +65,12 @@ Aspirational
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
 - **lib**: Unused nix-code dump
-- **modules**: togglable configuration elements
+- **modules**: custom configuration settings
   - **home-manager**: user-relevant preferences and extensions
   - **nixos**: system-relevant modules
-- **overlays**: contains one overlay
+- **overlays**: custom overrides of nixpkgs
   - **default**: allows for nixos-unstable repository as pkgs.unstable
-- **pkgs**: custom packages
+- **pkgs**: custom written packages
   - empty
 -  flake.nix: entry point
 -  flake.lock: version pinner
