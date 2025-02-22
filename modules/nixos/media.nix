@@ -36,6 +36,7 @@
               description = "Enables VLC";
               default = false;
             };
+        };
     };
 
     config = lib.mkMerge [
