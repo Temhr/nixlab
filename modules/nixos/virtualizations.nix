@@ -2,28 +2,52 @@
 
     options = {
         bottles = {
-            enable = lib.mkEnableOption "enables Bottles";
+            enable = lib.mkEnableOption {
+              description = "Enables Bottles";
+              default = false;
+            };
         };
         distrobox = {
-            enable = lib.mkEnableOption "enables Distrobox";
+            enable = lib.mkEnableOption {
+              description = "Enables Distrobox";
+              default = false;
+            };
         };
         incus = {
-            enable = lib.mkEnableOption "enables Incus";
+            enable = lib.mkEnableOption {
+              description = "Enables Incus";
+              default = false;
+            };
         };
         podman = {
-            enable = lib.mkEnableOption "enables Podman";
+            enable = lib.mkEnableOption {
+              description = "Enables Podman";
+              default = false;
+            };
         };
         quickemu = {
-            enable = lib.mkEnableOption "enables Quickemu";
+            enable = lib.mkEnableOption {
+              description = "Enables Quickemu";
+              default = false;
+            };
         };
         virt-manager = {
-            enable = lib.mkEnableOption "enables Virt-Manager";
+            enable = lib.mkEnableOption {
+              description = "Enables Virt-Manager";
+              default = false;
+            };
         };
         wine = {
-            enable = lib.mkEnableOption "enables Wine";
+            enable = lib.mkEnableOption {
+              description = "Enables Wine";
+              default = false;
+            };
         };
         home-assistant = {
-            enable = lib.mkEnableOption "enables Home-Assistant";
+            enable = lib.mkEnableOption {
+              description = "Enables Home-Assistant";
+              default = false;
+            };
         };
     };
 

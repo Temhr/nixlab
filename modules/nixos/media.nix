@@ -2,22 +2,40 @@
 
     options = {
         audacity = {
-            enable = lib.mkEnableOption "enables Audacity";
+            enable = lib.mkEnableOption {
+              description = "Enables Audacity";
+              default = false;
+            };
         };
         kdenlive = {
-            enable = lib.mkEnableOption "enables Kdenlive";
+            enable = lib.mkEnableOption {
+              description = "Enables Kdenlive";
+              default = false;
+            };
         };
         obs = {
-            enable = lib.mkEnableOption "enables OBS-studio";
+            enable = lib.mkEnableOption {
+              description = "Enables OBS-studio";
+              default = false;
+            };
         };
         openshot = {
-            enable = lib.mkEnableOption "enables Openshot";
+            enable = lib.mkEnableOption {
+              description = "Enables Openshot";
+              default = false;
+            };
         };
         spotify = {
-            enable = lib.mkEnableOption "enables Spotify";
+            enable = lib.mkEnableOption {
+              description = "Enables Spotify";
+              default = false;
+            };
         };
         vlc = {
-            enable = lib.mkEnableOption "enables VLC";
+            enable = lib.mkEnableOption {
+              description = "Enables VLC";
+              default = false;
+            };
         };
     };
 

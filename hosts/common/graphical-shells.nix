@@ -2,13 +2,22 @@
 
     options = {
         gnome = {
-            enable = lib.mkEnableOption "enables Gnome";
+            enable = lib.mkEnableOption {
+              description = "Enables Gnome";
+              default = false;
+            };
         };
         plasma = {
-            enable = lib.mkEnableOption "enables KDE Plasma";
+            enable = lib.mkEnableOption {
+              description = "Enables KDE Plasma";
+              default = false;
+            };
         };
         sway = {
-            enable = lib.mkEnableOption "enables Sway";
+            enable = lib.mkEnableOption {
+              description = "Enables Sway";
+              default = false;
+            };
         };
     };
 

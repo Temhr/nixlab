@@ -2,16 +2,28 @@
 
     options = {
         syncace = {
-            enable = lib.mkEnableOption "enables Syncthing on nixace";
+            enable = lib.mkEnableOption {
+              description = "Enables Syncthing on nixace";
+              default = false;
+            };
         };
         syncbase = {
-            enable = lib.mkEnableOption "enables Syncthing on nixbase";
+            enable = lib.mkEnableOption {
+              description = "Enables Syncthing on nixbase";
+              default = false;
+            };
         };
         syncser = {
-            enable = lib.mkEnableOption "enables Syncthing on nixser";
+            enable = lib.mkEnableOption {
+              description = "Enables Syncthing on nixser";
+              default = false;
+            };
         };
         synctop = {
-            enable = lib.mkEnableOption "enables Syncthing on nixtop";
+            enable = lib.mkEnableOption {
+              description = "Enables Syncthing on nixtop";
+              default = false;
+            };
         };
     };
 
