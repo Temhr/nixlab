@@ -3,19 +3,7 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./optional
-    ./audio.nix
-    ./auto-backup-home.nix
-    ./auto-build.nix
-    ./auto-move-files.nix
-    ./auto-pull.nix
-    ./firefox.nix
-    ./flatpak.nix
-    ./home-manager.nix
-    ./locale.nix
-    ./open-ssh.nix
-    ./users.nix
-    ./utilities.nix
+    ./graphical-shells.nix
   ];
 
   options = {
