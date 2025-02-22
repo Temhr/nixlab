@@ -2,19 +2,34 @@
 
     options = {
         blender = {
-            enable = lib.mkEnableOption "enables blender";
+            enable = lib.mkEnableOption {
+              description = "Enables blender";
+              default = false;
+            };
         };
         gimp = {
-            enable = lib.mkEnableOption "enables gimp";
+            enable = lib.mkEnableOption {
+              description = "Enables gimp";
+              default = false;
+            };
         };
         godot = {
-            enable = lib.mkEnableOption "enables godot";
+            enable = lib.mkEnableOption {
+              description = "Enables godot";
+              default = false;
+            };
         };
         inkscape = {
-            enable = lib.mkEnableOption "enables inkscape";
+            enable = lib.mkEnableOption {
+              description = "Enables inkscape";
+              default = false;
+            };
         };
         krita = {
-            enable = lib.mkEnableOption "enables krita";
+            enable = lib.mkEnableOption {
+              description = "Enables krita";
+              default = false;
+            };
         };
     };
 
