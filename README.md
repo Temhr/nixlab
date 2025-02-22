@@ -20,7 +20,7 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
 
 # Nixlab Features
 Contains
-- **Cachix**: cache service of prebuilt binaries; speeds installs, avoids compilation 
+- **Cachix**: cache service of prebuilt binaries; speeds installs, avoids compilations 
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
   - consists of a filesystem tree with a flake.nix file in root directory; specifies:
     - metadata about the flake
