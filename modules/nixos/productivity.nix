@@ -2,10 +2,16 @@
 
     options = {
         calibre = {
-            enable = lib.mkEnableOption "enables Calibre";
+            enable = lib.mkEnableOption {
+              description = "Enables Calibre";
+              default = false;
+            };
         };
         libreoffice = {
-            enable = lib.mkEnableOption "enables LibreOffice";
+            enable = lib.mkEnableOption {
+              description = "Enables LibreOffice";
+              default = false;
+            };
         };
     };
 

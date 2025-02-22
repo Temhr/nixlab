@@ -2,10 +2,16 @@
 
     options = {
         openSourceGames = {
-            enable = lib.mkEnableOption "enables open-source games";
+            enable = lib.mkEnableOption {
+              description = "Enables open-source games";
+              default = false;
+            };
         };
         steam = {
-            enable = lib.mkEnableOption "enables Steam";
+            enable = lib.mkEnableOption {
+              description = "Enables Steam";
+              default = false;
+            };
         };
     };
 
