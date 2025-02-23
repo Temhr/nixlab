@@ -10,7 +10,8 @@ let
        cp /home/temhr/nixlab/bin/bash/.bash/emoticons /home/temhr/.bash/emoticons &&
        cp /home/temhr/nixlab/bin/bash/.bash/environment_variables /home/temhr/.bash/environment_variables &&
        cp /home/temhr/nixlab/bin/bash/.bash/ghostty_theme_randomizer /home/temhr/.bash/ghostty_theme_randomizer &&
-       cp /home/temhr/nixlab/bin/bash/.bash/ghostty_themes.txt /home/temhr/.bash/ghostty_themes.txt
+       cp /home/temhr/nixlab/bin/bash/.bash/ghostty_themes.txt /home/temhr/.bash/ghostty_themes.txt &&
+       cp /home/temhr/nixlab/bin/config/kscreenlockerrc /home/temhr/.config/kscreenlockerrc
 
     '';
 in
