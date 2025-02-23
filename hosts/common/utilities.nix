@@ -13,6 +13,7 @@
     eza  #Modern, maintained replacement for ls
     unstable.fastfetch  #Like neofetch, but much faster because written in C
     unstable.fzf  #Command-line fuzzy finder written in Go
+    unstable.git #Distributed version control system
     jq  #Lightweight and flexible command-line JSON processor
     less  #More advanced file pager (program that displays text files) than 'more'
     logrotate  #Rotates and compresses system logs
