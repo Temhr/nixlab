@@ -29,9 +29,8 @@ Contains
   - updates **Nix package manager**'s CLI with the new/experimental commands
   - version-pinning of pkgs and dependencies via flake.lock file (increases reproducibity)
 - **Home Manager**: home-directory management module; installs user programs, pkgs, and config files, sets env-variables, dotfiles, and any other arbitrary file
-- **Modules**: library of **expressions** to help customize options, settings, and functionality in config
-  - system level modules isolated from user level modules
-  - togglables; encapsulated by role or function, and abstracted away from host file
+- **Modules**: to customize options, settings, and functionality in config
+  - segregation of system and user level modules, encapsulated by role or function
 - **Overlays**: custom modifications, extensions, and patches of Nixpkgs
 - Single source of truth: repo serves as the reference point where all systems auto-pull from, and push to
 
