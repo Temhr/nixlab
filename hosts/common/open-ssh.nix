@@ -7,7 +7,7 @@
     ports = [ 22 ];
     settings = {
       PasswordAuthentication = false;  # Opinionated: use keys only
-      AllowUsers = temhr; # "null" Allows all users by default. Can be [ "user1" "user2" ]
+      AllowUsers = null; # "null" Allows all users by default. Can be [ "user1" "user2" ]
       UseDns = true;
       X11Forwarding = false;
       # Opinionated: forbid root login through SSH.
