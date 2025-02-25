@@ -12,11 +12,11 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
   - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
 - Nix Packages Collection (Nixpkgs): a large repository of **Nix expressions**
 - Nix Store: complex abstractions of immutable file system data (software packages, dependencies, etc.)
-- Nix Package Manager: a command-line toolset which:
+- Nix Package Manager: a command-line toolset, with an atomic update model, that:
   1) evaluates **expressions** into **derivations**
   2) builds packages from **derivations** 
   3) manages the **Nix Store** (handles dependencies, ensures reproducibility), where packages are kept
-- NixOS: Linux distro with a system configuration that's entirely built with Nix
+- NixOS: Linux distro that has a system configuration entirely built with Nix
 
 # Nixlab Features
 Contains
