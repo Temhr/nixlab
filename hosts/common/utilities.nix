@@ -6,6 +6,7 @@
     cachix  #Command-line client for Nix binary cache hosting https://cachix.org
 
     ## Terminal Utilities
+    appimage-run  #https://nixos.org/manual/nixpkgs/stable/#sec-pkgs-appimageTools
     bat  #Cat(1) clone with syntax highlighting and Git integration
     busybox  #Tiny versions of common UNIX utilities in a single small executable
     colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
@@ -85,6 +86,7 @@
     #yazi  #Blazing fast terminal file manager written in Rust, based on async I/O
 
     ##Applications
+
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
     unstable.kdePackages.kcalc  #Calculator offering everything a scientific calculator does, and more
     unstable.home-manager  #Nix-based user environment configurator
