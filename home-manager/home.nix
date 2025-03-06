@@ -77,6 +77,9 @@
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   #konsole.enable = true;  #Terminal emulator by KDE
 
+  # Learning Tools
+  anki.enable = true; #Spaced repetition flashcard program
+
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
 
