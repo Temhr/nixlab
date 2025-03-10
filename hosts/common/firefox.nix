@@ -25,7 +25,7 @@
       };
       OverrideFirstRunPage = "";  #blank if you want to disable the first run page
       OverridePostUpdatePage = "";  #blank if you want to disable the post-update page
-      RequestedLocales = "en-US";
+      RequestedLocales = "en-CA";
       SearchBar = "unified"; # alternative: "separate"
 
       /* ---- EXTENSIONS ---- */
