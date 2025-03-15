@@ -17,6 +17,7 @@
     unstable.git #Distributed version control system
     jq  #Lightweight and flexible command-line JSON processor
     less  #More advanced file pager (program that displays text files) than 'more'
+    libxml2  #XML parsing library for C
     logrotate  #Rotates and compresses system logs
     lsof  #A tool to list open files
     parted  #Create, destroy, resize, check, and copy partitions
