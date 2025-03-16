@@ -41,7 +41,7 @@
           environment.systemPackages = with pkgs; [ unstable.gimp-with-plugins ];  #GNU Image Manipulation Program
         })
         (lib.mkIf config.godot.enable {
-          environment.systemPackages = with pkgs; [ unstable.godot_4 ];  #Free and Open Source 2D and 3D game engine
+          environment.systemPackages = with pkgs; [ unstable.godot_4 unstable.godot-export-templates];  #Free and Open Source 2D and 3D game engine
         })
         (lib.mkIf config.inkscape.enable {
           environment.systemPackages = with pkgs; [ unstable.inkscape-with-extensions ];  #Vector graphics editor
