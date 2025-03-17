@@ -90,6 +90,8 @@
   # TODO: Set your hostname
   networking.hostName = "nixtop";
 
+  wallpaper.enable = true;
+
   ## Enable Syncthing (only for this host)
   synctop.enable = false;
 

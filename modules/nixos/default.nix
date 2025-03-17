@@ -4,6 +4,7 @@
     # Compose this module out of smaller ones.
     ./art.nix
     ./games.nix
+    ./kde-plasma.nix
     ./productivity.nix
     ./media.nix
     ./syncthing.nix
