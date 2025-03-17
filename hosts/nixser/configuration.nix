@@ -20,6 +20,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     ../common
+    #../globals/dotbashfiles.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -120,20 +121,20 @@
   #vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Virtualizations
-  #bottles.enable = true;    #Easy-to-use wineprefix manager
-  #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  #incus.enable = true;   #Powerful system container and virtual machine manager
-  #podman.enable = true;    #A program for managing pods, containers and container images
-  #quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
-  #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
-  #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
+  bottles.enable = true;    #Easy-to-use wineprefix manager
+  distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
+  incus.enable = true;   #Powerful system container and virtual machine manager
+  podman.enable = true;    #A program for managing pods, containers and container images
+  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  virt-manager.enable = true;    #Desktop user interface for managing virtual machines
+  wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
-  #gimp.enable = true;    #GNU Image Manipulation Program
-  #godot.enable = true;    #Free and Open Source 2D and 3D game engine
-  #inkscape.enable = true;    #Vector graphics editor
-  #krita.enable = true;    #Free and open source painting application
+  gimp.enable = true;    #GNU Image Manipulation Program
+  godot.enable = true;    #Free and Open Source 2D and 3D game engine
+  inkscape.enable = true;    #Vector graphics editor
+  krita.enable = true;    #Free and open source painting application
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
