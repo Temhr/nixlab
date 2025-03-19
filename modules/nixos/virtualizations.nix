@@ -61,7 +61,7 @@
         (lib.mkIf config.incus.enable {
           virtualisation.incus.enable = true;
           networking.nftables.enable = true;
-          users.users.temhr.extraGroups = ["incus-admin"];
+          users.users."temhr".extraGroups = ["incus-admin"];
           # minimal incus initialization below
           # $ incus admin init --minimal
           networking.firewall.trustedInterfaces = [ "incusbr0" ];
