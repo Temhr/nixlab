@@ -19,6 +19,7 @@
         "x-systemd.idle-timeout=60" # disconnects after 60 seconds
       ];
     };
+
   systemd.tmpfiles.rules = [
     "d /mirror 1744 temhr users "
     "d /mnt 1744 temhr users "

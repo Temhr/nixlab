@@ -126,7 +126,7 @@
   #incus.enable = true;   #Powerful system container and virtual machine manager
   #podman.enable = true;    #A program for managing pods, containers and container images
   #quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
-  #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
+  virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Art Dev Tools
