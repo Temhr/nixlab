@@ -86,6 +86,9 @@
             wineWowPackages.waylandFull  #native wayland support (unstable)
           ];
         })
+        (lib.mkIf config.home-assistant.enable {
+          #environment.systemPackages = [ pkgs.home-assistant ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+        })
     ];
 
 }
