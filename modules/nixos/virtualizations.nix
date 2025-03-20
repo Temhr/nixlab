@@ -103,6 +103,11 @@
               }
             ];
           };
+          #Setting up the bridge profile
+          # $ incus profile create bridgeprofile
+          # $ incus profile device add bridgeprofile eth0 nic nictype=bridged parent=incusbr0
+          #Create a VM example with profile
+          # $ incus init images:< debian/11 > --vm < name > --profile default --profile bridgeprofile -c boot.autostart=true -c limits.cpu=2 -c limits.memory=4GiB
           networking.firewall.trustedInterfaces = [ "incusbr0" ];
         })
         (lib.mkIf config.podman.enable {
