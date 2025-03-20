@@ -8,7 +8,9 @@
       isNormalUser = true;
       openssh.authorizedKeys.keys = [ ]; # Add your SSH public key(s) here, if you plan on using SSH to connect
       # TODO: Be sure to add any other groups you need (such as networkmanager, audio, docker, etc)
-      extraGroups = [ "root" "wheel" "networkmanager" "adbusers" "kvm" "libvirtd" "video" "render"];
+      #"adbusers" "kvm" => adb and android deveopment
+      #"video" "render" => Blender user development
+      extraGroups = [ "root" "wheel" "networkmanager" "adbusers" "kvm" "video" "render"];
       packages = with pkgs; [
       #  thunderbird
       ];
