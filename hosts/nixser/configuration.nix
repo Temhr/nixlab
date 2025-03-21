@@ -130,7 +130,7 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Art Dev Tools
-  #blender.enable = true;    #3D Creation/Animation/Publishing System
+  blender.enable = true;    #3D Creation/Animation/Publishing System
   #gimp.enable = true;    #GNU Image Manipulation Program
   #odot.enable = true;    #Free and Open Source 2D and 3D game engine
   #inkscape.enable = true;    #Vector graphics editor
