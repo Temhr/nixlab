@@ -53,7 +53,7 @@
           environment.systemPackages = with pkgs; [ unstable.kdePackages.kdenlive ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
         })
         (lib.mkIf config.media-downloader.enable {
-          environment.systemPackages = with pkgs; [ unstable.media-downloader ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+          environment.systemPackages = with pkgs; [ unstable.media-downloader ];  #Qt/C++ GUI front end for yt-dlp and others
         })
         (lib.mkIf config.obs.enable {
             programs.obs-studio = {
