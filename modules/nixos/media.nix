@@ -13,6 +13,12 @@
               default = false;
             };
         };
+        media-downloader = {
+            enable = lib.mkEnableOption {
+              description = "Enables Media-Downloader";
+              default = false;
+            };
+        };
         obs = {
             enable = lib.mkEnableOption {
               description = "Enables OBS-studio";
@@ -41,10 +47,13 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.audacity.enable {
-          environment.systemPackages = [ pkgs.audacity ];  #Sound editor with graphical UI
+          environment.systemPackages = with pkgs; [ unstable.audacity ];  #Sound editor with graphical UI
         })
         (lib.mkIf config.kdenlive.enable {
-          environment.systemPackages = [ pkgs.kdePackages.kdenlive ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+          environment.systemPackages = with pkgs; [ unstable.kdePackages.kdenlive ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+        })
+        (lib.mkIf config.media-downloader.enable {
+          environment.systemPackages = with pkgs; [ unstable.media-downloader ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
         })
         (lib.mkIf config.obs.enable {
             programs.obs-studio = {
@@ -53,13 +62,13 @@
             };
         })
         (lib.mkIf config.openshot.enable {
-          environment.systemPackages = [ pkgs.openshot-qt ];  #Free, open-source video editor
+          environment.systemPackages = with pkgs; [ unstable.openshot-qt ];  #Free, open-source video editor
         })
         (lib.mkIf config.spotify.enable {
-          environment.systemPackages = [ pkgs.spotify ];  #Play music from the Spotify music service
+          environment.systemPackages = with pkgs; [ spotify ];  #Play music from the Spotify music service
         })
         (lib.mkIf config.vlc.enable {
-          environment.systemPackages = [ pkgs.vlc ];  #Cross-platform media player and streaming server
+          environment.systemPackages = with pkgs; [ vlc ];  #Cross-platform media player and streaming server
         })
     ];
 
