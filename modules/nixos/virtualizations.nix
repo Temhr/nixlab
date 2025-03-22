@@ -60,7 +60,6 @@
         })
         (lib.mkIf config.incus.enable {
           virtualisation.incus.enable = true;
-          networking.nftables.enable = true;
           users.users."temhr".extraGroups = ["incus-admin"];
           # minimal incus initialization below
           # $ incus admin init --minimal
@@ -109,6 +108,7 @@
           #Create a VM example with profile
           # $ incus init images:< debian/11 > --vm < name > --profile default --profile bridgeprofile -c boot.autostart=true -c limits.cpu=2 -c limits.memory=4GiB
           networking.firewall.trustedInterfaces = [ "incusbr0" ];
+          networking.nftables.enable = true;
         })
         (lib.mkIf config.podman.enable {
           environment.systemPackages = [ pkgs.podman ];  #A program for managing pods, containers and container images
