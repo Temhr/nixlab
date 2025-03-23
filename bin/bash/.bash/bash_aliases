@@ -35,7 +35,7 @@ alias weather='curl wttr.in'
 alias wget='wget -c'
 
 ##Scrcpy Shortcuts
-alias scrcpy-e='scrcpy --tcpip --video-codec=h265 --max-size=720 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
+alias scrcpy-e='scrcpy --tcpip --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
 alias scrcpycam='scrcpy --video-source=camera --camera-size=1920x1080 -e'
 
 ##SSH Shortcuts
