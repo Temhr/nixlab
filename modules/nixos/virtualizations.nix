@@ -109,6 +109,16 @@
           # $ incus init images:< debian/11 > --vm < name > --profile default --profile bridgeprofile -c boot.autostart=true -c limits.cpu=2 -c limits.memory=4GiB
           networking.firewall.trustedInterfaces = [ "incusbr0" ];
           networking.nftables.enable = true;
+          networking.firewall.interfaces.incusbr0.allowedTCPPorts = [
+            53
+            67
+            8123
+          ];
+          networking.firewall.interfaces.incusbr0.allowedUDPPorts = [
+            53
+            67
+            8123
+          ];
         })
         (lib.mkIf config.podman.enable {
           environment.systemPackages = [ pkgs.podman ];  #A program for managing pods, containers and container images
