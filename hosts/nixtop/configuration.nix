@@ -134,6 +134,7 @@
 
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
+  darktable.enable = true;    #Virtual lighttable and darkroom for photographers
   gimp.enable = true;    #GNU Image Manipulation Program
   godot.enable = true;    #Free and Open Source 2D and 3D game engine
   inkscape.enable = true;    #Vector graphics editor
