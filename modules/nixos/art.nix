@@ -41,9 +41,10 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.blender.enable {
-          environment.systemPackages = with pkgs; [
-            #(unstable.blender.override {cudaSupport=true;})
-            unstable.blender                                               #3D Creation/Animation/Publishing System
+          environment.systemPackages = with pkgs; [          #3D Creation/Animation/Publishing System
+            #(unstable.blender.override {cudaSupport=true;})   #Explicit CUDA support, but long compile time
+            unstable.blender                                   #unstable pkg
+            #blender                                           #stable pkg
           ];
         })
         (lib.mkIf config.darktable.enable {
