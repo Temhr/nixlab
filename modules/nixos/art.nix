@@ -41,7 +41,10 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.blender.enable {
-          environment.systemPackages = with pkgs; [ (unstable.blender.override {cudaSupport=true;}) ];  #3D Creation/Animation/Publishing System
+          environment.systemPackages = with pkgs; [
+            #(unstable.blender.override {cudaSupport=true;})
+            unstable.blender                                               #3D Creation/Animation/Publishing System
+          ];
         })
         (lib.mkIf config.darktable.enable {
           environment.systemPackages = with pkgs; [ unstable.darktable ];  #Virtual lighttable and darkroom for photographers
