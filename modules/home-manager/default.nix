@@ -6,7 +6,6 @@
     ./config-fastfetch.nix
     ./config-git.nix
     ./config-virt-manager.nix
-    ./learn.nix
     ./terminal-emulators.nix
   ];
 

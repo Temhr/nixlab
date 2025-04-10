@@ -3,6 +3,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./art.nix
+    ./education.nix
     ./games.nix
     ./kde-plasma.nix
     ./productivity.nix
