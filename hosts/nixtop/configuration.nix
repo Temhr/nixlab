@@ -108,7 +108,7 @@
 
   ## Education
   anki.enable = true;  #Spaced repetition flashcard program
-  google-earth.enable = true;  #World sphere viewer
+  #google-earth.enable = true;  #World sphere viewer "not secure""
 
   ## Gaming Packages
   openSourceGames.enable = true;  #Open Source gaming platform for GNU/Linux
