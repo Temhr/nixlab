@@ -1,20 +1,30 @@
-{ config, lib, pkgs, ... }:{
+{ config, lib, pkgs, ... }: {
 
     options = {
         anki = {
-            enable = lib.mkEnableOption "enables Anki";
+            enable = lib.mkEnableOption {
+              description = "Enables anki";
+              default = false;
+            };
         };
         google-earth = {
-            enable = lib.mkEnableOption "enables Google-Earth";
+            enable = lib.mkEnableOption {
+              description = "Enables google Earth Pro";
+              default = false;
+            };
         };
     };
 
     config = lib.mkMerge [
         (lib.mkIf config.anki.enable {
-          environment.packages = [ pkgs.unstable.anki-bin ];  #Spaced repetition flashcard program
+            environment.systemPackages = with pkgs; [
+                unstable.anki-bin  #Spaced repetition flashcard program
+            ];
         })
         (lib.mkIf config.google-earth.enable {
-          environment.packages = [ pkgs.unstable.googleearth-pro ];  #World sphere viewer
+            environment.systemPackages = with pkgs; [
+                unstable.googleearth-pro #World sphere viewer
+            ];
         })
     ];
 
