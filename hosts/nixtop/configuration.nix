@@ -107,8 +107,8 @@
   services.printing.enable = true;
 
   ## Education
-  #anki.enable = true;  #Spaced repetition flashcard program
-  #google-earth.enable = true;  #World sphere viewer
+  anki.enable = true;  #Spaced repetition flashcard program
+  google-earth.enable = true;  #World sphere viewer
 
   ## Gaming Packages
   openSourceGames.enable = true;  #Open Source gaming platform for GNU/Linux
