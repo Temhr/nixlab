@@ -51,7 +51,7 @@
           environment.systemPackages = with pkgs; [ unstable.darktable ];  #Virtual lighttable and darkroom for photographers
         })
         (lib.mkIf config.gimp.enable {
-          environment.systemPackages = with pkgs; [ unstable.gimp-with-plugins ];  #GNU Image Manipulation Program
+          environment.systemPackages = with pkgs; [ unstable.gimp3-with-plugins ];  #GNU Image Manipulation Program
         })
         (lib.mkIf config.godot.enable {
           environment.systemPackages = with pkgs; [ unstable.godot unstable.godot-export-templates];  #Free and Open Source 2D and 3D game engine
