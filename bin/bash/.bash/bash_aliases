@@ -54,6 +54,9 @@ alias nboot='sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot'
 alias nbootl='sudo nixos-rebuild boot --flake /home/temhr/nixlab && sudo reboot'
 alias nlist='nixos-rebuild list-generations'
 
+##Nix-Shell
+alias ns='nix-shell -p'
+
 ## Check video drivers in use
 alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
 ## Check active GPU driver
