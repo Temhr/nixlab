@@ -47,13 +47,13 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.audacity.enable {
-          environment.systemPackages = with pkgs; [ unstable.audacity ];  #Sound editor with graphical UI
+          environment.systemPackages = with pkgs; [ audacity ];  #Sound editor with graphical UI
         })
         (lib.mkIf config.kdenlive.enable {
-          environment.systemPackages = with pkgs; [ unstable.kdePackages.kdenlive ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+          environment.systemPackages = with pkgs; [ kdePackages.kdenlive ];  #Free and open source video editor, based on MLT Framework and KDE Frameworks
         })
         (lib.mkIf config.media-downloader.enable {
-          environment.systemPackages = with pkgs; [ unstable.media-downloader ];  #Qt/C++ GUI front end for yt-dlp and others
+          environment.systemPackages = with pkgs; [ media-downloader ];  #Qt/C++ GUI front end for yt-dlp and others
         })
         (lib.mkIf config.obs.enable {
             programs.obs-studio = {
@@ -62,7 +62,7 @@
             };
         })
         (lib.mkIf config.openshot.enable {
-          environment.systemPackages = with pkgs; [ unstable.openshot-qt ];  #Free, open-source video editor
+          environment.systemPackages = with pkgs; [ openshot-qt ];  #Free, open-source video editor
         })
         (lib.mkIf config.spotify.enable {
           environment.systemPackages = with pkgs; [ spotify ];  #Play music from the Spotify music service

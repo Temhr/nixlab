@@ -18,12 +18,12 @@
     config = lib.mkMerge [
         (lib.mkIf config.anki.enable {
             environment.systemPackages = with pkgs; [
-                unstable.anki-bin  #Spaced repetition flashcard program
+                anki-bin  #Spaced repetition flashcard program
             ];
         })
         (lib.mkIf config.google-earth.enable {
             environment.systemPackages = with pkgs; [
-                unstable.googleearth-pro #World sphere viewer
+                googleearth-pro #World sphere viewer
             ];
         })
     ];

@@ -42,25 +42,23 @@
     config = lib.mkMerge [
         (lib.mkIf config.blender.enable {
           environment.systemPackages = with pkgs; [          #3D Creation/Animation/Publishing System
-            (unstable.blender.override {cudaSupport=true;})   #Explicit CUDA support, but long compile time
-            #unstable.blender                                   #unstable pkg
-            #blender                                           #stable pkg
+            (blender.override {cudaSupport=true;})   #Explicit CUDA support, but long compile time
           ];
         })
         (lib.mkIf config.darktable.enable {
-          environment.systemPackages = with pkgs; [ unstable.darktable ];  #Virtual lighttable and darkroom for photographers
+          environment.systemPackages = with pkgs; [ darktable ];  #Virtual lighttable and darkroom for photographers
         })
         (lib.mkIf config.gimp.enable {
-          environment.systemPackages = with pkgs; [ unstable.gimp3-with-plugins ];  #GNU Image Manipulation Program
+          environment.systemPackages = with pkgs; [ gimp3-with-plugins ];  #GNU Image Manipulation Program
         })
         (lib.mkIf config.godot.enable {
-          environment.systemPackages = with pkgs; [ unstable.godot unstable.godot-export-templates];  #Free and Open Source 2D and 3D game engine
+          environment.systemPackages = with pkgs; [ godot godot-export-templates];  #Free and Open Source 2D and 3D game engine
         })
         (lib.mkIf config.inkscape.enable {
-          environment.systemPackages = with pkgs; [ unstable.inkscape-with-extensions ];  #Vector graphics editor
+          environment.systemPackages = with pkgs; [ inkscape-with-extensions ];  #Vector graphics editor
         })
         (lib.mkIf config.krita.enable {
-          environment.systemPackages = with pkgs; [ unstable.krita ];  #Free and open source painting application
+          environment.systemPackages = with pkgs; [ krita ];  #Free and open source painting application
         })
     ];
 

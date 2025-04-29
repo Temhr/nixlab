@@ -17,10 +17,10 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.calibre.enable {
-          environment.systemPackages = [ pkgs.calibre ];  #Comprehensive e-book software
+          environment.systemPackages = with pkgs; [ calibre ];  #Comprehensive e-book software
         })
         (lib.mkIf config.libreoffice.enable {
-          environment.systemPackages = [ pkgs.libreoffice-fresh ];  #Comprehensive, professional-quality productivity suite
+          environment.systemPackages = with pkgs; [ libreoffice-fresh ];  #Comprehensive, professional-quality productivity suite
         })
     ];
 

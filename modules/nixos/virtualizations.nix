@@ -53,10 +53,10 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.bottles.enable {
-          environment.systemPackages = [ pkgs.bottles ];  #Easy-to-use wineprefix manager
+          environment.systemPackages = with pkgs; [ bottles ];  #Easy-to-use wineprefix manager
         })
         (lib.mkIf config.distrobox.enable {
-          environment.systemPackages = [ pkgs.distrobox ];  #Wrapper around podman or docker to create and start containers
+          environment.systemPackages = with pkgs; [ distrobox ];  #Wrapper around podman or docker to create and start containers
         })
         (lib.mkIf config.incus.enable {
           virtualisation.incus.enable = true;
@@ -121,10 +121,10 @@
           ];
         })
         (lib.mkIf config.podman.enable {
-          environment.systemPackages = [ pkgs.podman ];  #A program for managing pods, containers and container images
+          environment.systemPackages = with pkgs; [ podman ];  #A program for managing pods, containers and container images
         })
         (lib.mkIf config.quickemu.enable {
-          environment.systemPackages = [ pkgs.quickemu ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+          environment.systemPackages = with pkgs; [ quickemu ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines

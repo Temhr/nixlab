@@ -17,13 +17,13 @@
 
     config = lib.mkMerge [
         (lib.mkIf config.brave.enable {
-          home.packages = [ pkgs.brave ];  #Privacy-oriented browser for Desktop and Laptop computerse
+          home.packages = with pkgs; [ brave ];  #Privacy-oriented browser for Desktop and Laptop computerse
         })
         (lib.mkIf config.chrome.enable {
-          home.packages = [ pkgs.google-chrome ];  #Freeware web browser developed by Google
+          home.packages = with pkgs; [ google-chrome ];  #Freeware web browser developed by Google
         })
         (lib.mkIf config.edge.enable {
-          home.packages = [ pkgs.microsoft-edge ];  #The web browser from Microsoft
+          home.packages = with pkgs; [ microsoft-edge ];  #The web browser from Microsoft
         })
         (lib.mkIf config.zen.enable {
           home.packages = [ inputs.zen-browser.packages.x86_64-linux.beta ];  #
