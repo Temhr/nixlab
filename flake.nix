@@ -2,8 +2,10 @@
   description = "Modular Nix Config";
 
   inputs = {
-    # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    # Base/Default Nixpkgs
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Also see the 'stable-packages' overlay at 'overlays/default.nix'.
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     # Home manager
