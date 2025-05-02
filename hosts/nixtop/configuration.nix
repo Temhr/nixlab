@@ -28,30 +28,7 @@
       ./nvidia.nix
   ];
 
-  nixpkgs = {
-    # You can add overlays here
-    overlays = [
-      # Add overlays your own flake exports (from overlays and pkgs dir):
-      outputs.overlays.additions
-      outputs.overlays.modifications
-      outputs.overlays.unstable-packages
 
-      # You can also add overlays exported from other flakes:
-      # neovim-nightly-overlay.overlays.default
-
-      # Or define it inline, for example:
-      # (final: prev: {
-      #   hi = final.hello.overrideAttrs (oldAttrs: {
-      #     patches = [ ./change-hello-to-hi.patch ];
-      #   });
-      # })
-    ];
-    # Configure your nixpkgs instance
-    config = {
-      # Disable if you don't want unfree packages
-      allowUnfree = true;
-    };
-  };
 
   nix = let
     flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
@@ -90,8 +67,6 @@
   # TODO: Set your hostname
   networking.hostName = "nixtop";
 
-  wallpaper.enable = true;
-
   ## Enable Syncthing (only for this host)
   synctop.enable = false;
 
@@ -115,7 +90,7 @@
   steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Communication
-  discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
+  #discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
 
   ## Productivity
   calibre.enable = true;  #Comprehensive e-book software
@@ -131,13 +106,13 @@
   vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Virtualizations
-  bottles.enable = true;    #Easy-to-use wineprefix manager
-  distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  incus.enable = true;   #Powerful system container and virtual machine manager
-  podman.enable = true;    #A program for managing pods, containers and container images
-  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
-  virt-manager.enable = true;    #Desktop user interface for managing virtual machines
-  wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
+  #bottles.enable = true;    #Easy-to-use wineprefix manager
+  #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
+  #incus.enable = true;   #Powerful system container and virtual machine manager
+  #podman.enable = true;    #A program for managing pods, containers and container images
+  #quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
+  #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
@@ -145,7 +120,7 @@
   gimp.enable = true;    #GNU Image Manipulation Program
   godot.enable = true;    #Free and Open Source 2D and 3D game engine
   inkscape.enable = true;    #Vector graphics editor
-  krita.enable = true;    #Free and open source painting application
+  #krita.enable = true;    #Free and open source painting application
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

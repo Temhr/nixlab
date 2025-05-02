@@ -13,6 +13,7 @@
     ./flatpak.nix
     ./home-manager.nix
     ./locale.nix
+    ./nixpkgs.nix
     ./open-ssh.nix
     ./users.nix
     ./utilities.nix
