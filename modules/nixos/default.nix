@@ -6,7 +6,6 @@
     ./communication.nix
     ./education.nix
     ./games.nix
-    ./kde-plasma.nix
     ./productivity.nix
     ./media.nix
     ./syncthing.nix
