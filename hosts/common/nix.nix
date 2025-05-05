@@ -28,7 +28,7 @@
     gc = {
       automatic = true;
       dates = "*-*-* 02:00:00";
-      options = "--delete-older-than 10d";
+      options = "--delete-older-than 5d";
     };
     ## Optimize storage (only for incoming/new files)
     settings.auto-optimise-store = true;
