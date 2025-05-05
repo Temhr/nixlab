@@ -12,9 +12,9 @@
     colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
     doas  #Executes the given command as another user
     eza  #Modern, maintained replacement for ls
-    unstable.fastfetch  #Like neofetch, but much faster because written in C
-    unstable.fzf  #Command-line fuzzy finder written in Go
-    unstable.git #Distributed version control system
+    fastfetch  #Like neofetch, but much faster because written in C
+    fzf  #Command-line fuzzy finder written in Go
+    git #Distributed version control system
     jq  #Lightweight and flexible command-line JSON processor
     less  #More advanced file pager (program that displays text files) than 'more'
     libxml2  #XML parsing library for C
@@ -89,8 +89,8 @@
     ##Applications
 
     kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
-    unstable.kdePackages.kcalc  #Calculator offering everything a scientific calculator does, and more
-    unstable.home-manager  #Nix-based user environment configurator
+    kdePackages.kcalc  #Calculator offering everything a scientific calculator does, and more
+    home-manager  #Nix-based user environment configurator
     # Media
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
     unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
