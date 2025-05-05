@@ -11,8 +11,6 @@
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
     # outputs.nixosModules.example
-    ../../cachix.nix
-    ../../modules/nixos
 
     # Or modules from other flakes (such as nixos-hardware):
     # inputs.hardware.nixosModules.common-cpu-amd
@@ -20,7 +18,8 @@
 
     # You can also split up your configuration and import pieces of it here:
     ../common
-    #../globals/dotbashfiles.nix
+    ../../cachix.nix
+    ../../modules/nixos
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
@@ -38,7 +37,7 @@
   networking.hostName = "nixser";
 
   ## Enable Syncthing (only for this host)
-  syncser.enable = true;
+  syncthing.system = "nixser";
 
   ## Enable networking
   networking.networkmanager.enable = true;
