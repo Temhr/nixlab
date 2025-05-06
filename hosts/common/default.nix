@@ -6,9 +6,9 @@
     ./optional
     ./audio.nix
     ./auto-backup-home.nix
+    ./auto-git-pull.nix
     ./auto-move-files.nix
-    ./auto-pull.nix
-    ./auto-upgrade.nix
+    ./auto-upgrade-system.nix
     ./firefox.nix
     ./flatpak.nix
     ./home-manager.nix

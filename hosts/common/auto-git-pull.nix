@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  gitpullShellScript = pkgs.writeShellScript "nixlab-git-pull" ( builtins.readFile ../../bin/nixlab-git-pull.sh );
+  gitpullShellScript = pkgs.writeShellScript "auto-git-pull" ( builtins.readFile ../../scripts/auto-git-pull.sh );
 in
 {
   systemd.timers.git-pull = {

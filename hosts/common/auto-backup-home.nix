@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  backuphomeShellScript = pkgs.writeShellScript "backup-home" ( builtins.readFile ../../bin/backup-home.sh );
+  backuphomeShellScript = pkgs.writeShellScript "auto-backup-home" ( builtins.readFile ../../scripts/auto-backup-home.sh );
 in
 {
 
