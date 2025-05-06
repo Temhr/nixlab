@@ -5,7 +5,7 @@ in
 {
 
   systemd.services.backup-home = {
-    description = "Nightly Home directry backup";
+    description = "Nightly Home directory backup";
     serviceConfig = {
       ExecStart = BackupHomeShellScript;
       Type = "oneshot";

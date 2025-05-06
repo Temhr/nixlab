@@ -19,7 +19,7 @@ in
 
 {
   systemd.services.move-files = {
-    description = "Move Bash and Config Files";
+    description = "Nightly copy/move bash and config Files";
     serviceConfig ={
       ExecStart = MoveFilesShellScript;
       Type = "oneshot";

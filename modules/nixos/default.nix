@@ -8,7 +8,6 @@
     ./games.nix
     ./productivity.nix
     ./media.nix
-    ./syncthing.nix
     ./virtualizations.nix
   ];
 
