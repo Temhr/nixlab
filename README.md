@@ -63,7 +63,7 @@ Aspirational
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
-- **lib**: templates and othe nix-code
+- **lib**: templates and other nix-code
 - **modules**: custom configuration settings and options
   - **home-manager**: user-relevant preferences and extensions
   - **nixos**: system-relevant modules
