@@ -10,8 +10,10 @@
     ./auto-move-files.nix
     ./auto-nix-gc.nix
     ./auto-nixos-upgrade.nix
+    ./boot-loader.nix
     ./firefox.nix
     ./flatpak.nix
+    ./hardware.nix
     ./home-manager.nix
     ./locale.nix
     ./nix.nix
