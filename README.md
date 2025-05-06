@@ -56,7 +56,7 @@ Aspirational
 # Repository Layout
 - **bin**: various user config files
 - **cachix**: prebuilt cached binaries to pull
-- **home-manager**: user level configurations
+- **home**: user level configurations (home manager)
 - **hosts**: system level configurations
   - **common**: host-agnostic configs (applications, programs, services, user-account, etc.)
   - **nixace**: workstation config.nix file
