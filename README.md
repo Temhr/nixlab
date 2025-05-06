@@ -56,18 +56,20 @@ Aspirational
 # Repository Layout
 - **bin**: various user config files
 - **cachix**: prebuilt cached binaries to pull
-- **home**: user level configurations (home manager)
+- **home**: user level configurations (home manager) 
+  - **common**: user-agnostic settings and options
+  - **temhr**: user-specfic preferences
 - **hosts**: system level configurations
-  - **common**: host-agnostic configs (applications, programs, services, user-account, etc.)
+  - **common**: host-agnostic applications, programs, services, etc.
   - **nixace**: workstation config.nix file
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
 - **lib**: templates and other nix-code
-- **modules**: custom configuration settings and options
-  - **home-manager**: user-relevant preferences and extensions
+- **modules**: custom configuration
+  - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
-- **overlays**: custom overrides of nixpkgs
+- **overlays**: custom overrides and extensions
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom written packages
   - empty
