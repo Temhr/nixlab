@@ -42,10 +42,8 @@
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Graphical Shells
-  #gnome.enable = true; #Gnome - Desktop Environment
-  plasma.enable = true; #KDE - Desktop Environment
-  #sway.enable = true;  #Wayland Compositor NEEDS WORK
+  ## Graphical Shells ("none" "gnome" "plasma6")
+  gShells.DE = "plasma6";
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
