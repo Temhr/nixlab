@@ -1,4 +1,4 @@
-{ rootPath, ... }:
+{ ... }:
 {
   imports = [
     # Paths to other modules.
