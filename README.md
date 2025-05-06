@@ -54,7 +54,7 @@ Aspirational
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
 # Repository Layout
-- **bin**: various user files and shell scripts
+- **bin**: various user config files
 - **cachix**: prebuilt cached binaries to pull
 - **home-manager**: user level configurations
 - **hosts**: system level configurations
@@ -63,7 +63,7 @@ Aspirational
   - **nixbase**: stationary config.nix file
   - **nixser**: server config.nix file
   - **nixtop**: laptop config.nix file
-- **lib**: Unused nix-code dump
+- **lib**: templates and othe nix-code
 - **modules**: custom configuration settings and options
   - **home-manager**: user-relevant preferences and extensions
   - **nixos**: system-relevant modules
@@ -71,5 +71,6 @@ Aspirational
   - **default**: allows for nixos-unstable repository as pkgs.unstable
 - **pkgs**: custom written packages
   - empty
+- **scripts**: various shell scripts
 -  flake.nix: entry point
 -  flake.lock: version pinner
