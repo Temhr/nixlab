@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:{
+{ ... }:{
   system.autoUpgrade = {
     enable = true;
     operation = "boot"; #switch or boot
