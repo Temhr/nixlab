@@ -1,9 +1,7 @@
 { ... }: {
-
   programs.firefox = {
     enable = true;
     languagePacks = [ "en-CA" ];
-
     /* ---- POLICIES ---- */
     # Check about:policies#documentation for options.
     policies = {
@@ -27,7 +25,6 @@
       OverridePostUpdatePage = "";  #blank if you want to disable the post-update page
       RequestedLocales = "en-CA";
       SearchBar = "unified"; # alternative: "separate"
-
       /* ---- EXTENSIONS ---- */
       # Check about:support for extension/add-on ID strings.
       # Valid strings for installation_mode are "allowed", "blocked",
@@ -97,5 +94,4 @@
       };
     };
   };
-
 }

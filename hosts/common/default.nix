@@ -21,13 +21,11 @@
     ./users.nix
     ./utilities.nix
   ];
-
   options = {
     # Option declarations.
     # Declare what settings a user of this module can set.
     # Usually this includes a global "enable" option which defaults to false.
   };
-
   config = {
     # Option definitions.
     # Define what other settings, services and resources should be active.

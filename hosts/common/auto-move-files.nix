@@ -1,5 +1,4 @@
 { pkgs, ... }:
-
 let
     MoveFilesShellScript = pkgs.writeShellScript "auto-move-files.sh" ''
        cp /home/temhr/nixlab/bin/bash/.bash_profile /home/temhr/.bash_profile &&
@@ -16,7 +15,6 @@ let
 
     '';
 in
-
 {
   systemd.services.move-files = {
     description = "Nightly copy/move bash and config Files";
