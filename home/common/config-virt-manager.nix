@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:{
+{ ... }: {
 
   ## Removes initial virt-manager warning
   dconf.settings = {
