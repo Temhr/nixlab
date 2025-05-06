@@ -59,7 +59,7 @@
   steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Communication
-  #discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
+  discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
 
   ## Productivity
   calibre.enable = true;  #Comprehensive e-book software
@@ -100,7 +100,6 @@
     pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
     scons  #Improved, cross-platform substitute for Make
     python3Full  #High-level dynamically-typed programming language
-
 
   ];
 

@@ -58,6 +58,9 @@
   #openSourceGames.enable = true;  #Open Source gaming platform for GNU/Linux
   #steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
+  ## Communication
+  #discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
+
   ## Productivity
   #calibre.enable = true;  #Comprehensive e-book software
   #libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
@@ -97,9 +100,6 @@
     #pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
     #scons  #Improved, cross-platform substitute for Make
     #python3Full  #High-level dynamically-typed programming language
-
-    ## Communication
-    #discord  #All-in-one cross-platform voice and text chat for gamers
 
   ];
 
