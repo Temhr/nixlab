@@ -1,4 +1,3 @@
-
 { ... }: {
 
   # Use the systemd-boot EFI boot loader.

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 let
     MoveFilesShellScript = pkgs.writeShellScript "auto-move-files.sh" ''

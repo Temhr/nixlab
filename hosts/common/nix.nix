@@ -1,10 +1,4 @@
-{
-  inputs,
-  outputs,
-  lib,
-  config,
-  pkgs,
-  ...}: {
+{ inputs, lib, config, ...}: {
 
   nix = let
     flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;

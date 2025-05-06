@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 let
   GitPullShellScript = pkgs.writeShellScript "auto-git-pull" ( builtins.readFile ../../scripts/auto-git-pull.sh );
 in
