@@ -4,7 +4,7 @@ let
 in
 {
 
-  systemd.services.autoBH = {
+  systemd.services.backup-home = {
     description = "Nightly Home directry backup";
     serviceConfig = {
       ExecStart = BackupHomeShellScript;

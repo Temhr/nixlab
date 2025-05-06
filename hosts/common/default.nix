@@ -8,7 +8,7 @@
     ./auto-backup-home.nix
     ./auto-git-pull.nix
     ./auto-move-files.nix
-    ./auto-upgrade-system.nix
+    ./auto-nixos-upgrade.nix
     ./firefox.nix
     ./flatpak.nix
     ./home-manager.nix

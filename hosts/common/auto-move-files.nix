@@ -18,7 +18,7 @@ let
 in
 
 {
-  systemd.services.autoMF = {
+  systemd.services.move-files = {
     description = "Move Bash and Config Files";
     serviceConfig ={
       ExecStart = MoveFilesShellScript;
