@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-    MoveBash = pkgs.writeShellScript "MoveBash.sh" ''
+    MoveFilesShellScript = pkgs.writeShellScript "auto-move-files.sh" ''
        cp /home/temhr/nixlab/bin/bash/.bash_profile /home/temhr/.bash_profile &&
        cp /home/temhr/nixlab/bin/bash/.bashrc /home/temhr/.bashrc &&
        cp /home/temhr/nixlab/bin/bash/.bash/bash_aliases /home/temhr/.bash/bash_aliases &&
@@ -18,10 +18,10 @@ let
 in
 
 {
-  systemd.services.MoveBash = {
-    description = "Move Bash Files";
+  systemd.services.autoMF = {
+    description = "Move Bash and Config Files";
     serviceConfig ={
-      ExecStart = MoveBash;
+      ExecStart = MoveFilesShellScript;
       Type = "oneshot";
       User = "temhr";
     };

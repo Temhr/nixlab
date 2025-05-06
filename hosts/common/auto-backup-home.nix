@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 let
-  backuphomeShellScript = pkgs.writeShellScript "auto-backup-home" ( builtins.readFile ../../scripts/auto-backup-home.sh );
+  BackupHomeShellScript = pkgs.writeShellScript "auto-backup-home" ( builtins.readFile ../../scripts/auto-backup-home.sh );
 in
 {
 
-  systemd.services.backup-home = {
-    description = "script write";
+  systemd.services.autoBH = {
+    description = "Nightly Home directry backup";
     serviceConfig = {
-      ExecStart = backuphomeShellScript;
+      ExecStart = BackupHomeShellScript;
       Type = "oneshot";
       User = "root";
     };

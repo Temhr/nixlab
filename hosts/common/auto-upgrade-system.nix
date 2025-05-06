@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }:{
-  system.autoUpgrade = {
+  system.autoUS = {
     enable = true;
     operation = "boot"; #switch or boot
     flake = "github:Temhr/nixlab"; #Flake URI of the NixOS configuration to build

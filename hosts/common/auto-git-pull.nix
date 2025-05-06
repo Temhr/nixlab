@@ -1,21 +1,21 @@
 { config, lib, pkgs, ... }:
 let
-  gitpullShellScript = pkgs.writeShellScript "auto-git-pull" ( builtins.readFile ../../scripts/auto-git-pull.sh );
+  GitPullShellScript = pkgs.writeShellScript "auto-git-pull" ( builtins.readFile ../../scripts/auto-git-pull.sh );
 in
 {
-  systemd.timers.git-pull = {
+  systemd.timers.autoGP = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
       OnUnitActiveSec = "60min";
-      Unit = "git-pull.service";
+      Unit = "autoGP.service";
     };
   };
 
-  systemd.services.git-pull = {
-    description = "script write";
+  systemd.services.autoGP = {
+    description = "Hourly nixlab git pull";
     serviceConfig = {
-      ExecStart = gitpullShellScript;
+      ExecStart = GitPullShellScript;
       Type = "oneshot";
       User = "temhr";
     };
