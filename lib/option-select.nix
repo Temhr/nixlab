@@ -1,12 +1,12 @@
 { config, lib, ... }:
 
 let
-  cfg = config.group;
+  cfg = config.GROUP;
 in {
   options = {
-    group = {
-      choice = lib.mkOption {
-        type = lib.types.enum [ "none" "one" "two" "three" ];
+    GROUP = {
+      CHOICE = lib.mkOption {
+        type = lib.types.enum [ "none" "ONE" "TWO" "THREE" ];
         default = "none";
         description = "Select which between three options or none";
       };
@@ -14,18 +14,18 @@ in {
   };
 
   config = lib.mkMerge [
-    (lib.mkIf (cfg.choice == "one") {
+    (lib.mkIf (cfg.CHOICE == "ONE") {
 
     })
-    (lib.mkIf (cfg.choice == "two") {
+    (lib.mkIf (cfg.CHOICE == "TWO") {
 
     })
-    (lib.mkIf (cfg.choice == "three") {
+    (lib.mkIf (cfg.CHOICE == "THREE") {
 
     })
   ];
 }
 
 ## Goes in config file
-# Choose between these choices: "none" "one" "two" "three"
-# group.choice = "two";
+# Choose between these choices: "none" "ONE" "TWO" "THREE"
+# GROUP.CHOICE = "TWO";
