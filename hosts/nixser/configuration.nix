@@ -36,7 +36,7 @@
   # TODO: Set your hostname
   networking.hostName = "nixser";
 
-  ## Enable Syncthing (only for this host)
+  ## Enable Syncthing ("hostname" or "none")
   syncthing.system = "nixser";
 
   ## Enable networking
