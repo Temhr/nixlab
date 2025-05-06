@@ -56,15 +56,15 @@ Aspirational
 # Repository Layout
 - **bin**: various user config files
 - **cachix**: prebuilt cached binaries to pull
-- **home**: user level configurations (home manager) 
+- **home**: user level configuration.nix (home manager) 
   - **common**: user-agnostic settings and options
   - **temhr**: user-specfic preferences
-- **hosts**: system level configurations
-  - **common**: host-agnostic applications, programs, services, etc.
-  - **nixace**: workstation config.nix file
-  - **nixbase**: stationary config.nix file
-  - **nixser**: server config.nix file
-  - **nixtop**: laptop config.nix file
+- **hosts**: system level configuration.nix
+  - **common**: host-agnostic applications, programs, services, users, etc.
+  - **nixace**: host-specfic files - workstation
+  - **nixbase**: host-specfic files - stationary
+  - **nixser**: host-specfic files - server
+  - **nixtop**: host-specfic files - laptop
 - **lib**: templates and other nix-code
 - **modules**: custom configuration
   - **home-manager**: user-relevant modules
