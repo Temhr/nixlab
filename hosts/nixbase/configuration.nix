@@ -30,17 +30,17 @@
   # TODO: Set your hostname
   networking.hostName = "nixbase";
 
-  ## Enable Syncthing ("hostname" or "none")
-  syncthing.system = "nixbase";
-
   ## Enable networking
   networking.networkmanager.enable = true;
 
-  ## Graphical Shells ("none" "gnome" "plasma6")
-  gShells.DE = "plasma6";
-
   ## Enable CUPS to print documents.
   services.printing.enable = true;
+
+  ## Enable Syncthing ("hostname" or "none")
+  syncthing.system = "nixbase";
+
+  ## Graphical Shells ("none" "gnome" "plasma6")
+  gShells.DE = "plasma6";
 
   ## Education
   #anki.enable = true;  #Spaced repetition flashcard program
