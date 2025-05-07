@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  BackupHomeShellScript = pkgs.writeShellScript "auto-backup-home" ( builtins.readFile ../../scripts/auto-backup-home.sh );
+  BackupHomeShellScript = pkgs.writeShellScript "auto-backup-home" ( builtins.readFile ../../../scripts/auto-backup-home.sh );
 in
 {
   systemd.services.backup-home = {
