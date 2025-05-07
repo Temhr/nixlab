@@ -1,6 +1,0 @@
-[AC][Performance]
-PowerProfile=performance
-
-[AC][SuspendAndShutdown]
-AutoSuspendAction=0
-LidAction=0
