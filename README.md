@@ -64,7 +64,7 @@ Aspirational
   - **common**: host-agnostic programs, services, users, etc.
     - **core**: universal to all hosts
     - **optional**: host selection required
-  - **files**: various host related files and scripts
+  - **files**: various host related scripts
   - **nixace**: host-specfic preferences - workstation
   - **nixbase**: host-specfic preferences - stationary
   - **nixser**: host-specfic preferences - server
