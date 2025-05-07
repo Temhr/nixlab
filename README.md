@@ -58,7 +58,7 @@ Aspirational
   - **common**: user-agnostic settings and options
     - **core**: universal to all users
     - **optional**: user selection required
-  - **temhr**: user-specfic preferences and files
+  - **temhr**: user-specfic preferences, files and
 - **hosts**: system level configurations
   - **common**: host-agnostic programs, services, users, etc.
     - **core**: universal to all hosts
