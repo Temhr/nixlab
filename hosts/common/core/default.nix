@@ -2,7 +2,6 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./optional
     ./audio.nix
     ./auto-backup-home.nix
     ./auto-git-pull.nix
