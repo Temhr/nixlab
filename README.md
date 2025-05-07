@@ -53,7 +53,6 @@ Aspirational
   - **Cachix**: ` $ sudo cachix use [package_name]`
 
 # Repository Layout
-- **bin**: various user config files
 - **cachix**: prebuilt cached binaries to pull
 - **home**: user level configurations (home manager) 
   - **common**: user-agnostic settings and options
