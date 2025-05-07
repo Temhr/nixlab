@@ -2,23 +2,8 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./users
-    ./audio.nix
-    ./auto-backup-home.nix
-    ./auto-git-pull.nix
-    ./auto-move-files.nix
-    ./auto-nix-gc.nix
-    ./auto-nixos-upgrade.nix
-    ./bluetooth.nix
-    ./boot-loader.nix
-    ./display-manager.nix
-    ./firefox.nix
-    ./flatpak.nix
-    ./locale.nix
-    ./nix.nix
-    ./nixpkgs.nix
-    ./open-ssh.nix
-    ./utilities.nix
+    ./home-manager.nix
+    ./users.nix
   ];
   options = {
     # Option declarations.
