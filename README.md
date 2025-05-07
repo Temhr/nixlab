@@ -57,15 +57,17 @@ Aspirational
 - **cachix**: prebuilt cached binaries to pull
 - **home**: user level configurations (home manager) 
   - **common**: user-agnostic settings and options
-  - **temhr**: user-specfic preferences
+    - **core**: universal to all users
+    - **optional**: user selection required
+  - **temhr**: user-specfic preferences and files
 - **hosts**: system level configurations
   - **common**: host-agnostic programs, services, users, etc.
-    - **core**: universal to all
-    - **optional**: selection required
-  - **nixace**: host-specfic files - workstation
-  - **nixbase**: host-specfic files - stationary
-  - **nixser**: host-specfic files - server
-  - **nixtop**: host-specfic files - laptop
+    - **core**: universal to all hosts
+    - **optional**: host selection required
+  - **nixace**: host-specfic preferences and files - workstation
+  - **nixbase**: host-specfic preferences and files - stationary
+  - **nixser**: host-specfic preferences and files - server
+  - **nixtop**: host-specfic preferences and files - laptop
 - **lib**: templates and other nix-code
 - **modules**: encapsulated nix expressions and customized applications
   - **home-manager**: user-relevant modules
