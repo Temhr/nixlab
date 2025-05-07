@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  GitPullShellScript = pkgs.writeShellScript "auto-git-pull" ( builtins.readFile ../../scripts/auto-git-pull.sh );
+  GitPullShellScript = pkgs.writeShellScript "auto-git-pull" ( builtins.readFile ../../../scripts/auto-git-pull.sh );
 in
 {
   systemd.timers.git-pull = {
