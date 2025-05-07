@@ -74,7 +74,7 @@
     ## Text Editors
     nano  #Small, user-friendly console text editor
     vim  #The most popular clone of the VI editor
-    unstable.neovim  #Vim text editor fork focused on extensibility and agility
+    neovim  #Vim text editor fork focused on extensibility and agility
       alejandra #Uncompromising Nix Code Formatter
     zed  #Novel data lake based on super-structured data
 
@@ -93,7 +93,7 @@
     home-manager  #Nix-based user environment configurator
     # Media
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
-    unstable.scrcpy  #Display and control Android devices over USB or TCP/IP
+    scrcpy  #Display and control Android devices over USB or TCP/IP
     simplescreenrecorder  #A screen recorder for Linux
 
   ];
