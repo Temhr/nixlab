@@ -21,6 +21,7 @@
     ../common/optional
     ../../modules/home-manager
     ./auto-git-pull.nix
+    ./auto-move-files.nix
   ];
 
   # Add stuff for your user as you see fit:
