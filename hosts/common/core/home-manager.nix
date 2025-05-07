@@ -7,7 +7,7 @@
     extraSpecialArgs = { inherit inputs outputs; };
     users = {
       # Import your home-manager configuration
-      temhr = import ../../home/temhr.nix;
+      temhr = import ../../../home/temhr.nix;
     };
   };
 }
