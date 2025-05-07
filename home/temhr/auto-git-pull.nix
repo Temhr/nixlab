@@ -6,7 +6,7 @@ let
 in
 {
   systemd.user.timers.git-pull = {
-    wantedBy = [ "timers.target" ]; # ⬅️ This ensures it starts automatically
+    wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "1min";
       OnUnitActiveSec = "60min";
@@ -15,8 +15,10 @@ in
   };
 
   systemd.user.services.git-pull = {
-    description = "Hourly nixlab git pull (user service)";
-    serviceConfig = {
+    Unit = {
+      Description = "Hourly nixlab git pull (user service)";
+    };
+    Service = {
       ExecStart = "${GitPullShellScript}";
       Type = "oneshot";
     };
