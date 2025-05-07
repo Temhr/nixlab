@@ -15,11 +15,7 @@
         git-credential-keepassxc  #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
       ];
 
-      programs.git = {
-        enable = true;  #Distributed version control system
-        userName  = "Temhr";
-        userEmail = "9110264+Temhr@users.noreply.github.com";
-      };
+      programs.git.enable = true;  #Distributed version control system
       programs.lazygit.enable = true;  #A simple terminal UI for git commands
     })
   ];
