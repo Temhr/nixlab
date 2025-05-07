@@ -6,11 +6,16 @@ let
 in
 {
   systemd.user.timers.git-pull = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
+    Unit = {
+      Description = "Run git pull every hour";
+    };
+    Timer = {
       OnBootSec = "1min";
       OnUnitActiveSec = "60min";
       Unit = "git-pull.service";
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
     };
   };
 
