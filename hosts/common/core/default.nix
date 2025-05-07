@@ -10,6 +10,7 @@
     ./auto-nixos-upgrade.nix
     ./bluetooth.nix
     ./boot-loader.nix
+    ./display-manager.nix
     ./firefox.nix
     ./flatpak.nix
     ./home-manager.nix
