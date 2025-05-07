@@ -24,8 +24,8 @@
 
   # Add stuff for your user as you see fit:
   home = {
-    username = "temhr";
-    homeDirectory = "/home/temhr";
+    username = "guest";
+    homeDirectory = "/home/guest";
     #Environment Variables
     sessionVariables = {
     };
@@ -39,14 +39,12 @@
 
   # Git Config
   git.enable = true;  #Distributed version control system
-  programs.git.userName  = "Temhr";
-  programs.git.userEmail = "9110264+Temhr@users.noreply.github.com";
 
   # Extra Browsers
   brave.enable = true;
   chrome.enable = true;
-  edge.enable = true;
-  zen.enable = true;
+  #edge.enable = true;
+  #zen.enable = true;
 
   ## Extra Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator

@@ -8,6 +8,7 @@
     users = {
       # Import your home-manager configuration
       temhr = import ../../../home/temhr/configuration.nix;
+      guest = import ../../../home/guest/configuration.nix;
     };
   };
 }
