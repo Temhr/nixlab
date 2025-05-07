@@ -41,7 +41,6 @@ Aspirational
 - Custom packages and services
 - Secret management system
 - Impermanent system; declaratively built on boot and connected to storage drives for data persistence
-- Making possible use of nix related libraries (Snowfall)
 
 # Implementations
 - **Installation**:
