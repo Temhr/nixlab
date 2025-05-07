@@ -5,7 +5,6 @@
     ./users
     ./audio.nix
     ./auto-backup-home.nix
-    ./auto-git-pull.nix
     ./auto-move-files.nix
     ./auto-nix-gc.nix
     ./auto-nixos-upgrade.nix
