@@ -61,6 +61,8 @@ Aspirational
   - **temhr**: user-specfic preferences
 - **hosts**: system level configurations
   - **common**: host-agnostic programs, services, users, etc.
+    - **core**: universal to all
+    - **optional**: selection required
   - **nixace**: host-specfic files - workstation
   - **nixbase**: host-specfic files - stationary
   - **nixser**: host-specfic files - server
