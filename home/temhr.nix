@@ -39,10 +39,6 @@
   # Let home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  ## Enable automatic login for the user.
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "temhr";
-
   # Extra Browsers
   brave.enable = true;
   chrome.enable = true;
