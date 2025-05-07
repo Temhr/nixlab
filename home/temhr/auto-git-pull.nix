@@ -48,3 +48,6 @@ in
     };
   };
 }
+
+#below to check status of .timer or .service
+#systemctl --user status git-pull.timer
