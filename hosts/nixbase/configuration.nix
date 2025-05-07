@@ -37,6 +37,9 @@
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
+  ## Enable automatic login for the user.
+  #services.displayManager.autoLogin.user =  "temhr";
+
   ## Enable Syncthing ("hostname" or "none")
   syncthing.system = "nixbase";
 
