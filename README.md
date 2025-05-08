@@ -81,7 +81,7 @@ Aspirational
   - **nixser**: host-specfic preferences - server
   - **nixtop**: host-specfic preferences - laptop
 - **lib**: templates and other nix-code
-- **modules**: encapsulated nix expressions and customized applications
+- **modules**: encapsulated nix expressions of packaged applications
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
 - **overlays**: custom overrides and extensions
