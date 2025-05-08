@@ -23,7 +23,7 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
 
 # Nixlab Features
 <details>
-<summary>Implimented Nix feature and what they do <i>(click to expand)</i></summary>
+<summary>Implimented features and what they do <i>(click to expand)</i></summary>
 Contains
 - **Cachix**: cache service of prebuilt binaries; speeds installs, avoids compilations 
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
