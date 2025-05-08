@@ -8,6 +8,7 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
 # Nix Ecosystem Terminology
 <details>
 <summary>List of common Nix terms and their definitions <i>(click to expand)</i></summary>
+  
 - Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
   - Nix values: data types that are immutable, can be whole **expressions** themselves, are only computed when needed, and type-error detected at evaluation
 - Nix Expressions: **Nix lang** code (functions) that describes how to build packages or configure systems
@@ -24,6 +25,7 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
 # Nixlab Features
 <details>
 <summary>Implimented features and what they do <i>(click to expand)</i></summary>
+  
 Contains
 - **Cachix**: cache service of prebuilt binaries; speeds installs, avoids compilations 
 - **Flakes**: a schema for writing, referencing, and sharing **Nix expressions**
