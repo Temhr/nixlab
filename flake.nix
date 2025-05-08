@@ -3,7 +3,7 @@
 
   inputs = {
     # Base/Default Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     # Also see the 'stable-packages' overlay at 'overlays/default.nix'.
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
