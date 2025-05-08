@@ -16,7 +16,7 @@
       ];
     };
   fileSystems."/mnt/mirser" =
-    { device = "192.168.0.202:/mirror";
+    { device = "192.168.0.204:/mirror";
       fsType = "nfs";
       options = [
         "x-systemd.automount" "noauto"
