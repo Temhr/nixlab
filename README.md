@@ -74,7 +74,7 @@ Aspirational
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
 - **overlays**: custom overrides and extensions
-  - **default**: allows repository switching (pkgs.unstable, pkgs.stable)
+  - **default**: repository switching via flags (pkgs.unstable, pkgs.stable)
 - **pkgs**: custom written packages
   - empty
 - **scripts**: various shell scripts
