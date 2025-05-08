@@ -59,6 +59,7 @@ Aspirational
     - **core**: universal to all users
     - **optional**: user selection required
   - **files**: various user related files and scripts
+  - **guest**: user-specfic preferences
   - **temhr**: user-specfic preferences
 - **hosts**: system level configurations and files
   - **common**: host-agnostic programs, services, users, etc.
