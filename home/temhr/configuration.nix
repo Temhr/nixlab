@@ -40,7 +40,7 @@
   programs.home-manager.enable = true;
 
   # Git Config
-  git.enable = true;  #Distributed version control system
+  #git.enable = true;  #Distributed version control system
   programs.git.userName  = "Temhr";
   programs.git.userEmail = "9110264+Temhr@users.noreply.github.com";
 
