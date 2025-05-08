@@ -6,6 +6,8 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
 - [Repository Layout](#repository-layout)
 
 # Nix Ecosystem Terminology
+<details>
+<summary>Definitions of terms used</summary>
 - Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
   - Nix values: data types that are immutable, can be whole **expressions** themselves, are only computed when needed, and type-error detected at evaluation
 - Nix Expressions: **Nix lang** code (functions) that describes how to build packages or configure systems
@@ -17,7 +19,7 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
   2) builds packages from **derivations** 
   3) manages the **Nix Store** (handles dependencies, ensures reproducibility), where packages are kept
 - NixOS: Linux distro that has a system configuration entirely built with Nix
-
+</details>
 # Nixlab Features
 Contains
 - **Cachix**: cache service of prebuilt binaries; speeds installs, avoids compilations 
