@@ -53,6 +53,10 @@ Aspirational
 </details>
 
 # Implementations
+<details>
+<summary>Instalation directions and update commands <i>(click to expand)</i></summary>
+<p></p>
+
 - **Installation**:
   1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
   2) First rebuild, with: flakes enabled and a proper hostname,
@@ -61,6 +65,7 @@ Aspirational
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab`
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
   - **Cachix**: ` $ sudo cachix use [package_name]`
+</details>
 
 # Repository Layout
 - **cachix**: prebuilt cached binaries to pull
