@@ -10,7 +10,7 @@
     { device = "/dev/disk/by-label/mirror";
       fsType = "ext4";
     };
-  fileSystems."/mnt/mirser" =
+  fileSystems."/mnt/mirzer" =
     { device = "192.168.0.204:/mirror";
       fsType = "nfs";
       options = [

@@ -41,7 +41,7 @@
   services.displayManager.autoLogin.user =  "temhr";
 
   ## Enable Syncthing ("hostname" or "none")
-  syncthing.system = "nixser";
+  syncthing.system = "none";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";

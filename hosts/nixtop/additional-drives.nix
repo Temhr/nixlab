@@ -15,7 +15,7 @@
         "x-systemd.idle-timeout=60" # disconnects after 60 seconds
       ];
     };
-  fileSystems."/mnt/mirser" =
+  fileSystems."/mnt/mirzer" =
     { device = "192.168.0.204:/mirror";
       fsType = "nfs";
       options = [

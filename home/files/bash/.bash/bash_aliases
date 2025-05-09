@@ -43,6 +43,7 @@ alias nixace='ssh temhr@192.168.0.200'
 alias nixbase='ssh temhr@192.168.0.201'
 alias nixser='ssh temhr@192.168.0.202'
 alias nixtop='ssh temhr@192.168.0.203'
+alias nixzer='ssh temhr@192.168.0.204'
 
 ##NixOS Shortcuts
 alias fup='nix flake update --flake /home/temhr/nixlab'
