@@ -82,9 +82,10 @@ Aspirational
     - **optional**: host selection required
   - **files**: various host related scripts
   - **nixace**: host-specfic preferences - workstation
-  - **nixbase**: host-specfic preferences - stationary
-  - **nixser**: host-specfic preferences - server
+  - **nixbase**: host-specfic preferences - stationary & mirror
+  - **nixser**: host-specfic preferences - server & mirror
   - **nixtop**: host-specfic preferences - laptop
+  - **nixzer**: host-specfic preferences - server 2
 - **lib**: templates and other nix-code
 - **modules**: encapsulated packages and applications
   - **home-manager**: user-relevant modules
