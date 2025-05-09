@@ -44,7 +44,7 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    # Nvidia Quadro k3100m
+    # Nvidia Quadro k1100m
     package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
 
     prime = {
