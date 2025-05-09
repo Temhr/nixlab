@@ -69,7 +69,7 @@
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixser/configuration.nix
+          ./hosts/nixzer/configuration.nix
         ];
       };
       nixtop = nixpkgs.lib.nixosSystem {
