@@ -26,7 +26,7 @@
     };
 
   systemd.tmpfiles.rules = [
-#   "d /home/temhr/shelf 1744 temhr users "
-    "d /mnt 1744 temhr users "
+    "d /mnt 1744 temhr user "
   ];
+
 }
