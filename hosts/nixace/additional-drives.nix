@@ -2,10 +2,10 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-#  fileSystems."/home/temhr/shelf" =
-#    { device = "/dev/disk/by-label/shelf";
-#      fsType = "ext4";
-#    };
+  fileSystems."/home" =
+    { device = "/dev/disk/by-label/home";
+      fsType = "ext4";
+    };
   fileSystems."/mnt/mirbase" =
     { device = "192.168.0.201:/mirror";
       fsType = "nfs";
