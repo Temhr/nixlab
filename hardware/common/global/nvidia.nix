@@ -47,7 +47,7 @@
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     # Nvidia Quadro p5000
-    package = config.boot.kernelPackages.nvidiaPackages.latest;
+    #package = config.boot.kernelPackages.nvidiaPackages.latest;
 
     prime = {
       offload.enable = false;

@@ -23,9 +23,12 @@
     ../../modules/nixos
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./hardware-configuration.nix
-      ./additional-drives.nix
-      ./nvidia.nix
+#    ./hardware-configuration.nix
+#      ./additional-drives.nix
+#      ./nvidia.nix
+
+
+    ../../hardware/zb17g2-k5.nix
   ];
 
   # TODO: Set your hostname

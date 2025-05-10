@@ -2,16 +2,28 @@
 
   options = {
       mount-home = {
-          enable = lib.mkEnableOption "mounts home drive";
+          enable = lib.mkEnableOption {
+              description = "mounts home drive";
+              default = false;
+            };
       };
       mount-mirror = {
-          enable = lib.mkEnableOption "mounts mirror drive";
+          enable = lib.mkEnableOption {
+              description = "mounts mirror drive";
+              default = false;
+            };
       };
       mount-mirk1 = {
-          enable = lib.mkEnableOption "mounts mirk1 nfs";
+          enable = lib.mkEnableOption {
+              description = "mounts mirk1 nfs";
+              default = false;
+            };
       };
       mount-mirk3 = {
-          enable = lib.mkEnableOption "mounts mirk3 nfs";
+          enable = lib.mkEnableOption {
+              description = "mounts mirk3 nfs";
+              default = false;
+            };
       };
   };
 
@@ -40,6 +52,7 @@
             allowedTCPPorts = [ 111 2049 4000 4001 4002 20048 ];
             allowedUDPPorts = [ 111 2049 4000 4001 4002 20048 ];
         };
+        systemd.tmpfiles.rules = [ "d /mirror 1744 temhr user " ];
     })
     (lib.mkIf config.mount-mirk1.enable {
         fileSystems."/mnt/mirk1" =
