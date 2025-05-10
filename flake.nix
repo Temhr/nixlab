@@ -36,6 +36,7 @@
     ];
     # This is a function that generates an attribute by calling a function you pass to it, with each system as an argument
     forAllSystems = nixpkgs.lib.genAttrs systems;
+
   in {
     # Your custom packages. Accessible through 'nix build', 'nix shell', etc
     packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
