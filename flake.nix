@@ -51,39 +51,39 @@
 
     # NixOS configuration entrypoint. Available through 'nixos-rebuild --flake .#your-hostname'
     nixosConfigurations = {
-      nixace = nixpkgs.lib.nixosSystem {
+      nixzer = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixace/configuration.nix
+          ./hosts/nixk1/configuration.nix
         ];
       };
       nixbase = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixbase/configuration.nix
-        ];
-      };
-      nixser = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixser/configuration.nix
+          ./hosts/nixk3/configuration.nix
         ];
       };
       nixtop = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixtop/configuration.nix
+          ./hosts/nixk4/configuration.nix
         ];
       };
-      nixzer = nixpkgs.lib.nixosSystem {
+      nixser = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixzer/configuration.nix
+          ./hosts/nixk5/configuration.nix
+        ];
+      };
+      nixace = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          # > Our main nixos configuration file <
+          ./hosts/nixp5/configuration.nix
         ];
       };
     };
