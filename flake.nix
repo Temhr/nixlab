@@ -83,7 +83,7 @@
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
-          ./hosts/nixqat/configuration.nix
+          ./hosts/nixzer/configuration.nix
         ];
       };
     };
