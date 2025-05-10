@@ -1,7 +1,7 @@
 { ... }: {
   imports = [
-    ../common/global
-    ../common/optional
+    ./common/global
+    ./common/optional
   ];
 
   # Choose between these choices: "none" "k" "p"
