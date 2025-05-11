@@ -71,7 +71,7 @@ Aspirational
 - **cachix**: prebuilt cached binaries to pull
 - **hardware**: machine level configurations and devices
   - **common**: machine-agnostic settings and options
-    - **global**: universal to all machine
+    - **global**: universal to all machines
     - **optional**: machine selection required
 - **home**: user level configurations (home manager) and files
   - **common**: user-agnostic settings and options
