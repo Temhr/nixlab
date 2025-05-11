@@ -17,17 +17,17 @@
     # inputs.hardware.nixosModules.common-ssd
 
     # You can also split up your configuration and import pieces of it here:
-    ../common/core
-    ../common/optional
-    ../../cachix.nix
-    ../../modules/nixos
+    ./common/global
+    ./common/optional
+    ../cachix.nix
+    ../modules/nixos
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ../../hardware/zb15g2-k1.nix
+    ../hardware/zb17g1-k3.nix
   ];
 
   # TODO: Set your hostname
-  networking.hostName = "nixzer";
+  networking.hostName = "nixbase";
 
   ## Enable networking
   networking.networkmanager.enable = true;
@@ -39,7 +39,7 @@
   services.displayManager.autoLogin.user =  "temhr";
 
   ## Enable Syncthing ("hostname" or "none")
-  syncthing.system = "nixzer";
+  syncthing.system = "nixbase";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
@@ -56,7 +56,7 @@
   #discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
 
   ## Productivity
-  #calibre.enable = true;  #Comprehensive e-book software
+  calibre.enable = true;  #Comprehensive e-book software
   #libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
 
   ## Media Packages
@@ -66,14 +66,14 @@
   #obs.enable = true;  #Free and open source software for video recording and live streaming
   #openshot.enable = true;  #Free, open-source video editor
   #spotify.enable = true;  #Play music from the Spotify music service
-  #vlc.enable = true;  #Cross-platform media player and streaming server
+  vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Virtualizations
   #bottles.enable = true;    #Easy-to-use wineprefix manager
   #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  #incus.enable = true;   #Powerful system container and virtual machine manager
+  incus.enable = true;   #Powerful system container and virtual machine manager
   #podman.enable = true;    #A program for managing pods, containers and container images
-  #quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
@@ -90,10 +90,10 @@
   environment.systemPackages = with pkgs; [
 
     ## Godot Dev Tools
-    #gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
-    #pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
-    #scons  #Improved, cross-platform substitute for Make
-    #python3Full  #High-level dynamically-typed programming language
+    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
+    scons  #Improved, cross-platform substitute for Make
+    python3Full  #High-level dynamically-typed programming language
 
   ];
 

@@ -17,7 +17,7 @@
     # inputs.nix-colors.homeManagerModules.default
 
     # You can also split up your configuration and import pieces of it here:
-    ../common/core
+    ../common/global
     ../common/optional
     ../../modules/home-manager
     ./auto-git-pull.nix

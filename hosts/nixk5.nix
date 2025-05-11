@@ -17,13 +17,13 @@
     # inputs.hardware.nixosModules.common-ssd
 
     # You can also split up your configuration and import pieces of it here:
-    ../common/core
-    ../common/optional
-    ../../cachix.nix
-    ../../modules/nixos
+    ./common/global
+    ./common/optional
+    ../cachix.nix
+    ../modules/nixos
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ../../hardware/zb17g2-k5.nix
+    ../hardware/zb17g2-k5.nix
   ];
 
   # TODO: Set your hostname
