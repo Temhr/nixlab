@@ -69,23 +69,21 @@ Aspirational
 
 # Repository Layout
 - **cachix**: prebuilt cached binaries to pull
+- **hardware**: machine level configurations and devices
+  - **common**: machine-agnostic settings and options
+    - **global**: universal to all machine
+    - **optional**: machine selection required
 - **home**: user level configurations (home manager) and files
   - **common**: user-agnostic settings and options
-    - **core**: universal to all users
+    - **global**: universal to all users
     - **optional**: user selection required
   - **files**: various user related files and scripts
-  - **guest**: user-specfic preferences
   - **temhr**: user-specfic preferences
 - **hosts**: system level configurations and files
   - **common**: host-agnostic programs, services, users, etc.
-    - **core**: universal to all hosts
+    - **global**: universal to all hosts
     - **optional**: host selection required
   - **files**: various host related scripts
-  - **nixace**: host-specfic preferences - workstation
-  - **nixbase**: host-specfic preferences - stationary & mirror
-  - **nixser**: host-specfic preferences - server & mirror
-  - **nixtop**: host-specfic preferences - laptop
-  - **nixzer**: host-specfic preferences - server 2
 - **lib**: templates and other nix-code
 - **modules**: encapsulated packages and applications
   - **home-manager**: user-relevant modules
