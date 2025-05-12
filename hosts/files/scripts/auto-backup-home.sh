@@ -5,8 +5,8 @@ set -e
 
 hostname=$(/run/current-system/sw/bin/hostname) # Dynamically determines the system's hostname
 mirrorDir="/mirror"
-serDir="/mnt/mirser"
-baseDir="/mnt/mirbase"
+serDir="/mnt/mirk1"
+baseDir="/mnt/mirk3"
 
 if [ -d "$mirrorDir" ]; then
     if [ -d "${mirrorDir}/home/${hostname}/" ]; then
