@@ -1,20 +1,6 @@
-{ config, lib, pkgs, ... }: {
-
-  systemd.user.services.auto-git-push = {
-    description = "Daily Nix Flake Update and Git Commit Service";
-
-    # Run daily at midnight
-    startAt = "00:00";
-
-    serviceConfig = {
-      Type = "oneshot";
-      User = "temhr";
-
-      # Explicit path to the repository in temhr's home directory
-      WorkingDirectory = "/home/temhr/nixlab";
-    };
-
-    script = ''
+{ pkgs, ... }:
+let
+  auto-git-push = pkgs.writeShellScript "auto-move-files.sh" ''
       # Run nix flake update
       ${pkgs.nix}/bin/nix flake update --flake /home/temhr/nixlab
 
@@ -30,6 +16,30 @@
 
       # Push to the default branch (typically main or master)
       /run/current-system/sw/bin/git push origin HEAD
-    '';
+  '';
+in
+{
+  systemd.user.timers.auto-git-push = {
+    Unit = {
+      Description = "Daily Nix Flake Update and Git Commit Service (timer)";
+    };
+    Timer = {
+      OnCalendar = "daily"; # Runs once per day at midnight by default
+      Persistent = true;
+      Unit = "auto-git-push.service";
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
+  systemd.user.services.auto-git-push = {
+    Unit = {
+      Description = "Daily Nix Flake Update and Git Commit Service (user service)";
+    };
+    Service = {
+      ExecStart = "${auto-git-push}";
+      Type = "oneshot";
+    };
   };
 }
