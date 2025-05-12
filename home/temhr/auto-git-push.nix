@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }: {
 
-  systemd.services.auto-git-push = {
+  systemd.user.services.auto-git-push = {
     description = "Daily Nix Flake Update and Git Commit Service";
 
     # Run daily at midnight
