@@ -21,7 +21,6 @@
     ../common/optional
     ../../modules/home-manager
     ./auto-git-pull.nix
-    ./auto-git-push.nix
     ./auto-move-files.nix
   ];
 
