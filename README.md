@@ -83,7 +83,6 @@ Aspirational
   - **common**: host-agnostic programs, services, users, etc.
     - **global**: universal to all hosts
     - **optional**: host selection required
-    - **users**: systems' users
   - **files**: various host related scripts
 - **lib**: templates and other nix-code
 - **modules**: encapsulated packages and applications
@@ -93,5 +92,6 @@ Aspirational
   - **default**: repository switching via flags (pkgs.unstable, pkgs.stable)
 - **pkgs**: custom written packages
   - empty
+- **scripts**: various shell scripts
 -  flake.nix: entry point
 -  flake.lock: version pinner

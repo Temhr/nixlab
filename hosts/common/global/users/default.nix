@@ -3,8 +3,6 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./home-manager.nix
-    ./temhr.nix
-    ./temhrbot.nix
     ./users.nix
   ];
   options = {

@@ -19,7 +19,6 @@
     # You can also split up your configuration and import pieces of it here:
     ./common/global
     ./common/optional
-    ./common/users
     ../cachix.nix
     ../modules/nixos
 
