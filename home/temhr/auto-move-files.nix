@@ -9,7 +9,8 @@ let
     cp /home/temhr/nixlab/home/files/bash/emoticons /home/temhr/.bash/emoticons &&
     cp /home/temhr/nixlab/home/files/bash/environment_variables /home/temhr/.bash/environment_variables &&
     cp /home/temhr/nixlab/home/files/bash/ghostty_theme_randomizer /home/temhr/.bash/ghostty_theme_randomizer &&
-    cp /home/temhr/nixlab/home/files/bash/ghostty_themes.txt /home/temhr/.bash/ghostty_themes.txt
+    cp /home/temhr/nixlab/home/files/bash/ghostty_themes.txt /home/temhr/.bash/ghostty_themes.txt &&
+    cp /home/temhr/nixlab/home/files/ssh-agent.service /home/temhr/.config/systemd/user/ssh-agent.service
   '';
 in
 {

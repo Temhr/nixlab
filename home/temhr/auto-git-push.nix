@@ -41,6 +41,9 @@ in
       ExecStart = "${auto-git-push}";
       Type = "oneshot";
       WorkingDirectory = "/home/temhr/nixlab";
+
+      # These lines allow access to your SSH agent
+      Environment = "SSH_AUTH_SOCK=%t/ssh-agent";
     };
   };
 }
