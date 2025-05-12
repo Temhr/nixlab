@@ -7,7 +7,7 @@
     group = "temhrbot";
 
     # Explicitly set shell to prevent any interactive login
-    shell = pkgs.shadow.nologin;
+    shell = "/run/current-system/sw/bin/nologin";
 
     # Minimal home directory for potential script storage
     home = "/var/lib/temhrbot";
