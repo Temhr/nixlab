@@ -40,6 +40,7 @@ in
     Service = {
       ExecStart = "${auto-git-push}";
       Type = "oneshot";
+      WorkingDirectory = "/home/temhr/nixlab";
     };
   };
 }
