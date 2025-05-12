@@ -32,10 +32,4 @@
       /run/current-system/sw/bin/git push origin HEAD
     '';
   };
-
-  # Ensure SSH is configured for GitHub access
-  # You'll need to manually set up SSH key authentication
-  environment.systemPackages = with pkgs; [
-    ssh-copy-id  # Helpful for setting up SSH key
-  ];
 }
