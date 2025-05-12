@@ -12,7 +12,7 @@ let
 in
 {
   # Define a systemd user timer named `git-pull`.
-  systemd."temhr".timers.git-pull = {
+  systemd.user.timers.git-pull = {
     Unit = {
       # This is metadata for the timer unit, a human-readable description.
       Description = "Run git pull every hour";
@@ -34,7 +34,7 @@ in
   };
 
   # Define the systemd user service that the timer triggers.
-  systemd."temhr".services.git-pull = {
+  systemd.user.services.git-pull = {
     Unit = {
       # Description of the service (for `systemctl status` etc.)
       Description = "Hourly nixlab git pull (user service)";
