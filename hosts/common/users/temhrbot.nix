@@ -5,7 +5,7 @@
     # System user (no login shell)
     isSystemUser = true;
     group = "temhrbot";
-
+    #extraGroups = [ "users"];
     # Explicitly set shell to prevent any interactive login
     shell = "/run/current-system/sw/bin/nologin";
 

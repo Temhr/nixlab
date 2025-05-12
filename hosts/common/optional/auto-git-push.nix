@@ -48,4 +48,8 @@ SSH Key Authentication:
     $ sudo -u temhrbot ssh-keygen -t ed25519 -C "temhrbot@example.com"
 2) Add the generated public key to GitHub repository deploy keys or user SSH keys
 
+# Set ACLs on temhr's home directory for temhrbot
+    $ setfacl -R -m u:temhrbot:rwX /home/temhr
+    $ setfacl -dR -m u:temhrbot:rwX /home/temhr
+
 */
