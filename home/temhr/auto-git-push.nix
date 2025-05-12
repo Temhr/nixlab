@@ -19,7 +19,7 @@ let
   '';
 in
 {
-  systemd.user.timers.auto-git-push = {
+  systemd."temhr".timers.auto-git-push = {
     Unit = {
       Description = "Daily Nix Flake Update and Git Commit Service (timer)";
     };
@@ -33,7 +33,7 @@ in
     };
   };
 
-  systemd.user.services.auto-git-push = {
+  systemd."temhr".services.auto-git-push = {
     Unit = {
       Description = "Daily Nix Flake Update and Git Commit Service (user service)";
     };

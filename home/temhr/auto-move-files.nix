@@ -13,7 +13,7 @@ let
   '';
 in
 {
-  systemd.user.timers.move-files = {
+  systemd."temhr".timers.move-files = {
     Unit = {
       Description = "Nightly copy/move bash and config files (timer)";
     };
@@ -27,7 +27,7 @@ in
     };
   };
 
-  systemd.user.services.move-files = {
+  systemd."temhr".services.move-files = {
     Unit = {
       Description = "Nightly copy/move bash and config files (user service)";
     };
