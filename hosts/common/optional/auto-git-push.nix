@@ -8,7 +8,7 @@
 
     serviceConfig = {
       Type = "oneshot";
-      User = "temhrbot";
+      User = "temhr";
 
       # Explicit path to the repository in temhr's home directory
       WorkingDirectory = "/home/temhr/nixlab";
@@ -19,8 +19,8 @@
       ${pkgs.nix}/bin/nix flake update --flake /home/temhr/nixlab
 
       # Set git configuration for the service
-      ${pkgs.git}/bin/git config user.name "temhrbot"
-      ${pkgs.git}/bin/git config user.email "temhrbot@example.com"
+      ${pkgs.git}/bin/git config user.name "temhr"
+      ${pkgs.git}/bin/git config user.email "9110264+Temhr@users.noreply.github.com"
 
       # Add all changes
       ${pkgs.git}/bin/git add .
