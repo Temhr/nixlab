@@ -7,6 +7,12 @@
               default = false;
             };
       };
+      mount-shelf = {
+          enable = lib.mkEnableOption {
+              description = "mounts shelf drive in home directory";
+              default = false;
+            };
+      };
       mount-mirror = {
           enable = lib.mkEnableOption {
               description = "mounts mirror drive";
@@ -31,6 +37,12 @@
     (lib.mkIf config.mount-home.enable {
         fileSystems."/home" =
             { device = "/dev/disk/by-label/home";
+              fsType = "ext4";
+            };
+    })
+    (lib.mkIf config.mount-shelf.enable {
+        fileSystems."/home/shelf" =
+            { device = "/dev/disk/by-label/shelf";
               fsType = "ext4";
             };
     })
