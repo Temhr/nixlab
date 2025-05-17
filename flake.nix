@@ -124,9 +124,9 @@
               # Module that dynamically detects the system UUID and imports the right config
               ({ config, pkgs, lib, ... }: {
                 # This script detects the UUID and includes the appropriate configuration
-                imports = lib.mkOrder 0 [
+                imports = [
+                  # Add a boot-time script to print the UUID for debugging
                   ({ ... }: {
-                    # Add a boot-time script to print the UUID for debugging
                     boot.postBootCommands = ''
                       systemUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
                                   dmidecode -s system-uuid 2>/dev/null ||
@@ -134,6 +134,9 @@
                       echo "Running on system with UUID: $systemUUID" > /var/log/system-uuid.log
                     '';
                   })
+
+                  # Import the dynamically determined configuration
+                  "/run/current-system/configuration.nix"
                 ];
 
                 # Use the environment to store the script to detect the UUID
@@ -167,9 +170,6 @@
                   '';
                   deps = [];
                 };
-
-                # Import the dynamically determined configuration
-                imports = [ "/run/current-system/configuration.nix" ];
               })
             ];
           };
