@@ -56,13 +56,32 @@
 
       # Function to get current system UUID and map to hostname
       getCurrentHostname = let
-        uuid = builtins.readFile "/sys/class/dmi/id/product_uuid";
-        # Trim whitespace/newlines from UUID
-        cleanUuid = lib.strings.removeSuffix "\n" (lib.strings.trim uuid);
+        # The path can vary between systems
+        uuidPaths = [
+          "/sys/class/dmi/id/product_uuid"
+          "/sys/devices/virtual/dmi/id/product_uuid"
+          "/etc/machine-id" # Fallback to machine-id if product_uuid is not available
+        ];
+
+        # Try to read from the first file that exists
+        getFirstExistingFile = paths:
+          if paths == [] then throw "No UUID file found"
+          else let path = builtins.head paths;
+            in if builtins.pathExists path
+               then path
+               else getFirstExistingFile (builtins.tail paths);
+
+        # Get the UUID safely
+        getUuid = let
+          uuidPath = getFirstExistingFile uuidPaths;
+        in builtins.readFile uuidPath;
+
+        # Read the UUID and clean it
+        uuid = lib.strings.removeSuffix "\n" (lib.strings.trim (getUuid));
       in
-        if builtins.hasAttr cleanUuid uuidToHostname
-        then uuidToHostname.${cleanUuid}
-        else throw "Unknown system UUID: ${cleanUuid}";
+        if builtins.hasAttr uuid uuidToHostname
+        then uuidToHostname.${uuid}
+        else throw "Unknown system UUID: ${uuid}";
 
     in {
       # Package Definitions
