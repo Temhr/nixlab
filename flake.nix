@@ -1,105 +1,81 @@
 {
   description = "Modular Nix Config";
 
+  # Input Sources
   inputs = {
-    # Base/Default Nixpkgs
+    # NixOS package collections
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # Also see the 'stable-packages' overlay at 'overlays/default.nix'.
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
-    # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    # Home manager
-    home-manager.url = "github:nix-community/home-manager/master";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    # Ghostty flake
+
+    # Environment management
+    home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Application-specific flakes
     ghostty.url = "github:ghostty-org/ghostty";
-    # Zen flake
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    ghostty,
-    zen-browser,
-    ...
-  } @ inputs: let
-    inherit (self) outputs;
-    # Supported systems for your flake packages, shell, etc.
-    systems = [
-      "aarch64-linux"
-      "i686-linux"
-      "x86_64-linux"
-      "aarch64-darwin"
-      "x86_64-darwin"
-    ];
-    # This is a function that generates an attribute by calling a function you pass to it, with each system as an argument
-    forAllSystems = nixpkgs.lib.genAttrs systems;
+  outputs = { self, nixpkgs, home-manager, ghostty, zen-browser, ... } @ inputs:
+    let
+      inherit (self) outputs;
 
-  in {
-    # Your custom packages. Accessible through 'nix build', 'nix shell', etc
-    packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
-    # Formatter for your nix files, available through 'nix fmt'. Other options beside 'alejandra' include 'nixpkgs-fmt'
-    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+      # Supported systems for cross-platform compatibility
+      supportedSystems = [
+        "aarch64-linux"
+        "i686-linux"
+        "x86_64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
 
-    # Your custom packages and modifications, exported as overlays
-    overlays = import ./overlays {inherit inputs;};
-    # Reusable nixos modules you might want to export. These are usually stuff you would upstream into nixpkgs
-    nixosModules = import ./modules/nixos;
-    # Reusable home-manager modules you might want to export. These are usually stuff you would upstream into home-manager
-    homeManagerModules = import ./modules/home-manager;
+      # Helper function to generate attributes for all supported systems
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    # NixOS configuration entrypoint. Available through 'nixos-rebuild --flake .#your-hostname'
-    nixosConfigurations = {
-      nixzer = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
+      # Helper function to create NixOS configurations with common parameters
+      mkNixosSystem = hostname: nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs outputs; };
         modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixk1.nix
+          # Main configuration file for this host
+          ./hosts/${hostname}.nix
         ];
       };
-      nixbase = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixk3.nix
-        ];
+    in {
+      # Package Definitions
+      packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
+
+      # Code formatter configuration
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+
+      # Reusable Components
+      overlays = import ./overlays { inherit inputs; };
+      nixosModules = import ./modules/nixos;
+      homeManagerModules = import ./modules/home-manager;
+
+      # System Configurations
+      nixosConfigurations = {
+        nixzer = mkNixosSystem "nixk1";
+        nixbase = mkNixosSystem "nixk3";
+        nixtop = mkNixosSystem "nixk4";
+        nixser = mkNixosSystem "nixk5";
+        nixace = mkNixosSystem "nixp5";
       };
-      nixtop = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixk4.nix
-        ];
+
+      # Home Manager Configurations
+      # Currently disabled - uncomment when needed
+      /*
+      homeConfigurations = {
+        "temhr" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          extraSpecialArgs = { inherit inputs outputs; };
+          modules = [
+            ./home-manager/home.nix
+          ];
+        };
       };
-      nixser = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixk5.nix
-        ];
-      };
-      nixace = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main nixos configuration file <
-          ./hosts/nixp5.nix
-        ];
-      };
+      */
     };
-    /*
-    # Standalone home-manager configuration entrypoint. Available through 'home-manager --flake .#your-username@your-hostname'
-    homeConfigurations = {
-      "temhr" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [
-          # > Our main home-manager configuration file <
-          ./home-manager/home.nix
-        ];
-      };
-    };
-    */
-  };
 }
