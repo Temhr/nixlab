@@ -48,7 +48,7 @@
         # Format: UUID = "config-file-name";
         "67e589ff-5de2-4784-a477-b88bd8822621" = "nixk1"; # Desktop
         "a34f7231-c938-4026-8ce5-3cb3ec51827c" = "nixk3"; # Server
-        "4c4c4544-0033-4a10-8051-b7c04f534631" = "nixk4"; # Laptop
+        "a423347f-d8f3-11e3-9078-5634120000ff" = "nixk4"; # Laptop
         "87dfe389-1127-4e5b-a0d4-fed634b9f7fc" = "nixk5"; # Server 2
         "6a943fcd-8ae9-4909-8df2-8d4868ba8404" = "nixp5"; # Workstation
         # Add more UUIDs and their corresponding config files as needed
