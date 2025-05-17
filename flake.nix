@@ -122,7 +122,7 @@
             specialArgs = { inherit inputs outputs; };
             modules = [
               # Default configuration in case UUID detection fails
-              ./hosts/default.nix
+              ./hosts/nixk4.nix
 
               # Module that dynamically detects and configures based on the system UUID
               ({ config, pkgs, lib, ... }: {
