@@ -1,5 +1,5 @@
 {
-  description = "Modular Nix Config";
+  description = "Modular Nixlab Config";
 
   # Input Sources
   inputs = {
@@ -14,12 +14,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Secret management
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Application-specific flakes
     ghostty.url = "github:ghostty-org/ghostty";
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
-  outputs = { self, nixpkgs, home-manager, ghostty, zen-browser, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, sops-nix, ghostty, zen-browser, ... } @ inputs:
     let
       inherit (self) outputs;
 
@@ -41,6 +47,8 @@
         modules = [
           # Main configuration file for this host
           ./hosts/${hostname}.nix
+          # Add sops-nix module
+          sops-nix.nixosModules.sops
         ];
       };
     in {
