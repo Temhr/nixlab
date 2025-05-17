@@ -68,8 +68,8 @@
         nixace = mkNixosSystem "nixp5"; #nixace
         nixsun = mkNixosSystem "nixk5"; #nixsun
         nixtop = mkNixosSystem "nixk4"; #nixtop
-        nixbase = mkNixosSystem "nixk3"; #nixvat
-        nixzer = mkNixosSystem "nixk1"; #nixzen
+        nixvat = mkNixosSystem "nixk3"; #nixvat
+        nixzen = mkNixosSystem "nixk1"; #nixzen
       };
 
       # Home Manager Configurations
