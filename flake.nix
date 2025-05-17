@@ -30,7 +30,6 @@
   outputs = { self, nixpkgs, home-manager, sops-nix, ghostty, zen-browser, ... } @ inputs:
     let
       inherit (self) outputs;
-      lib = nixpkgs.lib;
 
       # Supported systems for cross-platform compatibility
       supportedSystems = [
@@ -42,74 +41,136 @@
       ];
 
       # Helper function to generate attributes for all supported systems
-      forAllSystems = lib.genAttrs supportedSystems;
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-      # Import the UUID detection module
-      uuidModule = import ./lib/modules/uuid-detection.nix;
-
-      # System configurations - map UUIDs to config files
-      # Replace these example UUIDs with your actual system UUIDs
-      systems = {
-        # Format: UUID = {configFile = "filename"; description = "Description";}
-        "67e589ff-5de2-4784-a477-b88bd8822621" = {
-          configFile = "nixk1";
-          description = "Desktop";
-        };
-        "a34f7231-c938-4026-8ce5-3cb3ec51827c" = {
-          configFile = "nixk3";
-          description = "Server";
-        };
-        "a423347f-d8f3-11e3-9078-5634120000ff" = {
-          configFile = "nixk4";
-          description = "Laptop";
-        };
-        "87dfe389-1127-4e5b-a0d4-fed634b9f7fc" = {
-          configFile = "nixk5";
-          description = "Server 2";
-        };
-        "6a943fcd-8ae9-4909-8df2-8d4868ba8404" = {
-          configFile = "nixp5";
-          description = "Workstation";
-        };
+      # UUID to configuration mapping
+      systemConfigs = {
+        # Format: UUID = "config-file-name";
+        "67e589ff-5de2-4784-a477-b88bd8822621" = "nixk1"; # Desktop
+        "a34f7231-c938-4026-8ce5-3cb3ec51827c" = "nixk3"; # Server
+        "4c4c4544-0033-4a10-8051-b7c04f534631" = "nixk4"; # Laptop
+        "87dfe389-1127-4e5b-a0d4-fed634b9f7fc" = "nixk5"; # Server 2
+        "6a943fcd-8ae9-4909-8df2-8d4868ba8404" = "nixp5"; # Workstation
+        # Add more UUIDs and their corresponding config files as needed
+        # Note: Replace these example UUIDs with your actual system UUIDs
       };
 
-      # Create a NixOS configuration for a specific system
-      mkNixosSystem = uuid: { configFile, description ? "" }:
-        lib.nixosSystem {
-          specialArgs = {
-            inherit inputs outputs;
-            systemUUID = uuid;
-          };
-          modules = [
-            # UUID detection module
-            uuidModule
-            # System-specific configuration file
-            ./hosts/${configFile}.nix
-          ];
+      # Helper function to create NixOS configurations with common parameters
+      mkNixosSystem = uuid: configFile: nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs outputs;
+          systemUUID = uuid;  # Pass the UUID to the configuration
         };
+        modules = [
+          # Common module for all systems that provides UUID-based identification
+          ({ config, lib, ... }: {
+            # Import system-specific configuration based on UUID
+            imports = [ ./hosts/${configFile}.nix ];
 
+            # Set system.build.installBootLoader to detect the UUID at runtime
+            system.build.installBootLoader = lib.mkForce (
+              ''
+                #!/bin/sh
+                currentUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
+                              dmidecode -s system-uuid 2>/dev/null ||
+                              echo "unknown")
+                echo "Detected System UUID: $currentUUID"
+
+                # Continue with the regular boot loader installation
+                ${config.system.build.installBootLoader.orig}
+              ''
+            );
+          })
+        ];
+      };
     in {
-      # Packages and utilities
+      #
+      # Package Definitions
+      #
       packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
+
+      # Code formatter configuration
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-      # Reusable components
+      #
+      # Reusable Components
+      #
       overlays = import ./overlays { inherit inputs; };
       nixosModules = import ./modules/nixos;
       homeManagerModules = import ./modules/home-manager;
 
-      # System configurations by UUID
+      # Add a common module that can be used for UUID-based configuration
+      lib = {
+        # Helper function to get the current system UUID
+        getSystemUUID = pkgs: ''
+          ${pkgs.util-linux}/bin/cat /sys/class/dmi/id/product_uuid 2>/dev/null || \
+          ${pkgs.dmidecode}/bin/dmidecode -s system-uuid 2>/dev/null || \
+          echo "unknown"
+        '';
+      };
+
+      #
+      # System Configurations
+      #
       nixosConfigurations =
-        # Generate all UUID-specific configurations
-        lib.mapAttrs mkNixosSystem systems //
-        # Add a "current" configuration with auto-detection capability
-        {
-          # Special configuration that detects the current system's UUID
-          current = lib.nixosSystem {
-            specialArgs = { inherit inputs outputs systems; };
+        # Generate configurations for each UUID in systemConfigs
+        nixpkgs.lib.mapAttrs (uuid: configFile:
+          mkNixosSystem uuid configFile
+        ) systemConfigs // {
+          # Add a special "current" configuration that detects the UUID at runtime
+          current = nixpkgs.lib.nixosSystem {
+            specialArgs = { inherit inputs outputs; };
             modules = [
-              # This is the auto-detection module that selects the right config
-              ./lib/modules/auto-detect-system.nix
+              # Module that dynamically detects the system UUID and imports the right config
+              ({ config, pkgs, lib, ... }: {
+                # This script detects the UUID and includes the appropriate configuration
+                imports = lib.mkOrder 0 [
+                  ({ ... }: {
+                    # Add a boot-time script to print the UUID for debugging
+                    boot.postBootCommands = ''
+                      systemUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
+                                  dmidecode -s system-uuid 2>/dev/null ||
+                                  echo "unknown")
+                      echo "Running on system with UUID: $systemUUID" > /var/log/system-uuid.log
+                    '';
+                  })
+                ];
+
+                # Use the environment to store the script to detect the UUID
+                system.activationScripts.detectUUID = {
+                  text = ''
+                    # Detect the current system's UUID
+                    currentUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
+                                  dmidecode -s system-uuid 2>/dev/null ||
+                                  echo "unknown")
+                    echo "Detected System UUID: $currentUUID"
+
+                    # Get the configuration file for this UUID
+                    configFile="${toString ./hosts}/"
+                    case "$currentUUID" in
+                      ${lib.concatStringsSep "\n      " (
+                        lib.mapAttrsToList (uuid: configFile:
+                          ''${uuid}) configFile="${configFile}.nix" ;;''
+                        ) systemConfigs
+                      )}
+                      *)
+                        echo "Warning: Unknown system UUID: $currentUUID" >&2
+                        echo "Using default configuration."
+                        configFile="${toString ./hosts}/default.nix"
+                        ;;
+                    esac
+
+                    # Create a symlink to the right configuration
+                    mkdir -p /run/current-system
+                    echo "Using configuration file: $configFile"
+                    ln -sf "$configFile" /run/current-system/configuration.nix
+                  '';
+                  deps = [];
+                };
+
+                # Import the dynamically determined configuration
+                imports = [ "/run/current-system/configuration.nix" ];
+              })
             ];
           };
         };
