@@ -27,7 +27,7 @@
   ];
 
   # TODO: Set your hostname
-  networking.hostName = "nixbase";
+  networking.hostName = "nixvat";
 
   ## Enable networking
   networking.networkmanager.enable = true;

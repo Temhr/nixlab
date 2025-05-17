@@ -27,7 +27,7 @@
   ];
 
   # TODO: Set your hostname
-  networking.hostName = "nixser";
+  networking.hostName = "nixsun";
 
   ## Enable networking
   networking.networkmanager.enable = true;

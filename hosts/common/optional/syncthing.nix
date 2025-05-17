@@ -6,7 +6,7 @@ in {
   options = {
     syncthing = {
       system = lib.mkOption {
-        type = lib.types.enum [ "none" "nixace" "nixbase" "nixser" "nixtop" "nixzer" ];
+        type = lib.types.enum [ "none" "nixace" "nixvat" "nixsun" "nixtop" "nixzen" ];
         default = "none";
         description = "Select which system to enable syncthing on";
       };
@@ -41,8 +41,8 @@ in {
             settings = {
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
-                    "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                    "nixzer" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
+                    "nixvat" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
+                    "nixzen" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
@@ -52,13 +52,13 @@ in {
                     # Which folder to add to Syncthing
                         path = "/home/temhr";
                         # Which devices to share the folder with
-                        devices = [ "nixzer" ];
+                        devices = [ "nixzen" ];
                     };
                 };
             };
         };
     })
-    (lib.mkIf (cfg.system == "nixbase") {
+    (lib.mkIf (cfg.system == "nixvat") {
         systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
         networking.firewall = {
             allowedTCPPorts = [ 8384 ];
@@ -86,27 +86,27 @@ in {
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
                     #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
-                    "nixzer" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
+                    "nixzen" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {                        # Name of folder in Syncthing, also the folder ID
-                #    "home-nixbase" = {
+                #    "home-nixvat" = {
                 #    # Which folder to add to Syncthing
                 #        path = "/home/temhr";
                 #        # Which devices to share the folder with
-                #        devices = [ "nixser" ];
+                #        devices = [ "nixsun" ];
                 #    };
                     # Name of folder in Syncthing, also the folder ID
                     "mirror" = {
                     path = "/mirror";
-                    devices = [ "nixzer" ];
+                    devices = [ "nixzen" ];
                     };
                 };
             };
         };
     })
-    (lib.mkIf (cfg.system == "nixser") {
+    (lib.mkIf (cfg.system == "nixsun") {
         systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
         networking.firewall = {
             allowedTCPPorts = [ 8384 ];
@@ -134,21 +134,21 @@ in {
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
                     #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
-                    "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
+                    "nixvat" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {                        # Name of folder in Syncthing, also the folder ID
-                #    "home-nixser" = {
+                #    "home-nixsun" = {
                 #    # Which folder to add to Syncthing
                 #        path = "/home/temhr";
                 #        # Which devices to share the folder with
-                #        devices = [ "nixbase" ];
+                #        devices = [ "nixvat" ];
                 #    };
                     # Name of folder in Syncthing, also the folder ID
                     "mirror" = {
                     path = "/mirror";
-                    devices = [ "nixbase" ];
+                    devices = [ "nixvat" ];
                     };
                 };
             };
@@ -182,8 +182,8 @@ in {
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
                     "nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
-                    "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
-                    #"nixser" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
+                    "nixvat" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
+                    #"nixsun" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {
@@ -192,14 +192,14 @@ in {
                     # Which folder to add to Syncthing
                         path = "/home/temhr";
                         # Which devices to share the folder with
-                        devices = [ "nixzer" ];
+                        devices = [ "nixzen" ];
                     };
                 };
             };
         };
     })
 
-    (lib.mkIf (cfg.system == "nixzer") {
+    (lib.mkIf (cfg.system == "nixzen") {
         systemd.services.syncthing.environment.STNODEFAULTFOLDER = "true"; # Don't create default ~/Sync folder
         networking.firewall = {
             allowedTCPPorts = [ 8384 ];
@@ -227,21 +227,21 @@ in {
                 # Manually grab the device IDs of the other syncthing devices
                 devices = {
                     #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
-                    "nixbase" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
+                    "nixvat" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {                        # Name of folder in Syncthing, also the folder ID
-                #    "home-nixser" = {
+                #    "home-nixsun" = {
                 #    # Which folder to add to Syncthing
                 #        path = "/home/temhr";
                 #        # Which devices to share the folder with
-                #        devices = [ "nixbase" ];
+                #        devices = [ "nixvat" ];
                 #    };
                     # Name of folder in Syncthing, also the folder ID
                     "mirror" = {
                     path = "/mirror";
-                    devices = [ "nixbase" ];
+                    devices = [ "nixvat" ];
                     };
                 };
             };
