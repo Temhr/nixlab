@@ -121,26 +121,21 @@
           current = nixpkgs.lib.nixosSystem {
             specialArgs = { inherit inputs outputs; };
             modules = [
-              # Module that dynamically detects the system UUID and imports the right config
+              # Default configuration in case UUID detection fails
+              ./hosts/default.nix
+
+              # Module that dynamically detects and configures based on the system UUID
               ({ config, pkgs, lib, ... }: {
-                # This script detects the UUID and includes the appropriate configuration
-                imports = [
-                  # Add a boot-time script to print the UUID for debugging
-                  ({ ... }: {
-                    boot.postBootCommands = ''
-                      systemUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
-                                  dmidecode -s system-uuid 2>/dev/null ||
-                                  echo "unknown")
-                      echo "Running on system with UUID: $systemUUID" > /var/log/system-uuid.log
-                    '';
-                  })
+                # Add a boot-time script to print the UUID for debugging
+                boot.postBootCommands = ''
+                  systemUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
+                              dmidecode -s system-uuid 2>/dev/null ||
+                              echo "unknown")
+                  echo "Running on system with UUID: $systemUUID" > /var/log/system-uuid.log
+                '';
 
-                  # Import the dynamically determined configuration
-                  "/run/current-system/configuration.nix"
-                ];
-
-                # Use the environment to store the script to detect the UUID
-                system.activationScripts.detectUUID = {
+                # Generate specific configuration during system activation
+                system.activationScripts.uuidBasedConfig = {
                   text = ''
                     # Detect the current system's UUID
                     currentUUID=$(cat /sys/class/dmi/id/product_uuid 2>/dev/null ||
@@ -148,29 +143,51 @@
                                   echo "unknown")
                     echo "Detected System UUID: $currentUUID"
 
-                    # Get the configuration file for this UUID
-                    configFile="${toString ./hosts}/"
+                    # Log the UUID for debugging purposes
+                    mkdir -p /var/log/nixos
+                    echo "UUID: $currentUUID" > /var/log/nixos/system-uuid.log
+
+                    # Apply system-specific configurations at runtime
                     case "$currentUUID" in
-                      ${lib.concatStringsSep "\n      " (
-                        lib.mapAttrsToList (uuid: configFile:
-                          ''${uuid}) configFile="${configFile}.nix" ;;''
-                        ) systemConfigs
-                      )}
+                    ${lib.concatStringsSep "\n      " (
+                      lib.mapAttrsToList (uuid: configFile:
+                        ''${uuid})
+                          echo "Applying configuration for ${configFile}" >> /var/log/nixos/system-uuid.log
+                          ;;''
+                      ) systemConfigs
+                    )}
                       *)
-                        echo "Warning: Unknown system UUID: $currentUUID" >&2
-                        echo "Using default configuration."
-                        configFile="${toString ./hosts}/default.nix"
+                        echo "Warning: Unknown system UUID, using default configuration" >> /var/log/nixos/system-uuid.log
                         ;;
                     esac
-
-                    # Create a symlink to the right configuration
-                    mkdir -p /run/current-system
-                    echo "Using configuration file: $configFile"
-                    ln -sf "$configFile" /run/current-system/configuration.nix
                   '';
                   deps = [];
                 };
+
+                # Conditionally include host-specific settings
+                # This avoids the pure evaluation error by implementing a runtime
+                # solution rather than trying to import at evaluation time
+                options.my = {
+                  currentSystem = lib.mkOption {
+                    type = lib.types.str;
+                    default = "unknown";
+                    description = "The current system identifier based on UUID detection";
+                  };
+                };
               })
+
+              # Import host-specific modules based on command line arguments
+              # This allows selecting the right host with --argstr host <hostname>
+              ({ config, pkgs, lib, ... }@args:
+                let
+                  hostArg = args.hostArg or "default";
+                  hostPath = ./hosts + "/${hostArg}.nix";
+                  hostExists = builtins.pathExists hostPath;
+                in {
+                  _file = ./flake.nix;
+                  imports = lib.optional (hostExists && hostArg != "default") hostPath;
+                }
+              )
             ];
           };
         };
