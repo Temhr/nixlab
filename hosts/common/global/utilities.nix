@@ -58,6 +58,7 @@
     curl  #A command line tool for transferring files with URL syntax
 
     ## Secret Management
+    age #Modern encryption tool with small explicit keys
     keepassxc  #Offline password manager with many features.
 
     ## System Resource Monitors
