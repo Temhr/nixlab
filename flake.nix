@@ -70,6 +70,7 @@
         nixtop = mkNixosSystem "nixk4"; #nixtop
         nixvat = mkNixosSystem "nixk3"; #nixvat
         nixzen = mkNixosSystem "nixk1"; #nixzen
+        nixos = mkNixosSystem "nixos"; #nixzen
       };
 
       # Home Manager Configurations
