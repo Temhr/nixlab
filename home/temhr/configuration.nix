@@ -22,7 +22,6 @@
     ../../modules/home-manager
     ./auto-git-pull.nix
     ./auto-move-files.nix
-    ./ssh-manager.nix
   ];
 
   # Add stuff for your user as you see fit:
@@ -39,6 +38,11 @@
 
   # Let home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  # Git Config
+  programs.git.enable = true;  #Distributed version control system
+  programs.git.userName  = "Temhr";
+  programs.git.userEmail = "9110264+Temhr@users.noreply.github.com";
 
   # Extra Browsers
   brave.enable = true;
