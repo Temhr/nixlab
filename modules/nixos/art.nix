@@ -52,7 +52,7 @@
           environment.systemPackages = with pkgs; [ gimp3-with-plugins ];  #GNU Image Manipulation Program
         })
         (lib.mkIf config.godot.enable {
-          environment.systemPackages = with pkgs; [ godot godot-export-templates];  #Free and Open Source 2D and 3D game engine
+          environment.systemPackages = with pkgs; [ godot godot-export-templates-bin];  #Free and Open Source 2D and 3D game engine
         })
         (lib.mkIf config.inkscape.enable {
           environment.systemPackages = with pkgs; [ inkscape-with-extensions ];  #Vector graphics editor
