@@ -68,7 +68,7 @@ Aspirational
 </details>
 
 # Repository Layout
-- **cachix**: prebuilt cached binaries to pull
+- **cachix**: prebuilt cached binaries
 - **hardware**: machine level configurations and devices
   - **common**: machine-agnostic settings and options
     - **global**: universal to all machines
