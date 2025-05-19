@@ -13,7 +13,6 @@
   ## === SSH === ##
   programs.ssh = {
     enable = true;
-    startAgent = true;  # start ssh-agent
     matchBlocks = {
       "nixlab" = {
         hostname = "github.com";
@@ -24,11 +23,10 @@
     };
   };
 
-  #programs.ssh.startAgent = true;
-  #services.ssh-agent.enable = true;
+  # Use this instead of startAgent
+  services.ssh-agent.enable = true;
 
   # Link SSH keys from a persistent location (for impermanence)
   #home.file.".ssh/id_ed25519_nixlab".source = "/persist/home/temhr/.ssh/id_ed25519_nixlab";
   #home.file.".ssh/id_ed25519_nixlab.pub".source = "/persist/home/temhr/.ssh/id_ed25519_nixlab.pub";
-
 }
