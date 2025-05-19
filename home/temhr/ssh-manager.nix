@@ -2,6 +2,12 @@
 
   ## === SHELL === ##
   programs.bash.enable = true;
+  programs.bash.initExtra = ''
+    # Ensure SSH agent environment variables are available
+    if [ -z "$SSH_AUTH_SOCK" ]; then
+      eval "$(ssh-agent -s)"
+    fi
+  '';
 
   ## === GIT === ##
   programs.git = {
