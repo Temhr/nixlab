@@ -24,7 +24,7 @@
     };
   };
 
-  programs.ssh.startAgent = true;
+  #programs.ssh.startAgent = true;
   services.ssh-agent.enable = true;
 
   # Link SSH keys from a persistent location (for impermanence)
