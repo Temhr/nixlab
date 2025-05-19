@@ -25,7 +25,7 @@
   };
 
   #programs.ssh.startAgent = true;
-  services.ssh-agent.enable = true;
+  #services.ssh-agent.enable = true;
 
   # Link SSH keys from a persistent location (for impermanence)
   #home.file.".ssh/id_ed25519_nixlab".source = "/persist/home/temhr/.ssh/id_ed25519_nixlab";
