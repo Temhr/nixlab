@@ -59,12 +59,6 @@
           # Import Disko module
           disko.nixosModules.disko
 
-          # Your disk configuration
-          ./hardware/${hostname}/disko.nix
-
-          # Impermanence configuration
-          ./hardware/${hostname}/impermanence.nix
-
           # Main configuration file for this host
           ./hosts/${hostname}.nix
         ];
