@@ -2,6 +2,8 @@
   imports = [
     ./common/global
     ./common/optional
+    ./common/optional/drives.nix
+    ./common/optional/drives-additional.nix
   ];
 
   # Choose between these choices: "none" "k" "p"
