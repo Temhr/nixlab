@@ -14,6 +14,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    #Declarative disk management
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Secret management
     sops-nix = {
       url = "github:Mic92/sops-nix";
@@ -25,7 +31,7 @@
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
-  outputs = { self, nixpkgs, home-manager, sops-nix, ghostty, zen-browser, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, disko, sops-nix, ghostty, zen-browser, ... } @ inputs:
     let
       inherit (self) outputs;
 
@@ -43,12 +49,17 @@
 
       # Helper function to create NixOS configurations with common parameters
       mkNixosSystem = hostname: nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs outputs; };
+        specialArgs = { inherit disko inputs outputs; };
         modules = [
-          # Main configuration file for this host
-          ./hosts/${hostname}.nix
+
+          # Import Disko module
+          disko.nixosModules.disko
+
           # Add sops-nix module
           sops-nix.nixosModules.sops
+
+          # Main configuration file for this host
+          ./hosts/${hostname}.nix
         ];
       };
     in {
