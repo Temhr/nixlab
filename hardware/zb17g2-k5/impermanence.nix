@@ -1,16 +1,12 @@
 { inputs, config, lib, pkgs, ...}: {
 
   imports = [
+
     inputs.impermanence.nixosModules.impermanence
   ];
 
-  # Create a persistent directory
-  fileSystems."/persistent" = {
-    device = "/dev/disk/by-label/root";
-    fsType = "ext4";
-    neededForBoot = true;
-    options = ["noatime"];
-  };
+  # The /persistent mount point is now managed by Disko
+  # No need to define it here as it's defined in disk-config.nix
 
   # Link home directory to persistent storage
   fileSystems."/home" = {
@@ -20,8 +16,7 @@
   };
 
   # Enable tmpfs for root
-  boot.initrd.systemd.enable = true;
-  fileSystems."/" = {
+  fileSystems."/" = lib.mkForce {
     device = "none";
     fsType = "tmpfs";
     options = ["defaults" "size=2G" "mode=755"];

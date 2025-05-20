@@ -4,6 +4,7 @@
     # Compose this module out of smaller ones.
     ./disko.nix
     ./impermanence.nix
+    ./mount-order.nix
   ];
 
   options = {
