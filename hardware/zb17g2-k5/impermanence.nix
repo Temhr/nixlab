@@ -40,7 +40,6 @@
       directories = [
         ".bin"
         ".bash"
-        ".ssh"
         ".gnupg"
         ".config"
         ".local"
