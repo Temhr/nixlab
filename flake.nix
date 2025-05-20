@@ -19,6 +19,7 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    impermanence = { url = "github:nix-community/impermanence"; };
 
     # Secret management
     sops-nix = {
@@ -31,7 +32,7 @@
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
-  outputs = { self, nixpkgs, home-manager, disko, sops-nix, ghostty, zen-browser, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, disko, impermanence, sops-nix, ghostty, zen-browser, ... } @ inputs:
     let
       inherit (self) outputs;
 
@@ -49,14 +50,20 @@
 
       # Helper function to create NixOS configurations with common parameters
       mkNixosSystem = hostname: nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit disko inputs outputs; };
+        specialArgs = { inherit disko impermanence inputs outputs; };
         modules = [
+
+          # Add sops-nix module
+          sops-nix.nixosModules.sops
 
           # Import Disko module
           disko.nixosModules.disko
 
-          # Add sops-nix module
-          sops-nix.nixosModules.sops
+          # Your disk configuration
+          ./hardware/${hostname}/disko.nix
+
+          # Impermanence configuration
+          ./hardware/${hostname}/impermanence.nix
 
           # Main configuration file for this host
           ./hosts/${hostname}.nix
