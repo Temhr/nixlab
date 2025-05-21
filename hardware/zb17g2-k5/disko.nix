@@ -1,11 +1,18 @@
-{ ... }: {
-
+{
   # Disko configuration for partitioning and formatting
   disko.devices = {
     disk = {
       ssd = {
         type = "disk";
-        device = "/dev/disk/by-id/ata-Patriot_P220_256GB_P220NIBB24110810773"; # You might need to adjust this path
+        # Use more reliable device identifiers
+        device = "/dev/disk/by-id/ata-Patriot_P220_256GB_P220NIBB24110810773"; # Replace with your actual disk ID
+        # Fallbacks for device identification
+        extraConfig = {
+          discardable = true;
+          content.partitions.root.extraConfig.label = "root";
+          content.partitions.boot.extraConfig.label = "boot";
+          content.partitions.swap.extraConfig.label = "swap";
+        };
         content = {
           type = "gpt";
           partitions = {
@@ -40,7 +47,12 @@
       };
       hdd = {
         type = "disk";
-        device = "/dev/disk/by-id/ata-HGST_HTS721075A9E630_JR11006P0JL6HE"; # You might need to adjust this path
+        # Use more reliable device identifiers
+        device = "/dev/disk/by-id/ata-HGST_HTS721075A9E630_JR11006P0JL6HE"; # Replace with your actual disk ID
+        # Fallback label for the home partition
+        extraConfig = {
+          content.partitions.home.extraConfig.label = "home";
+        };
         content = {
           type = "gpt";
           partitions = {
