@@ -18,8 +18,8 @@
                 mountpoint = "/boot";
                 mountOptions = ["fmask=0077" "dmask=0077"];
               };
-              # Change label to match expected format
-              name = "disk-ssd-boot";
+              # Use simple name - disko will add the prefix
+              name = "boot";
             };
             swap = {
               size = "8G"; # Adjust swap size as needed
@@ -27,8 +27,8 @@
                 type = "swap";
                 resumeDevice = true;
               };
-              # Change label to match expected format
-              name = "disk-ssd-swap";
+              # Use simple name - disko will add the prefix
+              name = "swap";
             };
             root = {
               size = "100%"; # Use the rest of the SSD
@@ -38,8 +38,8 @@
                 mountpoint = "/persistent";
                 mountOptions = ["noatime"];
               };
-              # Change label to match expected format
-              name = "disk-ssd-root";
+              # Use simple name - disko will add the prefix
+              name = "root";
             };
           };
         };
@@ -59,8 +59,8 @@
                 mountpoint = "/persistent/home";
                 mountOptions = ["noatime"];
               };
-              # Change label to match expected format
-              name = "disk-hdd-home";
+              # Use simple name - disko will add the prefix
+              name = "home";
             };
           };
         };
