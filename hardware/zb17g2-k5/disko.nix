@@ -18,8 +18,8 @@
                 mountpoint = "/boot";
                 mountOptions = ["fmask=0077" "dmask=0077"];
               };
-              # Add label at partition level
-              name = "boot";
+              # Change label to match expected format
+              name = "disk-ssd-boot";
             };
             swap = {
               size = "8G"; # Adjust swap size as needed
@@ -27,8 +27,8 @@
                 type = "swap";
                 resumeDevice = true;
               };
-              # Add label at partition level
-              name = "swap";
+              # Change label to match expected format
+              name = "disk-ssd-swap";
             };
             root = {
               size = "100%"; # Use the rest of the SSD
@@ -38,8 +38,8 @@
                 mountpoint = "/persistent";
                 mountOptions = ["noatime"];
               };
-              # Add label at partition level
-              name = "root";
+              # Change label to match expected format
+              name = "disk-ssd-root";
             };
           };
         };
@@ -59,8 +59,8 @@
                 mountpoint = "/persistent/home";
                 mountOptions = ["noatime"];
               };
-              # Add label at partition level
-              name = "home";
+              # Change label to match expected format
+              name = "disk-hdd-home";
             };
           };
         };
