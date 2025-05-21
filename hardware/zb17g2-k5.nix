@@ -2,9 +2,9 @@
   imports = [
     ./common/global
     ./common/optional
-    #./common/optional/drives.nix
-    #./common/optional/drives-additional.nix
-    ./zb17g2-k5
+    ./common/optional/drives.nix
+    ./common/optional/drives-additional.nix
+    #./zb17g2-k5
   ];
 
   # Choose between these choices: "none" "k" "p"

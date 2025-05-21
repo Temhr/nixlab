@@ -5,7 +5,7 @@
       ssd = {
         type = "disk";
         # Use more reliable device identifiers
-        device = "/dev/sdb"; # Replace with your actual disk ID
+        device = "/dev/disk/by-id/ata-Patriot_P220_256GB_P220NIBB24110810773"; # Replace with your actual disk ID
         content = {
           type = "gpt";
           partitions = {
@@ -47,7 +47,7 @@
       hdd = {
         type = "disk";
         # Use more reliable device identifiers
-        device = "/dev/sda"; # Replace with your actual disk ID
+        device = "/dev/disk/by-id/ata-HGST_HTS721075A9E630_JR11006P0JL6HE"; # Replace with your actual disk ID
         content = {
           type = "gpt";
           partitions = {
