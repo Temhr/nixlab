@@ -1,18 +1,11 @@
+# Disko configuration for partitioning and formatting
 {
-  # Disko configuration for partitioning and formatting
   disko.devices = {
     disk = {
       ssd = {
         type = "disk";
         # Use more reliable device identifiers
         device = "/dev/disk/by-id/ata-Patriot_P220_256GB_P220NIBB24110810773"; # Replace with your actual disk ID
-        # Fallbacks for device identification
-        extraConfig = {
-          discardable = true;
-          content.partitions.root.extraConfig.label = "root";
-          content.partitions.boot.extraConfig.label = "boot";
-          content.partitions.swap.extraConfig.label = "swap";
-        };
         content = {
           type = "gpt";
           partitions = {
@@ -25,6 +18,8 @@
                 mountpoint = "/boot";
                 mountOptions = ["fmask=0077" "dmask=0077"];
               };
+              # Add label at partition level
+              name = "boot";
             };
             swap = {
               size = "8G"; # Adjust swap size as needed
@@ -32,6 +27,8 @@
                 type = "swap";
                 resumeDevice = true;
               };
+              # Add label at partition level
+              name = "swap";
             };
             root = {
               size = "100%"; # Use the rest of the SSD
@@ -41,6 +38,8 @@
                 mountpoint = "/persistent";
                 mountOptions = ["noatime"];
               };
+              # Add label at partition level
+              name = "root";
             };
           };
         };
@@ -49,10 +48,6 @@
         type = "disk";
         # Use more reliable device identifiers
         device = "/dev/disk/by-id/ata-HGST_HTS721075A9E630_JR11006P0JL6HE"; # Replace with your actual disk ID
-        # Fallback label for the home partition
-        extraConfig = {
-          content.partitions.home.extraConfig.label = "home";
-        };
         content = {
           type = "gpt";
           partitions = {
@@ -64,6 +59,8 @@
                 mountpoint = "/persistent/home";
                 mountOptions = ["noatime"];
               };
+              # Add label at partition level
+              name = "home";
             };
           };
         };
