@@ -16,6 +16,7 @@
     ./nix.nix
     ./nixpkgs.nix
     ./open-ssh.nix
+    ./system.nix
     ./utilities.nix
   ];
   options = {
