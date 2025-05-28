@@ -7,7 +7,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-d2411.url = "github:NixOS/nixpkgs/nixos-24.11";
 
     # Environment management
     home-manager = {
@@ -33,7 +32,7 @@
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-unstable, nixpkgs-d2411, home-manager, disko, impermanence, sops-nix, ghostty, zen-browser, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, disko, impermanence, sops-nix, ghostty, zen-browser, ... } @ inputs:
     let
       inherit (self) outputs;
 

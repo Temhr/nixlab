@@ -47,7 +47,7 @@
   # Extra Browsers
   brave.enable = true;
   chrome.enable = true;
-  edge.enable = true;
+  #edge.enable = true;
   zen.enable = true;
 
   ## Extra Terminal Emulators
