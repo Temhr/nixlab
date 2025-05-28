@@ -49,9 +49,10 @@
       # Helper function to generate attributes for all supported systems
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
+      overlays = import ./overlays { inherit inputs; };
       pkgsFor = system: import nixpkgs {
         inherit system;
-        overlays = import ./overlays { inherit inputs; };
+        overlays = builtins.attrValues overlays;
         config.allowUnfree = true;
       };
 
