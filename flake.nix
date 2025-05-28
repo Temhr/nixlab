@@ -49,8 +49,16 @@
       # Helper function to generate attributes for all supported systems
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
+      pkgsFor = system: import nixpkgs {
+        inherit system;
+        overlays = import ./overlays { inherit inputs; };
+        config.allowUnfree = true;
+      };
+
       # Helper function to create NixOS configurations with common parameters
       mkNixosSystem = hostname: nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux"; # or parametrize this as needed
+        pkgs = pkgsFor "x86_64-linux"; # Use the pkgs with overlays
         specialArgs = { inherit disko impermanence inputs outputs; };
         modules = [
 
