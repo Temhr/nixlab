@@ -44,6 +44,9 @@
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
+  ## Development
+  vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
+
   ## Education
   anki.enable = true;  #Spaced repetition flashcard program
   #google-earth.enable = true;  #World sphere viewer "not secure""

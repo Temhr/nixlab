@@ -19,6 +19,12 @@
               default = false;
             };
         };
+        vscodium = {
+            enable = lib.mkEnableOption {
+              description = "Enables vscodium";
+              default = false;
+            };
+        };
     };
 
     config = lib.mkMerge [
@@ -35,6 +41,11 @@
         (lib.mkIf config.vscode.enable {
             environment.systemPackages = with pkgs; [
                 vscode #Open source source code editor developed by Microsoft
+            ];
+        })
+        (lib.mkIf config.vscodium.enable {
+            environment.systemPackages = with pkgs; [
+                vscodium #VS Code without MS branding/telemetry/licensing
             ];
         })
     ];

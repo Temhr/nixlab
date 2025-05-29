@@ -4,6 +4,7 @@
     # Compose this module out of smaller ones.
     ./art.nix
     ./communication.nix
+    ./development.nix
     ./education.nix
     ./games.nix
     ./productivity.nix
