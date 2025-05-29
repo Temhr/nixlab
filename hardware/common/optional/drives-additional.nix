@@ -41,7 +41,7 @@
             };
     })
     (lib.mkIf config.mount-shelf.enable {
-        fileSystems."/home/shelf" =
+        fileSystems."/home/temhr/shelf" =
             { device = "/dev/disk/by-label/shelf";
               fsType = "ext4";
             };
