@@ -84,19 +84,5 @@
         nixzen = mkNixosSystem "nixk1"; #nixzen
         nixos = mkNixosSystem "nixos"; #nixos
       };
-
-      # Home Manager Configurations
-      # Currently disabled - uncomment when needed
-      /*
-      homeConfigurations = {
-        "temhr" = home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.x86_64-linux;
-          extraSpecialArgs = { inherit inputs outputs; };
-          modules = [
-            ./home-manager/home.nix
-          ];
-        };
-      };
-      */
     };
 }
