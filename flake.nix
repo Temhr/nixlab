@@ -56,23 +56,63 @@
       # Helper function to generate attributes for all supported systems
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-
-      # Helper function to create NixOS configurations with common parameters
-      mkNixosSystem = hostname: system: nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit disko impermanence inputs outputs; };
-        modules = [
-
-          # Add sops-nix module
-          sops-nix.nixosModules.sops
-
-          # Import Disko module
-          disko.nixosModules.disko
-
-          # Main configuration file for this host
-          ./hosts/${hostname}.nix
-        ];
+      # Host definitions with metadata
+      hosts = {
+        nixace = {
+          system = "x86_64-linux";
+          # Add host-specific modules here if needed
+          # nixos-hardware.nixosModules.dell-xps-13-9310
+          modules = [  ];
+        };
+        nixsun = {
+          system = "x86_64-linux";
+          modules = [  ];
+        };
+        nixtop = {
+          system = "x86_64-linux";
+          modules = [  ];
+        };
+        nixvat = {
+          system = "x86_64-linux";
+          modules = [  ];
+        };
+        nixzen = {
+          system = "x86_64-linux";
+          modules = [  ];
+        };
+        nixos = {
+          system = "x86_64-linux";
+          modules = [  ];
+        };
       };
+
+      # Common modules used by all hosts
+      commonModules = [
+        sops-nix.nixosModules.sops
+        disko.nixosModules.disko
+        # Add other common modules here
+      ];
+
+      # Enhanced helper function to create NixOS configurations
+      mkNixosSystem = hostname: { system, modules ? [], ... }:
+        let
+          hostConfigPath = ./hosts/${hostname}.nix;
+        in
+        assert builtins.pathExists hostConfigPath;
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit disko impermanence inputs outputs hostname;
+          };
+          modules = commonModules ++ modules ++ [
+            # Set hostname automatically
+            { networking.hostName = hostname; }
+
+            # Host-specific configuration
+            hostConfigPath
+          ];
+        };
+
     in {
       # Package Definitions
       packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
@@ -120,6 +160,8 @@
               echo "  - deadnix: Find unused Nix code"
               echo "  - statix: Lint Nix code"
               echo ""
+              echo "Available hosts: ${builtins.concatStringsSep ", " (builtins.attrNames hosts)}"
+              echo ""
               echo "Example usage:"
               echo "  sudo nixos-rebuild switch --flake .#nixace"
               echo "  home-manager switch --flake .#user@nixace"
@@ -152,9 +194,17 @@
           # Build check - ensures all configurations can build
           build-check = pkgs.writeShellScriptBin "build-check" ''
             echo "Checking if all NixOS configurations build..."
-            ${pkgs.lib.concatStringsSep "\n" (pkgs.lib.mapAttrsToList (name: config:
+            ${nixpkgs.lib.concatStringsSep "\n" (nixpkgs.lib.mapAttrsToList (name: config:
               "echo 'Building ${name}...' && nix build .#nixosConfigurations.${name}.config.system.build.toplevel --no-link"
             ) self.nixosConfigurations)}
+          '';
+
+          # Validate host definitions
+          host-validation = pkgs.runCommand "validate-hosts" {} ''
+            ${nixpkgs.lib.concatStringsSep "\n" (nixpkgs.lib.mapAttrsToList (hostname: config:
+              "[ -f ${./hosts}/${hostname}.nix ] || (echo 'Missing host file: hosts/${hostname}.nix' && exit 1)"
+            ) hosts)}
+            echo "All host files exist" > $out
           '';
         });
 
@@ -163,14 +213,7 @@
       nixosModules = import ./modules/nixos;
       homeManagerModules = import ./modules/home-manager;
 
-      # System Configurations
-      nixosConfigurations = {
-        nixace = mkNixosSystem "nixace" "x86_64-linux";
-        nixsun = mkNixosSystem "nixsun" "x86_64-linux";
-        nixtop = mkNixosSystem "nixtop" "x86_64-linux";
-        nixvat = mkNixosSystem "nixvat" "x86_64-linux";
-        nixzen = mkNixosSystem "nixzen" "x86_64-linux";
-        nixos = mkNixosSystem "nixos" "x86_64-linux";
-      };
+      # System Configurations - Now DRY!
+      nixosConfigurations = nixpkgs.lib.mapAttrs mkNixosSystem hosts;
     };
 }
