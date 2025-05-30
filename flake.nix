@@ -120,12 +120,12 @@
       # Code formatter configuration
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-      # Development shells - imported from separate files
+      # Shell Enviroments - imported from separate files
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
-        import ./dev-shells { inherit pkgs; }
+        import ./shells { inherit pkgs; }
       );
 
       # Flake checks for code quality and build verification
