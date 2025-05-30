@@ -120,54 +120,13 @@
       # Code formatter configuration
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-      # Development shells
+      # Development shells - imported from separate files
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-        in {
-          default = pkgs.mkShell {
-            name = "nixlab-dev";
-            buildInputs = with pkgs; [
-              # NixOS tools
-              nixos-rebuild
-              home-manager
-
-              # Secret management
-              sops
-              age
-              ssh-to-age
-
-              # Development tools
-              git
-              alejandra  # Nix formatter
-              deadnix    # Find dead Nix code
-              statix     # Nix linter
-
-              # Disk management
-              parted
-
-              # Optional: if you use VS Code
-              # nixd  # Nix language server
-            ];
-
-            shellHook = ''
-              echo "🚀 NixLab Development Environment"
-              echo "Available commands:"
-              echo "  - nixos-rebuild: Rebuild NixOS configuration"
-              echo "  - home-manager: Manage user environment"
-              echo "  - sops: Edit encrypted secrets"
-              echo "  - alejandra: Format Nix code"
-              echo "  - deadnix: Find unused Nix code"
-              echo "  - statix: Lint Nix code"
-              echo ""
-              echo "Available hosts: ${builtins.concatStringsSep ", " (builtins.attrNames hosts)}"
-              echo ""
-              echo "Example usage:"
-              echo "  sudo nixos-rebuild switch --flake .#nixace"
-              echo "  home-manager switch --flake .#user@nixace"
-            '';
-          };
-        });
+        in
+        import ./dev-shells { inherit pkgs; }
+      );
 
       # Flake checks for code quality and build verification
       checks = forAllSystems (system:
