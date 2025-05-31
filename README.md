@@ -66,6 +66,7 @@ Aspirational
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab`
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
   - **Cachix**: ` $ sudo cachix use [package_name]`
+  - **Shells**: ` $ nix develop /home/temhr/nixlab#<shell-name>`
 </details>
 
 # Repository Layout
@@ -93,5 +94,6 @@ Aspirational
   - **default**: repository switching via flags (pkgs.unstable, pkgs.stable)
 - **pkgs**: custom written packages
   - empty
+- **shells**: temporary, isolated, shell environments
 -  flake.nix: entry point
 -  flake.lock: version pinner
