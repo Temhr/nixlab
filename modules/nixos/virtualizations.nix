@@ -74,6 +74,8 @@
 
           # Network configuration for Incus
           networking = {
+            # Enable nftables (required for Incus)
+            nftables.enable = true;
 
             firewall = {
               enable = true;
@@ -82,21 +84,6 @@
 
               # Trust Incus bridge interface
               trustedInterfaces = [ "incusbr0" ];
-
-              # Additional firewall rules for Incus
-              extraCommands = ''
-                # Allow forwarding for Incus bridge
-                iptables -A FORWARD -i incusbr0 -o incusbr0 -j ACCEPT
-                iptables -A FORWARD -i incusbr0 -j ACCEPT
-                iptables -A FORWARD -o incusbr0 -j ACCEPT
-
-                # NAT for Incus network
-                iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -j MASQUERADE
-
-                # Optional: Port forwarding for Home Assistant
-                # Replace VM_IP with your actual VM IP
-                # iptables -t nat -A PREROUTING -p tcp --dport 8123 -j DNAT --to-destination VM_IP:8123
-              '';
             };
           };
 
