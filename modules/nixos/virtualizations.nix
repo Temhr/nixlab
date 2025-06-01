@@ -69,10 +69,11 @@
           # Add your user to incus-admin group
           users.users."temhr".extraGroups = [ "incus-admin" ];
 
+          # Enable IP forwarding for Incus
+          boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
           # Network configuration for Incus
           networking = {
-            # Enable IP forwarding
-            kernel.sysctl."net.ipv4.ip_forward" = 1;
 
             firewall = {
               enable = true;
