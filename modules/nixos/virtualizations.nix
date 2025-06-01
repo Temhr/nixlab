@@ -59,66 +59,48 @@
           environment.systemPackages = with pkgs; [ distrobox ];  #Wrapper around podman or docker to create and start containers
         })
         (lib.mkIf config.incus.enable {
-          virtualisation.incus.enable = true;
-          users.users."temhr".extraGroups = ["incus-admin"];
-          # minimal incus initialization below
-          # $ incus admin init --minimal
-          virtualisation.incus.preseed = {
-            networks = [
-              {
-                config = {
-                  "ipv4.address" = "auto";
-                  "ipv4.nat" = "true";
-                };
-                name = "incusbr0";
-                type = "bridge";
-              }
-            ];
-            profiles = [
-              {
-                devices = {
-                  eth0 = {
-                    name = "eth0";
-                    network = "incusbr0";
-                    type = "nic";
-                  };
-                  root = {
-                    path = "/";
-                    pool = "default";
-                    size = "35GiB";
-                    type = "disk";
-                  };
-                };
-                name = "default";
-              }
-            ];
-            storage_pools = [
-              {
-                config = {
-                  source = "/var/lib/incus/storage-pools/default";
-                };
-                driver = "dir";
-                name = "default";
-              }
-            ];
+
+          # Enable Incus
+          virtualisation.incus = {
+            enable = true;
+            ui.enable = true;  # Optional web UI
           };
-          #Setting up the bridge profile
-          # $ incus profile create bridgeprofile
-          # $ incus profile device add bridgeprofile eth0 nic nictype=bridged parent=incusbr0
-          #Create a VM example with profile
-          # $ incus init images:< debian/11 > --vm < name > --profile default --profile bridgeprofile -c boot.autostart=true -c limits.cpu=2 -c limits.memory=4GiB
-          networking.firewall.trustedInterfaces = [ "incusbr0" ];
-          networking.nftables.enable = true;
-          networking.firewall.interfaces.incusbr0.allowedTCPPorts = [
-            53
-            67
-            8123
-          ];
-          networking.firewall.interfaces.incusbr0.allowedUDPPorts = [
-            53
-            67
-            8123
-          ];
+
+          # Add your user to incus-admin group
+          users.users."temhr".extraGroups = [ "incus-admin" ];
+
+          # Network configuration for Incus
+          networking = {
+            # Enable IP forwarding
+            kernel.sysctl."net.ipv4.ip_forward" = 1;
+
+            firewall = {
+              enable = true;
+              # Allow Home Assistant port
+              allowedTCPPorts = [ 8123 ];
+
+              # Trust Incus bridge interface
+              trustedInterfaces = [ "incusbr0" ];
+
+              # Additional firewall rules for Incus
+              extraCommands = ''
+                # Allow forwarding for Incus bridge
+                iptables -A FORWARD -i incusbr0 -o incusbr0 -j ACCEPT
+                iptables -A FORWARD -i incusbr0 -j ACCEPT
+                iptables -A FORWARD -o incusbr0 -j ACCEPT
+
+                # NAT for Incus network
+                iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -j MASQUERADE
+
+                # Optional: Port forwarding for Home Assistant
+                # Replace VM_IP with your actual VM IP
+                # iptables -t nat -A PREROUTING -p tcp --dport 8123 -j DNAT --to-destination VM_IP:8123
+              '';
+            };
+          };
+
+          # Required kernel modules
+          boot.kernelModules = [ "veth" "xt_comment" ];
         })
         (lib.mkIf config.podman.enable {
           environment.systemPackages = with pkgs; [ podman ];  #A program for managing pods, containers and container images
