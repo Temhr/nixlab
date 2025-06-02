@@ -18,7 +18,7 @@ in {
         hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
     })
     (lib.mkIf (cfg.quadro == "p") {
-        hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.latest;
+        hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
     })
   ];
 }
