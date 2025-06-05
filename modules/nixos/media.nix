@@ -60,6 +60,15 @@
                 enable = true;  #Distributed version control system
                 enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
             };
+            environment.systemPackages = [
+              (pkgs.wrapOBS {
+                plugins = with pkgs.obs-studio-plugins; [
+                  wlrobs
+                  obs-backgroundremoval
+                  obs-pipewire-audio-capture
+                ];
+              })
+            ];
             boot.extraModulePackages = with config.boot.kernelPackages; [
               v4l2loopback
             ];
