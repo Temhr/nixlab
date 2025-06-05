@@ -56,27 +56,41 @@
           environment.systemPackages = with pkgs; [ media-downloader ];  #Qt/C++ GUI front end for yt-dlp and others
         })
         (lib.mkIf config.obs.enable {
-            programs.obs-studio = {
-                enable = true;  #Distributed version control system
-                enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
-            };
-            environment.systemPackages = [
-              (pkgs.wrapOBS {
+
+          programs.obs-studio = {
+                  enable = true;  #Distributed version control system
+                  enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
+          };
+          # Enable v4l2loopback kernel module for OBS virtual camera
+          boot.extraModulePackages = with config.boot.kernelPackages; [
+            v4l2loopback
+          ];
+
+          # Load the module at boot with proper parameters
+          boot.extraModprobeConfig = ''
+            options v4l2loopback devices=1 video_nr=10 card_label="OBS Cam" exclusive_caps=1
+          '';
+
+          # Alternative: Load module on demand
+          boot.kernelModules = [ "v4l2loopback" ];
+
+          # Ensure your user is in the video group
+          users.users."temhr" = {
+            extraGroups = [ "video" ];
+          };
+
+          # Install OBS with virtual camera support
+          environment.systemPackages = with pkgs; [
+            obs-studio
+            v4l-utils  # Useful for debugging video devices
+            (pkgs.wrapOBS {
                 plugins = with pkgs.obs-studio-plugins; [
                   wlrobs
                   obs-backgroundremoval
                   obs-pipewire-audio-capture
                 ];
-              })
-            ];
-            boot.extraModulePackages = with config.boot.kernelPackages; [
-              v4l2loopback
-            ];
-            boot.kernelModules = [ "v4l2loopback" ];
-            boot.extraModprobeConfig = ''
-              options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
-            '';
-            security.polkit.enable = true;
+            })
+          ];
         })
         (lib.mkIf config.openshot.enable {
           environment.systemPackages = with pkgs; [ openshot-qt ];  #Free, open-source video editor
