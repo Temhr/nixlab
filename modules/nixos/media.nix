@@ -60,8 +60,14 @@
                 enable = true;  #Distributed version control system
                 enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
             };
-            boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+            boot.extraModulePackages = with config.boot.kernelPackages; [
+              v4l2loopback
+            ];
             boot.kernelModules = [ "v4l2loopback" ];
+            boot.extraModprobeConfig = ''
+              options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+            '';
+            security.polkit.enable = true;
         })
         (lib.mkIf config.openshot.enable {
           environment.systemPackages = with pkgs; [ openshot-qt ];  #Free, open-source video editor
