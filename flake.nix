@@ -6,6 +6,7 @@
     # NixOS package collections - unstable as default, stable as overlay
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-24-11.url = "github:nixos/nixpkgs/nixos-24.11";
 
     # Environment management
     home-manager = {
@@ -40,7 +41,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-24-11, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
     let
       inherit (self) outputs;
 
