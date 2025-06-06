@@ -58,7 +58,6 @@
         (lib.mkIf config.obs.enable {
 
           programs.obs-studio = {
-                  enable = true;  #Distributed version control system
                   enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
           };
           # Enable v4l2loopback kernel module for OBS virtual camera
