@@ -40,7 +40,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-24-11, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
     let
       inherit (self) outputs;
 
