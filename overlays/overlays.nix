@@ -21,13 +21,4 @@
     };
   };
 
-  # When applied, the stable nixpkgs set (declared in the flake inputs) will
-  # be accessible through 'pkgs.stable'
-  d2411-packages = final: _prev: {
-    d2411 = import inputs.nixpkgs-2411 {
-      system = final.system;
-      config.allowUnfree = true;
-    };
-  };
-
 }
