@@ -1,22 +1,24 @@
-{ ... }: {
-  imports = [
-    # Paths to other modules.
-    # Compose this module out of smaller ones.
-    ./nixpkgs.nix
-    ./overlays.nix
-  ];
+# This file defines overlays
+{inputs, ...}: {
+  # This one brings our custom packages from the 'pkgs' directory
+  additions = final: _prev: import ../pkgs final.pkgs;
 
-  options = {
-    # Option declarations.
-    # Declare what settings a user of this module can set.
-    # Usually this includes a global "enable" option which defaults to false.
+  # This one contains whatever you want to overlay
+  # You can change versions, add patches, set compilation flags, anything really.
+  # https://nixos.wiki/wiki/Overlays
+  modifications = final: prev: {
+    # example = prev.example.overrideAttrs (oldAttrs: rec {
+    # ...
+    # });
   };
 
-  config = {
-    # Option definitions.
-    # Define what other settings, services and resources should be active.
-    # Usually these depend on whether a user of this module chose to "enable" it
-    # using the "option" above.
-    # Options for modules imported in "imports" can be set here.
+  # When applied, the stable nixpkgs set (declared in the flake inputs) will
+  # be accessible through 'pkgs.stable'
+  stable-packages = final: _prev: {
+    stable = import inputs.nixpkgs-stable {
+      system = final.system;
+      config.allowUnfree = true;
+    };
   };
+
 }
