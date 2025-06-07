@@ -66,7 +66,10 @@
         };
         nixsun = {
           system = "x86_64-linux";
-          modules = [  ];
+          modules = [
+            # Multiple profiles
+            "${nixpkgs}/nixos/modules/profiles/headless.nix"
+          ];
         };
         nixtop = {
           system = "x86_64-linux";
