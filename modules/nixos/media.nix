@@ -80,7 +80,7 @@
 
           # Install OBS with virtual camera support
           environment.systemPackages = with pkgs; [
-            d2411.obs-studio
+            obs-studio
             v4l-utils  # Useful for debugging video devices
             (pkgs.wrapOBS {
                 plugins = with pkgs.obs-studio-plugins; [
