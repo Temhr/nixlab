@@ -68,7 +68,6 @@
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-            "${nixpkgs}/nixos/modules/profiles/headless.nix"
           ];
         };
         nixtop = {
@@ -79,7 +78,6 @@
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-            "${nixpkgs}/nixos/modules/profiles/headless.nix"
             "${nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
           ];
         };
@@ -87,14 +85,12 @@
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-            "${nixpkgs}/nixos/modules/profiles/headless.nix"
           ];
         };
         nixos = {
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-            "${nixpkgs}/nixos/modules/profiles/headless.nix"
           ];
         };
       };
