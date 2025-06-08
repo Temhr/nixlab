@@ -68,24 +68,21 @@
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-<<<<<<< Updated upstream
-=======
             #"${nixpkgs}/nixos/modules/profiles/headless.nix"
->>>>>>> Stashed changes
           ];
         };
         nixtop = {
           system = "x86_64-linux";
-          modules = [  ];
+          modules = [
+            # Multiple profiles
+            #"${nixpkgs}/nixos/modules/profiles/headless.nix"
+          ];
         };
         nixvat = {
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-<<<<<<< Updated upstream
-=======
             #"${nixpkgs}/nixos/modules/profiles/headless.nix"
->>>>>>> Stashed changes
             "${nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
           ];
         };
@@ -93,20 +90,14 @@
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-<<<<<<< Updated upstream
-=======
             #"${nixpkgs}/nixos/modules/profiles/headless.nix"
->>>>>>> Stashed changes
           ];
         };
         nixos = {
           system = "x86_64-linux";
           modules = [
             # Multiple profiles
-<<<<<<< Updated upstream
-=======
             #"${nixpkgs}/nixos/modules/profiles/headless.nix"
->>>>>>> Stashed changes
           ];
         };
       };
