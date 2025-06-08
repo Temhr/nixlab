@@ -73,19 +73,27 @@
         };
         nixtop = {
           system = "x86_64-linux";
-          modules = [  ];
+          modules = [
+            # Multiple profiles
+            "${nixpkgs}/nixos/modules/profiles/headless.nix" ];
         };
         nixvat = {
           system = "x86_64-linux";
-          modules = [  ];
+          modules = [
+            # Multiple profiles
+            "${nixpkgs}/nixos/modules/profiles/headless.nix" ];
         };
         nixzen = {
           system = "x86_64-linux";
-          modules = [  ];
+          modules = [
+            # Multiple profiles
+            "${nixpkgs}/nixos/modules/profiles/headless.nix" ];
         };
         nixos = {
           system = "x86_64-linux";
-          modules = [  ];
+          modules = [
+            # Multiple profiles
+            "${nixpkgs}/nixos/modules/profiles/headless.nix" ];
         };
       };
 
