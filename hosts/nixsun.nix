@@ -21,6 +21,7 @@
     ./common/optional
     ../cachix.nix
     ../modules/nixos
+    ./common/global/network.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ../hardware/zb17g2-k5.nix
