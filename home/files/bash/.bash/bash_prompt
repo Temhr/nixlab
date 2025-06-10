@@ -43,7 +43,7 @@ set_prompt() {
   PS1="$CLOCK_COLOR\t$WHITE_SPACE"
   PS1+="$BRACKET_COLOR[$JOB_COLOR\j$BRACKET_COLOR]$WHITE_SPACE"
   PS1+="$exit_code_symbol\H:$PATH_COLOR\w$RESET_COLOR\n"
-  PS1+="$END_CHARACTER$RESET_COLOR $emoji $HASH "
+  PS1+="$END_CHARACTER$RESET_COLOR \[$emoji\] $HASH $WHITE_SPACE"
 }
 
 # Set the prompt before each command
