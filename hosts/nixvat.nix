@@ -29,9 +29,6 @@
   # TODO: Set your hostname
   networking.hostName = "nixvat";
 
-  ## Enable networking
-  networking.networkmanager.enable = true;
-
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 

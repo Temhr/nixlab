@@ -21,7 +21,6 @@
     ./common/optional
     ../cachix.nix
     ../modules/nixos
-    ./common/global/network.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ../hardware/zb17g2-k5.nix
@@ -29,9 +28,6 @@
 
   # TODO: Set your hostname
   networking.hostName = "nixsun";
-
-  ## Enable networking
-  networking.networkmanager.enable = true;
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;

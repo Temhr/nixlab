@@ -13,6 +13,7 @@
     ./firefox.nix
     ./flatpak.nix
     ./locale.nix
+    ./network.nix
     ./nix.nix
     ./nixpkgs.nix
     ./open-ssh.nix
