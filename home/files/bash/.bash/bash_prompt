@@ -1,24 +1,50 @@
-# declares an array with the emojis we want to support
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-EMOJIS=($(<"${SCRIPT_DIR}/emoticons"))
+#!/usr/bin/env bash
+# Exit early if not in an interactive shell
+[[ $- != *i* ]] && return
 
-# function that selects and return a random element from the EMOJIS set
+# Get the directory of the current script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Read emojis from a single-line, whitespace-separated file
+read -ra EMOJIS <<< "$(cat "${SCRIPT_DIR}/emoticons")"
+
+# Function to select a random emoji
 RANDOM_EMOJI() {
-  SELECTED_EMOJI=${EMOJIS[$RANDOM % ${#EMOJIS[@]}]};
-  echo $SELECTED_EMOJI;
+  echo "${EMOJIS[RANDOM % ${#EMOJIS[@]}]}"
 }
 
+# ANSI 256 color escapes (properly wrapped in \[ \] for prompt alignment)
 BRACKET_COLOR="\[\033[38;5;35m\]"
 CLOCK_COLOR="\[\033[38;5;35m\]"
 JOB_COLOR="\[\033[38;5;33m\]"
 PATH_COLOR="\[\033[38;5;33m\]"
-LINE_BOTTOM="\342\224\200"
-LINE_BOTTOM_CORNER="\342\224\224"
 LINE_COLOR="\[\033[38;5;248m\]"
-LINE_STRAIGHT="\342\224\200"
-LINE_UPPER_CORNER="\342\224\214"
+RESET_COLOR="\[\033[0m\]"
+
+# Line characters (UTF-8)
+LINE_BOTTOM="─"
+LINE_BOTTOM_CORNER="└"
+LINE_UPPER_CORNER="┌"
+LINE_STRAIGHT="─"
+
+# Misc symbols
 END_CHARACTER="|"
 WHITE_SPACE=" "
 HASH="#"
 
-tty -s && export PS1="$CLOCK_COLOR\t$WHITE_SPACE$BRACKET_COLOR[$JOB_COLOR\j$BRACKET_COLOR]$WHITE_SPACE\H:$PATH_COLOR\w$BRACKET_COLOR\n$END_CHARACTER\[$(tput sgr0)\]$(RANDOM_EMOJI)$WHITE_SPACE$HASH\[$(tput sgr0)\]"
+# Prompt update function
+set_prompt() {
+  local emoji exit_code_symbol=""
+  local last_code=$?
+
+  [[ $last_code -ne 0 ]] && exit_code_symbol="❌($last_code) "
+  emoji="$(RANDOM_EMOJI)"
+
+  PS1="$CLOCK_COLOR\t$WHITE_SPACE"
+  PS1+="$BRACKET_COLOR[$JOB_COLOR\j$BRACKET_COLOR]$WHITE_SPACE"
+  PS1+="$exit_code_symbol\H:$PATH_COLOR\w$RESET_COLOR\n"
+  PS1+="$END_CHARACTER$RESET_COLOR $emoji $HASH "
+}
+
+# Set the prompt before each command
+PROMPT_COMMAND="set_prompt"
