@@ -12,6 +12,7 @@
     ./display-manager.nix
     ./firefox.nix
     ./flatpak.nix
+    ./lid.nix
     ./locale.nix
     ./network.nix
     ./nix.nix
