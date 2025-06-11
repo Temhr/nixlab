@@ -1,4 +1,3 @@
-# Example configuration.nix using the WiFi fix module
 # WiFi Fix Module for Intel WiFi Cards (especially 7260)
 # Save as: modules/wifi-fix.nix or hardware/wifi-fix.nix
 
@@ -68,6 +67,12 @@ in
         options iwlwifi swcrypto=1
       '';
     };
+
+    networkManager = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Whether NetworkManager is being used (affects reconnection commands)";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -85,8 +90,8 @@ in
       ${cfg.extraModprobeConfig}
     '';
 
-    # NetworkManager configuration
-    services.networkmanager = mkIf cfg.powerSaveDisable {
+    # NetworkManager configuration (only if NetworkManager is enabled)
+    networking.networkmanager = mkIf (cfg.powerSaveDisable && config.networking.networkmanager.enable) {
       wifi.powersave = false;
     };
 
@@ -109,7 +114,7 @@ in
             ${pkgs.kmod}/bin/modprobe ${cfg.driver}
             sleep 5
             # Reconnect to WiFi
-            ${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface} || true
+            ${optionalString cfg.networkManager "${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface} || true"}
           fi
         '';
       };
@@ -142,7 +147,7 @@ in
                 sleep 10
 
                 # Reconnect
-                ${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface} || true
+                ${optionalString cfg.networkManager "${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface} || true"}
 
                 # Log the event
                 echo "$(date): WiFi driver reloaded for interface ${cfg.interface}" >> /var/log/wifi-watchdog.log
@@ -223,7 +228,7 @@ in
 
         # Reconnect to WiFi
         echo "Step 3: Reconnecting to WiFi..."
-        ${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface}
+        ${optionalString cfg.networkManager "${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface}"}
 
         echo "Waiting for connection..."
         sleep 10
