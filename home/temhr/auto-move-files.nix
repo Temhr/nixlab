@@ -9,16 +9,16 @@
     ".bashrc".source = ./nixlab/home/files/bash/.bashrc;
 
     # Bash utility files in ~/.bash/ directory
-    ".bash/bash_aliases".source = ./nixlab/home/files/bash/bash_aliases;
-    ".bash/bash_functions".source = ./nixlab/home/files/bash/bash_functions;
-    ".bash/bash_prompt".source = ./nixlab/home/files/bash/bash_prompt;
-    ".bash/emoticons".source = ./nixlab/home/files/bash/emoticons;
-    ".bash/environment_variables".source = ./nixlab/home/files/bash/environment_variables;
-    ".bash/ghostty_themes.txt".source = ./nixlab/home/files/bash/ghostty_themes.txt;
+    ".bash/bash_aliases".source = ./nixlab/home/files/bash/.bash/bash_aliases;
+    ".bash/bash_functions".source = ./nixlab/home/files/bash/.bash/bash_functions;
+    ".bash/bash_prompt".source = ./nixlab/home/files/bash/.bash/bash_prompt;
+    ".bash/emoticons".source = ./nixlab/home/files/bash/.bash/emoticons;
+    ".bash/environment_variables".source = ./nixlab/home/files/bash/.bash/environment_variables;
+    ".bash/ghostty_themes.txt".source = ./nixlab/home/files/bash/.bash/ghostty_themes.txt;
 
     # Make ghostty theme randomizer executable
     ".bash/ghostty_theme_randomizer" = {
-      source = ./nixlab/home/files/bash/ghostty_theme_randomizer;
+      source = ./nixlab/home/files/bash/.bash/ghostty_theme_randomizer;
       executable = true;
     };
   };
