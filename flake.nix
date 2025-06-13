@@ -118,7 +118,7 @@
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = {
-            inherit disko impermanence inputs outputs hostname;
+            inherit disko impermanence inputs outputs hostname self;
           };
           modules = commonModules ++ modules ++ [
             # Set hostname automatically
