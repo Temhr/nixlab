@@ -33,9 +33,12 @@
 
     ## Network Management
     bridge-utils  #Userspace tool to configure linux bridges (deprecated in favour or iproute2)
+    dig  #Domain name server
     ethtool  #Utility for controlling network drivers and hardware
     iperf  #Tool to measure IP bandwidth using UDP or TCP
     iproute2  #Collection of utilities for controlling TCP/IP networking and traffic control in Linux
+    mtr-gui  #Network diagnostics tool
+    nethogs  #Small 'net top' tool, grouping bandwidth by process
     nettools  #A set of tools for controlling the network subsystem in Linux
     nfs-utils  #Linux user-space NFS utilities
     nmap  #A free and open source utility for network discovery and security auditing
@@ -67,9 +70,13 @@
     iftop  #Display bandwidth usage on a network interface
     iotop  #A tool to find out the processes doing the most IO
     htop  #An interactive process viewer
+    lm_sensors  #Tools for reading hardware sensors
     nvtopPackages.intel  #(h)top like task monitor for AMD, Adreno, Intel and NVIDIA GPUs
     nvtopPackages.nvidia  #(h)top like task monitor for AMD, Adreno, Intel and NVIDIA GPUs
     perf-tools  #Performance analysis tools based on Linux perf_events (aka perf) and ftrace
+    psmisc  #Set of small useful utilities that use the proc filesystem (such as fuser, killall and pstree)
+    smartmontools  #Tools for monitoring the health of hard drives
+    stress-ng  #Stress test a computer system
     wavemon  #Ncurses-based monitoring application for wireless network devices
 
     ## Text Editors
