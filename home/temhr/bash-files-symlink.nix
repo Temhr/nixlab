@@ -4,20 +4,20 @@
 {
   home.file = {
     # Root level bash files - using relative paths from flake root
-    ".bash_profile".source = ./home/files/bash/.bash_profile;
-    ".bashrc".source = ./home/files/bash/.bashrc;
+    ".bash_profile".source = ${inputs.root}/home/files/bash/.bash_profile;
+    ".bashrc".source = ${inputs.root}/home/files/bash/.bashrc;
 
     # Files from the .bash/ subdirectory in your source
-    ".bash/bash_aliases".source = ./home/files/bash/.bash/bash_aliases;
-    ".bash/bash_functions".source = ./home/files/bash/.bash/bash_functions;
-    ".bash/bash_prompt".source = ./home/files/bash/.bash/bash_prompt;
-    ".bash/emoticons".source = ./home/files/bash/.bash/emoticons;
-    ".bash/environment_variables".source = ./home/files/bash/.bash/environment_variables;
-    ".bash/ghostty_themes.txt".source = ./home/files/bash/.bash/ghostty_themes.txt;
+    ".bash/bash_aliases".source = ${inputs.root}/home/files/bash/.bash/bash_aliases;
+    ".bash/bash_functions".source = ${inputs.root}/home/files/bash/.bash/bash_functions;
+    ".bash/bash_prompt".source = ${inputs.root}/home/files/bash/.bash/bash_prompt;
+    ".bash/emoticons".source = ${inputs.root}/home/files/bash/.bash/emoticons;
+    ".bash/environment_variables".source = ${inputs.root}/home/files/bash/.bash/environment_variables;
+    ".bash/ghostty_themes.txt".source = ${inputs.root}/home/files/bash/.bash/ghostty_themes.txt;
 
     # Make the theme randomizer executable
     ".bash/ghostty_theme_randomizer" = {
-      source = ./home/files/bash/.bash/ghostty_theme_randomizer;
+      source = ${inputs.root}/home/files/bash/.bash/ghostty_theme_randomizer;
       executable = true;
     };
   };
