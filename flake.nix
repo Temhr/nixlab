@@ -29,7 +29,7 @@
     # Hardware detection and configuration
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    root.url = "path:/home/temhr/nixlab";
+    root.url = "path:.";
 
     # Application-specific flakes
     ghostty.url = "github:ghostty-org/ghostty";
