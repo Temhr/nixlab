@@ -108,7 +108,7 @@
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
         {
-          home-manager.useGlobalPkgs = true;
+          home-manager.useGlobalPkgs = false;
           home-manager.useUserPackages = true;
           # Optionally, use home-manager.users.<username> to configure user-specific settings
         }
