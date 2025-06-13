@@ -24,7 +24,7 @@
 
   # Configure bash through Home Manager for better integration
   programs.bash = {
-    enable = true;
+    enable = false;
 
     # History settings
     historySize = 50000;
