@@ -106,12 +106,6 @@
       commonModules = [
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = false;
-          home-manager.useUserPackages = true;
-          # Optionally, use home-manager.users.<username> to configure user-specific settings
-        }
         # Add other common modules here
       ];
 
