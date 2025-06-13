@@ -1,39 +1,70 @@
-{ pkgs, ... }:
-let
-  MoveFilesShellScript = pkgs.writeShellScript "auto-move-files.sh" ''
-    cp /home/temhr/nixlab/home/files/bash/.bash_profile /home/temhr/.bash_profile &&
-    cp /home/temhr/nixlab/home/files/bash/.bashrc /home/temhr/.bashrc &&
-    cp /home/temhr/nixlab/home/files/bash/bash_aliases /home/temhr/.bash/bash_aliases &&
-    cp /home/temhr/nixlab/home/files/bash/bash_functions /home/temhr/.bash/bash_functions &&
-    cp /home/temhr/nixlab/home/files/bash/bash_prompt /home/temhr/.bash/bash_prompt &&
-    cp /home/temhr/nixlab/home/files/bash/emoticons /home/temhr/.bash/emoticons &&
-    cp /home/temhr/nixlab/home/files/bash/environment_variables /home/temhr/.bash/environment_variables &&
-    cp /home/temhr/nixlab/home/files/bash/ghostty_theme_randomizer /home/temhr/.bash/ghostty_theme_randomizer &&
-    cp /home/temhr/nixlab/home/files/bash/ghostty_themes.txt /home/temhr/.bash/ghostty_themes.txt
-  '';
-in
+# home.nix - Home Manager configuration for bash files
+{ config, pkgs, ... }:
+
 {
-  systemd.user.timers.move-files = {
-    Unit = {
-      Description = "Nightly copy/move bash and config files (timer)";
-    };
-    Timer = {
-      OnCalendar = "daily"; # Runs once per day at midnight by default
-      Persistent = true;
-      Unit = "move-files.service";
-    };
-    Install = {
-      WantedBy = [ "timers.target" ];
+  # Direct file management - files are symlinked automatically
+  home.file = {
+    # Main bash configuration files
+    ".bash_profile".source = ./nixlab/home/files/bash/.bash_profile;
+    ".bashrc".source = ./nixlab/home/files/bash/.bashrc;
+
+    # Bash utility files in ~/.bash/ directory
+    ".bash/bash_aliases".source = ./nixlab/home/files/bash/bash_aliases;
+    ".bash/bash_functions".source = ./nixlab/home/files/bash/bash_functions;
+    ".bash/bash_prompt".source = ./nixlab/home/files/bash/bash_prompt;
+    ".bash/emoticons".source = ./nixlab/home/files/bash/emoticons;
+    ".bash/environment_variables".source = ./nixlab/home/files/bash/environment_variables;
+    ".bash/ghostty_themes.txt".source = ./nixlab/home/files/bash/ghostty_themes.txt;
+
+    # Make ghostty theme randomizer executable
+    ".bash/ghostty_theme_randomizer" = {
+      source = ./nixlab/home/files/bash/ghostty_theme_randomizer;
+      executable = true;
     };
   };
 
-  systemd.user.services.move-files = {
+  # Alternative approach: Using programs.bash for better integration
+  programs.bash = {
+    enable = true;
+
+    # You can also manage bash configuration directly here instead of separate files
+    # bashrcExtra = ''
+    #   # Additional bash configuration can go here
+    #   # This gets appended to the generated .bashrc
+    # '';
+
+    # profileExtra = ''
+    #   # Additional profile configuration
+    #   # This gets appended to the generated .bash_profile
+    # '';
+
+    # Shell aliases (alternative to separate bash_aliases file)
+    # shellAliases = {
+    #   ll = "ls -alF";
+    #   la = "ls -A";
+    #   l = "ls -CF";
+    # };
+
+    # History configuration
+    historySize = 10000;
+    historyFileSize = 20000;
+    historyControl = [ "ignoredups" "ignorespace" ];
+  };
+
+  # If you want to keep using your existing separate files but with some Home Manager benefits:
+  # You can create a systemd user service that runs on home-manager switch
+  systemd.user.services.bash-config-refresh = {
     Unit = {
-      Description = "Nightly copy/move bash and config files (user service)";
+      Description = "Refresh bash configuration after home-manager switch";
+      After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${MoveFilesShellScript}";
       Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'source ~/.bash_profile 2>/dev/null || true'";
+      RemainAfterExit = true;
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
     };
   };
 }
