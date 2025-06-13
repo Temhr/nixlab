@@ -1,23 +1,23 @@
 # home.nix - Home Manager configuration matching your actual file structure
-{ config, inputs, pkgs, lib, ... }:
+{ config, self, pkgs, lib, ... }:
 
 {
   home.file = {
     # Root level bash files - using relative paths from flake root
-    ".bash_profile".source = ${inputs.root}/home/files/bash/.bash_profile;
-    ".bashrc".source = ${inputs.root}/home/files/bash/.bashrc;
+    ".bash_profile".source = ${self}/home/files/bash/.bash_profile;
+    ".bashrc".source = ${self}/home/files/bash/.bashrc;
 
     # Files from the .bash/ subdirectory in your source
-    ".bash/bash_aliases".source = ${inputs.root}/home/files/bash/.bash/bash_aliases;
-    ".bash/bash_functions".source = ${inputs.root}/home/files/bash/.bash/bash_functions;
-    ".bash/bash_prompt".source = ${inputs.root}/home/files/bash/.bash/bash_prompt;
-    ".bash/emoticons".source = ${inputs.root}/home/files/bash/.bash/emoticons;
-    ".bash/environment_variables".source = ${inputs.root}/home/files/bash/.bash/environment_variables;
-    ".bash/ghostty_themes.txt".source = ${inputs.root}/home/files/bash/.bash/ghostty_themes.txt;
+    ".bash/bash_aliases".source = ${self}/home/files/bash/.bash/bash_aliases;
+    ".bash/bash_functions".source = ${self}/home/files/bash/.bash/bash_functions;
+    ".bash/bash_prompt".source = ${self}/home/files/bash/.bash/bash_prompt;
+    ".bash/emoticons".source = ${self}/home/files/bash/.bash/emoticons;
+    ".bash/environment_variables".source = ${self}/home/files/bash/.bash/environment_variables;
+    ".bash/ghostty_themes.txt".source = ${self}/home/files/bash/.bash/ghostty_themes.txt;
 
     # Make the theme randomizer executable
     ".bash/ghostty_theme_randomizer" = {
-      source = ${inputs.root}/home/files/bash/.bash/ghostty_theme_randomizer;
+      source = ${self}/home/files/bash/.bash/ghostty_theme_randomizer;
       executable = true;
     };
   };

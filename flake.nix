@@ -29,8 +29,6 @@
     # Hardware detection and configuration
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    root.url = "path:.";
-
     # Application-specific flakes
     ghostty.url = "github:ghostty-org/ghostty";
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
@@ -42,7 +40,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, root, zen-browser, pre-commit-hooks, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
     let
       inherit (self) outputs;
 
