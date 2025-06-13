@@ -68,7 +68,7 @@
     })
     (lib.mkIf config.mount-mirk1.enable {
         fileSystems."/mnt/mirk1" =
-            { device = "192.168.0.201:/mirror";
+            { device = "192.168.0.204:/mirror";
               fsType = "nfs";
               options = [
                 "x-systemd.automount" "noauto"
@@ -80,7 +80,7 @@
     })
     (lib.mkIf config.mount-mirk3.enable {
         fileSystems."/mnt/mirk3" =
-            { device = "192.168.0.204:/mirror";
+            { device = "192.168.0.201:/mirror";
               fsType = "nfs";
               options = [
                 "x-systemd.automount" "noauto"
