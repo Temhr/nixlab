@@ -4,7 +4,7 @@
 {
   home.file = {
     # Root level bash files - using relative paths from flake root
-    ".bash_profile".source = "${self}/home/files/bash/.bash_profile";
+    ".bash_profile".source = lib.mkForce "${self}/home/files/bash/.bash_profile";
     ".bashrc".source = "${self}/home/files/bash/.bashrc";
 
     # Files from the .bash/ subdirectory in your source
