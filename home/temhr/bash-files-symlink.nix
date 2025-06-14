@@ -1,5 +1,5 @@
 # home.nix - Home Manager configuration matching your actual file structure
-{ config, self, pkgs, lib, ... }:
+{ config, lib, pkgs, self, ... }:
 
 {
   home.file = {
