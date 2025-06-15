@@ -4,6 +4,7 @@
     # Compose this module out of smaller ones.
     ./config-fastfetch.nix
     ./config-git.nix
+    ./config-plasma.nix
     ./config-virt-manager.nix
     #./nixpkgs.nix
   ];
