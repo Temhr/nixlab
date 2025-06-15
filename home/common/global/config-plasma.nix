@@ -412,16 +412,7 @@
         inhibitLidActionWhenExternalMonitorConnected = false;
       };
     };
-*/
 
-    # Hot corners
-    hotCorners = {
-      topLeft = "showDesktop";
-      topRight = "showApplicationLauncher";
-      bottomLeft = "activityManager";
-      bottomRight = "none";
-    };
-/*
     # Virtual desktops
     virtualDesktops = {
       rows = 2;
