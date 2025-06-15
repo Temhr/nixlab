@@ -446,25 +446,7 @@
         recordWindow = "Meta+Ctrl+R";
       };
     };
-*/
 
-    # Dolphin file manager
-    dolphin = {
-      general = {
-        browseArchives = true;
-        openExternallyCalledFolderInNewTab = true;
-        showFullPath = true;
-        showSpaceInfo = true;
-        showToolTips = true;
-        useTabForSwitchingSplitView = true;
-      };
-
-      search = {
-        location = "everywhere";
-      };
-    };
-
-/*
     # Konsole terminal
     konsole = {
       defaultProfile = "custom";
