@@ -1,7 +1,5 @@
-# ./home-manager/temhr.nix (or your Home Manager user configuration file)
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }: {
 
-{
   programs.plasma = {
     enable = true;
 
