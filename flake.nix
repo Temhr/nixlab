@@ -12,6 +12,11 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     # Declarative disk management
     disko = {
@@ -40,7 +45,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, disko, impermanence, sops-nix, nixos-hardware, ghostty, zen-browser, pre-commit-hooks, ... } @ inputs:
     let
       inherit (self) outputs;
 
@@ -106,6 +111,13 @@
       commonModules = [
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
+        home-manager.nixosModules.home-manager {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.sharedModules = [
+            plasma-manager.homeManagerModules.plasma-manager
+          ];
+        }
         # Add other common modules here
       ];
 

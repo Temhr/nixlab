@@ -5,7 +5,7 @@
     ./config-fastfetch.nix
     ./config-git.nix
     ./config-virt-manager.nix
-    ./nixpkgs.nix
+    #./nixpkgs.nix
   ];
 
   options = {
