@@ -27,8 +27,6 @@
 
       # Wallpaper
       wallpaperSlideShow = {
-        # Enable wallpaper slideshow
-        enable = true;
 
         # Path to directory containing wallpapers
         path = "/home/temhr/Pictures/Wallpapers";
@@ -39,57 +37,6 @@
         #   "/home/username/Pictures/Nature"
         #   "/usr/share/pixmaps"
         # ];
-
-        # Change interval in seconds
-        interval = 300;  # 5 minutes
-
-        # Slideshow mode options:
-        # - "Random" - random order
-        # - "Alphabetical" - alphabetical order
-        # - "AlphabeticalReversed" - reverse alphabetical
-        # - "Modified" - by modification time
-        # - "ModifiedReversed" - reverse modification time
-        mode = "Random";
-
-        # Image scaling/positioning options:
-        # - "Stretch" - stretch to fill screen
-        # - "Fit" - fit to screen maintaining aspect ratio
-        # - "Fill" - fill screen, may crop image
-        # - "Center" - center image at original size
-        # - "Tile" - tile image
-        # - "CenterTiled" - center and tile
-        fillMode = "Fill";
-
-        # Background color (used with some fill modes)
-        # Format: "#RRGGBB" or color name
-        color = "#000000";
-
-        # Blur background when image doesn't fill screen
-        blur = false;
-
-        # Uncrop: expand image to fill screen boundaries
-        uncrop = 0.0;  # 0.0 = no uncrop, 1.0 = maximum uncrop
-
-        # Image filters
-        filters = {
-          # Brightness adjustment (-1.0 to 1.0)
-          brightness = 0.0;
-
-          # Contrast adjustment (-1.0 to 1.0)
-          contrast = 0.0;
-
-          # Saturation adjustment (-1.0 to 1.0)
-          saturation = 0.0;
-        };
-
-        # Pause slideshow when on battery (laptop)
-        pauseOnBattery = false;
-
-        # Pause slideshow when running on low battery
-        pauseOnLowBattery = true;
-
-        # Battery threshold percentage for low battery pause
-        lowBatteryThreshold = 20;
       };
 
       # Window decorations
