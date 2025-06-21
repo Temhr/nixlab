@@ -7,6 +7,7 @@
   location.provider = "geoclue2";
   ## Set your time zone.
   time.timeZone = lib.mkDefault "America/Toronto";
+  services.timesyncd.enable = true;
 
   ## Configure keymap in X11
   services.xserver.xkb = {
