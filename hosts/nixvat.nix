@@ -77,6 +77,15 @@
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
+
+  networking.useNetworkd = true;  # Recommended over NetworkManager for Incus bridges
+  networking.interfaces.br0.useDHCP = true;
+  networking.bridges.br0.interfaces = [ "wlo1" ];
+  # Optional: disable DHCP on the physical NIC itself
+  networking.interfaces.wlo1.useDHCP = false;
+  # Open port for Home Assistant
+  networking.firewall.allowedTCPPorts = [ 8123 ];
+
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
   #darktable.enable = true;    #Virtual lighttable and darkroom for photographers
