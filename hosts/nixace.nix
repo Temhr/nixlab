@@ -90,6 +90,7 @@
   environment.systemPackages = with pkgs; [
 
     ## Godot Dev Tools
+    android-tools  #Android SDK platform tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
     pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
     scons  #Improved, cross-platform substitute for Make
