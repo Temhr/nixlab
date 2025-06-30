@@ -3,7 +3,7 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./config-fastfetch.nix
-    ./config-folders.nix
+    #./config-folders.nix
     ./config-git.nix
     ./config-plasma.nix
     ./config-virt-manager.nix
