@@ -1,14 +1,13 @@
-{  config, ... }: {
+{ ... }: {
 
-    xdg.userDirs = {
-        enable = true;
-        desktop = "${config.home.homeDirectory}/shelf/Desktop";
-        documents = "${config.home.homeDirectory}/shelf/Documents";
-        download = "${config.home.homeDirectory}/shelf/Downloads";
-        music = "${config.home.homeDirectory}/shelf/Music";
-        pictures = "${config.home.homeDirectory}/shelf/Pictures";
-        videos = "${config.home.homeDirectory}/shelf/Videos";
-        templates = "${config.home.homeDirectory}/shelf/Templates";
-        publicShare = "${config.home.homeDirectory}/shelf/Public";
-    };
+  home.sessionVariables = {
+    XDG_DESKTOP_DIR = "$HOME/shelf/Desktop";
+    XDG_DOCUMENTS_DIR = "$HOME/shelf/Documents";
+    XDG_DOWNLOAD_DIR = "$HOME/shelf/Downloads";
+    XDG_MUSIC_DIR = "$HOME/shelf/Music";
+    XDG_PICTURES_DIR = "$HOME/shelf/Pictures";
+    XDG_VIDEOS_DIR = "$HOME/shelf/Videos";
+    XDG_TEMPLATES_DIR = "$HOME/shelf/Templates";
+    XDG_PUBLICSHARE_DIR = "$HOME/shelf/Public";
+  };
 }
