@@ -46,6 +46,15 @@
               fsType = "ext4";
               options = [ "defaults" "auto" ];
             };
+        systemd.services.fix-shelf-permissions = {
+          description = "Fix ownership of /home/temhr/shelf for temhr user";
+          wantedBy = [ "local-fs.target" ];
+          after = [ "local-fs.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "/run/current-system/sw/bin/chown -R temhr:temhr /home/temhr/shelf";
+          };
+        };
     })
     (lib.mkIf config.mount-mirror.enable {
         fileSystems."/mirror" =
