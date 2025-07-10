@@ -129,27 +129,69 @@ for folder in "${found_folders[@]}"; do
 
     print_status "Processing $folder..."
 
-    # Move the folder
-    if mv "$src_path" "$dest_path"; then
-        print_success "Moved $folder to ~/shelf/default/"
+    # Special handling for system directories that might be in use
+    if [[ "$folder" == ".cache" || "$folder" == ".local" ]]; then
+        print_warning "System directory $folder detected - using careful copy method"
 
-        # Create symlink
-        if ln -s "$dest_path" "$src_path"; then
-            print_success "Created symlink for $folder"
-            moved_folders+=("$folder")
-        else
-            print_error "Failed to create symlink for $folder"
-            # Try to move back
-            if mv "$dest_path" "$src_path"; then
-                print_warning "Restored $folder to original location"
+        # First try to stop any processes that might be using these directories
+        if [[ "$folder" == ".cache" ]]; then
+            print_status "Attempting to clear some cache files first..."
+            # Clear some safe-to-remove cache files
+            find "$src_path" -name "*.tmp" -delete 2>/dev/null || true
+            find "$src_path" -name "*.cache" -delete 2>/dev/null || true
+        fi
+
+        # Use cp -a for system directories, then remove original
+        if cp -a "$src_path" "$dest_path"; then
+            print_success "Copied $folder to ~/shelf/default/"
+
+            # Create symlink with careful renaming
+            temp_name="${src_path}.script_backup_$(date +%s)"
+            if mv "$src_path" "$temp_name" && ln -s "$dest_path" "$src_path"; then
+                print_success "Created symlink for $folder"
+                # Remove the backup after successful symlink creation
+                if rm -rf "$temp_name"; then
+                    print_success "Cleaned up original $folder directory"
+                else
+                    print_warning "Symlink created but backup directory remains at $temp_name"
+                fi
+                moved_folders+=("$folder")
             else
-                print_error "CRITICAL: Failed to restore $folder! Manual intervention required."
+                print_error "Failed to create symlink for $folder"
+                # Try to restore
+                if [[ -d "$temp_name" ]]; then
+                    mv "$temp_name" "$src_path" 2>/dev/null
+                fi
+                rm -rf "$dest_path" 2>/dev/null
+                failed_folders+=("$folder")
             fi
+        else
+            print_error "Failed to copy $folder"
             failed_folders+=("$folder")
         fi
     else
-        print_error "Failed to move $folder"
-        failed_folders+=("$folder")
+        # Standard move for regular directories
+        if mv "$src_path" "$dest_path"; then
+            print_success "Moved $folder to ~/shelf/default/"
+
+            # Create symlink
+            if ln -s "$dest_path" "$src_path"; then
+                print_success "Created symlink for $folder"
+                moved_folders+=("$folder")
+            else
+                print_error "Failed to create symlink for $folder"
+                # Try to move back
+                if mv "$dest_path" "$src_path"; then
+                    print_warning "Restored $folder to original location"
+                else
+                    print_error "CRITICAL: Failed to restore $folder! Manual intervention required."
+                fi
+                failed_folders+=("$folder")
+            fi
+        else
+            print_error "Failed to move $folder"
+            failed_folders+=("$folder")
+        fi
     fi
 done
 
