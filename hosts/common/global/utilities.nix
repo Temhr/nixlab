@@ -96,8 +96,9 @@
 
     ##Applications
 
-    kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
+    kdePackages.filelight #Quickly visualize your disk space usage
     kdePackages.kcalc  #Calculator offering everything a scientific calculator does, and more
+    kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
     home-manager  #Nix-based user environment configurator
     # Media
     ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
