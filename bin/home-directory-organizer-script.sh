@@ -5,6 +5,8 @@
 
 # Define default folders to move
 DEFAULT_FOLDERS=(
+    ".cache"
+    ".local"
     "Desktop"
     "Documents"
     "Downloads"
@@ -98,15 +100,14 @@ for folder in "${found_folders[@]}"; do
 done
 
 if [[ ${#existing_in_shelf[@]} -gt 0 ]]; then
-    print_error "Found ${#existing_in_shelf[@]} folder(s) already in ~/shelf/default/:"
+    print_warning "Found ${#existing_in_shelf[@]} folder(s) already in ~/shelf/default/:"
     for folder in "${existing_in_shelf[@]}"; do
-        print_error "  - $folder"
+        print_warning "  - $folder (will be skipped)"
     done
-    print_error "Please resolve conflicts before running this script."
-    exit 1
+    print_warning "These folders will be skipped during processing."
 fi
 
-print_success "No conflicting folders found in ~/shelf/default/."
+print_success "Ready to proceed with available folders."
 
 # Step 4 & 5: Move folders and create symlinks
 print_status "Step 4 & 5: Moving folders and creating symlinks..."
@@ -162,13 +163,38 @@ if [[ ${#moved_folders[@]} -gt 0 ]]; then
     done
 fi
 
+if [[ ${#skipped_folders[@]} -gt 0 ]]; then
+    print_warning "Skipped ${#skipped_folders[@]} folder(s) (already existed in destination):"
+    for folder in "${skipped_folders[@]}"; do
+        print_warning "  ~ $folder"
+    done
+fi
+
 if [[ ${#failed_folders[@]} -gt 0 ]]; then
     print_error "Failed to process ${#failed_folders[@]} folder(s):"
     for folder in "${failed_folders[@]}"; do
         print_error "  ✗ $folder"
     done
-    exit 1
 fi
 
-print_success "All operations completed successfully!"
+# Determine exit code based on results
+if [[ ${#moved_folders[@]} -gt 0 ]]; then
+    print_success "Operation completed! Some folders were successfully processed."
+    if [[ ${#failed_folders[@]} -gt 0 ]]; then
+        print_status "Note: Some folders failed to process, but the script continued."
+        exit 2  # Partial success
+    else
+        print_success "All processable folders completed successfully!"
+        exit 0  # Full success
+    fi
+else
+    if [[ ${#skipped_folders[@]} -gt 0 ]]; then
+        print_warning "No folders were processed (all were skipped)."
+        exit 0
+    else
+        print_error "No folders were successfully processed."
+        exit 1  # Failure
+    fi
+fi
+
 print_status "Your default folders are now organized in ~/shelf/default/ with symlinks in place."
