@@ -8,7 +8,7 @@
       # Be sure to add any other groups you need (such as networkmanager, audio, docker, etc)
       #"adbusers" "kvm" => adb and android deveopment
       #"video" "render" => Blender user development
-      extraGroups = [ "root" "wheel" "networkmanager" "adbusers" "kvm" "video" "render"];
+      extraGroups = [ "root" "wheel" "networkmanager" "adbusers" "kvm" "video" "render" "temhr"];
       packages = with pkgs; [
       #  thunderbird
       ];
