@@ -70,6 +70,7 @@ Aspirational
 </details>
 
 # Repository Layout
+- **bin**: various shell scripts
 - **cachix**: prebuilt cached binaries to pull
 - **hardware**: machine level configurations and devices
   - **common**: machine-agnostic settings and options
