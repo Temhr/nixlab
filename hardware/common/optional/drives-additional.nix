@@ -44,7 +44,7 @@
         fileSystems."/home/temhr/shelf" =
             { device = "/dev/disk/by-label/shelf";
               fsType = "ext4";
-              options = [ "defaults" "user" "auto" ];
+              options = [ "defaults" "auto" ];
             };
     })
     (lib.mkIf config.mount-mirror.enable {
