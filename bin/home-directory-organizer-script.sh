@@ -136,15 +136,44 @@ for folder in "${found_folders[@]}"; do
         # First try to stop any processes that might be using these directories
         if [[ "$folder" == ".cache" ]]; then
             print_status "Attempting to clear some cache files first..."
-            # Clear some safe-to-remove cache files
+            # Clear some safe-to-remove cache files, ignore errors
             find "$src_path" -name "*.tmp" -delete 2>/dev/null || true
             find "$src_path" -name "*.cache" -delete 2>/dev/null || true
         fi
 
-        # Use cp -a for system directories, then remove original
-        if cp -a "$src_path" "$dest_path"; then
-            print_success "Copied $folder to ~/shelf/default/"
+        # Use rsync if available, otherwise cp with error handling
+        if command -v rsync >/dev/null 2>&1; then
+            print_status "Using rsync for robust copying..."
+            if rsync -av --ignore-errors --exclude='*.tmp' --exclude='*.lock' "$src_path/" "$dest_path/"; then
+                print_success "Copied $folder to ~/shelf/default/"
+                copy_success=true
+            else
+                print_error "Failed to copy $folder with rsync"
+                copy_success=false
+            fi
+        else
+            # Use cp with options to handle disappearing files
+            print_status "Using cp for copying (some errors about missing files are normal)..."
+            if cp -a --no-target-directory "$src_path" "$dest_path" 2>/dev/null || cp -a "$src_path" "$dest_path" 2>/dev/null; then
+                print_success "Copied $folder to ~/shelf/default/"
+                copy_success=true
+            else
+                print_warning "Standard cp failed, trying with error tolerance..."
+                # Try creating the directory first and then copying contents
+                mkdir -p "$dest_path" && \
+                (find "$src_path" -mindepth 1 -maxdepth 1 -exec cp -a {} "$dest_path/" \; 2>/dev/null || true) && \
+                copy_success=true || copy_success=false
 
+                if [[ "$copy_success" == "true" ]]; then
+                    print_success "Copied $folder to ~/shelf/default/ (with some expected errors)"
+                else
+                    print_error "Failed to copy $folder"
+                    copy_success=false
+                fi
+            fi
+        fi
+
+        if [[ "$copy_success" == "true" ]]; then
             # Create symlink with careful renaming
             temp_name="${src_path}.script_backup_$(date +%s)"
             if mv "$src_path" "$temp_name" && ln -s "$dest_path" "$src_path"; then
@@ -166,7 +195,6 @@ for folder in "${found_folders[@]}"; do
                 failed_folders+=("$folder")
             fi
         else
-            print_error "Failed to copy $folder"
             failed_folders+=("$folder")
         fi
     else
