@@ -22,6 +22,8 @@ RSYNC_OPTS=(
     "--exclude=*Trash*"
     "--exclude=.nix-profile"
     "--exclude=result"
+    "--exclude=*/state/nix/*"
+    "--exclude=*/state/home-manager/*"
 )
 
 # Function to convert absolute symlinks to relative ones
