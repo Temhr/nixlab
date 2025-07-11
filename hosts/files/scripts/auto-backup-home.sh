@@ -16,6 +16,7 @@ BACKUP_DESTINATIONS=(
 RSYNC_OPTS=(
     "-rva"
     "--delete"
+    "--delete-before"
     "--force"
     "--exclude=*cache*"
     "--exclude=*Cache*"
