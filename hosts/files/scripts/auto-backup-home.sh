@@ -26,12 +26,16 @@ RSYNC_OPTS=(
     "--exclude=*/state/home-manager/*"
 )
 
-# Function to convert all symlinks to relative paths within backup
+# Function to convert symlinks to point within the backup directory
 convert_symlinks() {
     local backup_dir="$1"
     local source_dir="$2"
 
-    echo "Converting all symlinks to relative paths in: $backup_dir"
+    echo "Converting symlinks to point within backup directory: $backup_dir"
+
+    # Remove trailing slash from source_dir for consistent matching
+    source_dir="${source_dir%/}"
+    backup_dir="${backup_dir%/}"
 
     find "$backup_dir" -type l 2>/dev/null | while read -r link; do
         original_target=$(readlink "$link" 2>/dev/null || continue)
@@ -44,8 +48,11 @@ convert_symlinks() {
             # Already absolute
             resolved_target="$original_target"
         else
-            # Make relative target absolute by resolving from the link's directory
-            resolved_target=$(realpath -m "$link_dir/$original_target" 2>/dev/null || continue)
+            # Make relative target absolute by resolving from the original source location
+            # We need to map the link's backup location back to source location
+            link_relative_to_backup="${link#$backup_dir/}"
+            original_link_dir="$source_dir/$(dirname "$link_relative_to_backup")"
+            resolved_target=$(realpath -m "$original_link_dir/$original_target" 2>/dev/null || continue)
         fi
 
         # Check if the resolved target is within the original source directory
@@ -59,12 +66,15 @@ convert_symlinks() {
                 # Calculate relative path from the symlink to the backup target
                 relative_target=$(realpath --relative-to="$link_dir" "$backup_target" 2>/dev/null || continue)
                 ln -sfn "$relative_target" "$link" 2>/dev/null || continue
-                echo "Converted: $(basename "$link") -> $relative_target"
+                echo "Converted: $link"
+                echo "  From: $original_target"
+                echo "  To:   $relative_target"
             else
-                echo "Warning: Backup target not found: $backup_target (for link: $(basename "$link"))"
+                echo "Warning: Backup target not found: $backup_target"
+                echo "  Original link: $link -> $original_target"
             fi
         else
-            echo "Keeping external symlink: $(basename "$link") -> $original_target"
+            echo "Keeping external symlink: $link -> $original_target"
         fi
     done
 }
