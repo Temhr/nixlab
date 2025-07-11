@@ -29,14 +29,35 @@ RSYNC_OPTS=(
 # Function to convert absolute symlinks to relative ones
 convert_symlinks() {
     local target_dir="$1"
+    local source_dir="$2"
+
+    echo "Converting symlinks in: $target_dir"
+
     find "$target_dir" -type l 2>/dev/null | while read -r link; do
         target=$(readlink "$link" 2>/dev/null || continue)
-        # Only process absolute symlinks that point within the backup
-        if [[ "$target" = /* ]] && [[ "$target" = "$target_dir"* ]]; then
-            # Calculate relative path
-            link_dir=$(dirname "$link")
-            relative_target=$(realpath --relative-to="$link_dir" "$target" 2>/dev/null || continue)
-            ln -sfn "$relative_target" "$link" 2>/dev/null || continue
+
+        # Only process absolute symlinks
+        if [[ "$target" = /* ]]; then
+            # Check if the symlink target points within the original source directory
+            if [[ "$target" = "$source_dir"* ]]; then
+                # Convert the absolute path to the corresponding path in the backup
+                relative_part="${target#$source_dir}"
+                new_target="${target_dir}${relative_part}"
+
+                # Check if the target exists in the backup
+                if [ -e "$new_target" ]; then
+                    # Calculate relative path from the symlink to the new target
+                    link_dir=$(dirname "$link")
+                    relative_target=$(realpath --relative-to="$link_dir" "$new_target" 2>/dev/null || continue)
+                    ln -sfn "$relative_target" "$link" 2>/dev/null || continue
+                    echo "Converted: $link -> $relative_target"
+                else
+                    echo "Warning: Target not found in backup: $new_target (for link: $link)"
+                fi
+            else
+                # For symlinks pointing outside the source directory, keep them as-is
+                echo "Keeping external symlink: $link -> $target"
+            fi
         fi
     done
 }
@@ -72,9 +93,11 @@ perform_backup() {
     # Convert symlinks to relative paths
     echo "Converting absolute symlinks to relative ones..."
     if command -v symlinks >/dev/null 2>&1; then
+        # Use symlinks tool if available (more robust)
         symlinks -rc "$dest_dir" 2>/dev/null || true
     else
-        convert_symlinks "$dest_dir"
+        # Use our custom function
+        convert_symlinks "$dest_dir" "$SOURCE_DIR"
     fi
 
     echo "Backup completed to: $dest_dir"
