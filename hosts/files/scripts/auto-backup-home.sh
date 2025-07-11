@@ -26,38 +26,45 @@ RSYNC_OPTS=(
     "--exclude=*/state/home-manager/*"
 )
 
-# Function to convert absolute symlinks to relative ones
+# Function to convert all symlinks to relative paths within backup
 convert_symlinks() {
-    local target_dir="$1"
+    local backup_dir="$1"
     local source_dir="$2"
 
-    echo "Converting symlinks in: $target_dir"
+    echo "Converting all symlinks to relative paths in: $backup_dir"
 
-    find "$target_dir" -type l 2>/dev/null | while read -r link; do
-        target=$(readlink "$link" 2>/dev/null || continue)
+    find "$backup_dir" -type l 2>/dev/null | while read -r link; do
+        original_target=$(readlink "$link" 2>/dev/null || continue)
 
-        # Only process absolute symlinks
-        if [[ "$target" = /* ]]; then
-            # Check if the symlink target points within the original source directory
-            if [[ "$target" = "$source_dir"* ]]; then
-                # Convert the absolute path to the corresponding path in the backup
-                relative_part="${target#$source_dir}"
-                new_target="${target_dir}${relative_part}"
+        # Get the directory containing the symlink
+        link_dir=$(dirname "$link")
 
-                # Check if the target exists in the backup
-                if [ -e "$new_target" ]; then
-                    # Calculate relative path from the symlink to the new target
-                    link_dir=$(dirname "$link")
-                    relative_target=$(realpath --relative-to="$link_dir" "$new_target" 2>/dev/null || continue)
-                    ln -sfn "$relative_target" "$link" 2>/dev/null || continue
-                    echo "Converted: $link -> $relative_target"
-                else
-                    echo "Warning: Target not found in backup: $new_target (for link: $link)"
-                fi
+        # Resolve the original target to an absolute path
+        if [[ "$original_target" = /* ]]; then
+            # Already absolute
+            resolved_target="$original_target"
+        else
+            # Make relative target absolute by resolving from the link's directory
+            resolved_target=$(realpath -m "$link_dir/$original_target" 2>/dev/null || continue)
+        fi
+
+        # Check if the resolved target is within the original source directory
+        if [[ "$resolved_target" = "$source_dir"* ]]; then
+            # Map the source path to the backup path
+            relative_part="${resolved_target#$source_dir}"
+            backup_target="${backup_dir}${relative_part}"
+
+            # Check if the target exists in the backup
+            if [ -e "$backup_target" ]; then
+                # Calculate relative path from the symlink to the backup target
+                relative_target=$(realpath --relative-to="$link_dir" "$backup_target" 2>/dev/null || continue)
+                ln -sfn "$relative_target" "$link" 2>/dev/null || continue
+                echo "Converted: $(basename "$link") -> $relative_target"
             else
-                # For symlinks pointing outside the source directory, keep them as-is
-                echo "Keeping external symlink: $link -> $target"
+                echo "Warning: Backup target not found: $backup_target (for link: $(basename "$link"))"
             fi
+        else
+            echo "Keeping external symlink: $(basename "$link") -> $original_target"
         fi
     done
 }
