@@ -56,9 +56,10 @@
     sysfsutils   # For systool
 
     ## File Management
-    wget  #Tool for retrieving files using HTTP, HTTPS, and FTP
-    rsync  #Fast incremental file transfer utility
     curl  #A command line tool for transferring files with URL syntax
+    rsync  #Fast incremental file transfer utility
+    symlinks #Find and remedy problematic symbolic links on a system
+    wget  #Tool for retrieving files using HTTP, HTTPS, and FTP
 
     ## Secret Management
     age #Modern encryption tool with small explicit keys
