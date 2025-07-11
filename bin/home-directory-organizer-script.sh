@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Home Directory Organizer Script
+# Home Directory Organizer Script - Fixed Version
 # Moves default home directories to ~/shelf/default/ and creates symlinks
 
 # Set up logging
@@ -59,15 +59,89 @@ check_directory() {
     fi
 }
 
+# Function to verify symlink is correct
+verify_symlink() {
+    local link_path="$1"
+    local expected_target="$2"
+
+    if [[ -L "$link_path" ]]; then
+        local actual_target=$(readlink "$link_path")
+        if [[ "$actual_target" == "$expected_target" ]]; then
+            return 0
+        else
+            print_error "Symlink points to wrong target: $actual_target (expected: $expected_target)"
+            return 1
+        fi
+    else
+        print_error "Symlink was not created at $link_path"
+        return 1
+    fi
+}
+
+# Function to safely create symlink
+create_safe_symlink() {
+    local src_path="$1"
+    local dest_path="$2"
+    local folder="$3"
+
+    # Use relative path for symlink to avoid issues
+    local relative_target="shelf/default/$folder"
+
+    # Remove any existing symlink or file at source location
+    if [[ -L "$src_path" ]]; then
+        print_status "Removing existing symlink at $src_path"
+        rm "$src_path"
+    elif [[ -e "$src_path" ]]; then
+        print_error "Unexpected file/directory still exists at $src_path"
+        return 1
+    fi
+
+    # Create the symlink
+    print_status "Creating symlink: $src_path -> $relative_target"
+    if ln -s "$relative_target" "$src_path"; then
+        # Verify the symlink works
+        if [[ -d "$src_path" ]] && verify_symlink "$src_path" "$relative_target"; then
+            print_success "Symlink created and verified for $folder"
+            return 0
+        else
+            print_error "Symlink verification failed for $folder"
+            rm -f "$src_path"
+            return 1
+        fi
+    else
+        print_error "Failed to create symlink for $folder"
+        return 1
+    fi
+}
+
 # Step 1: Check if there are default folders in the home directory
 print_status "Step 1: Checking for default folders in home directory..."
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting Home Directory Organizer Script"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Log file: $LOG_FILE"
+
+# First, check for and clean up any existing bad symlinks
+print_status "Checking for existing problematic symlinks..."
+for folder in "${DEFAULT_FOLDERS[@]}"; do
+    src_path="$HOME/$folder"
+    if [[ -L "$src_path" ]]; then
+        target=$(readlink "$src_path")
+        # Check if it's a self-referencing symlink
+        if [[ "$target" == "$src_path" ]] || [[ "$target" == "$folder" ]] || [[ "$target" == "./$folder" ]]; then
+            print_warning "Found self-referencing symlink: $src_path -> $target"
+            print_status "Removing bad symlink: $src_path"
+            rm "$src_path"
+        fi
+    fi
+done
+
 found_folders=()
 for folder in "${DEFAULT_FOLDERS[@]}"; do
-    if [[ -d "$HOME/$folder" ]]; then
+    src_path="$HOME/$folder"
+    if [[ -d "$src_path" && ! -L "$src_path" ]]; then
         found_folders+=("$folder")
-        print_status "Found: $HOME/$folder"
+        print_status "Found: $src_path"
+    elif [[ -L "$src_path" ]]; then
+        print_status "Symlink already exists: $src_path -> $(readlink "$src_path")"
     fi
 done
 
@@ -102,9 +176,12 @@ print_success "~/shelf/default/ directory is accessible."
 # Step 3: Check if there are default folders in ~/shelf/default/ directory
 print_status "Step 3: Checking for existing default folders in ~/shelf/default/..."
 existing_in_shelf=()
+skipped_folders=()
+
 for folder in "${found_folders[@]}"; do
     if [[ -e "$SHELF_DIR/$folder" ]]; then
         existing_in_shelf+=("$folder")
+        skipped_folders+=("$folder")
         print_warning "Found existing: $SHELF_DIR/$folder"
     fi
 done
@@ -114,26 +191,38 @@ if [[ ${#existing_in_shelf[@]} -gt 0 ]]; then
     for folder in "${existing_in_shelf[@]}"; do
         print_warning "  - $folder (will be skipped)"
     done
-    print_warning "These folders will be skipped during processing."
 fi
 
-print_success "Ready to proceed with available folders."
+# Filter out folders that already exist in shelf
+folders_to_process=()
+for folder in "${found_folders[@]}"; do
+    if [[ ! " ${existing_in_shelf[@]} " =~ " ${folder} " ]]; then
+        folders_to_process+=("$folder")
+    fi
+done
+
+if [[ ${#folders_to_process[@]} -eq 0 ]]; then
+    print_warning "No folders to process (all already exist in ~/shelf/default/)."
+    exit 0
+fi
+
+print_success "Ready to proceed with ${#folders_to_process[@]} folder(s)."
 
 # Step 4 & 5: Move folders and create symlinks
 print_status "Step 4 & 5: Moving folders and creating symlinks..."
 
-# Ask for confirmation
-echo
+# Show what will be processed
+echo >&3
 print_warning "About to move the following folders to ~/shelf/default/ and create symlinks:"
-for folder in "${found_folders[@]}"; do
-    echo "  $HOME/$folder -> $SHELF_DIR/$folder"
+for folder in "${folders_to_process[@]}"; do
+    echo "  $HOME/$folder -> $SHELF_DIR/$folder" >&3
 done
 
 # Perform the moves and symlink creation
 moved_folders=()
 failed_folders=()
 
-for folder in "${found_folders[@]}"; do
+for folder in "${folders_to_process[@]}"; do
     src_path="$HOME/$folder"
     dest_path="$SHELF_DIR/$folder"
 
@@ -143,87 +232,84 @@ for folder in "${found_folders[@]}"; do
     if [[ "$folder" == ".cache" || "$folder" == ".local" ]]; then
         print_warning "System directory $folder detected - using careful copy method"
 
-        # First try to stop any processes that might be using these directories
-        if [[ "$folder" == ".cache" ]]; then
-            print_status "Attempting to clear some cache files first..."
-            # Clear some safe-to-remove cache files, ignore errors
-            find "$src_path" -name "*.tmp" -delete 2>/dev/null || true
-            find "$src_path" -name "*.cache" -delete 2>/dev/null || true
+        # Create destination directory
+        if ! mkdir -p "$dest_path"; then
+            print_error "Failed to create destination directory: $dest_path"
+            failed_folders+=("$folder")
+            continue
         fi
 
-        # Use rsync if available, otherwise cp with error handling
+        # Copy with rsync if available, otherwise use cp
+        copy_success=false
         if command -v rsync >/dev/null 2>&1; then
             print_status "Using rsync for robust copying..."
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting rsync copy of $folder"
-            if rsync -av --ignore-errors --exclude='*.tmp' --exclude='*.lock' "$src_path/" "$dest_path/" >> "$LOG_FILE" 2>&1; then
-                print_success "Copied $folder to ~/shelf/default/"
+            if rsync -av --ignore-errors "$src_path/" "$dest_path/"; then
                 copy_success=true
+                print_success "Successfully copied $folder with rsync"
             else
-                print_error "Failed to copy $folder with rsync"
-                copy_success=false
+                print_warning "rsync had some errors, checking if copy was successful..."
+                if [[ -d "$dest_path" && $(ls -A "$dest_path" 2>/dev/null) ]]; then
+                    copy_success=true
+                    print_success "Copy appears successful despite rsync warnings"
+                fi
             fi
         else
-            # Use cp with options to handle disappearing files
-            print_status "Using cp for copying (some errors about missing files are normal)..."
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting cp copy of $folder"
-            if cp -a --no-target-directory "$src_path" "$dest_path" >> "$LOG_FILE" 2>&1 || cp -a "$src_path" "$dest_path" >> "$LOG_FILE" 2>&1; then
-                print_success "Copied $folder to ~/shelf/default/"
+            print_status "Using cp for copying..."
+            if cp -a "$src_path/." "$dest_path/"; then
                 copy_success=true
-            else
-                print_warning "Standard cp failed, trying with error tolerance..."
-                # Try creating the directory first and then copying contents
-                mkdir -p "$dest_path" && \
-                (find "$src_path" -mindepth 1 -maxdepth 1 -exec cp -a {} "$dest_path/" \; >> "$LOG_FILE" 2>&1 || true) && \
-                copy_success=true || copy_success=false
-
-                if [[ "$copy_success" == "true" ]]; then
-                    print_success "Copied $folder to ~/shelf/default/ (with some expected errors)"
-                else
-                    print_error "Failed to copy $folder"
-                    copy_success=false
-                fi
+                print_success "Successfully copied $folder with cp"
             fi
         fi
 
         if [[ "$copy_success" == "true" ]]; then
-            # Create symlink with careful renaming
-            temp_name="${src_path}.script_backup_$(date +%s)"
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Creating symlink for $folder"
-            if mv "$src_path" "$temp_name" >> "$LOG_FILE" 2>&1 && ln -s "$dest_path" "$src_path" >> "$LOG_FILE" 2>&1; then
-                print_success "Created symlink for $folder"
-                # Remove the backup after successful symlink creation
-                if rm -rf "$temp_name" >> "$LOG_FILE" 2>&1; then
-                    print_success "Cleaned up original $folder directory"
+            # Create backup of original
+            backup_name="${src_path}.backup_$(date +%s)"
+            if mv "$src_path" "$backup_name"; then
+                print_status "Created backup: $backup_name"
+
+                # Create symlink
+                if create_safe_symlink "$src_path" "$dest_path" "$folder"; then
+                    # Remove backup after successful symlink
+                    if rm -rf "$backup_name"; then
+                        print_success "Removed backup after successful symlink creation"
+                    else
+                        print_warning "Symlink successful but backup remains at $backup_name"
+                    fi
+                    moved_folders+=("$folder")
                 else
-                    print_warning "Symlink created but backup directory remains at $temp_name"
+                    print_error "Failed to create symlink for $folder"
+                    # Restore from backup
+                    if mv "$backup_name" "$src_path"; then
+                        print_status "Restored original directory from backup"
+                    else
+                        print_error "CRITICAL: Failed to restore $folder from backup!"
+                    fi
+                    rm -rf "$dest_path"
+                    failed_folders+=("$folder")
                 fi
-                moved_folders+=("$folder")
             else
-                print_error "Failed to create symlink for $folder"
-                # Try to restore
-                if [[ -d "$temp_name" ]]; then
-                    mv "$temp_name" "$src_path" >> "$LOG_FILE" 2>&1
-                fi
-                rm -rf "$dest_path" >> "$LOG_FILE" 2>&1
+                print_error "Failed to create backup of $folder"
+                rm -rf "$dest_path"
                 failed_folders+=("$folder")
             fi
         else
+            print_error "Failed to copy $folder"
+            rm -rf "$dest_path"
             failed_folders+=("$folder")
         fi
     else
         # Standard move for regular directories
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Moving regular directory $folder"
-        if mv "$src_path" "$dest_path" >> "$LOG_FILE" 2>&1; then
+        print_status "Moving regular directory $folder"
+        if mv "$src_path" "$dest_path"; then
             print_success "Moved $folder to ~/shelf/default/"
 
             # Create symlink
-            if ln -s "$dest_path" "$src_path" >> "$LOG_FILE" 2>&1; then
-                print_success "Created symlink for $folder"
+            if create_safe_symlink "$src_path" "$dest_path" "$folder"; then
                 moved_folders+=("$folder")
             else
                 print_error "Failed to create symlink for $folder"
                 # Try to move back
-                if mv "$dest_path" "$src_path" >> "$LOG_FILE" 2>&1; then
+                if mv "$dest_path" "$src_path"; then
                     print_warning "Restored $folder to original location"
                 else
                     print_error "CRITICAL: Failed to restore $folder! Manual intervention required."
@@ -241,6 +327,7 @@ done
 echo >&3
 print_status "=== SUMMARY ==="
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Script completed"
+
 if [[ ${#moved_folders[@]} -gt 0 ]]; then
     print_success "Successfully processed ${#moved_folders[@]} folder(s):"
     for folder in "${moved_folders[@]}"; do
@@ -266,6 +353,21 @@ fi
 echo >&3
 echo -e "${BLUE}[INFO]${NC} Detailed log saved to: $LOG_FILE" >&3
 
+# Final verification of symlinks
+if [[ ${#moved_folders[@]} -gt 0 ]]; then
+    echo >&3
+    print_status "Verifying symlinks..."
+    for folder in "${moved_folders[@]}"; do
+        src_path="$HOME/$folder"
+        if [[ -L "$src_path" ]] && [[ -d "$src_path" ]]; then
+            target=$(readlink "$src_path")
+            print_success "✓ $folder -> $target"
+        else
+            print_error "✗ $folder symlink verification failed"
+        fi
+    done
+fi
+
 # Determine exit code based on results
 if [[ ${#moved_folders[@]} -gt 0 ]]; then
     print_success "Operation completed! Some folders were successfully processed."
@@ -285,5 +387,3 @@ else
         exit 1  # Failure
     fi
 fi
-
-print_status "Your default folders are now organized in ~/shelf/default/ with symlinks in place."
