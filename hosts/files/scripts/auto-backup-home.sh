@@ -107,15 +107,9 @@ perform_backup() {
             "$dest_dir"
     fi
 
-    # Convert symlinks to relative paths
-    echo "Converting absolute symlinks to relative ones..."
-    if command -v symlinks >/dev/null 2>&1; then
-        # Use symlinks tool if available (more robust)
-        symlinks -rc "$dest_dir" 2>/dev/null || true
-    else
-        # Use our custom function
-        convert_symlinks "$dest_dir" "$SOURCE_DIR"
-    fi
+    # Convert symlinks to point within backup directory
+    echo "Converting symlinks to point within backup directory..."
+    convert_symlinks "$dest_dir" "$SOURCE_DIR"
 
     echo "Backup completed to: $dest_dir"
     return 0
