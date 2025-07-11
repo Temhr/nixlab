@@ -87,6 +87,26 @@ create_safe_symlink() {
     # Use relative path for symlink to avoid issues
     local relative_target="shelf/default/$folder"
 
+    # CRITICAL: Make sure we're creating the symlink in the HOME directory, not inside the destination
+    # The src_path should be ~/FolderName, not ~/shelf/default/FolderName/FolderName
+
+    # Double-check that src_path is in home directory
+    if [[ "$src_path" != "$HOME/$folder" ]]; then
+        print_error "ERROR: src_path should be in home directory, got: $src_path"
+        return 1
+    fi
+
+    # Make sure destination directory exists and is not the same as source
+    if [[ "$dest_path" == "$src_path" ]]; then
+        print_error "ERROR: Source and destination are the same: $src_path"
+        return 1
+    fi
+
+    if [[ ! -d "$dest_path" ]]; then
+        print_error "ERROR: Destination directory does not exist: $dest_path"
+        return 1
+    fi
+
     # Remove any existing symlink or file at source location
     if [[ -L "$src_path" ]]; then
         print_status "Removing existing symlink at $src_path"
@@ -96,7 +116,13 @@ create_safe_symlink() {
         return 1
     fi
 
-    # Create the symlink
+    # Clean up any bad symlinks inside the destination directory
+    if [[ -L "$dest_path/$folder" ]]; then
+        print_warning "Removing bad symlink inside destination: $dest_path/$folder"
+        rm -f "$dest_path/$folder"
+    fi
+
+    # Create the symlink in the HOME directory
     print_status "Creating symlink: $src_path -> $relative_target"
     if ln -s "$relative_target" "$src_path"; then
         # Verify the symlink works
@@ -123,6 +149,9 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] Log file: $LOG_FILE"
 print_status "Checking for existing problematic symlinks..."
 for folder in "${DEFAULT_FOLDERS[@]}"; do
     src_path="$HOME/$folder"
+    shelf_path="$HOME/shelf/default/$folder"
+
+    # Check for bad symlinks in home directory
     if [[ -L "$src_path" ]]; then
         target=$(readlink "$src_path")
         # Check if it's a self-referencing symlink
@@ -130,6 +159,16 @@ for folder in "${DEFAULT_FOLDERS[@]}"; do
             print_warning "Found self-referencing symlink: $src_path -> $target"
             print_status "Removing bad symlink: $src_path"
             rm "$src_path"
+        fi
+    fi
+
+    # CRITICAL: Check for and remove bad symlinks INSIDE the shelf directory
+    if [[ -d "$shelf_path" ]]; then
+        bad_symlink="$shelf_path/$folder"
+        if [[ -L "$bad_symlink" ]]; then
+            print_warning "Found bad symlink inside shelf directory: $bad_symlink"
+            print_status "Removing bad symlink: $bad_symlink"
+            rm -f "$bad_symlink"
         fi
     fi
 done
