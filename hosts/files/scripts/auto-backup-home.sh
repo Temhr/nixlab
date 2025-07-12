@@ -27,6 +27,7 @@ RSYNC_OPTS=(
     "--exclude=*.Trash*"
     "--exclude=*.nix-profile*"
     "--exclude=*.nix-defexpr*"
+    "--exclude=*nixlab*"
     "--exclude=result"
 )
 
