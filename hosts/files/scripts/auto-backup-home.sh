@@ -26,6 +26,7 @@ RSYNC_OPTS=(
     "--exclude=*/.zen/*"
     "--exclude=*/.Trash*"
     "--exclude=*/.nix-profile/*"
+    "--exclude=*/.nix-defexpr/*"
     "--exclude=result"
 )
 
