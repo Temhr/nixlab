@@ -23,9 +23,9 @@ RSYNC_OPTS=(
     "--exclude=*Trash*"
     "--exclude=.nix-profile"
     "--exclude=result"
-    "--exclude=*/state/nix/*"
-    "--exclude=*/state/home-manager/*"
-    "--exclude=*/share/Steam/*"
+    "--exclude=*/nix/*"
+    "--exclude=*/home-manager/*"
+    "--exclude=*/.local/*"
 )
 
 # Function to convert symlinks to point within the backup directory
