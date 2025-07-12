@@ -24,7 +24,7 @@ RSYNC_OPTS=(
     "--exclude=*/.mozilla/*"
     "--exclude=*/.steam/*"
     "--exclude=*/.zen/*"
-    "--exclude=*Trash*"
+    "--exclude=*/.Trash*"
     "--exclude=*/.nix-profile/*"
     "--exclude=result"
 )
