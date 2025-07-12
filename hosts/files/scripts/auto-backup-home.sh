@@ -21,12 +21,12 @@ RSYNC_OPTS=(
     "--exclude=*cache*"
     "--exclude=*Cache*"
     "--exclude=*/.local*"
-    "--exclude=*/.mozilla*"
-    "--exclude=*/.steam*"
-    "--exclude=*/.zen*"
-    "--exclude=*/.Trash*"
-    "--exclude=*/.nix-profile*"
-    "--exclude=*/.nix-defexpr*"
+    "--exclude=*.mozilla*"
+    "--exclude=*.steam*"
+    "--exclude=*.zen*"
+    "--exclude=*.Trash*"
+    "--exclude=*.nix-profile*"
+    "--exclude=*.nix-defexpr*"
     "--exclude=result"
 )
 
