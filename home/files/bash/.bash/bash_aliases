@@ -37,7 +37,11 @@ alias wget='wget -c'
 ##Scrcpy Shortcuts
 alias scrcpy-='scrcpy --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
 alias scrcpy-d='scrcpy -d --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
+alias scrcpy-d1='scrcpy -d -s HT69A0204070 --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
+alias scrcpy-d3='scrcpy -d -s 92GAX00UA1 --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
 alias scrcpy-e='scrcpy --tcpip --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
+alias scrcpy-e1='scrcpy -s 192.168.0.191:5555 --tcpip --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
+alias scrcpy-e3='scrcpy -s 192.168.0.193:5555 --tcpip --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
 alias scrcpycam='scrcpy --video-source=camera --camera-size=1920x1080 -e'
 
 ##SSH Shortcuts
