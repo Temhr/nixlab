@@ -13,4 +13,5 @@
       PermitRootLogin = "no"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
     };
   };
+  programs.ssh.startAgent = true;
 }
