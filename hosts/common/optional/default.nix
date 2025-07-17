@@ -3,7 +3,6 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./auto-flake-push.nix
     ./graphical-shells.nix
     ./syncthing.nix
   ];
