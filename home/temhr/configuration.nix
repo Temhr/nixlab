@@ -22,6 +22,7 @@
     ../common/optional
     ../../modules/home-manager
     ./auto-git-pull.nix
+    ./auto-update-flake.nix
     ./bash-files-symlink.nix
   ];
 
