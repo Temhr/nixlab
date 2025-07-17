@@ -72,10 +72,21 @@ in {
           "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils ]}"
           "HOME=/home/${cfg.user}"
         ];
-        # User services have more relaxed security by default
+        # Fix for group permission issues
+        User = cfg.user;
+        Group = "users";  # Explicitly set group
+        SupplementaryGroups = "";  # Clear supplementary groups
+
+        # Security settings for user services
         PrivateTmp = true;
         ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}/.cache" ];
         NoNewPrivileges = true;
+
+        # Additional fixes for user service permissions
+        PrivateDevices = false;  # Allow access to devices if needed
+        ProtectSystem = "strict";
+        ProtectHome = "read-only";
+        ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}/.cache" "/home/${cfg.user}/.local" ];
       };
 
       script = ''
@@ -170,6 +181,8 @@ in {
       description = "Handle flake auto-update failures";
       serviceConfig = {
         Type = "oneshot";
+        User = cfg.user;
+        Group = "users";
       };
       script = ''
         echo "Flake auto-update failed at $(date)" >> /tmp/flake-update-failures.log
@@ -179,7 +192,7 @@ in {
 
     systemd.user.timers.flake-auto-update = {
       description = "Timer for flake auto-update";
-      wantedBy = [ "default.target" ];  # Changed from timers.target
+      wantedBy = [ "timers.target" ];  # Use timers.target for user timers
       timerConfig = {
         OnCalendar = cfg.interval;
         Persistent = cfg.persistent;
