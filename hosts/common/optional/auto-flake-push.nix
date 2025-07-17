@@ -80,7 +80,6 @@ in {
 
         # Security settings for user services
         PrivateTmp = true;
-        ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}/.cache" ];
         NoNewPrivileges = true;
 
         # Additional fixes for user service permissions
