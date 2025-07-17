@@ -41,7 +41,7 @@ in {
         set -e
 
         # Pull from remote
-        git pull --rebase
+        GIT_SSH_COMMAND="ssh -i ~/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" git pull --rebase
 
         # Update flake
         nix flake update
@@ -50,7 +50,7 @@ in {
         if ! git diff --quiet flake.lock; then
           git add flake.lock
           git commit -m "Auto-update flake.lock"
-          git push
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" git push
         fi
       '';
     };
