@@ -69,7 +69,7 @@ in {
         Type = "oneshot";
         WorkingDirectory = cfg.flakePath;
         Environment = [
-          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils pkgs.timeout ]}"
+          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils ]}"
           "HOME=/home/${cfg.user}"
           "GIT_SSH_COMMAND=ssh -i /home/${cfg.user}/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no"
         ];
