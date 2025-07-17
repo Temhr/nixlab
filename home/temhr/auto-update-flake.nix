@@ -12,9 +12,9 @@ in
     };
     Timer = {
       # Run daily at a random time between 22:00 and 24:00 (2 hour window)
-      OnCalendar = "22:00";
+      OnCalendar = "20:00";
       # Add randomization delay of up to 2 hours (7200 seconds)
-      RandomizedDelaySec = "2h";
+      RandomizedDelaySec = "4h";
       # Make the timer persistent across reboots
       Persistent = true;
       Unit = "flake-auto-update.service";
