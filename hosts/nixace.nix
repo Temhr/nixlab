@@ -21,6 +21,7 @@
     ./common/optional
     ../cachix.nix
     ../modules/nixos
+    ./common/optional/auto-flake-push.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ../hardware/zb17g4-p5.nix
@@ -45,12 +46,6 @@
     enable = true;
     user = "temhr";
     flakePath = "/home/temhr/nixlab";
-    interval = "daily";  # or "*:0/6:00" for every 6 hours
-    autoPush = true;
-    commitMessage = "chore: update flake.lock";
-    afterScript = ''
-      echo "Flake updated!" | systemd-cat -t flake-update
-    '';
   };
 
   ## Development
