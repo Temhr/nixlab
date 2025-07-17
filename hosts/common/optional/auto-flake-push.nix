@@ -21,213 +21,49 @@ in {
     interval = lib.mkOption {
       type = lib.types.str;
       default = "*:0/8:00";
-      description = "Systemd timer interval (OnCalendar format)";
-      example = "daily";
-    };
-
-    persistent = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Whether to run missed timers on boot";
-    };
-
-    randomDelay = lib.mkOption {
-      type = lib.types.str;
-      default = "30m";
-      description = "Random delay to spread load";
-    };
-
-    autoPush = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Whether to automatically push changes to remote";
-    };
-
-    commitMessage = lib.mkOption {
-      type = lib.types.str;
-      default = "Auto-update flake.lock";
-      description = "Commit message template";
-    };
-
-    beforeScript = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      description = "Script to run before flake update";
-    };
-
-    afterScript = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      description = "Script to run after successful update";
+      description = "Systemd timer interval";
     };
   };
 
   config = lib.mkIf cfg.enable {
     systemd.user.services.flake-auto-update = {
-      description = "Update flake and optionally push to remote";
+      description = "Update flake and push to remote";
       serviceConfig = {
         Type = "oneshot";
         WorkingDirectory = cfg.flakePath;
         Environment = [
-          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils ]}"
+          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git ]}"
           "HOME=/home/${cfg.user}"
-          "GIT_SSH_COMMAND=ssh -i /home/${cfg.user}/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no"
         ];
-        # Remove explicit User/Group settings that cause issues in user services
-        # User services run as the user by default
-
-        # Security settings for user services
-        PrivateTmp = true;
-        NoNewPrivileges = true;
-
-        # Less restrictive security settings to avoid permission issues
-        ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}" ];
       };
 
       script = ''
         set -e
 
-        # Function for logging
-        log() {
-          echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-        }
+        # Pull from remote
+        git pull --rebase
 
-        log "Starting flake auto-update"
+        # Update flake
+        nix flake update
 
-        # Debug git configuration
-        log "Git user: $(git config user.name || echo 'NOT SET')"
-        log "Git email: $(git config user.email || echo 'NOT SET')"
-        log "Git remote: $(git remote -v || echo 'NO REMOTES')"
-
-        # Run before script if provided
-        ${lib.optionalString (cfg.beforeScript != "") ''
-          log "Running before script"
-          ${cfg.beforeScript}
-        ''}
-
-        # Check if we're in a git repository
-        if ! git rev-parse --git-dir > /dev/null 2>&1; then
-          log "ERROR: Not in a git repository"
-          exit 1
-        fi
-
-        # Check for uncommitted changes
-        if ! git diff-index --quiet HEAD --; then
-          log "WARNING: Working directory has uncommitted changes, stashing them"
-          git stash
-          STASHED=true
-        else
-          STASHED=false
-        fi
-
-        # Pull from remote if autoPush is enabled
-        ${lib.optionalString cfg.autoPush ''
-          log "Pulling from remote"
-          if ! timeout 60 git pull --rebase; then
-            log "Pull failed, likely due to conflicts. Attempting to resolve..."
-
-            # Check if we're in a rebase state
-            if [ -d .git/rebase-apply ] || [ -d .git/rebase-merge ]; then
-              log "In rebase state, attempting to resolve flake.lock conflicts"
-
-              # If there are conflicts in flake.lock, we'll regenerate it
-              if git status --porcelain | grep -q "flake.lock"; then
-                log "Flake.lock has conflicts, regenerating..."
-
-                # Abort the current rebase
-                git rebase --abort
-
-                # Reset to remote state
-                git fetch origin
-                git reset --hard origin/main
-
-                log "Reset to remote state, will update flake again"
-              else
-                log "ERROR: Conflicts in files other than flake.lock"
-                git rebase --abort
-                exit 1
-              fi
-            else
-              log "ERROR: Failed to pull from remote"
-              exit 1
-            fi
-          fi
-        ''}
-
-        # Update the flake
-        log "Updating flake"
-        if ! nix flake update --flake ${cfg.flakePath}; then
-          log "ERROR: Failed to update flake"
-          exit 1
-        fi
-
-        # Check if there are any changes to flake.lock
+        # Commit and push if there are changes
         if ! git diff --quiet flake.lock; then
-          log "Changes detected in flake.lock"
-
-          # Stage and commit the changes
           git add flake.lock
-          git commit -m "${cfg.commitMessage} ($(date '+%Y-%m-%d %H:%M:%S'))"
-
-          ${lib.optionalString cfg.autoPush ''
-            # Push to remote
-            log "Pushing to remote"
-            if ! timeout 60 git push; then
-              log "ERROR: Failed to push to remote (timeout or error)"
-              log "Git status:"
-              git status
-              log "Git remote info:"
-              git remote -v
-              exit 1
-            fi
-            log "Successfully pushed changes"
-          ''}
-
-          # Run after script if provided
-          ${lib.optionalString (cfg.afterScript != "") ''
-            log "Running after script"
-            ${cfg.afterScript}
-          ''}
-
-          log "Flake update completed successfully"
-        else
-          log "No changes to flake.lock, nothing to commit"
+          git commit -m "Auto-update flake.lock"
+          git push
         fi
-
-        # Restore stashed changes if any
-        if [ "$STASHED" = true ]; then
-          log "Restoring stashed changes"
-          git stash pop
-        fi
-      '';
-
-      # Handle failures gracefully
-      onFailure = [ "flake-auto-update-failure.service" ];
-    };
-
-    # Optional failure notification service
-    systemd.user.services.flake-auto-update-failure = {
-      description = "Handle flake auto-update failures";
-      serviceConfig = {
-        Type = "oneshot";
-      };
-      script = ''
-        echo "Flake auto-update failed at $(date)" >> /tmp/flake-update-failures.log
-        # You could add email notifications, desktop notifications, etc. here
       '';
     };
 
     systemd.user.timers.flake-auto-update = {
       description = "Timer for flake auto-update";
-      wantedBy = [ "timers.target" ];  # Use timers.target for user timers
+      wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = cfg.interval;
-        Persistent = cfg.persistent;
-        RandomizedDelaySec = cfg.randomDelay;
+        Persistent = true;
       };
     };
 
-    # Enable lingering for the user so user services can run without login
     users.users.${cfg.user}.linger = true;
   };
 }
