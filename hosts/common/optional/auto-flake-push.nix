@@ -63,7 +63,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    systemd.services.flake-auto-update = {
+    systemd.user.services.flake-auto-update = {
       description = "Update flake and optionally push to remote";
       serviceConfig = {
         Type = "oneshot";
@@ -169,7 +169,7 @@ in {
     };
 
     # Optional failure notification service
-    systemd.services.flake-auto-update-failure = {
+    systemd.user.services.flake-auto-update-failure = {
       description = "Handle flake auto-update failures";
       serviceConfig = {
         Type = "oneshot";
@@ -181,7 +181,7 @@ in {
       '';
     };
 
-    systemd.timers.flake-auto-update = {
+    systemd.user.timers.flake-auto-update = {
       description = "Timer for flake auto-update";
       wantedBy = [ "timers.target" ];
       timerConfig = {
