@@ -38,6 +38,9 @@
   ## Enable Syncthing ("hostname" or "none")
   syncthing.system = "none";
 
+  ## Run flake update every 8 hours ("no" or "yes")
+  flakeLock.autoPush = "yes";
+
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
