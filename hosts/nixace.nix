@@ -21,7 +21,6 @@
     ./common/optional
     ../cachix.nix
     ../modules/nixos
-    ./common/optional/auto-flake-push.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
     ../hardware/zb17g4-p5.nix
