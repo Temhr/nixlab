@@ -69,8 +69,9 @@ in {
         Type = "oneshot";
         WorkingDirectory = cfg.flakePath;
         Environment = [
-          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils ]}"
+          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils pkgs.timeout ]}"
           "HOME=/home/${cfg.user}"
+          "GIT_SSH_COMMAND=ssh -i /home/${cfg.user}/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no"
         ];
         # Fix for group permission issues
         User = cfg.user;
@@ -99,6 +100,11 @@ in {
 
         log "Starting flake auto-update"
 
+        # Debug git configuration
+        log "Git user: $(git config user.name || echo 'NOT SET')"
+        log "Git email: $(git config user.email || echo 'NOT SET')"
+        log "Git remote: $(git remote -v || echo 'NO REMOTES')"
+
         # Run before script if provided
         ${lib.optionalString (cfg.beforeScript != "") ''
           log "Running before script"
@@ -123,8 +129,8 @@ in {
         # Pull from remote if autoPush is enabled
         ${lib.optionalString cfg.autoPush ''
           log "Pulling from remote"
-          if ! git pull --rebase; then
-            log "ERROR: Failed to pull from remote"
+          if ! timeout 60 git pull --rebase; then
+            log "ERROR: Failed to pull from remote (timeout or error)"
             exit 1
           fi
         ''}
@@ -147,8 +153,12 @@ in {
           ${lib.optionalString cfg.autoPush ''
             # Push to remote
             log "Pushing to remote"
-            if ! git push; then
-              log "ERROR: Failed to push to remote"
+            if ! timeout 60 git push; then
+              log "ERROR: Failed to push to remote (timeout or error)"
+              log "Git status:"
+              git status
+              log "Git remote info:"
+              git remote -v
               exit 1
             fi
             log "Successfully pushed changes"
