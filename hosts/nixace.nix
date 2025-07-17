@@ -41,12 +41,6 @@
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
-  services.flakeAutoUpdate = {
-    enable = true;
-    user = "temhr";
-    flakePath = "/home/temhr/nixlab";
-  };
-
   ## Development
   vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
 
