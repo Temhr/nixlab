@@ -38,11 +38,20 @@
   ## Enable Syncthing ("hostname" or "none")
   syncthing.system = "none";
 
-  ## Run flake update every 8 hours ("no" or "yes")
-  flakeLock.autoPush = "yes";
-
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
+
+  services.flakeAutoUpdate = {
+    enable = true;
+    user = "temhr";
+    flakePath = "/home/temhr/nixlab";
+    interval = "daily";  # or "*:0/6:00" for every 6 hours
+    autoPush = true;
+    commitMessage = "chore: update flake.lock";
+    afterScript = ''
+      echo "Flake updated!" | systemd-cat -t flake-update
+    '';
+  };
 
   ## Development
   vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
