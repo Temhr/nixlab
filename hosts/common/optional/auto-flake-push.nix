@@ -67,17 +67,14 @@ in {
       description = "Update flake and optionally push to remote";
       serviceConfig = {
         Type = "oneshot";
-        User = cfg.user;
         WorkingDirectory = cfg.flakePath;
         Environment = [
-          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh ]}"
+          "PATH=${pkgs.lib.makeBinPath [ pkgs.nix pkgs.git pkgs.openssh pkgs.coreutils ]}"
           "HOME=/home/${cfg.user}"
         ];
-        # More restrictive security settings
+        # User services have more relaxed security by default
         PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = "read-only";
-        ReadWritePaths = [ cfg.flakePath ];
+        ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}/.cache" ];
         NoNewPrivileges = true;
       };
 
@@ -173,7 +170,6 @@ in {
       description = "Handle flake auto-update failures";
       serviceConfig = {
         Type = "oneshot";
-        User = cfg.user;
       };
       script = ''
         echo "Flake auto-update failed at $(date)" >> /tmp/flake-update-failures.log
@@ -183,12 +179,15 @@ in {
 
     systemd.user.timers.flake-auto-update = {
       description = "Timer for flake auto-update";
-      wantedBy = [ "timers.target" ];
+      wantedBy = [ "default.target" ];  # Changed from timers.target
       timerConfig = {
         OnCalendar = cfg.interval;
         Persistent = cfg.persistent;
         RandomizedDelaySec = cfg.randomDelay;
       };
     };
+
+    # Enable lingering for the user so user services can run without login
+    users.users.${cfg.user}.linger = true;
   };
 }
