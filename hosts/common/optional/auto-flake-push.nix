@@ -73,20 +73,15 @@ in {
           "HOME=/home/${cfg.user}"
           "GIT_SSH_COMMAND=ssh -i /home/${cfg.user}/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no"
         ];
-        # Fix for group permission issues
-        User = cfg.user;
-        Group = "users";  # Explicitly set group
-        SupplementaryGroups = "";  # Clear supplementary groups
+        # Remove explicit User/Group settings that cause issues in user services
+        # User services run as the user by default
 
         # Security settings for user services
         PrivateTmp = true;
         NoNewPrivileges = true;
 
-        # Additional fixes for user service permissions
-        PrivateDevices = false;  # Allow access to devices if needed
-        ProtectSystem = "strict";
-        ProtectHome = "read-only";
-        ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}/.cache" "/home/${cfg.user}/.local" ];
+        # Less restrictive security settings to avoid permission issues
+        ReadWritePaths = [ cfg.flakePath "/home/${cfg.user}" ];
       };
 
       script = ''
@@ -190,8 +185,6 @@ in {
       description = "Handle flake auto-update failures";
       serviceConfig = {
         Type = "oneshot";
-        User = cfg.user;
-        Group = "users";
       };
       script = ''
         echo "Flake auto-update failed at $(date)" >> /tmp/flake-update-failures.log
