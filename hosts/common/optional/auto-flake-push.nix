@@ -124,8 +124,33 @@ in {
         ${lib.optionalString cfg.autoPush ''
           log "Pulling from remote"
           if ! timeout 60 git pull --rebase; then
-            log "ERROR: Failed to pull from remote (timeout or error)"
-            exit 1
+            log "Pull failed, likely due to conflicts. Attempting to resolve..."
+
+            # Check if we're in a rebase state
+            if [ -d .git/rebase-apply ] || [ -d .git/rebase-merge ]; then
+              log "In rebase state, attempting to resolve flake.lock conflicts"
+
+              # If there are conflicts in flake.lock, we'll regenerate it
+              if git status --porcelain | grep -q "flake.lock"; then
+                log "Flake.lock has conflicts, regenerating..."
+
+                # Abort the current rebase
+                git rebase --abort
+
+                # Reset to remote state
+                git fetch origin
+                git reset --hard origin/main
+
+                log "Reset to remote state, will update flake again"
+              else
+                log "ERROR: Conflicts in files other than flake.lock"
+                git rebase --abort
+                exit 1
+              fi
+            else
+              log "ERROR: Failed to pull from remote"
+              exit 1
+            fi
           fi
         ''}
 
