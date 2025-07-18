@@ -6,7 +6,7 @@
     # Workspace appearance and behavior
     workspace = {
       # Look and feel theme
-      lookAndFeel = "org.kde.breezedark.desktop";
+      #lookAndFeel = "org.kde.breezedark.desktop";
       # Available options: "org.kde.breeze.desktop", "org.kde.breezedark.desktop"
 
       # Color scheme
