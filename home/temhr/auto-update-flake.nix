@@ -11,9 +11,9 @@ in
       Description = "Timer for flake auto-update";
     };
     Timer = {
-      # Run daily at a random time between 22:00 and 24:00 (2 hour window)
+      # Run daily at time
       OnCalendar = "20:00";
-      # Add randomization delay of up to 2 hours (7200 seconds)
+      # Add randomization delay of up to # hours
       RandomizedDelaySec = "4h";
       # Make the timer persistent across reboots
       Persistent = true;
