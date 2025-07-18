@@ -43,9 +43,9 @@ Contains
 - **Overlays**: custom modifications, extensions, and patches of Nixpkgs
 - **Shells**: clean, reproducible, and isolated environments
 - Single source of truth: remote nixlab repo is where all systems:
-  1) auto-push flakes,
-  2) auto-pull changes, and
-  3) evaluate from nightly.
+  1) auto-push their updated flakes,
+  2) auto-pull any hourly changes, and
+  3) rebuild/evaluate from nightly
 
 Aspirational
 - Declarative virtualization systems
