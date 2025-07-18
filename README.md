@@ -42,7 +42,10 @@ Contains
   - segregation of system and user level modules, encapsulated by role or function
 - **Overlays**: custom modifications, extensions, and patches of Nixpkgs
 - **Shells**: clean, reproducible, and isolated environments
-- Single source of truth: remote repo is where all systems 1) auto-push flakes, 2) auto-pull changes, and 3) evaluate from nightly.
+- Single source of truth: remote nixlab repo is where all systems:
+  1) auto-push flakes,
+  2) auto-pull changes, and
+  3) evaluate from nightly.
 
 Aspirational
 - Declarative virtualization systems
