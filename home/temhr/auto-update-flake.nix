@@ -11,10 +11,10 @@ in
       Description = "Timer for flake auto-update";
     };
     Timer = {
-      # Run daily at time
-      OnCalendar = "20:00";
+      # Run daily at times
+      OnCalendar = [ "11:30" "23:30" ];
       # Add randomization delay of up to # hours
-      RandomizedDelaySec = "5h";
+      RandomizedDelaySec = "1h";
       # Make the timer persistent across reboots
       Persistent = true;
       Unit = "flake-auto-update.service";
