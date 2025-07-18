@@ -34,6 +34,11 @@ in
       # Set the command to run.
       ExecStart = "${flakeAutoUpdate}";
       Type = "oneshot";
+
+      # ⏲ Add a timeout: stop after 5 minutes (adjust as needed)
+      TimeoutStartSec = "5min";
+      # Optionally kill all subprocesses if this times out
+      KillMode = "process";
     };
   };
 }
