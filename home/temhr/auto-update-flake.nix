@@ -12,7 +12,7 @@ in
     };
     Timer = {
       # Run daily at times
-      OnCalendar = [ "11:30" "23:30" ];
+      OnCalendar = [ "11:45" "23:45" ];
       # Add randomization delay of up to # hours
       RandomizedDelaySec = "1h";
       # Make the timer persistent across reboots
