@@ -16,7 +16,7 @@ in
       # Add randomization delay of up to # hours
       RandomizedDelaySec = "1h";
       # Make the timer persistent across reboots
-      Persistent = true;
+      Persistent = false;
       Unit = "flake-auto-update.service";
     };
     Install = {
