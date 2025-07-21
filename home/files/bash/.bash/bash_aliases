@@ -52,20 +52,22 @@ alias nixvat='ssh temhr@192.168.0.201'
 alias nixzen='ssh temhr@192.168.0.204'
 
 ##NixOS Shortcuts
-alias fup='nix flake update --flake /home/temhr/nixlab'
 alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
-alias nswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
-alias nswitchl='sudo nixos-rebuild switch --flake /home/temhr/nixlab'
-alias ntest='sudo nixos-rebuild test --flake /home/temhr/nixlab'
-alias nboot='sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot'
-alias nbootl='sudo nixos-rebuild boot --flake /home/temhr/nixlab && sudo reboot'
+alias lboot='sudo nixos-rebuild boot --flake /home/temhr/nixlab && sudo reboot'
+alias lfup='nix flake update --flake /home/temhr/nixlab'
+alias lswitch='sudo nixos-rebuild switch --flake /home/temhr/nixlab'
+alias ltest='sudo nixos-rebuild test --flake /home/temhr/nixlab'
+alias rboot='sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot'
+alias rfup='nix flake update --flake /home/temhr/nixlab && /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i ~/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git push'
+alias rswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
+alias rtest='sudo nixos-rebuild test --flake github:temhr/nixlab'
 alias nlist='nixos-rebuild list-generations'
 
 ##Nix-Shell
 alias nscowsay='nix shell nixpkgs#cowsay'
 
 ##Git
-alias greset='git reset --hard origin/main'
+alias greset='git reset --hard origin/main && git pull --rebase'
 
 ## Check video drivers in use
 alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
