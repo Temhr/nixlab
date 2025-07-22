@@ -1,5 +1,10 @@
 { pkgs, ... }: {
 
+#1) Require system-level privileges
+#2) Interact with system hardware, kernel interfaces, or system-wide configurations
+#3) Provide background daemons or network services
+#4) Benefit from being available to all users
+
   environment.systemPackages = with pkgs; [
     ## Nix Tools
     cachix                     # Nix binary cache client for sharing build artifacts

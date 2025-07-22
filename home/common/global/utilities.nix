@@ -1,5 +1,9 @@
 { pkgs, ... }: {
 
+#1) User-specific
+#2) Don’t require elevated privileges
+#3) Part of user workflows
+
   home.packages = with pkgs; [
     ## Terminal Utilities
     bat              # cat clone with syntax highlighting
