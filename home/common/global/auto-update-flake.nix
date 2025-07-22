@@ -1,7 +1,7 @@
 { pkgs, ... }:  # Import the package set (pkgs) and any other module arguments.
 let
   flakeAutoUpdate = pkgs.writeShellScript "flakeAutoUpdate" (
-    builtins.readFile ../files/scripts/auto-update-flake.sh
+    builtins.readFile ../../files/scripts/auto-update-flake.sh
   );
 in
 {

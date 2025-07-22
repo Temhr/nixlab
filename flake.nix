@@ -65,9 +65,10 @@
       hosts = {
         nixace = {
           system = "x86_64-linux";
-          # Add host-specific modules here if needed
-          # nixos-hardware.nixosModules.dell-xps-13-9310
-          modules = [  ];
+          modules = [
+            # Add host-specific modules here if needed
+            # nixos-hardware.nixosModules.dell-xps-13-9310
+          ];
         };
         nixsun = {
           system = "x86_64-linux";
