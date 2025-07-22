@@ -1,111 +1,71 @@
 { pkgs, ... }: {
 
   environment.systemPackages = with pkgs; [
+    ## Nix Tools
+    cachix                     # Nix binary cache client for sharing build artifacts
+    git                        # distributed version control system
+    home-manager             # user environment manager for declarative configs
 
-    ## NixOS Related Tools
-    cachix  #Command-line client for Nix binary cache hosting https://cachix.org
-
-    ## Terminal Utilities
-    appimage-run  #https://nixos.org/manual/nixpkgs/stable/#sec-pkgs-appimageTools
-    bat  #Cat(1) clone with syntax highlighting and Git integration
-    busybox  #Tiny versions of common UNIX utilities in a single small executable
-    colordiff  #Wrapper for 'diff' that produces the same output but with pretty 'syntax' highlighting
-    doas  #Executes the given command as another user
-    eza  #Modern, maintained replacement for ls
-    fastfetch  #Like neofetch, but much faster because written in C
-    fzf  #Command-line fuzzy finder written in Go
-    git #Distributed version control system
-    jq  #Lightweight and flexible command-line JSON processor
-    less  #More advanced file pager (program that displays text files) than 'more'
-    libxml2  #XML parsing library for C
-    logrotate  #Rotates and compresses system logs
-    lsof  #A tool to list open files
-    parted  #Create, destroy, resize, check, and copy partitions
-    screen  #A window manager that multiplexes a physical terminal
-    tmux  #Terminal multiplexer
-    tealdeer #Very fast implementation of tldr in Rust
-    moreutils #Growing collection of the unix tools that nobody thought to write long ago when unix was young
-    zoxide  # Fast cd command that learns your habits
+    ## System Utilities
+    appimage-run               # Run AppImage applications without extracting them
+    busybox                    # Single binary with lightweight UNIX utilities
+    doas                       # Minimal alternative to sudo for privilege escalation
+    logrotate                  # Automatically rotates and compresses system logs
+    lsof                       # Lists open files and associated processes
+    parted                     # Partition editor for disks
+    moreutils                  # Collection of useful Unix utilities
 
     ## Task Scheduling
-    at  #The classical Unix `at' job scheduling command
-    cron  #Daemon for running commands at specific times (Vixie Cron)
+    at                         # Schedule one-off tasks to run at a specific time
+    cron                       # Daemon to run recurring scheduled tasks
 
     ## Network Management
-    bridge-utils  #Userspace tool to configure linux bridges (deprecated in favour or iproute2)
-    dig  #Domain name server
-    ethtool  #Utility for controlling network drivers and hardware
-    iperf  #Tool to measure IP bandwidth using UDP or TCP
-    iproute2  #Collection of utilities for controlling TCP/IP networking and traffic control in Linux
-    mtr-gui  #Network diagnostics tool
-    nethogs  #Small 'net top' tool, grouping bandwidth by process
-    nettools  #A set of tools for controlling the network subsystem in Linux
-    nfs-utils  #Linux user-space NFS utilities
-    nmap  #A free and open source utility for network discovery and security auditing
-    tcpdump  #Network sniffer
-    traceroute  #Tracks the route taken by packets over an IP network
-    whois  #Intelligent WHOIS client from Debian
+    bridge-utils               # Configure and manage network bridges (deprecated)
+    dig                        # DNS lookup utility
+    ethtool                    # Control and query Ethernet device settings
+    iperf                      # Measure network throughput via TCP/UDP tests
+    iproute2                   # Modern networking tools (e.g., ip, tc, ss)
+    mtr-gui                    # GUI traceroute + ping tool for network diagnostics
+    nethogs                    # Real-time bandwidth usage grouped by process
+    nettools                   # Legacy networking utilities like ifconfig, netstat
+    nfs-utils                  # NFS client/server user-space support
+    nmap                       # Network discovery and security auditing tool
+    tcpdump                    # Packet capture and analysis tool
+    traceroute                 # Track path of packets through network hops
+    whois                      # Query ownership and registration of domains/IPs
 
     ## Device Management
-    pciutils  #A collection of programs for inspecting and manipulating configuration of PCI devices
-    ncdu  #Disk usage analyzer with an ncurses interface
-    clinfo  #Print all known information about all available OpenCL platforms and devices in the system
-    glxinfo  #Test utilities for OpenGL
-    lshw-gui  #Provide detailed information on the hardware configuration of the machine
-    usbutils  #Tools for working with USB devices, such as lsusb
-    sysfsutils   # For systool
+    pciutils                   # Inspect and manipulate PCI device configuration
+    usbutils                   # Inspect and interact with USB devices
+    sysfsutils                 # Query device information from sysfs
+    lshw-gui                   # Hardware lister with graphical interface
 
     ## File Management
-    curl  #A command line tool for transferring files with URL syntax
-    rsync  #Fast incremental file transfer utility
-    symlinks #Find and remedy problematic symbolic links on a system
-    wget  #Tool for retrieving files using HTTP, HTTPS, and FTP
+    curl                       # Transfer data from URLs (HTTP, FTP, etc.)
+    rsync                      # Efficient file copying and synchronization
+    symlinks                   # Inspect and clean broken symbolic links
+    wget                       # Retrieve files from the web via HTTP/S/FTP
 
-    ## Secret Management
-    age #Modern encryption tool with small explicit keys
-    keepassxc  #Offline password manager with many features.
+    ## Secret/Encryption
+    age                        # Simple, modern file encryption tool
 
     ## System Resource Monitors
-    atop  #Console system performance monitor
-    btop  #A monitor of resources
-    iftop  #Display bandwidth usage on a network interface
-    iotop  #A tool to find out the processes doing the most IO
-    htop  #An interactive process viewer
-    lm_sensors  #Tools for reading hardware sensors
-    nvtopPackages.intel  #(h)top like task monitor for AMD, Adreno, Intel and NVIDIA GPUs
-    nvtopPackages.nvidia  #(h)top like task monitor for AMD, Adreno, Intel and NVIDIA GPUs
-    perf-tools  #Performance analysis tools based on Linux perf_events (aka perf) and ftrace
-    psmisc  #Set of small useful utilities that use the proc filesystem (such as fuser, killall and pstree)
-    smartmontools  #Tools for monitoring the health of hard drives
-    stress-ng  #Stress test a computer system
-    wavemon  #Ncurses-based monitoring application for wireless network devices
+    atop                       # Advanced system and process resource monitor
+    btop                       # Graphical resource monitor with performance charts
+    iftop                      # Monitor real-time network traffic by interface
+    iotop                      # Monitor disk I/O usage by process
+    htop                       # Interactive process viewer and manager
+    lm_sensors                 # Read hardware sensor data (temps, fan speeds, etc.)
+    nvtopPackages.intel        # GPU usage monitor for Intel graphics
+    nvtopPackages.nvidia       # GPU usage monitor for NVIDIA graphics
+    perf-tools                 # Scripts and tools built on Linux perf events
+    psmisc                     # Utilities like `pstree`, `killall`, `fuser`
+    smartmontools              # Monitor S.M.A.R.T. health of storage drives
+    stress-ng                  # Apply configurable system stress for testing
+    wavemon                    # WiFi signal and quality monitor for terminals
 
-    ## Text Editors
-    nano  #Small, user-friendly console text editor
-    vim  #The most popular clone of the VI editor
-    neovim  #Vim text editor fork focused on extensibility and agility
-      alejandra #Uncompromising Nix Code Formatter
-    zed  #Novel data lake based on super-structured data
-
-    ## Terminal File Managers
-    mc  #File Manager and User Shell for the GNU Project, known as Midnight Commander
-    #ranger  #File manager with minimalistic curses interface
-    #lf  #Terminal file manager written in Go and heavily inspired by ranger
-    #nnn  #Small ncurses-based file browser forked from noice
-    #vifm-full  #Vi-like file manager; Includes support for optional features
-    #yazi  #Blazing fast terminal file manager written in Rust, based on async I/O
-
-    ##Applications
-
-    kdePackages.filelight #Quickly visualize your disk space usage
-    kdePackages.kcalc  #Calculator offering everything a scientific calculator does, and more
-    kdePackages.partitionmanager  #Manage the disk devices, partitions and file systems on your computer
-    home-manager  #Nix-based user environment configurator
-    # Media
-    ffmpeg  #A complete, cross-platform solution to record, convert and stream audio and video
-    scrcpy  #Display and control Android devices over USB or TCP/IP
-    simplescreenrecorder  #A screen recorder for Linux
-
+    ## Disk & Partition Tools
+    kdePackages.partitionmanager  # GUI for managing partitions and filesystems
   ];
 
   programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group

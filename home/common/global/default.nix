@@ -5,11 +5,10 @@
     ./auto-git-pull.nix
     ./auto-update-flake.nix
     ./config-fastfetch.nix
-    #./config-folders.nix
     ./config-git.nix
     ./config-plasma.nix
     ./config-virt-manager.nix
-    #./nixpkgs.nix
+    ./utilities.nix
   ];
 
   options = {
