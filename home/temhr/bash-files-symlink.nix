@@ -20,11 +20,6 @@
       source = lib.mkForce "${self}/home/files/bash/.bash/ghostty_theme_randomizer";
       executable = true;
     };
-
-    # symlink
-    #"Pictures/Wallpapers/mirk1/".source = lib.mkForce "${self}/../../../mnt/mirk1/Hard Drive Backup/Users/Efrem 2017/Pictures/Wallpapers/";
-    #"Pictures/Wallpapers/mirk3/".source = lib.mkForce "${self}/../../../mnt/mirk3/Hard Drive Backup/Users/Efrem 2017/Pictures/Wallpapers/";
-    #"Pictures/Wallpapers/mirror/".source = lib.mkForce "${self}/../../../mirror/Hard Drive Backup/Users/Efrem 2017/Pictures/Wallpapers/";
   };
 
   # Configure bash through Home Manager for better integration
