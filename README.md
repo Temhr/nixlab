@@ -81,15 +81,15 @@ Aspirational
     - **optional**: machine selection required
 - **home**: user level configurations (home manager) and files
   - **common**: user-agnostic settings and options
+    - **files**: various user related files and scripts
     - **global**: universal to all users
     - **optional**: user selection required
-  - **files**: various user related files and scripts
   - **temhr**: user-specfic preferences
 - **hosts**: system level configurations and files
   - **common**: host-agnostic programs, services, users, etc.
+    - **files**: various host related scripts
     - **global**: universal to all hosts
     - **optional**: host selection required
-  - **files**: various host related scripts
 - **lib**: templates and other helper nix-code
 - **modules**: encapsulated packages and applications
   - **home-manager**: user-relevant modules
