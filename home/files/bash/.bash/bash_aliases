@@ -1,4 +1,4 @@
-# 1. 🔧 Shell Usability
+# 1. 🔧 Shell Usability - Quality of life enhancements for navigating and editing
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias ....='cd ../../../../'
@@ -14,7 +14,7 @@ alias reload='source ~/.bashrc'
 alias watch='watch -d'
 alias which='type -a'
 
-# 2. 📁 File Management
+# 2. 📁 File Management - Safer and faster file operations
 alias chgrp='chgrp --preserve-root' #Parenting changing perms on /
 alias chmod='chmod -c --preserve-root' #Parenting changing perms on /
 alias chown='chown --preserve-root' #Parenting changing perms on /
@@ -34,7 +34,7 @@ alias rm='rm -I --preserve-root' #do not delete / or prompt if deleting more tha
 alias rmd='rm -r -i'
 alias tree='tree -C'
 
-# 3. 🧭 Navigation
+# 3. 🧭 Navigation - Directory movement and management
 alias cdg='cd ~/Git'
 alias cdd='cd ~/Documents'
 alias cdl='cd ~/Downloads'
@@ -44,7 +44,7 @@ alias cdtmp='cd /tmp'
 alias cdw='cd /var/www'
 alias ~='cd ~'
 
-# 4. 📜 File Viewing
+# 4. 📜 File Viewing - Inspecting file contents and structure
 alias cat='bat --paging=never'  #Requires: bat
 alias diff='colordiff'
 alias egrep='egrep --colour=auto'
@@ -57,11 +57,11 @@ alias less='less -R'
 alias tail='tail -n 20'
 alias tlf='tail -f'
 
-# 5. 💣 System Safety
+# 5. 💣 System Safety - Dangerous command protections
 alias :q='echo "Wrong shell, friend 😄"'
 alias format='echo "Nope 😅"'
 
-# 6. 📡 Networking
+# 6. 📡 Networking - Ping, ports, IPs, and interface info
 alias digg='dig +short'
 alias extip='curl icanhazip.com'
 alias hosts='cat /etc/hosts'
@@ -76,7 +76,7 @@ alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/m
 alias traceroute='traceroute -I'
 alias weather='curl wttr.in'
 
-# 7. 🔥 System Monitoring
+# 7. 🔥 System Monitoring - Processes, memory, load, services
 alias cpu='lscpu'
 alias df='df -h -x squashfs -x tmpfs -x devtmpfs'
 alias diskuse='du -h --max-depth=1'
@@ -87,7 +87,7 @@ alias psu='ps auxf'
 alias topc='htop'
 alias watchps='watch "ps aux --sort=-%mem | head -n 10"'
 
-# 8. 🛠️ Nix Package Management
+# 8. 🛠️ Nix Package Management - Quick install/update for common package managers
 alias nixb='nix build'
 alias nixc='nix-collect-garbage -d'
 alias nixd='nix develop'
@@ -109,13 +109,13 @@ alias rswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
 alias rtest='sudo nixos-rebuild test --flake github:temhr/nixlab'
 alias nlist='nixos-rebuild list-generations'
 
-# 9. 🧼 Cleanup & Temp
+# 9. 🧼 Cleanup & Temp - Cache clearing, temp management
 alias clr='clear && printf "\e[3J"'
 alias flushmem='sync; echo 3 | sudo tee /proc/sys/vm/drop_caches'
 alias logs='journalctl -xe'
 alias rmcache='rm -rf ~/.cache/*'
 
-# 10. 📦 Archives
+# 10. 📦 Archives - Compression/decompression shortcuts
 alias extract='a() { case $1 in *.tar.bz2) tar xvjf $1 ;; *.tar.gz) tar xvzf $1 ;; *.zip) unzip $1 ;; *.rar) unrar x $1 ;; *) echo "unknown format" ;; esac }; a'
 alias lz='ls *.tar.gz *.zip *.rar *.xz 2>/dev/null'
 alias targz='tar -czvf'
@@ -124,7 +124,7 @@ alias untargz='tar -xzvf'
 alias unzipf='unzip'
 alias zipf='zip -r'
 
-# 11. 🧪 System Info
+# 11. 🧪 System Info - Fast access to system/hardware info
 alias arch='uname -m'
 alias drives='lsblk -f'
 alias journal='journalctl -b -p err'
@@ -135,14 +135,14 @@ alias pci='lspci'
 alias uptime='uptime -p'
 alias usb='lsusb'
 
-# 12. 🧙‍♂️ Power Tools
+# 12. 🧙‍♂️ Power Tools - Powerful command combos & productivity boosters
 alias cheat='curl cheat.sh'
 alias please='sudo $(history -p !!)'
 alias serve='python3 -m http.server'
 alias timestamp='date +"%Y-%m-%d_%H-%M-%S"'
 alias uuid='uuidgen'
 
-# 13. 🧰 Dev & Git Helpers
+# 13. 🧰 Dev & Git Helpers - Development + scripting helpers
 alias ga='git add .'
 alias gc='git commit -m'
 alias gd='git diff'
