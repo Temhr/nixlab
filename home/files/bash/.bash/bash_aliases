@@ -1,38 +1,161 @@
-# aliases
+# 1. 🔧 Shell Usability
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias ....='cd ../../../../'
 alias back='cd $OLDPWD'
 alias c='clear'
 alias cd..='cd ..'
-alias cp='cp -iv'
-alias chmod="chmod -c"
-alias chmod="chmod -c"
-alias df='df -h -x squashfs -x tmpfs -x devtmpfs'
-alias diff='colordiff'
-alias egrep='egrep --colour=auto'
-alias e="vim -O "
-alias E="vim -o "
-alias extip='curl icanhazip.com'
-alias grep='grep --color=auto'
-alias l.=' ls -lhFa --time-style=long-iso --color=auto'
-alias ll=' ls'
-alias ls=' ls -lhF --time-style=long-iso --color=auto'
-alias lsmount='mount |column -t'
-alias mkdir='mkdir -pv'
-alias ports='netstat -tulanp'
+alias e='exit'
 alias h='history'
 alias j='jobs -l'
-alias mv='mv -iv'
-alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
-alias svim='sudo vim'
-alias tn=' tmux new -s'
-alias vdestroy='vagrant destroy'
-alias vssh='vagrant ssh'
-alias vup='vagrant up'
+alias path='echo -e ${PATH//:/\\n}'
+alias q='exit'
+alias reload='source ~/.bashrc'
 alias watch='watch -d'
+alias which='type -a'
+
+# 2. 📁 File Management
+alias chgrp='chgrp --preserve-root' #Parenting changing perms on /
+alias chmod='chmod -c --preserve-root' #Parenting changing perms on /
+alias chown='chown --preserve-root' #Parenting changing perms on /
+alias cp='cp -iv'
+alias ln='ln -i'
+alias l='ls -lah --color=auto'
+alias l.='ls -lhFa --time-style=long-iso --color=auto'
+alias la='ls -A --color=auto'
+alias ll='ls -lhF --color=auto'
+alias lS='ls -lSh --color=auto'
+alias ls='ls -la --color=auto'
+alias ltr='ls -ltr --color=auto'
+alias lt='ls -lt --color=auto'
+alias mkdir='mkdir -pv'
+alias mv='mv -iv'
+alias rm='rm -I --preserve-root' #do not delete / or prompt if deleting more than 3 files at a time
+alias rmd='rm -r -i'
+alias tree='tree -C'
+
+# 3. 🧭 Navigation
+alias cdg='cd ~/Git'
+alias cdd='cd ~/Documents'
+alias cdl='cd ~/Downloads'
+alias cds='cd ~/Scripts'
+alias cdp='cd ~/Projects'
+alias cdtmp='cd /tmp'
+alias cdw='cd /var/www'
+alias ~='cd ~'
+
+# 4. 📜 File Viewing
+alias cat='bat --paging=never'  #Requires: bat
+alias diff='colordiff'
+alias egrep='egrep --colour=auto'
+alias ff='find . -type f -name'
+alias fgrep='fgrep --color=auto'
+alias finds='find . -type f -iname'
+alias grep='grep --color=auto'
+alias head='head -n 20'
+alias less='less -R'
+alias tail='tail -n 20'
+alias tlf='tail -f'
+
+# 5. 💣 System Safety
+alias :q='echo "Wrong shell, friend 😄"'
+alias format='echo "Nope 😅"'
+
+# 6. 📡 Networking
+alias digg='dig +short'
+alias extip='curl icanhazip.com'
+alias hosts='cat /etc/hosts'
+alias http='curl -I'
+alias ipinfo='ip a'
+alias lsmount='mount | column -t'
+alias myip='curl ifconfig.me'
+alias netst='ss -tulpn'
+alias pingg='ping 8.8.8.8'
+alias ports='netstat -tulanp'
+alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
+alias traceroute='traceroute -I'
 alias weather='curl wttr.in'
-alias wget='wget -c'
+
+# 7. 🔥 System Monitoring
+alias cpu='lscpu'
+alias df='df -h -x squashfs -x tmpfs -x devtmpfs'
+alias diskuse='du -h --max-depth=1'
+alias duh='du -sh *'
+alias load='uptime'
+alias mem='free -h'
+alias psu='ps auxf'
+alias topc='htop'
+alias watchps='watch "ps aux --sort=-%mem | head -n 10"'
+
+# 8. 🛠️ Nix Package Management
+alias nixb='nix build'
+alias nixc='nix-collect-garbage -d'
+alias nixgc='nix store gc'
+alias nixrepl='nix repl'
+alias nixs='nix search'
+alias nixsh='nix shell'
+## Nix Shell
+alias nscowsay='nix shell nixpkgs#cowsay'
+## NixOS Shortcuts
+alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
+alias lboot='sudo nixos-rebuild boot --flake /home/temhr/nixlab && sudo reboot'
+alias lfup='nix flake update --flake /home/temhr/nixlab'
+alias lswitch='sudo nixos-rebuild switch --flake /home/temhr/nixlab'
+alias ltest='sudo nixos-rebuild test --flake /home/temhr/nixlab'
+alias rboot='sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot'
+alias rfup='bash /home/temhr/nixlab/home/files/scripts/auto-update-flake.sh'
+alias rswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
+alias rtest='sudo nixos-rebuild test --flake github:temhr/nixlab'
+alias nlist='nixos-rebuild list-generations'
+
+# 9. 🧼 Cleanup & Temp
+alias clr='clear && printf "\e[3J"'
+alias flushmem='sync; echo 3 | sudo tee /proc/sys/vm/drop_caches'
+alias logs='journalctl -xe'
+alias rmcache='rm -rf ~/.cache/*'
+
+# 10. 📦 Archives
+alias extract='a() { case $1 in *.tar.bz2) tar xvjf $1 ;; *.tar.gz) tar xvzf $1 ;; *.zip) unzip $1 ;; *.rar) unrar x $1 ;; *) echo "unknown format" ;; esac }; a'
+alias lz='ls *.tar.gz *.zip *.rar *.xz 2>/dev/null'
+alias targz='tar -czvf'
+alias untar='tar -xvf'
+alias untargz='tar -xzvf'
+alias unzipf='unzip'
+alias zipf='zip -r'
+
+# 11. 🧪 System Info
+alias arch='uname -m'
+alias drives='lsblk -f'
+alias journal='journalctl -b -p err'
+alias kernel='uname -r'
+alias mountlist='mount | column -t'
+alias os='cat /etc/os-release'
+alias pci='lspci'
+alias uptime='uptime -p'
+alias usb='lsusb'
+
+# 12. 🧙‍♂️ Power Tools
+alias cheat='curl cheat.sh'
+alias please='sudo $(history -p !!)'
+alias serve='python3 -m http.server'
+alias timestamp='date +"%Y-%m-%d_%H-%M-%S"'
+alias uuid='uuidgen'
+
+# 13. 🧰 Dev & Git Helpers
+alias ga='git add .'
+alias gc='git commit -m'
+alias gd='git diff'
+alias gl='git pull'
+alias gp='git push'
+alias gr='git remote -v'
+alias greset='git reset --hard origin/main && git pull --rebase'
+alias gs='git status'
+alias gslog='git log --oneline --graph --decorate'
+alias pyvenv='python3 -m venv .venv && source .venv/bin/activate'
+alias runpy='python3 -u'
+alias s='code .'
+alias svim='sudo vim'
+alias v='nvim'
 
 ##Scrcpy Shortcuts
 alias scrcpy-='scrcpy --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top'
@@ -50,24 +173,6 @@ alias nixsun='ssh temhr@192.168.0.202'
 alias nixtop='ssh temhr@192.168.0.203'
 alias nixvat='ssh temhr@192.168.0.201'
 alias nixzen='ssh temhr@192.168.0.204'
-
-##NixOS Shortcuts
-alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
-alias lboot='sudo nixos-rebuild boot --flake /home/temhr/nixlab && sudo reboot'
-alias lfup='nix flake update --flake /home/temhr/nixlab'
-alias lswitch='sudo nixos-rebuild switch --flake /home/temhr/nixlab'
-alias ltest='sudo nixos-rebuild test --flake /home/temhr/nixlab'
-alias rboot='sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot'
-alias rfup='bash /home/temhr/nixlab/home/files/scripts/auto-update-flake.sh'
-alias rswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
-alias rtest='sudo nixos-rebuild test --flake github:temhr/nixlab'
-alias nlist='nixos-rebuild list-generations'
-
-##Nix-Shell
-alias nscowsay='nix shell nixpkgs#cowsay'
-
-##Git
-alias greset='git reset --hard origin/main && git pull --rebase'
 
 ## Check video drivers in use
 alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
@@ -87,27 +192,3 @@ alias cpu10='ps auxf | sort -nr -k 3 | head -10'
 ## List largest directories (aka "ducks")
 alias dir5='du -cksh * | sort -hr | head -n 5'
 alias dir10='du -cksh * | sort -hr | head -n 10'
-
-## Safetynets
-# do not delete / or prompt if deleting more than 3 files at a time #
-alias rm='rm -I --preserve-root'
-
-## confirmation #
-alias mv='mv -i'
-alias cp='cp -i'
-alias ln='ln -i'
-
-## Parenting changing perms on / #
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
-
-## reload bash config
-alias reload="source ~/.bashrc"
-
-# Manage packages easier
-if [ -f /usr/bin/apt ]; then
-  alias update='sudo apt update'
-  alias upgrade='sudo apt update && sudo apt dist-upgrade && sudo apt autoremove && sudo apt clean'
-  alias install='sudo apt install'
-fi
