@@ -1,7 +1,7 @@
 { pkgs, ... }:  # Import the package set (pkgs) and any other module arguments.
 let
   flakeAutoUpdate = pkgs.writeShellScript "flakeAutoUpdate" (
-    builtins.readFile ../../files/scripts/auto-update-flake.sh
+    builtins.readFile ../files/scripts/auto-update-flake.sh
   );
 in
 {
@@ -12,7 +12,7 @@ in
     };
     Timer = {
       # Run daily at times
-      OnCalendar = [ "11:45" "23:45" ];
+      OnCalendar = [ "23:40" ];
       # Add randomization delay of up to # hours
       RandomizedDelaySec = "1h";
       # Make the timer persistent across reboots

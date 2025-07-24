@@ -1,4 +1,4 @@
-{ self, inputs, outputs, lib, config, ... }: {
+{ self, inputs, outputs, lib, config, self, ... }: {
   imports = [
     # Import home-manager's NixOS module
     inputs.home-manager.nixosModules.home-manager
@@ -7,7 +7,7 @@
     extraSpecialArgs = { inherit inputs outputs self; };
     users = {
       # Import your home-manager configuration based on hostname
-      temhr = import (../../../../home/temhr + "/${config.networking.hostName}.nix");
+      temhr = import ("${self}/home/temhr/" + "${config.networking.hostName}.nix");
     };
   };
 }

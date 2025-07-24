@@ -7,7 +7,7 @@ let
   # This creates an executable script named "auto-git-pull" in the Nix store,
   # whose contents are read from your local file at ../files/scripts/auto-git-pull.sh.
   GitPullShellScript = pkgs.writeShellScript "auto-git-pull" (
-    builtins.readFile ../../files/scripts/auto-git-pull.sh
+    builtins.readFile ../files/scripts/auto-git-pull.sh
   );
 in
 {
