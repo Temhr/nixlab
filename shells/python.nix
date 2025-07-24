@@ -22,6 +22,8 @@ pkgs.mkShell {
     python3Packages.requests
     python3Packages.numpy
     python3Packages.pandas
+
+    mpich
   ];
 
   shellHook = ''
