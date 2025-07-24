@@ -90,6 +90,7 @@ alias watchps='watch "ps aux --sort=-%mem | head -n 10"'
 # 8. 🛠️ Nix Package Management
 alias nixb='nix build'
 alias nixc='nix-collect-garbage -d'
+alias nixd='nix develop'
 alias nixgc='nix store gc'
 alias nixrepl='nix repl'
 alias nixs='nix search'
@@ -97,7 +98,7 @@ alias nixsh='nix shell'
 ## Nix Shell
 alias nscowsay='nix shell nixpkgs#cowsay'
 ## NixOS Shortcuts
-alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
+#alias hmswitch='home-manager switch --flake /home/temhr/nixlab'
 alias lboot='sudo nixos-rebuild boot --flake /home/temhr/nixlab && sudo reboot'
 alias lfup='nix flake update --flake /home/temhr/nixlab'
 alias lswitch='sudo nixos-rebuild switch --flake /home/temhr/nixlab'
