@@ -60,6 +60,7 @@
           programs.obs-studio = {
                   enable = true;  #Distributed version control system
                   enableVirtualCamera = true;  #Installs and sets up the v4l2loopback kernel module, necessary for OBS to start a virtual camera.
+                  plugins = [ pkgs.obs-studio-plugins.wlrobs pkgs.obs-studio-plugins.obs-backgroundremoval pkgs.obs-studio-plugins.obs-pipewire-audio-capture ];
           };
           # Enable v4l2loopback kernel module for OBS virtual camera
           boot.extraModulePackages = with config.boot.kernelPackages; [
@@ -78,19 +79,6 @@
           users.users."temhr" = {
             extraGroups = [ "video" ];
           };
-
-          # Install OBS with virtual camera support
-          environment.systemPackages = with pkgs; [
-            obs-studio
-            v4l-utils  # Useful for debugging video devices
-            (pkgs.wrapOBS {
-                plugins = with pkgs.obs-studio-plugins; [
-                  wlrobs
-                  obs-backgroundremoval
-                  obs-pipewire-audio-capture
-                ];
-            })
-          ];
         })
         (lib.mkIf config.openshot.enable {
           environment.systemPackages = with pkgs; [ openshot-qt ];  #Free, open-source video editor
