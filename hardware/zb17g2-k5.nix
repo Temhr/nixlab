@@ -2,9 +2,9 @@
   imports = [
     ./common/global
     ./common/optional
-    ./common/optional/wifi-fix.nix
     ./common/optional/drives.nix
     ./common/optional/drives-additional.nix
+    ./common/optional/wifi-fix.nix
     #./zb17g2-k5/disko-impermanence.nix
     #./zb17g2-k5/boilerplate.nix
   ];
