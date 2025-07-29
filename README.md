@@ -63,8 +63,11 @@ Aspirational
 
 - **Installation**:
   1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
-  2) First rebuild, with: flakes enabled and a proper hostname,
-  3) Second rebuild, with `sudo nixos-rebuild boot --flake github:temhr/nixlab && sudo reboot`
+  2) Mount and setup local repo in new home partition: 
+      - firstly, `nix-shell -p git wget curl`,
+      - then (in the partition) `mkdir -p /home/temhr`,
+      - finally `cd /home/temhr && git clone https://github.com/temhr/nixlab.git`
+  4) First rebuild: `sudo nixos-rebuild boot --flake github:temhr/nixlab#[HOSTNAME] --extra-experimental-features "nix-command flakes" && sudo reboot`
 - Updating systems imperatively:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab`
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
