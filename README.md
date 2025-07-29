@@ -67,7 +67,7 @@ Aspirational
       - firstly, `nix-shell -p git wget curl`,
       - then (in the partition) `mkdir -p /home/temhr`,
       - finally `cd /home/temhr && git clone https://github.com/temhr/nixlab.git`
-  4) First rebuild: `sudo nixos-rebuild boot --flake github:temhr/nixlab#[HOSTNAME] --extra-experimental-features "nix-command flakes" && sudo reboot`
+  3) First rebuild: `sudo nixos-rebuild boot --flake github:temhr/nixlab#[HOSTNAME] --extra-experimental-features "nix-command flakes" && sudo reboot`
 - Updating systems imperatively:
   - **Flakes**: ` $ nix flake update --flake /home/temhr/nixlab`
   - **NixOS**: ` $ sudo nixos-rebuild switch --flake /home/temhr/nixlab`
