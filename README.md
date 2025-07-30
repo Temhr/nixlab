@@ -62,7 +62,7 @@ Aspirational
 <p></p>
 
 - **Installation**:
-  1) Install NixOS with appropriate labelled partitions (boot, root, swap, home)
+  1) Install NixOS with appropriate labelled partitions (boot, root, swap, home, shelf)
   2) Mount and setup local repo in new home partition: 
       - firstly, `nix-shell -p git wget curl`,
       - then (in the partition) `mkdir -p /temhr`,
