@@ -35,7 +35,11 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
     # Application-specific flakes
-    ghostty.url = "github:ghostty-org/ghostty";
+
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
     # Pre-commit hooks for code quality (optional)
