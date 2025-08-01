@@ -102,13 +102,6 @@
             #"${nixpkgs}/nixos/modules/profiles/headless.nix"
           ];
         };
-        nixos = {
-          system = "x86_64-linux";
-          modules = [
-            # Multiple profiles
-            #"${nixpkgs}/nixos/modules/profiles/headless.nix"
-          ];
-        };
       };
 
       # Common modules used by all hosts
