@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }: {
 
-    home.file = {
+  home.file = {
     ".local/share/applications/EA-anki.desktop".text = ''
       [Desktop Entry]
       Name=Anki
@@ -9,7 +9,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=Education;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-audacity.desktop".text = ''
@@ -20,7 +20,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-darktable.desktop".text = ''
@@ -31,7 +31,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=Graphics;Photography;RasterGraphics;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-gimp.desktop".text = ''
@@ -42,7 +42,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=Graphics;RasterGraphics;2DGraphics;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-inkscape.desktop".text = ''
@@ -53,7 +53,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=Graphics;VectorGraphics;2DGraphics;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-kdenlive.desktop".text = ''
@@ -64,7 +64,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-krita.desktop".text = ''
@@ -75,7 +75,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=Graphics;2DGraphics;Painting;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-media-downloader.desktop".text = ''
@@ -86,7 +86,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=Network;FileTransfer;Video;Ephemeral-App;
     '';
 
     ".local/share/applications/EA-openshot.desktop".text = ''
@@ -97,7 +97,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Ephemeral-App;
+      Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
   };
 }
