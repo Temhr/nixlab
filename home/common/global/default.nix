@@ -8,6 +8,7 @@
     ./config-git.nix
     ./config-plasma.nix
     ./config-virt-manager.nix
+    ./ephemeral-apps.nix
     ./utilities.nix
   ];
 
