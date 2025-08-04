@@ -57,21 +57,21 @@
 
   ## Media Packages
   #audacity.enable = true;  #Sound editor with graphical UI
-  kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-  media-downloader.enable = true;  #Qt/C++ GUI front end for yt-dlp and others
+  #kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
+  #media-downloader.enable = true;  #Qt/C++ GUI front end for yt-dlp and others
   obs.enable = true;  #Free and open source software for video recording and live streaming
-  openshot.enable = true;  #Free, open-source video editor
+  #openshot.enable = true;  #Free, open-source video editor
   spotify.enable = true;  #Play music from the Spotify music service
   vlc.enable = true;  #Cross-platform media player and streaming server
 
   ## Virtualizations
-  bottles.enable = true;    #Easy-to-use wineprefix manager
-  distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  incus.enable = true;   #Powerful system container and virtual machine manager
-  podman.enable = true;    #A program for managing pods, containers and container images
-  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
-  virt-manager.enable = true;    #Desktop user interface for managing virtual machines
-  wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
+  #bottles.enable = true;    #Easy-to-use wineprefix manager
+  #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
+  #incus.enable = true;   #Powerful system container and virtual machine manager
+  #podman.enable = true;    #A program for managing pods, containers and container images
+  #quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
+  #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
@@ -82,7 +82,6 @@
   environment.systemPackages = with pkgs; [
 
     ## Godot Dev Tools
-    android-tools  #Android SDK platform tools
     gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
     pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
     scons  #Improved, cross-platform substitute for Make
