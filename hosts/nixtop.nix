@@ -45,7 +45,7 @@
   vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
 
   ## Education
-  #anki.enable = true;  #Spaced repetition flashcard program
+  anki.enable = true;  #Spaced repetition flashcard program
   #google-earth.enable = true;  #World sphere viewer "not secure""
 
   ## Gaming Packages
@@ -80,9 +80,9 @@
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
   #darktable.enable = true;    #Virtual lighttable and darkroom for photographers
-  gimp.enable = true;    #GNU Image Manipulation Program
+  #gimp.enable = true;    #GNU Image Manipulation Program
   godot.enable = true;    #Free and Open Source 2D and 3D game engine
-  inkscape.enable = true;    #Vector graphics editor
+  #inkscape.enable = true;    #Vector graphics editor
   #krita.enable = true;    #Free and open source painting application
 
   ## List packages installed in system profile. To search, run:
