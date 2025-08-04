@@ -94,7 +94,7 @@ Aspirational
     - **global**: universal to all hosts
     - **optional**: host selection required
 - **lib**: templates and other helper nix-code
-- **modules**: encapsulated packages and applications
+- **modules**: encapsulated packages and persistent applications
   - **home-manager**: user-relevant modules
   - **nixos**: system-relevant modules
 - **overlays**: custom overrides and extensions
