@@ -7,23 +7,12 @@
               default = false;
             };
         };
-        google-earth = {
-            enable = lib.mkEnableOption {
-              description = "Enables google Earth Pro";
-              default = false;
-            };
-        };
     };
 
     config = lib.mkMerge [
         (lib.mkIf config.anki.enable {
             environment.systemPackages = with pkgs; [
                 anki-bin  #Spaced repetition flashcard program
-            ];
-        })
-        (lib.mkIf config.google-earth.enable {
-            environment.systemPackages = with pkgs; [
-                googleearth-pro #World sphere viewer
             ];
         })
     ];

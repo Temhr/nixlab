@@ -46,14 +46,10 @@
 
   ## Education
   #anki.enable = true;  #Spaced repetition flashcard program
-  #google-earth.enable = true;  #World sphere viewer "not secure""
 
   ## Gaming Packages
   #openSourceGames.enable = true;  #Open Source gaming platform for GNU/Linux
   #steam.enable = true;  #Video game digital distribution service and storefront from Valve
-
-  ## Communication
-  #discord.enable = true;  #All-in-one cross-platform voice and text chat for gamers
 
   ## Productivity
   calibre.enable = true;  #Comprehensive e-book software
@@ -88,11 +84,7 @@
 
   ## Art Dev Tools
   blender.enable = true;    #3D Creation/Animation/Publishing System
-  #darktable.enable = true;    #Virtual lighttable and darkroom for photographers
-  #gimp.enable = true;    #GNU Image Manipulation Program
   #godot.enable = true;    #Free and Open Source 2D and 3D game engine
-  #inkscape.enable = true;    #Vector graphics editor
-  #krita.enable = true;    #Free and open source painting application
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
