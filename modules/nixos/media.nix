@@ -1,33 +1,9 @@
 { config, lib, pkgs, ... }: {
 
     options = {
-        audacity = {
-            enable = lib.mkEnableOption {
-              description = "Enables Audacity";
-              default = false;
-            };
-        };
-        kdenlive = {
-            enable = lib.mkEnableOption {
-              description = "Enables Kdenlive";
-              default = false;
-            };
-        };
-        media-downloader = {
-            enable = lib.mkEnableOption {
-              description = "Enables Media-Downloader";
-              default = false;
-            };
-        };
         obs = {
             enable = lib.mkEnableOption {
               description = "Enables OBS-studio";
-              default = false;
-            };
-        };
-        openshot = {
-            enable = lib.mkEnableOption {
-              description = "Enables Openshot";
               default = false;
             };
         };
