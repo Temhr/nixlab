@@ -56,11 +56,7 @@
   #libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
 
   ## Media Packages
-  #audacity.enable = true;  #Sound editor with graphical UI
-  #kdenlive.enable = true;  #Free and open source video editor, based on MLT Framework and KDE Frameworks
-  #media-downloader.enable = true;  #Qt/C++ GUI front end for yt-dlp and others
   #obs.enable = true;  #Free and open source software for video recording and live streaming
-  #openshot.enable = true;  #Free, open-source video editor
   #spotify.enable = true;  #Play music from the Spotify music service
   vlc.enable = true;  #Cross-platform media player and streaming server
 
