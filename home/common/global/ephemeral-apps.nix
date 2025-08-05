@@ -16,7 +16,7 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-    ## darktable
+   /* ## darktable - doesn't work properly
     ".local/share/applications/darktable.desktop".text = ''
       [Desktop Entry]
       Name=Darktable
@@ -26,7 +26,7 @@
       Terminal=false
       Type=Application
       Categories=Graphics;Photography;RasterGraphics;Ephemeral-App;
-    '';
+    ''; */
 
     ## gimp
     ".local/share/applications/gimp.desktop".text = ''
