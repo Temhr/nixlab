@@ -1,18 +1,11 @@
 { config, lib, pkgs, ... }: {
 
-  home.file = {
-    ".local/share/applications/EA-anki.desktop".text = ''
-      [Desktop Entry]
-      Name=Anki
-      Comment=Spaced repetition flashcard program
-      Exec=konsole -e nix run nixpkgs#anki-bin
-      Icon=utilities-terminal
-      Terminal=false
-      Type=Application
-      Categories=Education;Ephemeral-App;
-    '';
+## One-time use applications downloaded into store and discarded afterward
 
-    ".local/share/applications/EA-audacity.desktop".text = ''
+  home.file = {
+
+    ## audacity
+    ".local/share/applications/audacity.desktop".text = ''
       [Desktop Entry]
       Name=Audacity
       Comment=Sound editor with graphical UI
@@ -23,7 +16,8 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-darktable.desktop".text = ''
+    ## darktable
+    ".local/share/applications/darktable.desktop".text = ''
       [Desktop Entry]
       Name=Darktable
       Comment=Virtual lighttable and darkroom for photographers
@@ -34,7 +28,8 @@
       Categories=Graphics;Photography;RasterGraphics;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-gimp.desktop".text = ''
+    ## gimp
+    ".local/share/applications/gimp.desktop".text = ''
       [Desktop Entry]
       Name=Gimp
       Comment=GNU Image Manipulation Program
@@ -45,7 +40,8 @@
       Categories=Graphics;RasterGraphics;2DGraphics;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-inkscape.desktop".text = ''
+    ## inkscape
+    ".local/share/applications/inkscape.desktop".text = ''
       [Desktop Entry]
       Name=Inkscape
       Comment=Vector graphics editor
@@ -56,7 +52,8 @@
       Categories=Graphics;VectorGraphics;2DGraphics;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-kdenlive.desktop".text = ''
+    ## kdenlive
+    ".local/share/applications/kdenlive.desktop".text = ''
       [Desktop Entry]
       Name=Kdenlive
       Comment=Free and open source video editor, based on MLT Framework and KDE Frameworks
@@ -67,7 +64,8 @@
       Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-krita.desktop".text = ''
+    ## krita
+    ".local/share/applications/krita.desktop".text = ''
       [Desktop Entry]
       Name=Krita
       Comment=Free and open source painting application
@@ -78,7 +76,8 @@
       Categories=Graphics;2DGraphics;Painting;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-media-downloader.desktop".text = ''
+    ## media-downloader
+    ".local/share/applications/media-downloader.desktop".text = ''
       [Desktop Entry]
       Name=Media-downloader
       Comment=Qt/C++ GUI front end for yt-dlp and others
@@ -89,7 +88,8 @@
       Categories=Network;FileTransfer;Video;Ephemeral-App;
     '';
 
-    ".local/share/applications/EA-openshot.desktop".text = ''
+    ## openshot
+    ".local/share/applications/openshot.desktop".text = ''
       [Desktop Entry]
       Name=Openshot
       Comment=Free, open-source video editor
