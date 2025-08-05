@@ -38,11 +38,11 @@
     ncdu             # ncurses-based disk usage viewer
     clinfo           # lists OpenCL devices and capabilities
     glxinfo          # OpenGL renderer and extension information
-    kdePackages.filelight  # GUI disk usage visualizer using concentric rings
+    #kdePackages.filelight  # GUI disk usage visualizer using concentric rings
 
     ## Applications
     kdePackages.kcalc        # scientific calculator GUI
-    ffmpeg                   # command-line audio/video converter
+    #ffmpeg                   # command-line audio/video converter
     scrcpy                   # mirror and control Android devices
     simplescreenrecorder     # GUI screen recorder for X11
     keepassxc                # secure offline password manager
