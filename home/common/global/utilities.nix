@@ -24,7 +24,6 @@
     vim              # powerful, modal terminal text editor
     neovim           # modern fork of vim with better extensibility
     alejandra        # opinionated and fast Nix code formatter
-    zed              # structured data lake & search engine (experimental)
 
     ## Terminal File Managers
     mc               # Midnight Commander, ncurses-based file manager
