@@ -48,7 +48,6 @@
   #anki.enable = true;  #Spaced repetition flashcard program
 
   ## Gaming Packages
-  #openSourceGames.enable = true;  #Open Source gaming platform for GNU/Linux
   #steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Productivity

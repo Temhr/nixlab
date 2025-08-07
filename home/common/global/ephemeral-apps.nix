@@ -76,6 +76,18 @@
       Categories=Graphics;2DGraphics;Painting;Ephemeral-App;
     '';
 
+    ## lutris
+    ".local/share/applications/lutris.desktop".text = ''
+      [Desktop Entry]
+      Name=Lutris
+      Comment=Open Source gaming platform for GNU/Linux
+      Exec=konsole -e nix run nixpkgs#lutris
+      Icon=utilities-terminal
+      Terminal=false
+      Type=Application
+      Categories=Games;Ephemeral-App;
+    '';
+
     ## media-downloader
     ".local/share/applications/media-downloader.desktop".text = ''
       [Desktop Entry]
@@ -99,5 +111,18 @@
       Type=Application
       Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
+
+    ## SuperTuxKart
+    ".local/share/applications/superTuxKart.desktop".text = ''
+      [Desktop Entry]
+      Name=SuperTuxKart
+      Comment=A Free 3D kart racing game
+      Exec=konsole -e nix run nixpkgs#superTuxKart
+      Icon=utilities-terminal
+      Terminal=false
+      Type=Application
+      Categories=Games;Ephemeral-App;
+    '';
+
   };
 }
