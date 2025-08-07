@@ -16,7 +16,7 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-   /* ## darktable - doesn't work properly
+    /* ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
     ".local/share/applications/darktable.desktop".text = ''
       [Desktop Entry]
       Name=Darktable
@@ -81,7 +81,7 @@
       [Desktop Entry]
       Name=Lutris
       Comment=Open Source gaming platform for GNU/Linux
-      Exec=konsole -e nix run nixpkgs#lutris
+      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#lutris
       Icon=utilities-terminal
       Terminal=false
       Type=Application
