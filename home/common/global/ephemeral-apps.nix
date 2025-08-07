@@ -4,7 +4,7 @@
 
   home.file = {
 
-    ## audacity
+    ## Audacity
     ".local/share/applications/audacity.desktop".text = ''
       [Desktop Entry]
       Name=Audacity
@@ -28,7 +28,7 @@
       Categories=Graphics;Photography;RasterGraphics;Ephemeral-App;
     ''; */
 
-    ## gimp
+    ## Gimp
     ".local/share/applications/gimp.desktop".text = ''
       [Desktop Entry]
       Name=Gimp
@@ -40,7 +40,7 @@
       Categories=Graphics;RasterGraphics;2DGraphics;Ephemeral-App;
     '';
 
-    ## inkscape
+    ## Inkscape
     ".local/share/applications/inkscape.desktop".text = ''
       [Desktop Entry]
       Name=Inkscape
@@ -52,7 +52,7 @@
       Categories=Graphics;VectorGraphics;2DGraphics;Ephemeral-App;
     '';
 
-    ## kdenlive
+    ## Kdenlive
     ".local/share/applications/kdenlive.desktop".text = ''
       [Desktop Entry]
       Name=Kdenlive
@@ -64,7 +64,7 @@
       Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
 
-    ## krita
+    ## Krita
     ".local/share/applications/krita.desktop".text = ''
       [Desktop Entry]
       Name=Krita
@@ -76,7 +76,7 @@
       Categories=Graphics;2DGraphics;Painting;Ephemeral-App;
     '';
 
-    ## lutris
+    ## Lutris
     ".local/share/applications/lutris.desktop".text = ''
       [Desktop Entry]
       Name=Lutris
@@ -88,7 +88,7 @@
       Categories=Games;Ephemeral-App;
     '';
 
-    ## media-downloader
+    ## Media-downloader
     ".local/share/applications/media-downloader.desktop".text = ''
       [Desktop Entry]
       Name=Media-downloader
@@ -100,7 +100,7 @@
       Categories=Network;FileTransfer;Video;Ephemeral-App;
     '';
 
-    ## openshot
+    ## Openshot
     ".local/share/applications/openshot.desktop".text = ''
       [Desktop Entry]
       Name=Openshot
