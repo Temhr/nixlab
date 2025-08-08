@@ -17,7 +17,7 @@
     '';
 
      ## Blender
-    ".local/share/applications/blender.desktop".text = ''
+    ".local/share/applications/blender-cuda.desktop".text = ''
       [Desktop Entry]
       Name=Blender (CUDA)
       Comment=3D Creation/Animation/Publishing System (with explicit CUDA support and a build time)
