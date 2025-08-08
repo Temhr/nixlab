@@ -16,16 +16,16 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-     ## Davinci Resolve
-    ".local/share/applications/davinci-resolve.desktop".text = ''
+     ## Blender
+    ".local/share/applications/blender.desktop".text = ''
       [Desktop Entry]
-      Name=Davinci Resolve
-      Comment=Professional video editing, color, effects and audio post-processing
-      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve
+      Name=Blender
+      Comment=3D Creation/Animation/Publishing System
+      Exec=konsole -e nix run nixpkgs#blender
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
+      Categories=Graphics;Ephemeral-App;
     '';
 
     /* ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
@@ -39,6 +39,18 @@
       Type=Application
       Categories=Graphics;Photography;RasterGraphics;Ephemeral-App;
     ''; */
+
+     ## Davinci Resolve
+    ".local/share/applications/davinci-resolve.desktop".text = ''
+      [Desktop Entry]
+      Name=Davinci Resolve
+      Comment=Professional video editing, color, effects and audio post-processing
+      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve
+      Icon=utilities-terminal
+      Terminal=false
+      Type=Application
+      Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
+    '';
 
     ## Gimp
     ".local/share/applications/gimp.desktop".text = ''
