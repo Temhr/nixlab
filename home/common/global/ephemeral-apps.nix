@@ -20,12 +20,12 @@
     ".local/share/applications/blender-cuda.desktop".text = ''
       [Desktop Entry]
       Name=Blender (CUDA)
-      Comment=3D Creation/Animation/Publishing System (with explicit CUDA support and a build time)
-      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr "(import <nixpkgs> {}).blender.override {cudaSupport=true;}"
-      Icon=utilities-terminal
+      Comment=3D Creation/Animation/Publishing System (with CUDA support)
+      Exec=env NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr "(import <nixpkgs> {}).blender.override {cudaSupport=true;}"
+      Icon=blender
       Terminal=false
       Type=Application
-      Categories=Graphics;Ephemeral-App;
+      Categories=Graphics;3DGraphics;
     '';
 
     /* ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
