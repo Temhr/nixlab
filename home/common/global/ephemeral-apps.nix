@@ -16,6 +16,18 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
+    ## Davinci Resolve Studio
+    ".local/share/applications/davinci-resolve-studio.desktop".text = ''
+      [Desktop Entry]
+      Name=Davinci Resolve Studio
+      Comment=Professional video editing, color, effects and audio post-processing
+      Exec=NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve-studio
+      Icon=utilities-terminal
+      Terminal=false
+      Type=Application
+      Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
+    '';
+
     /* ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
     ".local/share/applications/darktable.desktop".text = ''
       [Desktop Entry]
