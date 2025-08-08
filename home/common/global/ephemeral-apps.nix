@@ -45,7 +45,7 @@
       [Desktop Entry]
       Name=DaVinci Resolve ⚡
       Comment=Professional video editing, color, effects and audio
-      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve
+      Exec=env NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve
       Icon=DaVinciResolve
       Terminal=false
       Type=Application
@@ -105,7 +105,7 @@
       [Desktop Entry]
       Name=Lutris ⚡
       Comment=Open Source gaming platform for GNU/Linux
-      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#lutris
+      Exec=env NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#lutris
       Icon=lutris
       Terminal=false
       Type=Application
