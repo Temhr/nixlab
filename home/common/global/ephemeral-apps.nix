@@ -16,7 +16,7 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-    ## Davinci Resolve
+    /* ## Davinci Resolve
     ".local/share/applications/davinci-resolve.desktop".text = ''
       [Desktop Entry]
       Name=Davinci Resolve
@@ -26,7 +26,7 @@
       Terminal=false
       Type=Application
       Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
-    '';
+    ''; */
 
     /* ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
     ".local/share/applications/darktable.desktop".text = ''
