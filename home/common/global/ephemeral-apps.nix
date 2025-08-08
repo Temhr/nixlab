@@ -16,12 +16,12 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-    ## Davinci Resolve Studio
-    ".local/share/applications/davinci-resolve-studio.desktop".text = ''
+    ## Davinci Resolve
+    ".local/share/applications/davinci-resolve.desktop".text = ''
       [Desktop Entry]
-      Name=Davinci Resolve Studio
+      Name=Davinci Resolve
       Comment=Professional video editing, color, effects and audio post-processing
-      Exec=NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve-studio
+      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve
       Icon=utilities-terminal
       Terminal=false
       Type=Application
