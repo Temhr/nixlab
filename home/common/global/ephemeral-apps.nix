@@ -9,7 +9,7 @@
       [Desktop Entry]
       Name=Audacity ⚡
       Comment=Sound editor with graphical UI
-      Exec=konsole -e nix run nixpkgs#audacity
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#audacity; echo 'Press Enter to close terminal...'; read"
       Icon=audacity
       Terminal=false
       Type=Application
@@ -21,7 +21,7 @@
       [Desktop Entry]
       Name=Blender CUDA ⚡
       Comment=3D Creation/Animation/Publishing System
-      Exec=env NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr "(import <nixpkgs> {}).blender.override {cudaSupport=true;}"
+      Exec=konsole -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr '(import <nixpkgs> {}).blender.override {cudaSupport=true;}'; echo 'Press Enter to close terminal...'; read"
       Icon=blender
       Terminal=false
       Type=Application
@@ -33,7 +33,7 @@
       [Desktop Entry]
       Name=Darktable ⚡
       Comment=Virtual lighttable and darkroom
-      Exec=konsole -e nix run nixpkgs#darktable
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#darktable; echo 'Press Enter to close terminal...'; read"
       Icon=darktable
       Terminal=false
       Type=Application
@@ -45,7 +45,7 @@
       [Desktop Entry]
       Name=DaVinci Resolve ⚡
       Comment=Professional video editing, color, effects and audio
-      Exec=env NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve
+      Exec=konsole -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve; echo 'Press Enter to close terminal...'; read"
       Icon=DaVinciResolve
       Terminal=false
       Type=Application
@@ -57,7 +57,7 @@
       [Desktop Entry]
       Name=GIMP ⚡
       Comment=GNU Image Manipulation Program
-      Exec=konsole -e nix run nixpkgs#gimp3-with-plugins
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#gimp3-with-plugins; echo 'Press Enter to close terminal...'; read"
       Icon=gimp
       Terminal=false
       Type=Application
@@ -69,7 +69,7 @@
       [Desktop Entry]
       Name=Inkscape ⚡
       Comment=Vector graphics editor
-      Exec=konsole -e nix run nixpkgs#inkscape-with-extensions
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#inkscape-with-extensions; echo 'Press Enter to close terminal...'; read"
       Icon=inkscape
       Terminal=false
       Type=Application
@@ -81,7 +81,7 @@
       [Desktop Entry]
       Name=Kdenlive ⚡
       Comment=Video editor based on MLT Framework
-      Exec=konsole -e nix run nixpkgs#kdePackages.kdenlive
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#kdePackages.kdenlive; echo 'Press Enter to close terminal...'; read"
       Icon=kdenlive
       Terminal=false
       Type=Application
@@ -93,7 +93,7 @@
       [Desktop Entry]
       Name=Krita ⚡
       Comment=Free and open source painting application
-      Exec=konsole -e nix run nixpkgs#krita
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#krita; echo 'Press Enter to close terminal...'; read"
       Icon=krita
       Terminal=false
       Type=Application
@@ -105,7 +105,7 @@
       [Desktop Entry]
       Name=Lutris ⚡
       Comment=Open Source gaming platform for GNU/Linux
-      Exec=env NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#lutris
+      Exec=konsole -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#lutris; echo 'Press Enter to close terminal...'; read"
       Icon=lutris
       Terminal=false
       Type=Application
@@ -117,7 +117,7 @@
       [Desktop Entry]
       Name=Media Downloader ⚡
       Comment=Qt/C++ GUI front end for yt-dlp
-      Exec=konsole -e nix run nixpkgs#media-downloader
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#media-downloader; echo 'Press Enter to close terminal...'; read"
       Icon=media-downloader
       Terminal=false
       Type=Application
@@ -129,7 +129,7 @@
       [Desktop Entry]
       Name=OpenShot ⚡
       Comment=Free, open-source video editor
-      Exec=konsole -e nix run nixpkgs#openshot-qt
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#openshot-qt; echo 'Press Enter to close terminal...'; read"
       Icon=openshot-qt
       Terminal=false
       Type=Application
@@ -141,7 +141,7 @@
       [Desktop Entry]
       Name=SuperTuxKart ⚡
       Comment=A Free 3D kart racing game
-      Exec=konsole -e nix run nixpkgs#superTuxKart
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#superTuxKart; echo 'Press Enter to close terminal...'; read"
       Icon=supertuxkart
       Terminal=false
       Type=Application
