@@ -19,9 +19,9 @@
      ## Blender
     ".local/share/applications/blender.desktop".text = ''
       [Desktop Entry]
-      Name=Blender
-      Comment=3D Creation/Animation/Publishing System
-      Exec=konsole -e nix run nixpkgs#blender
+      Name=Blender (CUDA)
+      Comment=3D Creation/Animation/Publishing System (with explicit CUDA support and a build time)
+      Exec=konsole -e NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr "(import <nixpkgs> {}).blender.override {cudaSupport=true;}"
       Icon=utilities-terminal
       Terminal=false
       Type=Application
