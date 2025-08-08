@@ -97,7 +97,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Games;Ephemeral-App;
+      Categories=Game;Ephemeral-App;
     '';
 
     ## Media-downloader
@@ -133,7 +133,7 @@
       Icon=utilities-terminal
       Terminal=false
       Type=Application
-      Categories=Games;Ephemeral-App;
+      Categories=Game;Ephemeral-App;
     '';
 
   };
