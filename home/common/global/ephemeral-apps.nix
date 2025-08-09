@@ -124,6 +124,18 @@
       Categories=Network;FileTransfer;Video;Ephemeral-App;
     '';
 
+    ## Microsoft Edge
+    ".local/share/applications/microsoft-edge.desktop".text = ''
+      [Desktop Entry]
+      Name=Microsoft Edge ⚡
+      Comment=Web browser from Microsoft
+      Exec=konsole -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#microsoft-edge; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=microsoft-edge
+      Terminal=false
+      Type=Application
+      Categories=Network;FileTransfer;Ephemeral-App;
+    '';
+
     ## Openshot
     ".local/share/applications/openshot.desktop".text = ''
       [Desktop Entry]
