@@ -243,7 +243,6 @@ Andromeda
 NightLion v1
 OneHalfDark
 CobaltNext
-Adwaita
 Tomorrow Night
 Flatland
 Violet Dark
@@ -322,7 +321,6 @@ GitHub-Dark-High-Contrast
 starlight
 Monokai Pro Light
 Hipster Green
-Terminal Basic
 GruvboxLightHard
 Medallion
 AtelierSulphurpool
