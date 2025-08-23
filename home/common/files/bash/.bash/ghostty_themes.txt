@@ -114,7 +114,6 @@ Obsidian
 CutiePro
 darkmatrix
 Bright Lights
-flexoki-light
 PaleNightHC
 Espresso Libre
 lovelace
