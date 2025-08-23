@@ -11,6 +11,7 @@ AlienBlood
 Andromeda
 Apple Classic
 Apple System Colors
+arcoiris
 Argonaut
 Arthur
 AtelierSulphurpool
@@ -18,7 +19,9 @@ Atom
 AtomOneLight
 Aura
 Aurora
+ayu
 Ayu Mirage
+ayu_light
 Banana Blueberry
 Batman
 Belafonte Day
@@ -41,14 +44,20 @@ Builtin Solarized Dark
 Builtin Solarized Light
 Builtin Tango Dark
 C64
-CGA
-CLRS
 Calamity
+carbonfox
+catppuccin-frappe
+catppuccin-latte
+catppuccin-macchiato
+catppuccin-mocha
+CGA
 Chalk
 Chalkboard
 ChallengerDeep
 Chester
 Ciapre
+citruszest
+CLRS
 Cobalt Neon
 Cobalt2
 CobaltNext
@@ -57,12 +66,19 @@ CobaltNext-Minimal
 CrayonPonyFish
 CutiePro
 Cyberdyne
+cyberpunk
 CyberpunkScarletProtocol
 Dark Modern
 Dark Pastel
 Dark+
+darkermatrix
+darkmatrix
 Darkside
+dawnfox
+dayfox
+deep
 Desert
+detuned
 Dimidium
 DimmedMonokai
 Django
@@ -73,17 +89,23 @@ DoomOne
 DotGov
 Dracula
 Dracula+
+duckbones
 Duotone Dark
-ENCOM
+duskfox
 Earthsong
+electron-highlighter
 Elemental
 Elementary
+embers-dark
+ENCOM
 Espresso
 Espresso Libre
 Everblush
 Everforest Dark - Hard
 Fahrenheit
 Fairyfloss
+farmhouse-dark
+farmhouse-light
 Fideloper
 Firefly Traditional
 FirefoxDev
@@ -91,6 +113,7 @@ Firewatch
 FishTank
 Flat
 Flatland
+flexoki-dark
 Floraverse
 ForestBlue
 Framer
@@ -98,6 +121,7 @@ FrontEndDelight
 FunForrest
 Galaxy
 Galizur
+Github
 GitHub Dark
 GitHub-Dark-Colorblind
 GitHub-Dark-Default
@@ -108,24 +132,26 @@ GitHub-Light-Default
 GitLab-Dark
 GitLab-Dark-Grey
 GitLab-Light
-Github
 Glacier
 Grape
 Grass
 Grey-green
+gruber-darker
+gruvbox-material
 GruvboxDark
 GruvboxDarkHard
 GruvboxLight
 GruvboxLightHard
 Guezwhoz
-HaX0R_BLUE
-HaX0R_GR33N
-HaX0R_R3D
 Hacktober
 Hardcore
 Harper
 Havn Daggry
 Havn Skumring
+HaX0R_BLUE
+HaX0R_GR33N
+HaX0R_R3D
+heeler
 Highway
 Hipster Green
 Hivacruz
@@ -137,16 +163,30 @@ Hurtado
 Hybrid
 IC_Green_PPL
 IC_Orange_PPL
+iceberg-dark
+iceberg-light
+idea
+idleToes
 IR_Black
+iTerm2 Dark Background
+iTerm2 Default
+iTerm2 Pastel Dark Background
+iTerm2 Smoooooth
+iTerm2 Solarized Dark
+iTerm2 Solarized Light
+iTerm2 Tango Dark
 Jackie Brown
 Japanesque
 Jellybeans
 JetBrains Darcula
+jubi
 Kanagawa Dragon
 Kanagawa Wave
+kanagawabones
 Kibble
 Kolorit
 Konsolas
+kurokula
 Lab Fox
 Laser
 Later This Evening
@@ -154,6 +194,7 @@ Lavandula
 LiquidCarbon
 LiquidCarbonTransparent
 LiquidCarbonTransparentInverse
+lovelace
 Mariana
 Material
 MaterialDark
@@ -161,10 +202,14 @@ MaterialDarker
 MaterialDesignColors
 MaterialOcean
 Mathias
+matrix
 Medallion
 Melange_dark
 Melange_light
 Mellifluous
+mellow
+miasma
+midnight-in-mojave
 Mirage
 Misterioso
 Molokai
@@ -181,13 +226,21 @@ Monokai Remastered
 Monokai Soda
 Monokai Vivid
 N0tch2k
+neobones_dark
+neobones_light
 Neon
 Neopolitan
 Neutron
 Night Owlish Light
+nightfox
 NightLion v1
 NightLion v2
+niji
 Nocturnal Winter
+nord
+nord-light
+nord-wave
+nordfox
 Novel
 NvimDark
 Obsidian
@@ -214,8 +267,10 @@ Pnevma
 Popping and Locking
 Pro
 Purple Rain
+purplepeter
 Rapture
 Raycast_Dark
+rebecca
 Red Alert
 Red Planet
 Red Sands
@@ -223,14 +278,20 @@ Relaxed
 Retro
 RetroLegends
 Rippedcasts
+rose-pine
+rose-pine-dawn
+rose-pine-moon
 Rouge 2
 Royal
 Ryuuko
 Sakura
 Scarlet Protocol
-SeaShells
 Seafoam Pastel
+SeaShells
+seoulbones_dark
+seoulbones_light
 Seti
+shades-of-purple
 Shaman
 Slate
 SleepyHollow
@@ -241,25 +302,35 @@ SoftServer
 Solarized Darcula
 Solarized Dark - Patched
 Solarized Dark Higher Contrast
+Spacedust
 SpaceGray
 SpaceGray Bright
 SpaceGray Eighties
 SpaceGray Eighties Dull
-Spacedust
 Spiderman
 Spring
 Square
 Squirrelsong Dark
+srcery
+starlight
 Sublette
 Subliminal
 Sugarplum
 Sundried
 Symfonic
+synthwave
+synthwave-everything
 SynthwaveAlpha
 Teerb
+terafox
 Thayer Bright
 The Hulk
 Tinacious Design (Dark)
+tokyonight
+tokyonight_moon
+tokyonight_night
+tokyonight-day
+tokyonight-storm
 Tomorrow
 Tomorrow Night
 Tomorrow Night Blue
@@ -276,90 +347,18 @@ UnderTheSea
 Unikitty
 Urple
 Vaughn
+vesper
 VibrantInk
+vimbones
 Violet Dark
 Violet Light
 WarmNeon
 Wez
 Whimsy
 WildCherry
+wilmersdorf
 Wombat
 Wryan
-Zenburn
-arcoiris
-ayu
-ayu_light
-carbonfox
-catppuccin-frappe
-catppuccin-latte
-catppuccin-macchiato
-catppuccin-mocha
-citruszest
-cyberpunk
-darkermatrix
-darkmatrix
-dawnfox
-dayfox
-deep
-detuned
-duckbones
-duskfox
-electron-highlighter
-embers-dark
-farmhouse-dark
-farmhouse-light
-flexoki-dark
-gruber-darker
-gruvbox-material
-heeler
-iTerm2 Dark Background
-iTerm2 Default
-iTerm2 Pastel Dark Background
-iTerm2 Smoooooth
-iTerm2 Solarized Dark
-iTerm2 Solarized Light
-iTerm2 Tango Dark
-iceberg-dark
-iceberg-light
-idea
-idleToes
-jubi
-kanagawabones
-kurokula
-lovelace
-matrix
-mellow
-miasma
-midnight-in-mojave
-neobones_dark
-neobones_light
-nightfox
-niji
-nord
-nord-light
-nord-wave
-nordfox
-purplepeter
-rebecca
-rose-pine
-rose-pine-dawn
-rose-pine-moon
-seoulbones_dark
-seoulbones_light
-shades-of-purple
-srcery
-starlight
-synthwave
-synthwave-everything
-terafox
-tokyonight
-tokyonight-day
-tokyonight-storm
-tokyonight_moon
-tokyonight_night
-vesper
-vimbones
-wilmersdorf
 xcodedark
 xcodedarkhc
 xcodelight
@@ -367,6 +366,7 @@ xcodewwdc
 zenbones
 zenbones_dark
 zenbones_light
+Zenburn
 zenburned
 zenwritten_dark
 zenwritten_light
