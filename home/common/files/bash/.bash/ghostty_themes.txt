@@ -156,7 +156,6 @@ Espresso
 Brogrammer
 Django
 Tomorrow Night Eighties
-primary
 detuned
 Wez
 idleToes
