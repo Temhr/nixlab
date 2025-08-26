@@ -248,8 +248,8 @@ in {
                     path = "/mirror/phshare/photos";
                     devices = [ "Pixel XL" ];
                     };
-                    "Secrets" = {
-                    path = "/mirror/phshare/secrets";
+                    "Docs" = {
+                    path = "/mirror/phshare/docs";
                     devices = [ "Pixel XL" ];
                     };
                 };
