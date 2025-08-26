@@ -1,5 +1,4 @@
 { config, pkgs, ... }:
-
 let
   photoMoveScript = pkgs.writeShellScriptBin "backup-phone-media" ''
     set -eu
@@ -9,10 +8,23 @@ let
 
     mkdir -p "$dst"
 
-    # Move everything (including hidden files)
     if [ -d "$src" ]; then
       shopt -s dotglob nullglob
-      mv "$src"/* "$dst"/
+      for f in "$src"/*; do
+        [ -e "$f" ] || continue  # skip if nothing
+        base=$(basename "$f")
+        ts=$(date +%Y-%m-%d-%H-%M-%S)
+        newname="$dst/${ts}-$base"
+
+        # If the name already exists, append -1, -2, ...
+        i=1
+        while [ -e "$newname" ]; do
+          newname="$dst/${ts}-$i-$base"
+          i=$((i+1))
+        done
+
+        mv -- "$f" "$newname"
+      done
     fi
   '';
 in {
@@ -33,3 +45,4 @@ in {
     };
   };
 }
+
