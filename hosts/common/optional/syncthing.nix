@@ -103,6 +103,14 @@ in {
                     path = "/mirror";
                     devices = [ "nixzen" ];
                     };
+                    "Phone media" = {
+                    path = "/mirror/phshare/photos";
+                    devices = [ "Pixel XL" ];
+                    };
+                    "Secrets" = {
+                    path = "/mirror/phshare/secrets";
+                    devices = [ "Pixel XL" ];
+                    };
                 };
             };
         };
@@ -244,6 +252,14 @@ in {
                     "mirror" = {
                     path = "/mirror";
                     devices = [ "nixvat" ];
+                    };
+                    "Phone media" = {
+                    path = "/mirror/phshare/photos";
+                    devices = [ "Pixel XL" ];
+                    };
+                    "Secrets" = {
+                    path = "/mirror/phshare/secrets";
+                    devices = [ "Pixel XL" ];
                     };
                 };
             };
