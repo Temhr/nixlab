@@ -1,7 +1,8 @@
 { config, pkgs, ... }:
+
 let
   photoMoveScript = pkgs.writeShellScriptBin "backup-phone-media" ''
-    set -eu
+    set -euo pipefail
 
     src="/mirror/phshare/photos/Camera"
     dst="/mirror/Hard-Drive-Backup/Pictures/phshare"
@@ -11,19 +12,19 @@ let
     if [ -d "$src" ]; then
       shopt -s dotglob nullglob
       for f in "$src"/*; do
-        [ -e "$f" ] || continue  # skip if nothing
+        [ -e "$f" ] || continue  # nothing to do
         base=$(basename "$f")
         ts=$(date +%Y-%m-%d-%H-%M-%S)
-        newname="$dst/${ts}-$base"
 
-        # If the name already exists, append -1, -2, ...
+        newname="$dst/$ts-$base"
         i=1
         while [ -e "$newname" ]; do
-          newname="$dst/${ts}-$i-$base"
+          newname="$dst/$ts-$i-$base"
           i=$((i+1))
         done
 
         mv -- "$f" "$newname"
+        echo "moved: $f -> $newname"
       done
     fi
   '';
@@ -33,6 +34,9 @@ in {
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${photoMoveScript}/bin/backup-phone-media";
+      # Optional: ensure logs go to journal
+      StandardOutput = "journal";
+      StandardError = "journal";
     };
   };
 
@@ -45,4 +49,3 @@ in {
     };
   };
 }
-
