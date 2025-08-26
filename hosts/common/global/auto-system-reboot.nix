@@ -1,9 +1,9 @@
 { config, pkgs, ... }:
 
 let
-  rebootScript = pkgs.writeShellScriptBin "conditional-reboot" ''
-    STATE_FILE=/var/lib/conditional-reboot/last_reboot
-    mkdir -p /var/lib/conditional-reboot
+  rebootScript = pkgs.writeShellScriptBin "system-reboot" ''
+    STATE_FILE=/var/lib/system-reboot/last_reboot
+    mkdir -p /var/lib/system-reboot
 
     # Current time
     now=$(date +%s)
@@ -43,15 +43,15 @@ let
     fi
   '';
 in {
-  systemd.services.conditional-reboot = {
+  systemd.services.system-reboot = {
     description = "Conditional Random Reboot";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${rebootScript}/bin/conditional-reboot";
+      ExecStart = "${rebootScript}/bin/system-reboot";
     };
   };
 
-  systemd.timers.conditional-reboot = {
+  systemd.timers.system-reboot = {
     description = "Timer for Conditional Random Reboot";
     wantedBy = [ "timers.target" ];
     timerConfig = {
