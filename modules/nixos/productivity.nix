@@ -13,6 +13,12 @@
               default = false;
             };
         };
+        logseq = {
+            enable = lib.mkEnableOption {
+              description = "Enables logseq";
+              default = false;
+            };
+        };
     };
 
     config = lib.mkMerge [
@@ -21,6 +27,9 @@
         })
         (lib.mkIf config.libreoffice.enable {
           environment.systemPackages = with pkgs; [ libreoffice-fresh ];  #Comprehensive, professional-quality productivity suite
+        })
+        (lib.mkIf config.logseq.enable {
+          environment.systemPackages = with pkgs; [ logseq ];  #Privacy-first, open-source platform for knowledge management and collaboration
         })
     ];
 
