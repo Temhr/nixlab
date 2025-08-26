@@ -230,6 +230,7 @@ in {
                     "nixvat" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
                     "Pixel XL" = { id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4"; };
+                    "Pixel 6 Pro" = { id = "ONYBLUB-XOJUXRG-VQEOPRZ-THOAPKN-UU2MBOY-M4PGI4Y-4J5Q4LT-SHSDLAF"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {                        # Name of folder in Syncthing, also the folder ID
@@ -246,11 +247,11 @@ in {
                     };
                     "Phone media" = {
                     path = "/mirror/phshare/photos";
-                    devices = [ "Pixel XL" ];
+                    devices = [ "Pixel XL" "Pixel 6 Pro"];
                     };
                     "Docs" = {
                     path = "/mirror/phshare/docs";
-                    devices = [ "Pixel XL" ];
+                    devices = [ "Pixel XL" "Pixel 6 Pro"];
                     };
                 };
             };
