@@ -55,7 +55,7 @@
   libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
 
   ## Media Packages
-  obs.enable = true;  #Free and open source software for video recording and live streaming
+  #obs.enable = true;  #Free and open source software for video recording and live streaming
   spotify.enable = true;  #Play music from the Spotify music service
   vlc.enable = true;  #Cross-platform media player and streaming server
 
