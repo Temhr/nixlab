@@ -4,7 +4,7 @@ let
   photoMoveScript = pkgs.writeShellScriptBin "backup-phone-media" ''
     set -eu
 
-    src="/mirror/phshare/photos"
+    src="/mirror/phshare/photos/Camera"
     dst="/mirror/Hard-Drive-Backup/Pictures/phshare"
 
     mkdir -p "$dst"
