@@ -88,6 +88,7 @@ in {
                     #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
                     "nixzen" = { id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                    "Pixel XL" = { id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {                        # Name of folder in Syncthing, also the folder ID
@@ -229,6 +230,7 @@ in {
                     #"nixace" = { id = "FWM4KIE-IRRB5P4-2PYUOEP-JNTOA6Q-IC6I7R5-IUJWWDL-D4HWF4X-DBONGA7"; };
                     "nixvat" = { id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP"; };
                     #"nixtop" = { id = "W7D7LC4-TFMJUFD-NXTAWDN-KCHXPEL-ACWWQES-VSBPGOH-BJDNLKC-PYZB7QW"; };
+                    "Pixel XL" = { id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4"; };
                 };
                 # all machines must have same declaration, but "devices" reflect the opposite device
                 folders = {                        # Name of folder in Syncthing, also the folder ID
