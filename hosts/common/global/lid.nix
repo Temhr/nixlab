@@ -1,8 +1,8 @@
 { ... }: {
 
-  services.logind = {
-    lidSwitch = "ignore";
-    lidSwitchDocked = "ignore";  # Optional: disables lid action even when docked
-    lidSwitchExternalPower = "ignore"; # Optional: disables lid action when charging
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchDocked = "ignore";  # Optional: disables lid action even when docked
+    HandleLidSwitchExternalPower = "ignore"; # Optional: disables lid action when charging
   };
 }
