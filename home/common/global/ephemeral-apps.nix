@@ -136,6 +136,18 @@
       Categories=Network;FileTransfer;Ephemeral-App;
     '';
 
+    ## OBS Studio
+    ".local/share/applications/obs-studio.desktop".text = ''
+      [Desktop Entry]
+      Name=OBS Studio ⚡
+      Comment=Free and open source software for video recording and live streaming
+      Exec=konsole -e bash -c "echo 'Launching...'; nix run nixpkgs#obs-studio; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=obs-studio
+      Terminal=false
+      Type=Application
+      Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
+    '';
+
     ## Openshot
     ".local/share/applications/openshot.desktop".text = ''
       [Desktop Entry]
