@@ -4,16 +4,22 @@ let
   photoMoveScript = pkgs.writeShellScriptBin "backup-phone-media" ''
     set -euo pipefail
 
-    src="/mirror/phshare/photos/Camera"
+    src="/mirror/phshare/photos"
     dst="/mirror/Hard-Drive-Backup/Pictures/phshare"
 
     mkdir -p "$dst"
 
     if [ -d "$src" ]; then
-      shopt -s dotglob nullglob
+      shopt -s nullglob
       for f in "$src"/*; do
         [ -e "$f" ] || continue  # nothing to do
         base=$(basename "$f")
+
+        # skip hidden files/folders
+        case "$base" in
+          .* ) continue ;;
+        esac
+
         ts=$(date +%Y-%m-%d-%H-%M-%S)
 
         newname="$dst/$ts-$base"
