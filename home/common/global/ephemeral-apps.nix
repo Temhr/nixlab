@@ -52,6 +52,18 @@
       Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
 
+     ## discord
+    ".local/share/applications/discord.desktop".text = ''
+      [Desktop Entry]
+      Name=Discord ⚡
+      Comment=All-in-one cross-platform voice and text chat for gamers
+      Exec=konsole -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#discord; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=discord
+      Terminal=false
+      Type=Application
+      Categories=AudioVideo;Network;Video;Ephemeral-App;
+    '';
+
     ## Gimp
     ".local/share/applications/gimp.desktop".text = ''
       [Desktop Entry]
