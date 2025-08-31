@@ -112,7 +112,7 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.sharedModules = [
-            plasma-manager.homeManagerModules.plasma-manager
+            plasma-manager.homeModules.plasma-manager
           ];
         }
         # Add other common modules here
@@ -195,7 +195,7 @@
       # Reusable Components
       overlays = import ./overlays { inherit inputs; };
       nixosModules = import ./modules/nixos;
-      homeManagerModules = import ./modules/home-manager;
+      homeModules = import ./modules/home-manager;
 
       # System Configurations - Now DRY!
       nixosConfigurations = nixpkgs.lib.mapAttrs mkNixosSystem hosts;
