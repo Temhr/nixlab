@@ -15,7 +15,7 @@ rantheme_index=$((RANDOM % ${#variable_themes[@]}))
 #ranfont_index=$((RANDOM % ${#variable_fonts[@]}))
 
 #Save current config before writting a new one
-cp -f "$file" "$file.bak"
+\cp -f "$file" "$file.bak"
 
 #Echo the randomly selected value to config file
 echo "background = 000000" > "$file"
