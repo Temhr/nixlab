@@ -41,7 +41,7 @@ in {
     description = "Timer for Conditional Random Reboot";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "04:00..04:59";
+      OnCalendar = "05:00..05:59";
       Persistent = true;
     };
   };
