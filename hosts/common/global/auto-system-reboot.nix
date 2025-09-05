@@ -14,8 +14,8 @@ let
     # Skip if rebooted within 2 days
     [ $days_since -lt 2 ] && exit 0
 
-    # Force reboot after 4 days, otherwise 50/50 chance
-    should_reboot=$([ $days_since -gt 4 ] && echo 1 || echo $(( RANDOM % 2 )))
+    # Force reboot after 5 days, otherwise 50/50 chance
+    should_reboot=$([ $days_since -gt 5 ] && echo 1 || echo $(( RANDOM % 2 )))
 
     # Check for recent user activity (last 30 min)
     recent_activity=$(find /tmp /var/tmp -user "$(id -u 1000 2>/dev/null || echo 1000)" -newermt "30 minutes ago" 2>/dev/null | head -1)
