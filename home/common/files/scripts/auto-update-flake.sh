@@ -18,7 +18,7 @@ echo "Pulling the latest version of the repository..."
 # Commit and push if there are changes
 if ! /run/current-system/sw/bin/git diff --quiet flake.lock; then
     /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git add flake.lock
-    /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git commit -m "$(hostname) - auto-update flake.lock - $(date)"
+    /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git commit -m "$(hostname) - update flake.lock - $(date)"
     /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i ~/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git push
 fi
 
