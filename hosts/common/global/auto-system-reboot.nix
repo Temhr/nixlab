@@ -5,40 +5,26 @@ let
     STATE_FILE=/var/lib/system-reboot/last_reboot
     mkdir -p /var/lib/system-reboot
 
-    # Current time
     now=$(date +%s)
 
-    # If file exists, check last reboot
-    if [ -f "$STATE_FILE" ]; then
-      last=$(cat "$STATE_FILE")
-      days_since=$(( (now - last) / 86400 ))
-    else
-      days_since=999
-    fi
+    # Atomic read with fallback
+    last=$(cat "$STATE_FILE" 2>/dev/null || echo 0)
+    days_since=$(( (now - last) / 86400 ))
 
-    # Must be between 2 and 4 days since last reboot
-    if [ $days_since -lt 2 ]; then
-      exit 0
-    fi
-    if [ $days_since -gt 4 ]; then
-      should_reboot=1
-    else
-      # Random 50/50 chance to reboot today
-      if [ $(( RANDOM % 2 )) -eq 0 ]; then
-        should_reboot=1
-      else
-        should_reboot=0
-      fi
-    fi
+    # Skip if rebooted within 2 days
+    [ $days_since -lt 2 ] && exit 0
 
-    # Check if idle (no user input in last 30 minutes)
-    idle_time=$(DISPLAY=:0 xprintidle 2>/dev/null || echo 0)
-    if [ "$idle_time" -lt 1800000 ]; then
-      should_reboot=0
-    fi
+    # Force reboot after 4 days, otherwise 50/50 chance
+    should_reboot=$([ $days_since -gt 4 ] && echo 1 || echo $(( RANDOM % 2 )))
+
+    # Check for recent user activity (last 30 min)
+    recent_activity=$(find /tmp /var/tmp -user "$(id -u 1000 2>/dev/null || echo 1000)" -newermt "30 minutes ago" 2>/dev/null | head -1)
+
+    [ -n "$recent_activity" ] && should_reboot=0
 
     if [ "$should_reboot" -eq 1 ]; then
-      echo $now > "$STATE_FILE"
+      # Atomic write
+      echo $now > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
       systemctl reboot
     fi
   '';
@@ -59,6 +45,4 @@ in {
       Persistent = true;
     };
   };
-
-  environment.systemPackages = [ pkgs.xprintidle ]; # needed for idle check
 }
