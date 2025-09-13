@@ -106,14 +106,6 @@
 
       # Common modules used by all hosts
       commonModules = [
-        # Add python3Full compatibility overlay
-        {
-          nixpkgs.overlays = [
-            (final: prev: {
-              python3Full = prev.python3;  # Compatibility alias for removed package
-            })
-          ];
-        }
         sops-nix.nixosModules.sops
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager {
