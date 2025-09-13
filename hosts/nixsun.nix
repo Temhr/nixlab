@@ -81,7 +81,7 @@
     #gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
     #pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
     #scons  #Improved, cross-platform substitute for Make
-    #python3Full  #High-level dynamically-typed programming language
+    #python3  #High-level dynamically-typed programming language
 
   ];
 
