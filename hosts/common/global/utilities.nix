@@ -9,9 +9,10 @@
     ## Nix Tools
     cachix                     # Nix binary cache client for sharing build artifacts
     git                        # distributed version control system
-    home-manager             # user environment manager for declarative configs
+    home-manager               # user environment manager for declarative configs
 
     ## System Utilities
+    aspell                     # Spell checker for many languages
     appimage-run               # Run AppImage applications without extracting them
     busybox                    # Single binary with lightweight UNIX utilities
     doas                       # Minimal alternative to sudo for privilege escalation
