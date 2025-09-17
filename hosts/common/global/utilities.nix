@@ -12,11 +12,6 @@
     home-manager               # user environment manager for declarative configs
 
     ## System Utilities
-    aspell                     # Spell checker for many languages
-    aspellDicts.en
-    aspellDicts.en-computers
-    aspellDicts.en-science
-    aspellDicts.fr
     appimage-run               # Run AppImage applications without extracting them
     busybox                    # Single binary with lightweight UNIX utilities
     doas                       # Minimal alternative to sudo for privilege escalation
