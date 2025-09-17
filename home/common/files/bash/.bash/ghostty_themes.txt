@@ -4,35 +4,35 @@
 Aardvark Blue
 Abernathy
 Adventure
-AdventureTime
+Adventure Time
 Adwaita Dark
 Afterglow
-AlienBlood
+Alien Blood
 Andromeda
 Apple Classic
 Apple System Colors
-arcoiris
+Arcoiris
 Argonaut
 Arthur
-AtelierSulphurpool
+Atelier Sulphurpool
 Atom
-AtomOneLight
+Atom One Light
 Aura
 Aurora
-ayu
+Ayu
+Ayu Light
 Ayu Mirage
-ayu_light
 Banana Blueberry
 Batman
 Belafonte Day
 Belafonte Night
-BirdsOfParadise
+Birds Of Paradise
 Blazer
+Blue Berry Pie
+Blue Dolphin
 Blue Matrix
-BlueBerryPie
-BlueDolphin
-BlulocoDark
-BlulocoLight
+Bluloco Dark
+Bluloco Light
 Borland
 Breeze
 Bright Lights
@@ -45,113 +45,110 @@ Builtin Solarized Light
 Builtin Tango Dark
 C64
 Calamity
-carbonfox
-catppuccin-frappe
-catppuccin-latte
-catppuccin-macchiato
-catppuccin-mocha
+Catppuccin Frappe
+Catppuccin Latte
+Catppuccin Macchiato
+Catppuccin Mocha
 CGA
 Chalk
 Chalkboard
-ChallengerDeep
+Challenger Deep
 Chester
 Ciapre
-citruszest
+Citruszest
 CLRS
 Cobalt Neon
+Cobalt Next
+Cobalt Next Dark
+Cobalt Next Minimal
 Cobalt2
-CobaltNext
-CobaltNext-Dark
-CobaltNext-Minimal
-CrayonPonyFish
-CutiePro
+Crayon Pony Fish
+Cutie Pro
 Cyberdyne
-cyberpunk
-CyberpunkScarletProtocol
+Cyberpunk
+Cyberpunk Scarlet Protocol
 Dark Modern
 Dark Pastel
 Dark+
-darkermatrix
-darkmatrix
+Darkermatrix
+Darkmatrix
 Darkside
-dawnfox
-dayfox
-deep
+Dayfox
+Deep
 Desert
-detuned
+Detuned
 Dimidium
-DimmedMonokai
+Dimmed Monokai
 Django
-DjangoRebornAgain
-DjangoSmooth
+Django Reborn Again
+Django Smooth
+Doom One
 Doom Peacock
-DoomOne
-DotGov
+Dot Gov
 Dracula
 Dracula+
-duckbones
+Duckbones
 Duotone Dark
-duskfox
 Earthsong
-electron-highlighter
+Electron Highlighter
 Elemental
 Elementary
-embers-dark
+Embers Dark
 ENCOM
 Espresso
 Espresso Libre
 Everblush
-Everforest Dark - Hard
+Everforest Dark Hard
 Fahrenheit
 Fairyfloss
-farmhouse-dark
-farmhouse-light
+Farmhouse Dark
+Farmhouse Light
 Fideloper
 Firefly Traditional
-FirefoxDev
+Firefox Dev
 Firewatch
-FishTank
+Fish Tank
 Flat
 Flatland
-flexoki-dark
+Flexoki Dark
 Floraverse
-ForestBlue
+Forest Blue
 Framer
-FrontEndDelight
-FunForrest
+Front End Delight
+Fun Forrest
 Galaxy
 Galizur
+Git Hub Dark
+Git Hub Dark Colorblind
+Git Hub Dark Default
+Git Hub Dark Dimmed
+Git Hub Dark High Contrast
+Git Hub Light Colorblind
+Git Hub Light Default
+Git Lab Dark
+Git Lab Dark Grey
+Git Lab Light
 Github
-GitHub Dark
-GitHub-Dark-Colorblind
-GitHub-Dark-Default
-GitHub-Dark-Dimmed
-GitHub-Dark-High-Contrast
-GitHub-Light-Colorblind
-GitHub-Light-Default
-GitLab-Dark
-GitLab-Dark-Grey
-GitLab-Light
 Glacier
 Grape
 Grass
-Grey-green
-gruber-darker
-gruvbox-material
-GruvboxDark
-GruvboxDarkHard
-GruvboxLight
-GruvboxLightHard
+Grey green
+Gruber Darker
+Gruvbox Dark
+Gruvbox Dark Hard
+Gruvbox Light
+Gruvbox Light Hard
+Gruvbox Material
 Guezwhoz
 Hacktober
 Hardcore
 Harper
 Havn Daggry
 Havn Skumring
-HaX0R_BLUE
-HaX0R_GR33N
-HaX0R_R3D
-heeler
+HaX0R BLUE
+HaX0R GR33N
+HaX0R R3D
+Heeler
 Highway
 Hipster Green
 Hivacruz
@@ -161,13 +158,13 @@ Hopscotch.256
 Horizon
 Hurtado
 Hybrid
-IC_Green_PPL
-IC_Orange_PPL
-iceberg-dark
-iceberg-light
-idea
-idleToes
-IR_Black
+IC Green PPL
+IC Orange PPL
+Iceberg Dark
+Iceberg Light
+Idea
+Idle Toes
+IR Black
 iTerm2 Dark Background
 iTerm2 Default
 iTerm2 Pastel Dark Background
@@ -178,42 +175,42 @@ iTerm2 Tango Dark
 Jackie Brown
 Japanesque
 Jellybeans
-JetBrains Darcula
-jubi
+Jet Brains Darcula
+Jubi
 Kanagawa Dragon
 Kanagawa Wave
-kanagawabones
+Kanagawabones
 Kibble
 Kolorit
 Konsolas
-kurokula
+Kurokula
 Lab Fox
 Laser
 Later This Evening
 Lavandula
-LiquidCarbon
-LiquidCarbonTransparent
-LiquidCarbonTransparentInverse
-lovelace
+Liquid Carbon
+Liquid Carbon Transparent
+Liquid Carbon Transparent Inverse
+Lovelace
 Mariana
 Material
-MaterialDark
-MaterialDarker
-MaterialDesignColors
-MaterialOcean
+Material Dark
+Material Darker
+Material Design Colors
+Material Ocean
 Mathias
-matrix
+Matrix
 Medallion
-Melange_dark
-Melange_light
+Melange dark
+Melange light
 Mellifluous
-mellow
-miasma
-midnight-in-mojave
+Mellow
+Miasma
+Midnight In Mojave
 Mirage
 Misterioso
 Molokai
-MonaLisa
+Mona Lisa
 Monokai Classic
 Monokai Pro
 Monokai Pro Light
@@ -226,147 +223,146 @@ Monokai Remastered
 Monokai Soda
 Monokai Vivid
 N0tch2k
-neobones_dark
-neobones_light
+Neobones Dark
+Neobones Light
 Neon
 Neopolitan
 Neutron
+Night Lion V1
+Night Lion V2
 Night Owlish Light
-nightfox
-NightLion v1
-NightLion v2
-niji
+Nightfox
+Niji
 Nocturnal Winter
-nord
-nord-light
-nord-wave
-nordfox
+Nord
+Nord Light
+Nord Wave
 Novel
-NvimDark
+Nvim Dark
 Obsidian
 Ocean
-Oceanic-Next
-OceanicMaterial
+Oceanic Material
+Oceanic Next
 Ollie
 One Double Dark
 One Double Light
-OneHalfDark
-OneHalfLight
+One Half Dark
+One Half Light
 Operator Mono Dark
 Overnight Slumber
 Oxocarbon
-PaleNightHC
+Pale Night Hc
 Pandora
 Paraiso Dark
-PaulMillr
-PencilDark
-PencilLight
+Paul Millr
+Pencil Dark
+Pencil Light
 Peppermint
 Piatto Light
 Pnevma
 Popping and Locking
 Pro
 Purple Rain
-purplepeter
+Purplepeter
 Rapture
-Raycast_Dark
-rebecca
+Raycast Dark
+Rebecca
 Red Alert
 Red Planet
 Red Sands
 Relaxed
 Retro
-RetroLegends
+Retro Legends
 Rippedcasts
-rose-pine
-rose-pine-dawn
-rose-pine-moon
+Rose Pine
+Rose Pine Dawn
+Rose Pine Moon
 Rouge 2
 Royal
 Ryuuko
 Sakura
 Scarlet Protocol
+Sea Shells
 Seafoam Pastel
-SeaShells
-seoulbones_dark
-seoulbones_light
+Seoulbones Dark
+Seoulbones Light
 Seti
-shades-of-purple
+Shades Of Purple
 Shaman
 Slate
-SleepyHollow
+Sleepy Hollow
 Smyck
 Snazzy
 Snazzy Soft
-SoftServer
+Soft Server
 Solarized Darcula
-Solarized Dark - Patched
 Solarized Dark Higher Contrast
+Solarized Dark Patched
+Space Gray
+Space Gray Bright
+Space Gray Eighties
+Space Gray Eighties Dull
 Spacedust
-SpaceGray
-SpaceGray Bright
-SpaceGray Eighties
-SpaceGray Eighties Dull
 Spiderman
 Spring
 Square
 Squirrelsong Dark
-srcery
-starlight
+Srcery
+Starlight
 Sublette
 Subliminal
 Sugarplum
 Sundried
 Symfonic
-synthwave
-synthwave-everything
-SynthwaveAlpha
+Synthwave
+Synthwave Alpha
+Synthwave Everything
 Teerb
-terafox
+Terafox
 Thayer Bright
 The Hulk
-Tinacious Design (Dark)
-tokyonight
-tokyonight_moon
-tokyonight_night
-tokyonight-day
-tokyonight-storm
+Tinacious Design Dark
+TokyoNight
+TokyoNight Day
+TokyoNight Moon
+TokyoNight Night
+TokyoNight Storm
 Tomorrow
 Tomorrow Night
 Tomorrow Night Blue
 Tomorrow Night Bright
 Tomorrow Night Burns
 Tomorrow Night Eighties
-ToyChest
+Toy Chest
 Treehouse
 Twilight
 Ubuntu
-UltraDark
-UltraViolent
-UnderTheSea
+Ultra Dark
+Ultra Violent
+Under The Sea
 Unikitty
 Urple
 Vaughn
-vesper
-VibrantInk
-vimbones
+Vesper
+Vibrant Ink
+Vimbones
 Violet Dark
 Violet Light
-WarmNeon
+Warm Neon
 Wez
 Whimsy
-WildCherry
-wilmersdorf
+Wild Cherry
+Wilmersdorf
 Wombat
 Wryan
-xcodedark
-xcodedarkhc
-xcodelight
-xcodewwdc
-zenbones
-zenbones_dark
-zenbones_light
+Xcode Dark
+Xcode Dark hc
+Xcode Light
+Xcode WWDC
+Zenbones
+Zenbones Dark
+Zenbones Light
 Zenburn
-zenburned
-zenwritten_dark
-zenwritten_light
+Zenburned
+Zenwritten Dark
+Zenwritten Light
