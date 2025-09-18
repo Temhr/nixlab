@@ -6,4 +6,5 @@
   web = import ./web.nix { inherit pkgs; };
   security = import ./security.nix { inherit pkgs; };
   minimal = import ./minimal.nix { inherit pkgs; };
+  repast = import ./repast.nix { inherit pkgs; };
 }
