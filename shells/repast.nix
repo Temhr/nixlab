@@ -20,4 +20,4 @@ pkgs.mkShell {
         export PYTHONPATH=""
         echo "Python development environment for Repast4Py ready"
     '';
-};
+}
