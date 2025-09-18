@@ -40,6 +40,7 @@ pkgs.mkShell {
     echo "  - web: Web development"
     echo "  - security: Security tools"
     echo "  - minimal: Lightweight shell"
+    echo "  - repast: repast4py"
     echo ""
     echo "Usage: nix develop .#<shell-name>"
   '';

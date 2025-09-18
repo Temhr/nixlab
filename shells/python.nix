@@ -8,7 +8,7 @@ pkgs.mkShell {
     python3
     python3Packages.pip
     python3Packages.virtualenv
-    python3Packages.poetry
+    python3Packages.poetry-core
 
     # Development tools
     python3Packages.black
