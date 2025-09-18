@@ -7,19 +7,25 @@ pkgs.mkShell {
     python3Packages.virtualenv
     python3Packages.numpy
     python3Packages.mpi4py
-    python3Packages.networkx
+    python3Packages.setuptools
+    python3Packages.wheel
     openmpi
     gcc
-    pkg-config
+    glibc.dev
+    stdenv.cc.cc
     stdenv.cc.cc.lib
-    glibc
-    zlib
+    pkg-config
+    zlib.dev
   ];
 
   shellHook = ''
-    export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.glibc}/lib:${pkgs.openmpi}/lib:${pkgs.zlib}/lib:$LD_LIBRARY_PATH"
     export CC=${pkgs.gcc}/bin/gcc
     export CXX=${pkgs.gcc}/bin/g++
-    echo "Enhanced Repast4Py development environment ready"
+    export CFLAGS="-I${pkgs.glibc.dev}/include"
+    export CXXFLAGS="-I${pkgs.glibc.dev}/include"
+    export LDFLAGS="-L${pkgs.glibc}/lib -L${pkgs.stdenv.cc.cc.lib}/lib"
+    export LD_LIBRARY_PATH="${pkgs.glibc}/lib:${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.openmpi}/lib:$LD_LIBRARY_PATH"
+    export PKG_CONFIG_PATH="${pkgs.openmpi}/lib/pkgconfig:$PKG_CONFIG_PATH"
+    echo "Development environment with C/C++ headers ready"
   '';
 }
