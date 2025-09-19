@@ -94,7 +94,18 @@
           environment.systemPackages = with pkgs; [ podman ];  #A program for managing pods, containers and container images
         })
         (lib.mkIf config.quickemu.enable {
-          environment.systemPackages = with pkgs; [ quickemu quickget quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+          environment.systemPackages = with pkgs; [ quickemu quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+
+          #Add the IOMMU kernel parameters to force enable it
+          boot.kernelParams = [
+            "intel_iommu=on"     # Use "amd_iommu=on" if you have AMD CPU
+            "iommu=pt"
+            "iommu=1"            # Force enable
+            "rd.driver.pre=vfio-pci"
+          ];
+          boot.initrd.kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" ];
+          boot.kernelModules = [ "kvm-intel" ];  # or "kvm-amd" for AMD
+
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
