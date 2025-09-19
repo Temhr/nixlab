@@ -298,11 +298,11 @@ Soft Server
 Solarized Darcula
 Solarized Dark Higher Contrast
 Solarized Dark Patched
-Space Gray
-Space Gray Bright
-Space Gray Eighties
-Space Gray Eighties Dull
 Spacedust
+Spacegray
+Spacegray Bright
+Spacegray Eighties
+Spacegray Eighties Dull
 Spiderman
 Spring
 Square
