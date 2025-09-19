@@ -95,6 +95,8 @@
         })
         (lib.mkIf config.quickemu.enable {
           environment.systemPackages = with pkgs; [ quickemu quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+          boot.kernelModules = [ "kvm-intel" ]; # or kvm-amd
+          virtualisation.libvirtd.enable = true;  # if quickemu uses libvirt backend
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
