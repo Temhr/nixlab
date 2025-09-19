@@ -94,9 +94,7 @@
           environment.systemPackages = with pkgs; [ podman ];  #A program for managing pods, containers and container images
         })
         (lib.mkIf config.quickemu.enable {
-          environment.systemPackages = with pkgs; [ quickemu quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
-          boot.kernelModules = [ "kvm-intel" ]; # or kvm-amd
-          virtualisation.libvirtd.enable = true;  # if quickemu uses libvirt backend
+          environment.systemPackages = with pkgs; [ quickemu quickget quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
