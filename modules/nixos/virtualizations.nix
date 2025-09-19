@@ -96,48 +96,6 @@
         (lib.mkIf config.quickemu.enable {
           environment.systemPackages = with pkgs; [ quickemu quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
 
-          # GPU Passthrough Configuration with aggressive IOMMU forcing
-          boot.kernelParams = [
-            "intel_iommu=on"
-            "iommu=pt"
-            "pcie_acs_override=downstream,multifunction,force_enable"  # More aggressive
-            "vfio-pci.ids=10de:11b7,10de:0e0a"
-            "rd.driver.pre=vfio-pci"
-            "modprobe.blacklist=nvidia,nvidia_drm,nvidia_modeset,nvidia_uvm,nouveau"
-            "pci=assign-busses"  # Help with PCI assignment
-          ];
-
-          # Load VFIO very early
-          boot.initrd.availableKernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd" ];
-          boot.initrd.kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd" ];
-          boot.kernelModules = [ "kvm-intel" "i915" ];
-
-          # Complete NVIDIA blacklist
-          boot.blacklistedKernelModules = [
-            "nvidia" "nvidia_drm" "nvidia_modeset" "nvidia_uvm" "nouveau"
-          ];
-
-          boot.extraModprobeConfig = ''
-            options vfio-pci ids=10de:11b7,10de:0e0a
-            options vfio enable_unsafe_noiommu_mode=1
-            blacklist nvidia
-            blacklist nvidia_drm
-            blacklist nvidia_modeset
-            blacklist nvidia_uvm
-            blacklist nouveau
-            install nvidia /bin/false
-            install nvidia_drm /bin/false
-            install nvidia_modeset /bin/false
-          '';
-
-          # Graphics and virtualization
-          services.xserver.videoDrivers = [ "modesetting" ];
-          hardware.nvidia.enable = false;
-          virtualisation.libvirtd.enable = true;
-          virtualisation.libvirtd.qemu.ovmf.enable = true;
-          programs.virt-manager.enable = true;
-          users.users.temhr.extraGroups = [ "libvirtd" ];
-
         })
         (lib.mkIf config.virt-manager.enable {
           programs.virt-manager.enable = true;  #Desktop user interface for managing virtual machines
