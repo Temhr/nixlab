@@ -98,13 +98,22 @@
 
           #Add the IOMMU kernel parameters to force enable it
           boot.kernelParams = [
-            "intel_iommu=on"     # Use "amd_iommu=on" if you have AMD CPU
+            "intel_iommu=on"
             "iommu=pt"
-            "iommu=1"            # Force enable
-            "rd.driver.pre=vfio-pci"
+            "pcie_acs_override=downstream,multifunction"  # Force IOMMU group separation
+            "vfio-pci.ids=10de:11b7,10de:0e0a"           # Bind GPU and audio to VFIO
           ];
+
           boot.initrd.kernelModules = [ "vfio_pci" "vfio" "vfio_iommu_type1" ];
-          boot.kernelModules = [ "kvm-intel" ];  # or "kvm-amd" for AMD
+          boot.kernelModules = [ "kvm-intel" "vfio-pci" ];
+
+          # Blacklist drivers so they don't grab the GPU first
+          boot.blacklistedKernelModules = [ "nouveau" "nvidia" ];
+
+          # Enable virtualization services
+          virtualisation.libvirtd.enable = true;
+          virtualisation.libvirtd.qemu.ovmf.enable = true;
+          programs.virt-manager.enable = true;
 
         })
         (lib.mkIf config.virt-manager.enable {
