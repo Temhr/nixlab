@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Don’t exit on first error, handle manually
-set +e
+# Don’t exit globally on error — we’ll handle errors manually
+set -u  # undefined vars are still errors
 
 # Configuration
 HOSTNAME=$(/run/current-system/sw/bin/hostname)
@@ -65,7 +65,6 @@ convert_symlinks() {
                 echo "  To:   $relative_target"
             else
                 echo "Warning: Backup target not found: $backup_target"
-                echo "  Original link: $link -> $original_target"
             fi
         else
             echo "Keeping external symlink: $link -> $original_target"
@@ -73,39 +72,44 @@ convert_symlinks() {
     done
 }
 
-# Function to perform backup
+# Function to perform backup, return success/failure
 perform_backup() {
     local dest_base="$1"
     local dest_dir="${dest_base}/home/${HOSTNAME}/"
 
     echo "Backing up to: $dest_dir"
 
+    # Check if shelf is mounted (non-fatal)
     if ! mountpoint -q "${SOURCE_DIR}shelf" 2>/dev/null; then
         echo "Warning: ${SOURCE_DIR}shelf is not mounted"
     fi
 
+    # Attempt backup
     if [ -d "$dest_dir" ]; then
         echo "Using incremental backup with hard links"
-        /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
+        if ! /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
             "${RSYNC_OPTS[@]}" \
             "--link-dest=${dest_dir}" \
             "$SOURCE_DIR" \
-            "$dest_dir"
+            "$dest_dir"; then
+            echo "Error: rsync incremental backup failed"
+            return 1
+        fi
     else
         echo "Performing initial backup"
-        /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
+        if ! /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
             "${RSYNC_OPTS[@]}" \
             "$SOURCE_DIR" \
-            "$dest_dir"
+            "$dest_dir"; then
+            echo "Error: rsync initial backup failed"
+            return 1
+        fi
     fi
 
-    if [ $? -ne 0 ]; then
-        echo "Error: rsync failed for $dest_base"
-        return 1
+    echo "Converting symlinks..."
+    if ! convert_symlinks "$dest_dir" "$SOURCE_DIR"; then
+        echo "Warning: symlink conversion failed (non-fatal)"
     fi
-
-    echo "Converting symlinks to point within backup directory..."
-    convert_symlinks "$dest_dir" "$SOURCE_DIR" || echo "Warning: symlink conversion failed"
 
     echo "Backup completed to: $dest_dir"
     return 0
@@ -115,23 +119,28 @@ perform_backup() {
 main() {
     echo "Starting backup for hostname: $HOSTNAME"
 
+    local success=1
+
     for dest in "${BACKUP_DESTINATIONS[@]}"; do
-        if mountpoint -q "$dest"; then
-            echo "Found mounted backup destination: $dest"
+        if [ -d "$dest" ]; then
+            echo "Found backup destination: $dest"
             if perform_backup "$dest"; then
-                echo "Backup process completed successfully"
-                exit 0
+                echo "Backup process completed successfully at $dest"
+                success=0
+                break
             else
-                echo "Backup failed for $dest, trying next..."
+                echo "Backup failed for $dest, trying next destination..."
             fi
         else
-            echo "Skipping $dest (not a mountpoint)"
+            echo "Destination not found: $dest"
         fi
     done
 
-    echo "Error: No successful backup destinations"
-    echo "Checked: ${BACKUP_DESTINATIONS[*]}"
-    exit 1
+    if [ $success -ne 0 ]; then
+        echo "Error: All backup destinations failed"
+        echo "Checked: ${BACKUP_DESTINATIONS[*]}"
+        exit 1
+    fi
 }
 
 main "$@"
