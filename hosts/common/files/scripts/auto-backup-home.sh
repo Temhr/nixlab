@@ -79,32 +79,41 @@ perform_backup() {
 
     echo "Backing up to: $dest_dir"
 
-    # Check if shelf is mounted (non-fatal)
-    if ! mountpoint -q "${SOURCE_DIR}shelf" 2>/dev/null; then
-        echo "Warning: ${SOURCE_DIR}shelf is not mounted"
+    # Ensure destination directory exists
+    if [ ! -d "$dest_dir" ]; then
+        echo "Creating destination directory: $dest_dir"
+        if ! mkdir -p "$dest_dir"; then
+            echo "Error: failed to create $dest_dir"
+            return 1
+        fi
     fi
 
-    # Attempt backup
+    # Perform rsync
     if [ -d "$dest_dir" ]; then
-        echo "Using incremental backup with hard links"
-        if ! /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
+        echo "Running rsync..."
+        /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
             "${RSYNC_OPTS[@]}" \
-            "--link-dest=${dest_dir}" \
             "$SOURCE_DIR" \
-            "$dest_dir"; then
-            echo "Error: rsync incremental backup failed"
-            return 1
-        fi
+            "$dest_dir"
+        rsync_status=$?
     else
-        echo "Performing initial backup"
-        if ! /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
-            "${RSYNC_OPTS[@]}" \
-            "$SOURCE_DIR" \
-            "$dest_dir"; then
-            echo "Error: rsync initial backup failed"
-            return 1
-        fi
+        echo "Error: destination directory not available after mkdir"
+        return 1
     fi
+
+    # Interpret rsync status
+    case $rsync_status in
+        0)
+            echo "Rsync completed successfully"
+            ;;
+        23)
+            echo "Rsync completed with warning (code 23: partial transfer), treating as success"
+            ;;
+        *)
+            echo "Error: rsync failed with code $rsync_status"
+            return 1
+            ;;
+    esac
 
     echo "Converting symlinks..."
     if ! convert_symlinks "$dest_dir" "$SOURCE_DIR"; then
