@@ -94,7 +94,7 @@
           environment.systemPackages = with pkgs; [ podman ];  #A program for managing pods, containers and container images
         })
         (lib.mkIf config.quickemu.enable {
-          environment.systemPackages = with pkgs; [ quickemu quickgui spice-vdagent ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+          environment.systemPackages = with pkgs; [ quickemu quickgui ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
 
         })
         (lib.mkIf config.virt-manager.enable {
