@@ -253,6 +253,7 @@ else
   echo "⚠️ Examples directory not found, skipping example test."
 fi
 
+
 # -------------------------------
 # Final Success Message
 # -------------------------------
@@ -272,10 +273,10 @@ echo "  1. Activate the environment:"
 echo "     source ~/repast4py-env/bin/activate"
 echo ""
 echo "  2. Run your model:"
-echo "     python your_model.py config.yaml"
+echo "     ~/repast4py-env/bin/python your_model.py config.yaml"
 echo ""
 echo "  3. Run with MPI (parallel):"
-echo "     mpiexec -n 4 python your_model.py config.yaml"
+echo "     mpiexec -n 3 ~/repast4py-env/bin/python your_model.py config.yaml"
 echo ""
 echo "Available example models:"
 echo "  - zombies: Zombie infection spread model"
