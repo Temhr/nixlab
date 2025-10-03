@@ -47,7 +47,7 @@ let
 
       shellHook = ''
         # Ensure Nix-provided libs are visible to any Python interpreter/venv
-        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.openmpi}/lib:${pkgs.stdenv.cc.cc.lib}/lib${nvidiaLibPath}\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.openmpi}/lib:${pkgs.stdenv.cc.cc.lib}/lib${nvidiaLibPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
         # Ensure we use Nix's mpicc/mpiexec when building/using mpi4py
         export PATH="${pkgs.openmpi}/bin:$PATH"
