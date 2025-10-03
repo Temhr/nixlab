@@ -71,16 +71,16 @@ let
         gnumake
         git
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
-        cudaPackages.cudatoolkit_11
-        cudaPackages.cudnn
+        cudaPackages_11.cudatoolkit
+        cudaPackages_11.cudnn
         linuxPackages.nvidia_x11
       ]);
 
       shellHook = ''
         ${if useGPU then ''
         # GPU mode - ensure CUDA is visible
-        export LD_LIBRARY_PATH="${pkgs.cudaPackages.cudatoolkit_11}/lib:${pkgs.cudaPackages.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        export CUDA_PATH="${pkgs.cudaPackages.cudatoolkit_11}"
+        export LD_LIBRARY_PATH="${pkgs.cudaPackages_11.cudatoolkit}/lib:${pkgs.cudaPackages_11.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        export CUDA_PATH="${pkgs.cudaPackages_11.cudatoolkit}"
 
         # Create a local pip install directory for GPU-specific packages
         export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
@@ -103,7 +103,7 @@ let
         echo "Repast4Py Development Environment (${if useGPU then "GPU" else "CPU"} mode)"
         ${if useGPU then ''
         echo "   Python: 3.11 (required for PyTorch 2.0.1)"
-        echo "   CUDA Toolkit: ${pkgs.cudaPackages.cudatoolkit_11.version}"
+        echo "   CUDA Toolkit: ${pkgs.cudaPackages_11.cudatoolkit.version}"
         echo "   PyTorch: 2.0.1 with CUDA 11.8 (supports compute capability 6.1+)"
         echo "   GPU: Quadro P5000 (sm_61) - SUPPORTED"
         '' else ''
