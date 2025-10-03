@@ -71,16 +71,14 @@ let
         gnumake
         git
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
-        cudaPackages_11.cudatoolkit
-        cudaPackages_11.cudnn
+        # Only include NVIDIA driver libs - PyTorch wheel includes CUDA runtime
         linuxPackages.nvidia_x11
       ]);
 
       shellHook = ''
         ${if useGPU then ''
-        # GPU mode - ensure CUDA is visible
-        export LD_LIBRARY_PATH="${pkgs.cudaPackages_11.cudatoolkit}/lib:${pkgs.cudaPackages_11.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        export CUDA_PATH="${pkgs.cudaPackages_11.cudatoolkit}"
+        # GPU mode - only need NVIDIA driver libs (PyTorch wheel includes CUDA runtime)
+        export LD_LIBRARY_PATH="${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
         # Create a local pip install directory for GPU-specific packages
         export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
@@ -88,9 +86,11 @@ let
         mkdir -p "$PIP_PREFIX/lib/python3.11/site-packages"
 
         # Install PyTorch 2.0.1 with CUDA 11.8 support (supports compute capability 6.1+)
+        # The wheel includes its own CUDA runtime, so we don't need system CUDA toolkit
         if [ ! -f "$PIP_PREFIX/lib/python3.11/site-packages/torch/__init__.py" ]; then
           echo "Installing PyTorch 2.0.1 with CUDA 11.8 support (Python 3.11)..."
           echo "This version supports your Quadro P5000 (compute capability 6.1)"
+          echo "Note: PyTorch wheel includes CUDA runtime - no system CUDA toolkit needed"
           pip install --prefix="$PIP_PREFIX" --no-cache-dir \
             torch==2.0.1+cu118 torchvision==0.15.2+cu118 \
             --index-url https://download.pytorch.org/whl/cu118
@@ -103,7 +103,7 @@ let
         echo "Repast4Py Development Environment (${if useGPU then "GPU" else "CPU"} mode)"
         ${if useGPU then ''
         echo "   Python: 3.11 (required for PyTorch 2.0.1)"
-        echo "   CUDA Toolkit: ${pkgs.cudaPackages_11.cudatoolkit.version}"
+        echo "   CUDA: Included in PyTorch wheel (CUDA 11.8 runtime)"
         echo "   PyTorch: 2.0.1 with CUDA 11.8 (supports compute capability 6.1+)"
         echo "   GPU: Quadro P5000 (sm_61) - SUPPORTED"
         '' else ''
