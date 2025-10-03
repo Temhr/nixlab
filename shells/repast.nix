@@ -93,7 +93,7 @@ let
         echo "=================================================="
 
         # Add MPI binaries to PATH (critical for setup.py to find mpicc/mpic++)
-        export PATH="${pkgs.openmpi}/bin:$PATH"
+        export PATH="${pkgs.openmpi}/bin:''$PATH"
 
         # Set up MPI compiler wrappers
         export CC=mpicc
