@@ -33,6 +33,7 @@ let
       pythonEnvGPU = python311WithOverrides.withPackages (ps: with ps; [
         networkx
         numba
+        "numpy<2"  # <-- force numpy 1.x ABI
         pyyaml
         mpi4py
         cython
