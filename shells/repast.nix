@@ -14,6 +14,15 @@ let
       # Override packages that pull in tkinter
       matplotlib = super.matplotlib.override { enableTk = false; };
       ipython = super.ipython.override { };
+      # Pin NumPy to 1.x for PyTorch 2.0.1 compatibility
+      numpy = super.numpy.overridePythonAttrs (old: rec {
+        version = "1.24.4";
+        src = super.fetchPypi {
+          pname = "numpy";
+          inherit version;
+          hash = "sha256-5Z5MdLx7Y6CgqLkGZdLljUEiS4oDaWGpTg3tNMbwVl0=";
+        };
+      });
     };
   };
 
@@ -43,8 +52,6 @@ let
         pytest
         # PyTorch will be installed via pip in shellHook
         # Note: ipython excluded to avoid tkinter dependency chain
-        # to add via pip in the GPU env. after shell loads:
-        # $ pip install --prefix="$PIP_PREFIX" ipython
       ]);
 
       # CPU mode: Can use latest Python with nixpkgs PyTorch
@@ -78,13 +85,12 @@ let
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
         # Only include NVIDIA driver libs - PyTorch wheel includes CUDA runtime
         linuxPackages.nvidia_x11
-        stdenv.cc.cc.lib   # <-- add this only for GPU mode
       ]);
 
       shellHook = ''
         ${if useGPU then ''
-        # GPU mode - NVIDIA driver + libstdc++ for PyTorch wheel
-        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        # GPU mode - only need NVIDIA driver libs (PyTorch wheel includes CUDA runtime)
+        export LD_LIBRARY_PATH="${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
         # Create a local pip install directory for GPU-specific packages
         export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
@@ -127,10 +133,6 @@ let
         # MPI include paths
         export CFLAGS="-I${pkgs.openmpi}/include"
         export CXXFLAGS="-I${pkgs.openmpi}/include"
-
-        # tells MPI to use the ob1 backend directly and silence UCX warnings.
-        export OMPI_MCA_pml=ob1
-        export OMPI_MCA_btl=^openib
 
         # Set custom temp directory
         export TMPDIR=''${TMPDIR:-$HOME/tmp}
