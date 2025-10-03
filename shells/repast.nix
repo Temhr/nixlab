@@ -20,7 +20,7 @@ let
         src = super.fetchPypi {
           pname = "numpy";
           inherit version;
-          hash = "sha256-5Z5MdLx7Y6CgqLkGZdLljUEiS4oDaWGpTg3tNMbwVl0=";
+          hash = "sha256-gPXjpOSYZBQBho30IIt0WBIGr77nz3uDKdqugmdtlGM=";
         };
       });
     };
