@@ -11,6 +11,9 @@ let
         doCheck = false;
         dontUsePytestCheck = true;
       });
+      # Override packages that pull in tkinter
+      matplotlib = super.matplotlib.override { enableTk = false; };
+      ipython = super.ipython.override { };
     };
   };
 
@@ -37,9 +40,9 @@ let
         setuptools
         wheel
         packaging
-        ipython
         pytest
         # PyTorch will be installed via pip in shellHook
+        # Note: ipython excluded to avoid tkinter dependency chain
       ]);
 
       # CPU mode: Can use latest Python with nixpkgs PyTorch
