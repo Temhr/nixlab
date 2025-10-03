@@ -14,15 +14,30 @@ let
   # Base configuration function that accepts GPU flag
   mkRepastShell = { useGPU ? false }:
     let
-      pythonEnvGPU = python3WithOverrides.withPackages (ps: with ps; [
-        networkx numba pyyaml mpi4py cython pip setuptools wheel packaging ipython pytest
-      ]);
+      # GPU: isolate from nixpkgs python, use only pip in venv
+      pythonEnvGPU = pkgs.buildEnv {
+        name = "empty-python-env";
+        paths = [ ];
+      };
 
+      # CPU: use nixpkgs python with bundled packages
       pythonEnvCPU = python3WithOverrides.withPackages (ps: with ps; [
-        networkx numba pyyaml mpi4py pytorch-bin cython pip setuptools wheel packaging ipython pytest
+        networkx
+        numba
+        pyyaml
+        mpi4py
+        pytorch-bin
+        cython
+        pip
+        setuptools
+        wheel
+        packaging
+        ipython
+        pytest
       ]);
 
       pythonEnv = if useGPU then pythonEnvGPU else pythonEnvCPU;
+
     in
     pkgs.mkShell {
       name = "repast4py-dev-${if useGPU then "gpu" else "cpu"}";
@@ -30,36 +45,44 @@ let
       buildInputs = with pkgs; [
         pythonEnv
         openmpi
-        gcc gnumake git
-        zlib                     # ensure libz.so.1 is available
+        gcc
+        gnumake
+        git
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
         linuxPackages.nvidia_x11
         stdenv.cc.cc.lib
       ]);
 
       shellHook = ''
-        # Always add zlib and nix python libs
-        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.stdenv.cc.cc.lib}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        export PYTHONPATH="${pythonEnv}/${pythonEnv.sitePackages}:$PYTHONPATH"
-
         ${if useGPU then ''
         # ------------------------------
         # GPU mode setup
         # ------------------------------
+        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
         export VENV_DIR="$HOME/repast4py-workspace/.pytorch-gpu-py311"
         if [ ! -d "$VENV_DIR" ]; then
-          echo "Creating Python 3.11 venv for GPU mode..."
+          echo "Creating clean Python 3.11 venv for GPU mode..."
           ${pkgs.python311}/bin/python3 -m venv "$VENV_DIR"
           source "$VENV_DIR/bin/activate"
           pip install --upgrade pip wheel setuptools
 
-          echo "Installing PyTorch 2.0.1 + CUDA 11.8..."
+          echo "Installing runtime dependencies via pip..."
+          pip install \
+            'numpy<2' \
+            cython \
+            mpi4py \
+            numba \
+            pyyaml \
+            networkx \
+            packaging \
+            ipython \
+            pytest
+
+          echo "Installing PyTorch 2.0.1 + CUDA 11.8 (sm_61 support)..."
           pip install --no-cache-dir \
             torch==2.0.1+cu118 torchvision==0.15.2+cu118 \
             --index-url https://download.pytorch.org/whl/cu118
-
-          echo "Pinning NumPy to <2..."
-          pip install --no-cache-dir 'numpy<2'
         else
           source "$VENV_DIR/bin/activate"
         fi
@@ -67,7 +90,9 @@ let
         export PYTHONPATH="$VENV_DIR/lib/python3.11/site-packages:$PYTHONPATH"
         export PATH="$VENV_DIR/bin:$PATH"
         '' else ''
-        # CPU mode: disable CUDA
+        # ------------------------------
+        # CPU mode setup
+        # ------------------------------
         export CUDA_VISIBLE_DEVICES=""
         ''}
 
@@ -75,14 +100,14 @@ let
         ${if useGPU then ''
         echo "   Python: 3.11 (PyTorch 2.0.1 compatible)"
         echo "   CUDA: Provided by PyTorch wheel (11.8)"
-        echo "   PyTorch: 2.0.1+cu118 (sm_61 capable)"
+        echo "   PyTorch: 2.0.1+cu118"
         '' else ''
         echo "   Using CPU-only PyTorch"
         ''}
         echo "=================================================="
 
         # MPI setup
-        export PATH="${pkgs.openmpi}/bin:$PATH"
+        export PATH="${pkgs.openmpi}/bin:''${PATH}"
         export CC=mpicc
         export CXX=mpic++
         export OMPI_MCA_pml=ob1
@@ -116,12 +141,16 @@ let
         echo ""
         echo "Environment ready!"
         echo "  Python: $(python --version)"
-        python -c "import numpy; print('  NumPy:', numpy.__version__)" || echo "  NumPy import failed!"
+        echo "  NumPy: $(python -c 'import numpy; print(numpy.__version__)')"
         python -c "from mpi4py import MPI; print('  MPI working')" || echo "  mpi4py import failed!"
         python -c "import repast4py; print('  Repast4Py version:', repast4py.__version__)" || echo "  Repast4Py import failed!"
-        python -c "import torch; print('  PyTorch:', torch.__version__); print('  CUDA available:', torch.cuda.is_available())" || echo "  Torch import failed!"
+        python -c "import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available()); print('  Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A')" || echo "  Torch import failed!"
         echo ""
-        echo "Examples at:"
+        echo "To run models:"
+        echo "  Single process:  python your_model.py config.yaml"
+        echo "  MPI parallel:    mpiexec -n 4 python your_model.py config.yaml"
+        echo ""
+        echo "Example models available at:"
         echo "  cd $REPAST4PY_HOME/repast4py/examples/zombies"
         echo "  mpiexec -n 2 python zombies.py zombie_model.yaml"
         echo "=================================================="
@@ -131,6 +160,6 @@ let
 in
 {
   default = mkRepastShell { useGPU = false; };
-  cpu     = mkRepastShell { useGPU = false; };
-  gpu     = mkRepastShell { useGPU = true; };
+  cpu = mkRepastShell { useGPU = false; };
+  gpu = mkRepastShell { useGPU = true; };
 }
