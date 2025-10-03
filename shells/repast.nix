@@ -1,27 +1,12 @@
 { pkgs, ... }:
 
 let
-  # Use Python 3.11 for GPU mode (PyTorch 2.0.1 compatibility)
-  python311 = pkgs.python311;
-
   # Override mpi4py to skip tests (they fail but package works fine)
-  python311WithOverrides = python311.override {
-    packageOverrides = self: super: {
-      mpi4py = super.mpi4py.overridePythonAttrs (old: {
-        doCheck = false;
-        dontUsePytestCheck = true;
-      });
-      # Override packages that pull in tkinter
-      matplotlib = super.matplotlib.override { enableTk = false; };
-      ipython = super.ipython.override { };
-    };
-  };
-
   python3WithOverrides = pkgs.python3.override {
     packageOverrides = self: super: {
       mpi4py = super.mpi4py.overridePythonAttrs (old: {
-        doCheck = false;
-        dontUsePytestCheck = true;
+        doCheck = false;  # Skip tests that fail with OpenMPI
+        dontUsePytestCheck = true;  # Also disable pytest check phase
       });
     };
   };
@@ -29,8 +14,10 @@ let
   # Base configuration function that accepts GPU flag
   mkRepastShell = { useGPU ? false }:
     let
-      # GPU mode: Use Python 3.11, install numpy + PyTorch via pip for compatibility
-      pythonEnvGPU = python311WithOverrides.withPackages (ps: with ps; [
+      # For GPU with older compute capability (6.1 - Quadro P5000),
+      # we need PyTorch 2.0.x or earlier
+      # PyTorch 2.1+ dropped support for compute capability < 7.5
+      pythonEnvGPU = python3WithOverrides.withPackages (ps: with ps; [
         networkx
         numba
         pyyaml
@@ -40,14 +27,12 @@ let
         setuptools
         wheel
         packaging
+        ipython
         pytest
-        # numpy and PyTorch will be installed via pip in shellHook for compatibility
-        # Note: ipython excluded to avoid tkinter dependency chain
-        # to add via pip in the GPU env. after shell loads:
-        # $ pip install --prefix="$PIP_PREFIX" ipython
+        # Use older PyTorch from stable channel that supports sm_61
+        # We'll install via pip in shellHook instead to get 2.0.1
       ]);
 
-      # CPU mode: Can use latest Python with nixpkgs PyTorch
       pythonEnvCPU = python3WithOverrides.withPackages (ps: with ps; [
         networkx
         numba
@@ -76,33 +61,30 @@ let
         gnumake
         git
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
-        # Only include NVIDIA driver libs - PyTorch wheel includes CUDA runtime
+        cudaPackages.cudatoolkit
+        cudaPackages.cudnn
         linuxPackages.nvidia_x11
-        stdenv.cc.cc.lib   # <-- add this only for GPU mode
       ]);
 
       shellHook = ''
         ${if useGPU then ''
-        # GPU mode - NVIDIA driver + libstdc++ for PyTorch wheel
-        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        # GPU mode - ensure CUDA is visible
+        export LD_LIBRARY_PATH="${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        export CUDA_PATH="${pkgs.cudaPackages.cudatoolkit}"
 
         # Create a local pip install directory for GPU-specific packages
-        export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
-        mkdir -p "$PIP_PREFIX/lib/python3.11/site-packages"
+        export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu"
+        export PYTHONPATH="$PIP_PREFIX/lib/python3.13/site-packages:$PYTHONPATH"
+        mkdir -p "$PIP_PREFIX/lib/python3.13/site-packages"
 
-        # CRITICAL: Put pip packages FIRST in PYTHONPATH to override nixpkgs numpy
-        export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages"
-
-        # Install NumPy 1.x and PyTorch 2.0.1 with CUDA 11.8 support
-        # PyTorch 2.0.1 requires NumPy <2.0, so we install 1.24.4 for compatibility
-        if [ ! -f "$PIP_PREFIX/lib/python3.11/site-packages/torch/__init__.py" ]; then
-          echo "Installing NumPy 1.24.4 and PyTorch 2.0.1 with CUDA 11.8 support..."
-          echo "This version supports your Quadro P5000 (compute capability 6.1)"
-          echo "Note: PyTorch wheel includes CUDA runtime - no system CUDA toolkit needed"
-          pip install --prefix="$PIP_PREFIX" --no-cache-dir \
-            "numpy==1.24.4" \
-            torch==2.0.1+cu118 torchvision==0.15.2+cu118 \
-            --index-url https://download.pytorch.org/whl/cu118
+        # Install latest PyTorch with CUDA 11.8 support
+        # Note: Python 3.13 limits us to PyTorch 2.5+, which only supports compute capability 7.5+
+        # Your Quadro P5000 (compute capability 6.1) is unfortunately not supported
+        # We'll install it anyway - it will detect the incompatibility and fall back to CPU
+        if [ ! -f "$PIP_PREFIX/lib/python3.13/site-packages/torch/__init__.py" ]; then
+          echo "Installing PyTorch with CUDA 11.8 support..."
+          echo "Note: Your GPU (compute capability 6.1) may fall back to CPU"
+          pip install --prefix="$PIP_PREFIX" --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu118
         fi
         '' else ''
         # CPU mode - suppress CUDA warnings
@@ -111,17 +93,14 @@ let
 
         echo "Repast4Py Development Environment (${if useGPU then "GPU" else "CPU"} mode)"
         ${if useGPU then ''
-        echo "   Python: 3.11 (required for PyTorch 2.0.1)"
-        echo "   CUDA: Included in PyTorch wheel (CUDA 11.8 runtime)"
+        echo "   CUDA Toolkit: ${pkgs.cudaPackages.cudatoolkit.version}"
         echo "   PyTorch: 2.0.1 with CUDA 11.8 (supports compute capability 6.1+)"
-        echo "   NumPy: 1.24.4 (required for PyTorch 2.0.1 compatibility)"
-        echo "   GPU: Quadro P5000 (sm_61) - SUPPORTED"
         '' else ''
         echo "   Using CPU-only PyTorch"
         ''}
         echo "=================================================="
 
-        # Add MPI binaries to PATH
+        # Add MPI binaries to PATH (critical for setup.py to find mpicc/mpic++)
         export PATH="${pkgs.openmpi}/bin:''${PATH}"
 
         # Set up MPI compiler wrappers
@@ -131,10 +110,6 @@ let
         # MPI include paths
         export CFLAGS="-I${pkgs.openmpi}/include"
         export CXXFLAGS="-I${pkgs.openmpi}/include"
-
-        # tells MPI to use the ob1 backend directly and silence UCX warnings.
-        export OMPI_MCA_pml=ob1
-        export OMPI_MCA_btl=^openib
 
         # Set custom temp directory
         export TMPDIR=''${TMPDIR:-$HOME/tmp}
@@ -165,7 +140,7 @@ let
           cd - > /dev/null
         fi
 
-        # Add Repast4Py source to Python path
+        # Add Repast4Py source to Python path (after build to ensure .so files exist)
         export PYTHONPATH="$REPAST4PY_HOME/repast4py/src:$PYTHONPATH"
 
         echo ""
@@ -180,12 +155,7 @@ let
         python -c "import repast4py; print('  Repast4Py version:', repast4py.__version__)" 2>/dev/null || \
           echo "  Repast4Py import failed - may need manual build"
         python -c "from mpi4py import MPI; print('  MPI working')"
-        ${if useGPU then ''
-        python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available()); print('  CUDA device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A')"
-        python -c "import numpy; print('  NumPy version:', numpy.__version__)"
-        '' else ''
-        python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__)" 2>/dev/null
-        ''}
+        python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available())" 2>/dev/null
         echo ""
         echo "To run models:"
         echo "  Single process:  python your_model.py config.yaml"
@@ -200,10 +170,10 @@ let
 
 in
 {
-  # CPU-only version (default, uses latest Python)
+  # CPU-only version (default, smaller and faster)
   default = mkRepastShell { useGPU = false; };
   cpu = mkRepastShell { useGPU = false; };
 
-  # GPU-enabled version (uses Python 3.11 for PyTorch 2.0.1 compatibility)
+  # GPU-enabled version (requires CUDA support)
   gpu = mkRepastShell { useGPU = true; };
 }
