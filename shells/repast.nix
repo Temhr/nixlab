@@ -95,14 +95,14 @@ let
         export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages"
 
         # Install NumPy 1.x, Numba, and PyTorch 2.0.1 with CUDA 11.8 support
-        # PyTorch 2.0.1 requires NumPy <2.0, so we install 1.24.4 for compatibility
+        # PyTorch 2.0.1 requires NumPy <2.0, so we install 1.26.3 for compatibility
         # Numba must also use NumPy 1.x, so we install it via pip
         if [ ! -f "$PIP_PREFIX/lib/python3.11/site-packages/torch/__init__.py" ]; then
-          echo "Installing NumPy 1.24.4, Numba, and PyTorch 2.0.1 with CUDA 11.8 support..."
+          echo "Installing NumPy 1.26.3, Numba, and PyTorch 2.0.1 with CUDA 11.8 support..."
           echo "This version supports your Quadro P5000 (compute capability 6.1)"
           echo "Note: PyTorch wheel includes CUDA runtime - no system CUDA toolkit needed"
           pip install --prefix="$PIP_PREFIX" --no-cache-dir \
-            "numpy==1.24.4" \
+            "numpy==1.26.3" \
             "numba>=0.57.0" \
             torch==2.0.1+cu118 torchvision==0.15.2+cu118 \
             --index-url https://download.pytorch.org/whl/cu118
@@ -117,7 +117,7 @@ let
         echo "   Python: 3.11 (required for PyTorch 2.0.1)"
         echo "   CUDA: Included in PyTorch wheel (CUDA 11.8 runtime)"
         echo "   PyTorch: 2.0.1 with CUDA 11.8 (supports compute capability 6.1+)"
-        echo "   NumPy: 1.24.4 (required for PyTorch 2.0.1 compatibility)"
+        echo "   NumPy: 1.26.3 (required for PyTorch 2.0.1 compatibility)"
         echo "   Numba: Installed via pip with NumPy 1.x compatibility"
         echo "   GPU: Quadro P5000 (sm_61) - SUPPORTED"
         '' else ''
