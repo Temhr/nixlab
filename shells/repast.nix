@@ -88,8 +88,10 @@ let
 
         # Create a local pip install directory for GPU-specific packages
         export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
-        export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages:$PYTHONPATH"
         mkdir -p "$PIP_PREFIX/lib/python3.11/site-packages"
+
+        # CRITICAL: Put pip packages FIRST in PYTHONPATH to override nixpkgs numpy
+        export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages"
 
         # Install NumPy 1.x and PyTorch 2.0.1 with CUDA 11.8 support
         # PyTorch 2.0.1 requires NumPy <2.0, so we install 1.24.4 for compatibility
