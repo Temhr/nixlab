@@ -72,11 +72,15 @@ let
         export LD_LIBRARY_PATH="${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
         export CUDA_PATH="${pkgs.cudaPackages.cudatoolkit}"
 
+        # Create a local pip install directory for GPU-specific packages
+        export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu"
+        export PYTHONPATH="$PIP_PREFIX/lib/python3.13/site-packages:$PYTHONPATH"
+        mkdir -p "$PIP_PREFIX/lib/python3.13/site-packages"
+
         # Install PyTorch 2.0.1 with CUDA 11.8 support (supports compute capability 6.1)
-        # Check if we need to install
-        if ! python -c "import torch; exit(0 if torch.__version__.startswith('2.0') else 1)" 2>/dev/null; then
+        if [ ! -f "$PIP_PREFIX/lib/python3.13/site-packages/torch/__init__.py" ]; then
           echo "Installing PyTorch 2.0.1 with CUDA 11.8 support..."
-          pip install --user torch==2.0.1 torchvision==0.15.2 --index-url https://download.pytorch.org/whl/cu118
+          pip install --prefix="$PIP_PREFIX" --no-cache-dir torch==2.0.1 torchvision==0.15.2 --index-url https://download.pytorch.org/whl/cu118
         fi
         '' else ''
         # CPU mode - suppress CUDA warnings
