@@ -148,10 +148,12 @@
       # Shell Environments - imported from separate files
       devShells = forAllSystems (system:
         let
-          # Create pkgs with unfree allowed (needed for PyTorch/Triton in repast shell)
           pkgs = import nixpkgs {
             inherit system;
-            config.allowUnfree = true;
+            config = {
+              allowUnfree = true;
+              cudaSupport = true;  # Add this line for GPU support
+            };
           };
         in
         import ./shells { inherit pkgs; }

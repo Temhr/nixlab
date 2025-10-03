@@ -4,7 +4,8 @@ let
   # Base configuration function that accepts GPU flag
   mkRepastShell = { useGPU ? false }:
     let
-      # Python environment with all required packages
+      # For GPU mode, we need PyTorch with CUDA support
+      # NixOS's pytorch package includes CUDA by default if cudaSupport is enabled
       pythonEnv = pkgs.python3.withPackages (ps: with ps; [
         # Core Repast4Py dependencies
         networkx
@@ -12,10 +13,17 @@ let
         pyyaml
         mpi4py
 
-        # PyTorch - conditional based on useGPU flag
-        # Note: In nixpkgs, pytorch-bin may still include CUDA libraries
-        # For true CPU-only, we'd need to override the package
-        (if useGPU then pytorch else pytorch-bin)
+        # PyTorch selection:
+        # - CPU mode: pytorch-bin (smaller, pre-compiled, CPU-only)
+        # - GPU mode: pytorch with CUDA (requires system CUDA support)
+        (if useGPU then
+          # For GPU, use the full pytorch with CUDA
+          # Note: This requires nixpkgs.config.cudaSupport = true in your system
+          pytorch
+        else
+          # For CPU, use the lighter binary distribution
+          pytorch-bin
+        )
 
         # Build tools
         cython
@@ -44,18 +52,30 @@ let
         gcc
         gnumake
         git
-      ];
+      ] ++ pkgs.lib.optionals useGPU (with pkgs; [
+        # Add CUDA libraries for GPU mode
+        cudaPackages.cudatoolkit
+        cudaPackages.cudnn
+        linuxPackages.nvidia_x11
+      ]);
 
       # Environment variables for MPI compilation
       shellHook = ''
-        ${if useGPU then "" else ''
-        # Suppress CUDA warnings in CPU mode
+        ${if useGPU then ''
+        # GPU mode - ensure CUDA is visible
+        export LD_LIBRARY_PATH="${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        export CUDA_PATH="${pkgs.cudaPackages.cudatoolkit}"
+        '' else ''
+        # CPU mode - suppress CUDA warnings
         export CUDA_VISIBLE_DEVICES=""
         ''}
 
         echo "🔧 Repast4Py Development Environment (${if useGPU then "GPU" else "CPU"} mode)"
-        ${if useGPU then "" else ''
-        echo "   Note: PyTorch binary includes CUDA libs but will use CPU if no GPU detected"
+        ${if useGPU then ''
+        echo "   CUDA Toolkit: ${pkgs.cudaPackages.cudatoolkit.version}"
+        echo "   Note: Requires NVIDIA drivers 525+ for CUDA 12.x"
+        '' else ''
+        echo "   Using CPU-only PyTorch"
         ''}
         echo "=================================================="
 
