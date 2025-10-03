@@ -107,6 +107,10 @@ let
         export CC=mpicc
         export CXX=mpic++
 
+        # tells MPI to use the ob1 backend directly and silence UCX warnings
+        export OMPI_MCA_pml=ob1
+        export OMPI_MCA_btl=^openib
+
         # MPI include paths
         export CFLAGS="-I${pkgs.openmpi}/include"
         export CXXFLAGS="-I${pkgs.openmpi}/include"
