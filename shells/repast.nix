@@ -25,6 +25,11 @@ let
       ]);
 
       pythonEnv = if useGPU then pythonEnvGPU else pythonEnvCPU;
+
+      # compute this once in Nix
+      nvidiaLibPath = if pkgs ? linuxPackages.nvidia_x11
+                      then ":${pkgs.linuxPackages.nvidia_x11}/lib"
+                      else "";
     in
     pkgs.mkShell {
       name = "repast4py-dev-${if useGPU then "gpu" else "cpu"}";
@@ -43,9 +48,7 @@ let
 
       shellHook = ''
         # Ensure Nix-provided libs are visible to any Python interpreter/venv
-        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.openmpi}/lib:${pkgs.stdenv.cc.cc.lib}/lib" \
-        + (if pkgs ? linuxPackages.nvidia_x11 then ":${pkgs.linuxPackages.nvidia_x11}/lib" else "") \
-        + (if builtins.getEnv "LD_LIBRARY_PATH" != "" then ":" + builtins.getEnv "LD_LIBRARY_PATH" else "")
+        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.openmpi}/lib:${pkgs.stdenv.cc.cc.lib}/lib${nvidiaLibPath}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
         # Ensure we use Nix's mpicc/mpiexec when building/using mpi4py
         export PATH="${pkgs.openmpi}/bin:$PATH"
