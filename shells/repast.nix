@@ -14,6 +14,15 @@ let
       # Override packages that pull in tkinter
       matplotlib = super.matplotlib.override { enableTk = false; };
       ipython = super.ipython.override { };
+      # Pin NumPy to 1.x for PyTorch 2.0.1 compatibility
+      numpy = super.numpy.overridePythonAttrs (old: rec {
+        version = "1.24.4";
+        src = super.fetchPypi {
+          pname = "numpy";
+          inherit version;
+          hash = "sha256-5Z5MdLx7Y6CgqLkGZdLljUEiS4oDaWGpTg3tNMbwVl0=";
+        };
+      });
     };
   };
 
@@ -29,7 +38,7 @@ let
   # Base configuration function that accepts GPU flag
   mkRepastShell = { useGPU ? false }:
     let
-      # GPU mode: Use Python 3.11, install numpy + PyTorch via pip for compatibility
+      # GPU mode: Use Python 3.11 for PyTorch 2.0.1 compatibility
       pythonEnvGPU = python311WithOverrides.withPackages (ps: with ps; [
         networkx
         numba
@@ -41,7 +50,7 @@ let
         wheel
         packaging
         pytest
-        # numpy and PyTorch will be installed via pip in shellHook for compatibility
+        # PyTorch will be installed via pip in shellHook
         # Note: ipython excluded to avoid tkinter dependency chain
         # to add via pip in the GPU env. after shell loads:
         # $ pip install --prefix="$PIP_PREFIX" ipython
@@ -91,14 +100,13 @@ let
         export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages:$PYTHONPATH"
         mkdir -p "$PIP_PREFIX/lib/python3.11/site-packages"
 
-        # Install NumPy 1.x and PyTorch 2.0.1 with CUDA 11.8 support
-        # PyTorch 2.0.1 requires NumPy <2.0, so we install 1.26.3 for compatibility
+        # Install PyTorch 2.0.1 with CUDA 11.8 support (supports compute capability 6.1+)
+        # The wheel includes its own CUDA runtime, so we don't need system CUDA toolkit
         if [ ! -f "$PIP_PREFIX/lib/python3.11/site-packages/torch/__init__.py" ]; then
-          echo "Installing NumPy 1.26.3 and PyTorch 2.0.1 with CUDA 11.8 support..."
+          echo "Installing PyTorch 2.0.1 with CUDA 11.8 support (Python 3.11)..."
           echo "This version supports your Quadro P5000 (compute capability 6.1)"
           echo "Note: PyTorch wheel includes CUDA runtime - no system CUDA toolkit needed"
           pip install --prefix="$PIP_PREFIX" --no-cache-dir \
-            "numpy==1.26.3" \
             torch==2.0.1+cu118 torchvision==0.15.2+cu118 \
             --index-url https://download.pytorch.org/whl/cu118
         fi
@@ -112,7 +120,6 @@ let
         echo "   Python: 3.11 (required for PyTorch 2.0.1)"
         echo "   CUDA: Included in PyTorch wheel (CUDA 11.8 runtime)"
         echo "   PyTorch: 2.0.1 with CUDA 11.8 (supports compute capability 6.1+)"
-        echo "   NumPy: 1.26.3 (required for PyTorch 2.0.1 compatibility)"
         echo "   GPU: Quadro P5000 (sm_61) - SUPPORTED"
         '' else ''
         echo "   Using CPU-only PyTorch"
@@ -180,7 +187,6 @@ let
         python -c "from mpi4py import MPI; print('  MPI working')"
         ${if useGPU then ''
         python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available()); print('  CUDA device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A')"
-        python -c "import numpy; print('  NumPy version:', numpy.__version__)"
         '' else ''
         python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__)" 2>/dev/null
         ''}
