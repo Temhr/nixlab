@@ -61,69 +61,70 @@ let
         gnumake
         git
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
-        cudaPackages.cudatoolkit
-        cudaPackages.cudnn
         linuxPackages.nvidia_x11
+        stdenv.cc.cc.lib   # ensure libstdc++ is available
       ]);
 
       shellHook = ''
         ${if useGPU then ''
-        # GPU mode - ensure CUDA is visible
-        export LD_LIBRARY_PATH="${pkgs.cudaPackages.cudatoolkit}/lib:${pkgs.cudaPackages.cudnn}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        export CUDA_PATH="${pkgs.cudaPackages.cudatoolkit}"
+        # ------------------------------
+        # GPU mode setup
+        # ------------------------------
+        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-        # Create a local pip install directory for GPU-specific packages
-        export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu"
-        export PYTHONPATH="$PIP_PREFIX/lib/python3.13/site-packages:$PYTHONPATH"
-        mkdir -p "$PIP_PREFIX/lib/python3.13/site-packages"
+        # Use Python 3.11 venv for PyTorch 2.0.1
+        export VENV_DIR="$HOME/repast4py-workspace/.pytorch-gpu-py311"
+        if [ ! -d "$VENV_DIR" ]; then
+          echo "Creating Python 3.11 venv for GPU mode..."
+          ${pkgs.python311}/bin/python3 -m venv "$VENV_DIR"
+          source "$VENV_DIR/bin/activate"
+          pip install --upgrade pip wheel setuptools
 
-        # Install latest PyTorch with CUDA 11.8 support
-        # Note: Python 3.13 limits us to PyTorch 2.5+, which only supports compute capability 7.5+
-        # Your Quadro P5000 (compute capability 6.1) is unfortunately not supported
-        # We'll install it anyway - it will detect the incompatibility and fall back to CPU
-        if [ ! -f "$PIP_PREFIX/lib/python3.13/site-packages/torch/__init__.py" ]; then
-          echo "Installing PyTorch with CUDA 11.8 support..."
-          echo "Note: Your GPU (compute capability 6.1) may fall back to CPU"
-          pip install --prefix="$PIP_PREFIX" --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu118
+          echo "Installing PyTorch 2.0.1 + CUDA 11.8 (for sm_61 Quadro P5000)..."
+          pip install --no-cache-dir \
+            torch==2.0.1+cu118 torchvision==0.15.2+cu118 \
+            --index-url https://download.pytorch.org/whl/cu118
+
+          echo "Pinning NumPy to <2 for Repast4Py compatibility..."
+          pip install --no-cache-dir 'numpy<2'
+        else
+          source "$VENV_DIR/bin/activate"
         fi
+
+        export PYTHONPATH="$VENV_DIR/lib/python3.11/site-packages:$PYTHONPATH"
+        export PATH="$VENV_DIR/bin:$PATH"
         '' else ''
-        # CPU mode - suppress CUDA warnings
+        # ------------------------------
+        # CPU mode setup
+        # ------------------------------
         export CUDA_VISIBLE_DEVICES=""
         ''}
 
         echo "Repast4Py Development Environment (${if useGPU then "GPU" else "CPU"} mode)"
         ${if useGPU then ''
-        echo "   CUDA Toolkit: ${pkgs.cudaPackages.cudatoolkit.version}"
-        echo "   PyTorch: 2.0.1 with CUDA 11.8 (supports compute capability 6.1+)"
+        echo "   Python: 3.11 (required for PyTorch 2.0.1)"
+        echo "   CUDA: Included in PyTorch wheel (CUDA 11.8 runtime)"
+        echo "   PyTorch: 2.0.1+cu118 (supports compute capability 6.1+)"
         '' else ''
         echo "   Using CPU-only PyTorch"
         ''}
         echo "=================================================="
 
-        # Add MPI binaries to PATH (critical for setup.py to find mpicc/mpic++)
+        # MPI setup
         export PATH="${pkgs.openmpi}/bin:''${PATH}"
-
-        # Set up MPI compiler wrappers
         export CC=mpicc
         export CXX=mpic++
-
-        # tells MPI to use the ob1 backend directly and silence UCX warnings
         export OMPI_MCA_pml=ob1
         export OMPI_MCA_btl=^openib
-
-        # MPI include paths
         export CFLAGS="-I${pkgs.openmpi}/include"
         export CXXFLAGS="-I${pkgs.openmpi}/include"
 
-        # Set custom temp directory
+        # Workspace setup
         export TMPDIR=''${TMPDIR:-$HOME/tmp}
         mkdir -p $TMPDIR
-
-        # Create workspace directory if it doesn't exist
         export REPAST4PY_HOME="$HOME/repast4py-workspace"
         mkdir -p $REPAST4PY_HOME
 
-        # Clone Repast4Py if not already present
         if [ ! -d "$REPAST4PY_HOME/repast4py" ]; then
           echo "Cloning Repast4Py repository..."
           git clone https://github.com/Repast/repast4py.git $REPAST4PY_HOME/repast4py
@@ -131,35 +132,29 @@ let
           echo "Repast4Py repository found at $REPAST4PY_HOME/repast4py"
         fi
 
-        # Build Repast4Py if not already built
+        # Build extensions if missing
         SO_FILE=$(find "$REPAST4PY_HOME/repast4py/src/repast4py" -name "_core*.so" 2>/dev/null | head -n1)
         if [ -z "$SO_FILE" ]; then
           echo "Building Repast4Py C++ extensions..."
           cd $REPAST4PY_HOME/repast4py
-          python setup.py build_ext --inplace || {
-            echo "Build failed. You may need to build manually:"
-            echo "   cd $REPAST4PY_HOME/repast4py"
-            echo "   python setup.py build_ext --inplace"
-          }
+          python setup.py build_ext --inplace || echo "Build failed. Please run manually."
           cd - > /dev/null
         fi
-
-        # Add Repast4Py source to Python path (after build to ensure .so files exist)
         export PYTHONPATH="$REPAST4PY_HOME/repast4py/src:$PYTHONPATH"
 
         echo ""
         echo "Environment ready!"
         echo "  Python: $(python --version)"
+        echo "  NumPy: $(python -c 'import numpy; print(numpy.__version__)')"
         echo "  MPI: $(mpirun --version | head -n1)"
         echo "  Workspace: $REPAST4PY_HOME"
         echo "  Source: $REPAST4PY_HOME/repast4py"
         echo "  Examples: $REPAST4PY_HOME/repast4py/examples"
         echo ""
         echo "Quick verification:"
-        python -c "import repast4py; print('  Repast4Py version:', repast4py.__version__)" 2>/dev/null || \
-          echo "  Repast4Py import failed - may need manual build"
+        python -c "import repast4py; print('  Repast4Py version:', repast4py.__version__)" || echo "  Repast4Py import failed!"
         python -c "from mpi4py import MPI; print('  MPI working')"
-        python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available())" 2>/dev/null
+        python -c "import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available()); print('  Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A')" || echo "  Torch import failed!"
         echo ""
         echo "To run models:"
         echo "  Single process:  python your_model.py config.yaml"
@@ -170,6 +165,7 @@ let
         echo "  mpiexec -n 2 python zombies.py zombie_model.yaml"
         echo "=================================================="
       '';
+
     };
 
 in
