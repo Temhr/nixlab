@@ -43,8 +43,6 @@ let
         pytest
         # PyTorch will be installed via pip in shellHook
         # Note: ipython excluded to avoid tkinter dependency chain
-        # to add via pip in the GPU env. after shell loads:
-        # $ pip install --prefix="$PIP_PREFIX" ipython
       ]);
 
       # CPU mode: Can use latest Python with nixpkgs PyTorch
@@ -172,7 +170,7 @@ let
           echo "  Repast4Py import failed - may need manual build"
         python -c "from mpi4py import MPI; print('  MPI working')"
         ${if useGPU then ''
-        python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available()); print('  CUDA device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A')" 2>/dev/null || echo "  PyTorch not yet installed"
+        python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__); print('  CUDA available:', torch.cuda.is_available()); print('  CUDA device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'N/A')"
         '' else ''
         python -c "import warnings; warnings.filterwarnings('ignore'); import torch; print('  PyTorch version:', torch.__version__)" 2>/dev/null
         ''}
