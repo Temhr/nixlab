@@ -78,12 +78,13 @@ let
       ] ++ pkgs.lib.optionals useGPU (with pkgs; [
         # Only include NVIDIA driver libs - PyTorch wheel includes CUDA runtime
         linuxPackages.nvidia_x11
+        stdenv.cc.cc.lib   # <-- add this only for GPU mode
       ]);
 
       shellHook = ''
         ${if useGPU then ''
-        # GPU mode - only need NVIDIA driver libs (PyTorch wheel includes CUDA runtime)
-        export LD_LIBRARY_PATH="${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        # GPU mode - NVIDIA driver + libstdc++ for PyTorch wheel
+        export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.linuxPackages.nvidia_x11}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
         # Create a local pip install directory for GPU-specific packages
         export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
