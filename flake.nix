@@ -145,10 +145,14 @@
       # Code formatter configuration
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-      # Shell Enviroments - imported from separate files
+      # Shell Environments - imported from separate files
       devShells = forAllSystems (system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          # Create pkgs with unfree allowed (needed for PyTorch/Triton in repast shell)
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
         in
         import ./shells { inherit pkgs; }
       );
