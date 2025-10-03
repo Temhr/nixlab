@@ -43,7 +43,9 @@ let
 
       shellHook = ''
         # Ensure Nix-provided libs are visible to any Python interpreter/venv
-        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.openmpi}/lib:${pkgs.stdenv.cc.cc.lib}/lib${pkgs.linuxPackages.nvidia_x11:+:}${pkgs.linuxPackages.nvidia_x11}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH="${pkgs.zlib}/lib:${pkgs.openmpi}/lib:${pkgs.stdenv.cc.cc.lib}/lib" \
+        + (if pkgs ? linuxPackages.nvidia_x11 then ":${pkgs.linuxPackages.nvidia_x11}/lib" else "") \
+        + (if builtins.getEnv "LD_LIBRARY_PATH" != "" then ":" + builtins.getEnv "LD_LIBRARY_PATH" else "")
 
         # Ensure we use Nix's mpicc/mpiexec when building/using mpi4py
         export PATH="${pkgs.openmpi}/bin:$PATH"
@@ -144,38 +146,38 @@ let
         echo "  Python: $(python --version)"
         # NumPy may fail to import if LD paths are missing; show informative checks
         python - <<'PY' 2>/dev/null || echo "  NumPy import failed!"
-import sys
-try:
-    import numpy as np
-    print(f"  NumPy: {np.__version__}")
-except Exception as e:
-    print("  NumPy import error:", e, file=sys.stderr)
-PY
+        import sys
+        try:
+            import numpy as np
+            print(f"  NumPy: {np.__version__}")
+        except Exception as e:
+            print("  NumPy import error:", e, file=sys.stderr)
+        PY
 
-        # Check mpi4py (this requires that mpi libs are exportable into LD_LIBRARY_PATH)
-        python - <<'PY' 2>/dev/null || echo "  mpi4py import failed!"
-import sys
-try:
-    from mpi4py import MPI
-    print("  MPI working")
-except Exception as e:
-    print("  mpi4py import error:", e, file=sys.stderr)
-PY
+                # Check mpi4py (this requires that mpi libs are exportable into LD_LIBRARY_PATH)
+                python - <<'PY' 2>/dev/null || echo "  mpi4py import failed!"
+        import sys
+        try:
+            from mpi4py import MPI
+            print("  MPI working")
+        except Exception as e:
+            print("  mpi4py import error:", e, file=sys.stderr)
+        PY
 
-        # Repast4Py and torch checks
-        python - <<'PY' 2>/dev/null || echo "  Repast4Py / torch import failed!"
-import sys
-try:
-    import repast4py
-    print("  Repast4Py version:", repast4py.__version__)
-except Exception as e:
-    print("  Repast4Py import error:", e, file=sys.stderr)
-try:
-    import torch
-    print("  PyTorch:", torch.__version__, "CUDA available:", torch.cuda.is_available())
-except Exception as e:
-    print("  Torch import error:", e, file=sys.stderr)
-PY
+                # Repast4Py and torch checks
+                python - <<'PY' 2>/dev/null || echo "  Repast4Py / torch import failed!"
+        import sys
+        try:
+            import repast4py
+            print("  Repast4Py version:", repast4py.__version__)
+        except Exception as e:
+            print("  Repast4Py import error:", e, file=sys.stderr)
+        try:
+            import torch
+            print("  PyTorch:", torch.__version__, "CUDA available:", torch.cuda.is_available())
+        except Exception as e:
+            print("  Torch import error:", e, file=sys.stderr)
+        PY
 
         echo ""
         echo "To run models:"
