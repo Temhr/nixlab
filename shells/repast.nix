@@ -128,6 +128,10 @@ let
         export CFLAGS="-I${pkgs.openmpi}/include"
         export CXXFLAGS="-I${pkgs.openmpi}/include"
 
+        # tells MPI to use the ob1 backend directly and silence UCX warnings.
+        export OMPI_MCA_pml=ob1
+        export OMPI_MCA_btl=^openib
+
         # Set custom temp directory
         export TMPDIR=''${TMPDIR:-$HOME/tmp}
         mkdir -p $TMPDIR
