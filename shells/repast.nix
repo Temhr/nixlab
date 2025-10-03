@@ -30,7 +30,6 @@ let
   mkRepastShell = { useGPU ? false }:
     let
       # GPU mode: Use Python 3.11, install numpy + PyTorch via pip for compatibility
-      # NOTE: We exclude numpy from nixpkgs to avoid version conflicts
       pythonEnvGPU = python311WithOverrides.withPackages (ps: with ps; [
         networkx
         numba
@@ -43,7 +42,6 @@ let
         packaging
         pytest
         # numpy and PyTorch will be installed via pip in shellHook for compatibility
-        # DO NOT add numpy here - it will conflict with pip-installed version
         # Note: ipython excluded to avoid tkinter dependency chain
         # to add via pip in the GPU env. after shell loads:
         # $ pip install --prefix="$PIP_PREFIX" ipython
@@ -90,10 +88,8 @@ let
 
         # Create a local pip install directory for GPU-specific packages
         export PIP_PREFIX="$HOME/repast4py-workspace/.pytorch-gpu-py311"
+        export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages:$PYTHONPATH"
         mkdir -p "$PIP_PREFIX/lib/python3.11/site-packages"
-
-        # CRITICAL: Put pip packages FIRST in PYTHONPATH to override nixpkgs numpy
-        export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages"
 
         # Install NumPy 1.x and PyTorch 2.0.1 with CUDA 11.8 support
         # PyTorch 2.0.1 requires NumPy <2.0, so we install 1.24.4 for compatibility
@@ -168,8 +164,7 @@ let
         fi
 
         # Add Repast4Py source to Python path
-        # Keep pip packages first, then add repast4py
-        export PYTHONPATH="$PIP_PREFIX/lib/python3.11/site-packages:$REPAST4PY_HOME/repast4py/src:$PYTHONPATH"
+        export PYTHONPATH="$REPAST4PY_HOME/repast4py/src:$PYTHONPATH"
 
         echo ""
         echo "Environment ready!"
