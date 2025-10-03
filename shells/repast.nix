@@ -43,6 +43,8 @@ let
         pytest
         # PyTorch will be installed via pip in shellHook
         # Note: ipython excluded to avoid tkinter dependency chain
+        # to add via pip in the GPU env. after shell loads:
+        # $ pip install --prefix="$PIP_PREFIX" ipython
       ]);
 
       # CPU mode: Can use latest Python with nixpkgs PyTorch
