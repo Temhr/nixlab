@@ -83,7 +83,7 @@
               options = [
                 "x-systemd.automount" "noauto"
                 "_netdev"  # Wait for network to be available
-                "x-systemd.after=network-online.target"
+                "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'
                 "x-systemd.idle-timeout=60" # disconnects after 60 seconds
               ];
             };
@@ -96,8 +96,7 @@
               options = [
                 "x-systemd.automount" "noauto"
                 "_netdev"  # Wait for network to be available
-                "x-systemd.after=network-online.target"
-                "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+                "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'                "x-systemd.idle-timeout=60" # disconnects after 60 seconds
               ];
             };
         systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
