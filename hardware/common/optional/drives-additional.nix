@@ -89,14 +89,15 @@
             };
         systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
     })
-    (lib.mkIf config.mount-mirk1.enable {
+    (lib.mkIf config.mount-mirk3.enable {
         fileSystems."/mnt/mirk3" =
             { device = "192.168.0.201:/mirror";
               fsType = "nfs";
               options = [
                 "x-systemd.automount" "noauto"
                 "_netdev"  # Wait for network to be available
-                "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'                "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+                "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'
+                "x-systemd.idle-timeout=60" # disconnects after 60 seconds
               ];
             };
         systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
