@@ -1,4 +1,4 @@
-{ config, lib, ... }: {
+{ config, lib, pkgs, ... }: {
 
   options = {
       mount-home = {
@@ -77,30 +77,44 @@
         systemd.tmpfiles.rules = [ "d /mirror 1744 temhr user " ];
     })
     (lib.mkIf config.mount-mirk1.enable {
-        fileSystems."/mnt/mirk1" =
-            { device = "192.168.0.204:/mirror";
-              fsType = "nfs";
-              options = [
-                "x-systemd.automount" "noauto"
-                "_netdev"  # Wait for network to be available
-                "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'
-                "x-systemd.idle-timeout=60" # disconnects after 60 seconds
-              ];
-            };
-        systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
+      fileSystems."/mnt/mirk1" =
+        { device = "192.168.0.204:/mirror";
+          fsType = "nfs";
+          options = [
+            "x-systemd.automount" "noauto"
+            "_netdev"  # Wait for network to be available
+            "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'
+            "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+          ];
+        };
+
+      # Override the automount unit to wait for network
+      systemd.services."mnt-mirk1.automount" = {
+        requires = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+      };
+
+      systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
     })
     (lib.mkIf config.mount-mirk3.enable {
-        fileSystems."/mnt/mirk3" =
-            { device = "192.168.0.201:/mirror";
-              fsType = "nfs";
-              options = [
-                "x-systemd.automount" "noauto"
-                "_netdev"  # Wait for network to be available
-                "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'
-                "x-systemd.idle-timeout=60" # disconnects after 60 seconds
-              ];
-            };
-        systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
+      fileSystems."/mnt/mirk3" =
+        { device = "192.168.0.201:/mirror";
+          fsType = "nfs";
+          options = [
+            "x-systemd.automount" "noauto"
+            "_netdev"  # Wait for network to be available
+            "x-systemd.requires=network-online.target"  # Changed from 'after' to 'requires'
+            "x-systemd.idle-timeout=60" # disconnects after 60 seconds
+          ];
+        };
+
+      # Override the automount unit to wait for network
+      systemd.services."mnt-mirk3.automount" = {
+        requires = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+      };
+
+      systemd.tmpfiles.rules = [ "d /mnt 1744 temhr user " ];
     })
   ];
 }
