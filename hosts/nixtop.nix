@@ -51,7 +51,7 @@
   steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Productivity
-  calibre.enable = true;  #Comprehensive e-book software
+  #calibre.enable = true;  #Comprehensive e-book software
   libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
   logseq.enable = true;  #Privacy-first, open-source platform for knowledge management and collaboration
 
