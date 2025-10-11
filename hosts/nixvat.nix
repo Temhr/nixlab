@@ -26,14 +26,6 @@
     ../hardware/zb17g1-k3.nix
   ];
 
-  #networking.useNetworkd = true;  # Recommended over NetworkManager for Incus bridges
-  #networking.interfaces.br0.useDHCP = true;
-  #networking.bridges.br0.interfaces = [ "wlo1" ];
-  # Optional: disable DHCP on the physical NIC itself
-  #networking.interfaces.wlo1.useDHCP = false;
-  # Open port for Home Assistant
-  #networking.firewall.allowedTCPPorts = [ 8123 ];
-
   # TODO: Set your hostname
   networking.hostName = "nixvat";
 
