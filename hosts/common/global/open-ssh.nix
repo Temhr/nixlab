@@ -13,7 +13,7 @@
       PermitRootLogin = "no"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
     };
   };
-  programs.ssh.startAgent = true;
+  programs.ssh.startAgent = !config.services.xserver.desktopManager.gnome.enable; #true if DE is not gnome
   programs.ssh.knownHosts = {
     "github.com" = {
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
