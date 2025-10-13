@@ -16,8 +16,8 @@ in {
   config = lib.mkMerge [
     (lib.mkIf (cfg.DE == "gnome") {
 
-      services.xserver = {
-          enable = true;  #enables the X11 windowing system.
+      services = {
+          xserver.enable = true;  #enables the X11 windowing system.
           displayManager.gdm.enable = true;
           desktopManager.gnome.enable = true;  #installs gnome
       };
