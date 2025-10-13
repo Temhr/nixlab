@@ -39,7 +39,7 @@
   syncthing.system = "none";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
-  gShells.DE = "gnome";
+  gShells.DE = "plasma6";
 
   ## Development
   #vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
