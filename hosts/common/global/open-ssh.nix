@@ -1,4 +1,4 @@
-{ ... }: {
+{ config, ... }: {
   # This setups a SSH server. Very important if you're setting up a headless system.
   # Feel free to remove if you don't need it.
   services.openssh = {
@@ -13,7 +13,7 @@
       PermitRootLogin = "no"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
     };
   };
-  programs.ssh.startAgent = lib.mkForce (!config.services.gnome.gcr-ssh-agent.enable); #true if DE is not gnome
+  programs.ssh.startAgent = !config.services.xserver.desktopManager.gnome.enable; #true if DE is not gnome
   programs.ssh.knownHosts = {
     "github.com" = {
       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
