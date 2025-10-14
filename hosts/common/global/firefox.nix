@@ -81,6 +81,11 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
           installation_mode = "force_installed";
         };
+        # Video Speed Controller:
+        "{7be2ba16-0f1e-4d93-9ebc-5164397477a9}" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/videospeed/latest.xpi";
+          installation_mode = "force_installed";
+        };
         # Youtube Playlist Duration Calculator:
         "{36d78ab3-8f38-444a-baee-cb4a0cadbf98}" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/youtube-playlist-duration-calc/latest.xpi";
