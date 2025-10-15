@@ -43,6 +43,8 @@
   gShells.DE = "plasma6";
 
   ## Development
+  #blender.enable = true;    #3D Creation/Animation/Publishing System
+  #godot.enable = true;    #Free and Open Source 2D and 3D game engine
   #vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
 
   ## Education
@@ -69,10 +71,6 @@
   #quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
-
-  ## Art Dev Tools
-  #blender.enable = true;    #3D Creation/Animation/Publishing System
-  #godot.enable = true;    #Free and Open Source 2D and 3D game engine
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

@@ -1,15 +1,15 @@
 { config, lib, pkgs, ... }: {
 
     options = {
-        conda = {
+        blender = {
             enable = lib.mkEnableOption {
-              description = "Enables conda";
+              description = "Enables blender";
               default = false;
             };
         };
-        spyder = {
+        godot = {
             enable = lib.mkEnableOption {
-              description = "Enables spyder";
+              description = "Enables godot";
               default = false;
             };
         };
@@ -28,15 +28,14 @@
     };
 
     config = lib.mkMerge [
-        (lib.mkIf config.conda.enable {
-            environment.systemPackages = with pkgs; [
-                conda  #Package manager for Python
-            ];
+        (lib.mkIf config.blender.enable {
+          environment.systemPackages = with pkgs; [
+            blender   #3D Creation/Animation/Publishing System
+            #(blender.override {cudaSupport=true;})   #Explicit CUDA support, but long compile time
+          ];
         })
-        (lib.mkIf config.spyder.enable {
-            environment.systemPackages = with pkgs; [
-                spyder  #Scientific python development environment
-            ];
+        (lib.mkIf config.godot.enable {
+          environment.systemPackages = with pkgs; [ godot godot-export-templates-bin];  #Free and Open Source 2D and 3D game engine
         })
         (lib.mkIf config.vscode.enable {
             environment.systemPackages = with pkgs; [

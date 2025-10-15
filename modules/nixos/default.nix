@@ -2,7 +2,6 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./art.nix
     ./development.nix
     ./education.nix
     ./games.nix
