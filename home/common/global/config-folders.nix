@@ -1,4 +1,4 @@
-{ ... }: {
+{ lib, ... }: {
 
   home.sessionVariables = {
     # XDG User Directories
@@ -14,23 +14,35 @@
     # Development Directories (custom extensions)
     XDG_PROJECTS_DIR     = "$HOME/shelf/projects";     # Personal or exploratory work
     XDG_CODE_DIR         = "$HOME/shelf/code";         # Long-term or serious repositories
+    XDG_QEMU_DIR         = "$HOME/shelf/qemu";         # VM's and Containers
   };
 
-  # Ensure XDG directories exist at activation
+  # Create XDG directories safely at activation
   home.activation.createXDGDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     echo "Ensuring XDG user and development directories exist..."
 
-    mkdir -p \
-      "$XDG_DESKTOP_DIR" \
-      "$XDG_DOCUMENTS_DIR" \
-      "$XDG_DOWNLOAD_DIR" \
-      "$XDG_MUSIC_DIR" \
-      "$XDG_PICTURES_DIR" \
-      "$XDG_VIDEOS_DIR" \
-      "$XDG_TEMPLATES_DIR" \
-      "$XDG_PUBLICSHARE_DIR" \
-      "$XDG_PROJECTS_DIR" \
-      "$XDG_CODE_DIR"
+    # Define paths explicitly (since sessionVariables are not sourced here)
+    XDG_BASE="$HOME/shelf"
+    dirs=(
+      "$XDG_BASE/default/Desktop"
+      "$XDG_BASE/default/Documents"
+      "$XDG_BASE/default/Downloads"
+      "$XDG_BASE/default/Music"
+      "$XDG_BASE/default/Pictures"
+      "$XDG_BASE/default/Videos"
+      "$XDG_BASE/default/Templates"
+      "$XDG_BASE/default/Public"
+      "$XDG_BASE/projects"
+      "$XDG_BASE/code"
+      "$XDG_BASE/qemu"
+    )
+
+    for d in "''${dirs[@]}"; do
+      if [ ! -d "$d" ]; then
+        mkdir -p "$d"
+        echo "Created: $d"
+      fi
+    done
 
     echo "✅ XDG directories verified or created."
   '';
