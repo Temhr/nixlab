@@ -161,6 +161,9 @@ alias svim='sudo vim'
 alias v='nvim'
 
 # 14. Nix Develop Shells
+alias mesa='nix develop /home/temhr/nixlab#mesa'
+alias mesa-cpu='nix develop /home/temhr/nixlab#mesa-cpu'
+alias mesa-gpu='nix develop /home/temhr/nixlab#mesa-gpu'
 alias repast='nix develop /home/temhr/nixlab#repast'
 alias repast-cpu='nix develop /home/temhr/nixlab#repast-cpu'
 alias repast-gpu='nix develop /home/temhr/nixlab#repast-gpu'
