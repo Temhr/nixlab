@@ -11,6 +11,8 @@ let
 
       # CPU: Mesa with standard dependencies via nixpkgs
       pythonEnvCPU = pkgs.python3.withPackages (ps: with ps; [
+        # Mesa itself (available in nixpkgs)
+        mesa
         # Core Mesa dependencies
         networkx
         numpy
