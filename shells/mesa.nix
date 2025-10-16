@@ -3,40 +3,11 @@
 let
   mkMesaShell = { useGPU ? false }:
     let
-      # GPU: empty pythonEnv so nixpkgs python site-packages do not interfere
-      pythonEnvGPU = pkgs.buildEnv {
+      # Both modes use empty pythonEnv - we'll create venvs for both
+      pythonEnv = pkgs.buildEnv {
         name = "empty-python-env";
         paths = [ ];
       };
-
-      # CPU: Mesa with standard dependencies via nixpkgs
-      pythonEnvCPU = pkgs.python3.withPackages (ps: with ps; [
-        # Mesa itself (available in nixpkgs)
-        mesa
-        # Core Mesa dependencies
-        networkx
-        numpy
-        pandas
-        # Visualization
-        matplotlib
-        seaborn
-        # Jupyter support
-        jupyter
-        ipython
-        notebook
-        # Additional utilities
-        tqdm
-        scipy
-        # Development tools
-        pytest
-        black
-        ruff
-        pip
-        setuptools
-        wheel
-      ]);
-
-      pythonEnv = if useGPU then pythonEnvGPU else pythonEnvCPU;
 
       nvidiaLibPath = if pkgs ? linuxPackages.nvidia_x11
                       then ":${pkgs.linuxPackages.nvidia_x11}/lib"
@@ -71,11 +42,11 @@ let
         # ============================================================
 
         ${if useGPU then ''
-        # GPU Mode: Isolated Python 3.11 venv with CUDA support
+        # GPU Mode: Python 3.11 venv with CUDA support
         export VENV_DIR="$HOME/mesa-workspace/.mesa-gpu-py311"
 
         if [ ! -d "$VENV_DIR" ]; then
-          echo "Creating clean Python 3.11 venv for GPU mode..."
+          echo "Creating Python 3.11 venv for GPU mode..."
           ${pkgs.python311}/bin/python3 -m venv "$VENV_DIR"
           source "$VENV_DIR/bin/activate"
           pip install --upgrade pip wheel setuptools
@@ -112,7 +83,39 @@ let
         # GPU-specific LD paths (NVIDIA driver libs)
         export LD_LIBRARY_PATH="${pkgs.linuxPackages.nvidia_x11}/lib:$LD_LIBRARY_PATH"
         '' else ''
-        # CPU Mode: Using nixpkgs Python environment
+        # CPU Mode: Python 3.13 venv with Mesa and dependencies
+        export VENV_DIR="$HOME/mesa-workspace/.mesa-cpu-py313"
+
+        if [ ! -d "$VENV_DIR" ]; then
+          echo "Creating Python 3.13 venv for CPU mode..."
+          ${pkgs.python3}/bin/python3 -m venv "$VENV_DIR"
+          source "$VENV_DIR/bin/activate"
+          pip install --upgrade pip wheel setuptools
+
+          echo "Installing Mesa and core dependencies..."
+          pip install --no-cache-dir \
+            mesa \
+            numpy \
+            pandas \
+            networkx \
+            matplotlib \
+            seaborn \
+            tqdm \
+            scipy \
+            jupyter \
+            ipython \
+            notebook \
+            pytest \
+            black \
+            ruff
+        else
+          source "$VENV_DIR/bin/activate"
+        fi
+
+        # Ensure the venv's site-packages are first on PYTHONPATH and PATH
+        export PYTHONPATH="$VENV_DIR/lib/python3.13/site-packages:$PYTHONPATH"
+        export PATH="$VENV_DIR/bin:$PATH"
+
         export CUDA_VISIBLE_DEVICES=""
         ''}
 
@@ -131,12 +134,6 @@ let
         mkdir -p $MESA_HOME/data
         mkdir -p $MESA_HOME/notebooks
 
-        # Install Mesa if not already present
-        python -c "import mesa" 2>/dev/null || {
-          echo "Installing Mesa..."
-          pip install --user mesa 2>/dev/null || pip install mesa
-        }
-
         # ============================================================
         # Environment Information
         # ============================================================
@@ -149,7 +146,7 @@ let
         echo "  CUDA: Provided by PyTorch wheel (11.8)"
         echo "  PyTorch: 2.0.1+cu118"
         '' else ''
-        echo "  Using CPU-only configuration"
+        echo "  Python: 3.13 (CPU-only)"
         ''}
         echo "============================================================"
         echo ""
