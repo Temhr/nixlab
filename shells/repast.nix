@@ -82,7 +82,7 @@ let
 
         ${if useGPU then ''
         # GPU Mode: Isolated Python 3.11 venv with CUDA support
-        export VENV_DIR="$HOME/repast4py-workspace/.pytorch-gpu-py311"
+        export VENV_DIR="$HOME/shelf/projects/repast4py-workspace/.pytorch-gpu-py311"
 
         if [ ! -d "$VENV_DIR" ]; then
           echo "Creating clean Python 3.11 venv for GPU mode..."
@@ -128,7 +128,7 @@ let
         export TMPDIR=''${TMPDIR:-$HOME/tmp}
         mkdir -p $TMPDIR
 
-        export REPAST4PY_HOME="$HOME/repast4py-workspace"
+        export REPAST4PY_HOME="$HOME/shelf/projects/repast4py-workspace"
         mkdir -p $REPAST4PY_HOME
 
         if [ ! -d "$REPAST4PY_HOME/repast4py" ]; then

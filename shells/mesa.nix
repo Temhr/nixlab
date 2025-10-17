@@ -43,7 +43,7 @@ let
 
         ${if useGPU then ''
         # GPU Mode: Python 3.11 venv with CUDA support
-        export VENV_DIR="$HOME/mesa-workspace/.mesa-gpu-py311"
+        export VENV_DIR="$HOME/shelf/projects/mesa-workspace/.mesa-gpu-py311"
 
         if [ ! -d "$VENV_DIR" ]; then
           echo "Creating Python 3.11 venv for GPU mode..."
@@ -84,7 +84,7 @@ let
         export LD_LIBRARY_PATH="${pkgs.linuxPackages.nvidia_x11}/lib:$LD_LIBRARY_PATH"
         '' else ''
         # CPU Mode: Python 3.13 venv with Mesa and dependencies
-        export VENV_DIR="$HOME/mesa-workspace/.mesa-cpu-py313"
+        export VENV_DIR="$HOME/shelf/projects/mesa-workspace/.mesa-cpu-py313"
 
         if [ ! -d "$VENV_DIR" ]; then
           echo "Creating Python 3.13 venv for CPU mode..."
@@ -126,7 +126,7 @@ let
         export TMPDIR=''${TMPDIR:-$HOME/tmp}
         mkdir -p $TMPDIR
 
-        export MESA_HOME="$HOME/mesa-workspace"
+        export MESA_HOME="$HOME/shelf/projects/mesa-workspace"
         mkdir -p $MESA_HOME
 
         # Create directories for models and data
