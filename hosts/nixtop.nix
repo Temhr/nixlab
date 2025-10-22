@@ -23,7 +23,7 @@
     ../modules/nixos
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ../hardware/zb17g1-k4.nix
+    ../hardware/zb17g2-k5.nix
   ];
 
   # TODO: Set your hostname
