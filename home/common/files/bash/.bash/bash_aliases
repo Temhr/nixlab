@@ -180,8 +180,8 @@ alias scrcpycam='scrcpy --video-source=camera --camera-size=1920x1080 -e'
 
 ##SSH Shortcuts
 alias nixace='ssh temhr@192.168.0.200'
-alias nixsun='ssh temhr@192.168.0.202'
-alias nixtop='ssh temhr@192.168.0.203'
+alias nixsun='ssh temhr@192.168.0.203'
+alias nixtop='ssh temhr@192.168.0.202'
 alias nixvat='ssh temhr@192.168.0.201'
 alias nixzen='ssh temhr@192.168.0.204'
 
