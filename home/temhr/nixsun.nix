@@ -41,8 +41,8 @@
 
   # Git Config
   programs.git.enable = true;  #Distributed version control system
-  programs.git.userName  = "Temhr";
-  programs.git.userEmail = "9110264+Temhr@users.noreply.github.com";
+  programs.git.settings.user.name  = "Temhr";
+  programs.git.settings.user.email = "9110264+Temhr@users.noreply.github.com";
 
   # Extra Browsers
   brave.enable = true;
