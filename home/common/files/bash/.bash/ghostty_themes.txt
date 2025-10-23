@@ -1,10 +1,10 @@
 0x96f
-3024 Day
+12-bit Rainbow
 3024 Night
 Aardvark Blue
 Abernathy
-Adventure
 Adventure Time
+Adventure
 Adwaita Dark
 Afterglow
 Alien Blood
@@ -12,28 +12,38 @@ Andromeda
 Apple Classic
 Apple System Colors
 Arcoiris
+Ardoise
 Argonaut
 Arthur
 Atelier Sulphurpool
+Atom One Dark
 Atom
-Atom One Light
 Aura
 Aurora
-Ayu
-Ayu Light
 Ayu Mirage
+Ayu
 Banana Blueberry
 Batman
-Belafonte Day
 Belafonte Night
 Birds Of Paradise
+Black Metal (Bathory)
+Black Metal (Burzum)
+Black Metal (Dark Funeral)
+Black Metal (Gorgoroth)
+Black Metal (Immortal)
+Black Metal (Khold)
+Black Metal (Marduk)
+Black Metal (Mayhem)
+Black Metal (Nile)
+Black Metal (Venom)
+Black Metal
 Blazer
 Blue Berry Pie
 Blue Dolphin
 Blue Matrix
 Bluloco Dark
-Bluloco Light
 Borland
+Box
 Breeze
 Bright Lights
 Broadcast
@@ -41,12 +51,11 @@ Brogrammer
 Builtin Dark
 Builtin Pastel Dark
 Builtin Solarized Dark
-Builtin Solarized Light
 Builtin Tango Dark
 C64
 Calamity
+Carbonfox
 Catppuccin Frappe
-Catppuccin Latte
 Catppuccin Macchiato
 Catppuccin Mocha
 CGA
@@ -56,53 +65,54 @@ Challenger Deep
 Chester
 Ciapre
 Citruszest
-CLRS
 Cobalt Neon
-Cobalt Next
 Cobalt Next Dark
 Cobalt Next Minimal
+Cobalt Next
 Cobalt2
 Crayon Pony Fish
+Cursor Dark
 Cutie Pro
 Cyberdyne
-Cyberpunk
 Cyberpunk Scarlet Protocol
+Cyberpunk
 Dark Modern
 Dark Pastel
 Dark+
 Darkermatrix
 Darkmatrix
 Darkside
-Dayfox
 Deep
 Desert
 Detuned
 Dimidium
 Dimmed Monokai
-Django
 Django Reborn Again
 Django Smooth
+Django
 Doom One
 Doom Peacock
 Dot Gov
-Dracula
 Dracula+
+Dracula
 Duckbones
 Duotone Dark
+Duskfox
 Earthsong
 Electron Highlighter
+Elegant
 Elemental
 Elementary
+Embark
 Embers Dark
 ENCOM
-Espresso
 Espresso Libre
+Espresso
 Everblush
 Everforest Dark Hard
 Fahrenheit
 Fairyfloss
 Farmhouse Dark
-Farmhouse Light
 Fideloper
 Firefly Traditional
 Firefox Dev
@@ -118,69 +128,69 @@ Front End Delight
 Fun Forrest
 Galaxy
 Galizur
-GitHub
-GitHub Dark
+Ghostty Default Style Dark
 GitHub Dark Colorblind
 GitHub Dark Default
 GitHub Dark Dimmed
 GitHub Dark High Contrast
-GitHub Light Colorblind
-GitHub Light Default
-GitLab Dark
+GitHub Dark
 GitLab Dark Grey
-GitLab Light
+GitLab Dark
 Glacier
 Grape
 Grass
-Grey green
+Grey Green
 Gruber Darker
-Gruvbox Dark
 Gruvbox Dark Hard
-Gruvbox Light
-Gruvbox Light Hard
+Gruvbox Dark
+Gruvbox Material Dark
 Gruvbox Material
 Guezwhoz
 Hacktober
 Hardcore
 Harper
-Havn Daggry
 Havn Skumring
-HaX0R BLUE
-HaX0R GR33N
+HaX0R Blue
+HaX0R Gr33N
 HaX0R R3D
 Heeler
 Highway
 Hipster Green
 Hivacruz
 Homebrew
-Hopscotch
 Hopscotch.256
+Hopscotch
 Horizon
+Hot Dog Stand
 Hurtado
 Hybrid
+IBM 5153 CGA (Black)
+IBM 5153 CGA
 IC Green PPL
 IC Orange PPL
 Iceberg Dark
-Iceberg Light
 Idea
 Idle Toes
 IR Black
+IRIX Console
+IRIX Terminal
 iTerm2 Dark Background
 iTerm2 Default
 iTerm2 Pastel Dark Background
 iTerm2 Smoooooth
 iTerm2 Solarized Dark
-iTerm2 Solarized Light
 iTerm2 Tango Dark
 Jackie Brown
 Japanesque
 Jellybeans
-Jet Brains Darcula
+JetBrains Darcula
 Jubi
 Kanagawa Dragon
 Kanagawa Wave
 Kanagawabones
 Kibble
+Kitty Default
+Kitty Low Contrast
 Kolorit
 Konsolas
 Kurokula
@@ -188,21 +198,19 @@ Lab Fox
 Laser
 Later This Evening
 Lavandula
-Liquid Carbon
 Liquid Carbon Transparent
-Liquid Carbon Transparent Inverse
+Liquid Carbon
 Lovelace
 Mariana
-Material
 Material Dark
 Material Darker
 Material Design Colors
 Material Ocean
 Mathias
 Matrix
+Matte Black
 Medallion
-Melange dark
-Melange light
+Melange Dark
 Mellifluous
 Mellow
 Miasma
@@ -212,32 +220,29 @@ Misterioso
 Molokai
 Mona Lisa
 Monokai Classic
-Monokai Pro
-Monokai Pro Light
-Monokai Pro Light Sun
 Monokai Pro Machine
 Monokai Pro Octagon
 Monokai Pro Ristretto
 Monokai Pro Spectrum
+Monokai Pro
 Monokai Remastered
 Monokai Soda
 Monokai Vivid
+Moonfly
 N0Tch2K
 Neobones Dark
-Neobones Light
 Neon
 Neopolitan
 Neutron
 Night Lion V1
 Night Lion V2
-Night Owlish Light
+Night Owl
 Nightfox
 Niji
 Nocturnal Winter
-Nord
-Nord Light
 Nord Wave
-Novel
+Nord
+Nordfox
 Nvim Dark
 Obsidian
 Ocean
@@ -245,9 +250,7 @@ Oceanic Material
 Oceanic Next
 Ollie
 One Double Dark
-One Double Light
 One Half Dark
-One Half Light
 Operator Mono Dark
 Overnight Slumber
 Oxocarbon
@@ -256,11 +259,14 @@ Pandora
 Paraiso Dark
 Paul Millr
 Pencil Dark
-Pencil Light
 Peppermint
-Piatto Light
+Phala Green Dark
 Pnevma
-Popping and Locking
+Poimandres Darker
+Poimandres Storm
+Poimandres
+Popping And Locking
+Powershell
 Pro
 Purple Rain
 Purplepeter
@@ -271,12 +277,11 @@ Red Alert
 Red Planet
 Red Sands
 Relaxed
-Retro
 Retro Legends
+Retro
 Rippedcasts
-Rose Pine
-Rose Pine Dawn
 Rose Pine Moon
+Rose Pine
 Rouge 2
 Royal
 Ryuuko
@@ -284,27 +289,29 @@ Sakura
 Scarlet Protocol
 Sea Shells
 Seafoam Pastel
+Selenized Black
+Selenized Dark
 Seoulbones Dark
-Seoulbones Light
 Seti
 Shades Of Purple
 Shaman
 Slate
 Sleepy Hollow
 Smyck
-Snazzy
 Snazzy Soft
+Snazzy
 Soft Server
 Solarized Darcula
 Solarized Dark Higher Contrast
 Solarized Dark Patched
+Solarized Osaka Night
+Sonokai
 Spacedust
-Spacegray
 Spacegray Bright
-Spacegray Eighties
 Spacegray Eighties Dull
+Spacegray Eighties
+Spacegray
 Spiderman
-Spring
 Square
 Squirrelsong Dark
 Srcery
@@ -314,25 +321,25 @@ Subliminal
 Sugarplum
 Sundried
 Symfonic
-Synthwave
 Synthwave Alpha
 Synthwave Everything
+Synthwave
+Tearout
 Teerb
 Terafox
+Terminal Basic Dark
 Thayer Bright
 The Hulk
 Tinacious Design Dark
-TokyoNight
-TokyoNight Day
 TokyoNight Moon
 TokyoNight Night
 TokyoNight Storm
-Tomorrow
-Tomorrow Night
+TokyoNight
 Tomorrow Night Blue
 Tomorrow Night Bright
 Tomorrow Night Burns
 Tomorrow Night Eighties
+Tomorrow Night
 Toy Chest
 Treehouse
 Twilight
@@ -340,14 +347,14 @@ Ubuntu
 Ultra Dark
 Ultra Violent
 Under The Sea
-Unikitty
 Urple
+Vague
 Vaughn
+Vercel
 Vesper
 Vibrant Ink
-Vimbones
 Violet Dark
-Violet Light
+Violite
 Warm Neon
 Wez
 Whimsy
@@ -355,14 +362,10 @@ Wild Cherry
 Wilmersdorf
 Wombat
 Wryan
-Xcode Dark
 Xcode Dark hc
-Xcode Light
+Xcode Dark
 Xcode WWDC
-Zenbones
 Zenbones Dark
-Zenbones Light
 Zenburn
 Zenburned
 Zenwritten Dark
-Zenwritten Light
