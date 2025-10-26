@@ -9,7 +9,7 @@ exec 3>&1 4>&2 1>>"$LOG_FILE" 2>&1
 
 # Define default folders to move
 DEFAULT_FOLDERS=(
-    ".cache"
+    ".config"
     ".local"
     "Desktop"
     "Documents"
