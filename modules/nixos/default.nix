@@ -8,7 +8,7 @@
     ./productivity.nix
     ./media.nix
     ./virtualizations.nix
-    ./wikijs.nix
+    ./wiki-js.nix
   ];
 
   options = {
