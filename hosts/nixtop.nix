@@ -71,6 +71,13 @@
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
+  ##wiki.js
+  wikijs = {
+    enable = true;
+    port = 3000;
+    bindIP = "127.0.0.1";
+  };
+
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [

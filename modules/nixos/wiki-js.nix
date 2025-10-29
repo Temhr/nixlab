@@ -124,3 +124,15 @@ in
     # };
   };
 }
+
+/*
+
+  wikijs = {
+    enable = true;
+    port = 3000;
+    bindIP = "127.0.0.1";
+    domain = "wiki.example.com";  # Optional
+    enableSSL = true;              # Optional
+  };
+
+*/
