@@ -16,7 +16,7 @@ in
 
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "127.0.0.1";
+        default = "127.0.0.1"; #localhost only
         description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 
@@ -169,7 +169,7 @@ in
     };
 
     # Firewall configuration
-    networking.firewall.allowedTCPPorts = lib.mkIf (cfg.domain != null) [ 80 443 ];
+    networking.firewall.allowedTCPPorts = lib.mkIf (cfg.domain != null) [ 80 443 3000 ];
 
     # Automatic PostgreSQL backups
     services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
