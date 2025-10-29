@@ -42,11 +42,10 @@ in
       };
 
       uploadsPath = lib.mkOption {
-        type = lib.types.path;
-        default = "${cfg.dataDir}/data/uploads";
-        defaultText = lib.literalExpression ''"''${config.wikijs.dataDir}/data/uploads"'';
+        type = lib.types.nullOr lib.types.path;
+        default = null;
         example = "/mnt/storage/wiki-uploads";
-        description = "Path where uploaded files will be stored";
+        description = "Path where uploaded files will be stored (null uses default under dataDir)";
       };
 
       backupPath = lib.mkOption {
@@ -69,6 +68,7 @@ in
     # Create necessary directories
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0750 wiki-js wiki-js -"
+    ] ++ lib.optionals (cfg.uploadsPath != null) [
       "d ${cfg.uploadsPath} 0750 wiki-js wiki-js -"
     ] ++ lib.optionals (cfg.backupPath != null) [
       "d ${cfg.backupPath} 0750 postgres postgres -"
@@ -88,6 +88,10 @@ in
     services.wiki-js = {
       enable = true;
 
+      # Override state directory if using custom path
+      stateDirectoryName = lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
+        (baseNameOf cfg.dataDir);
+
       settings = {
         port = cfg.port;
         bindIP = cfg.bindIP;
@@ -99,14 +103,8 @@ in
           user = "wiki-js";
         };
 
-        # Configure data paths
-        dataPath = "${cfg.dataDir}/data";
-
-        # Upload storage configuration
-        uploads = {
-          maxFileSize = 5242880;  # 5MB default
-          maxFiles = 10;
-        };
+        # Don't override dataPath - let the module handle it
+        # The module sets this based on stateDirectoryName
 
         logLevel = "info";
         ha = false;
@@ -118,20 +116,27 @@ in
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
 
-      # Ensure directories exist before starting
-      preStart = ''
+      # Add custom preStart if we have a custom uploads path
+      preStart = lib.mkIf (cfg.uploadsPath != null) (lib.mkAfter ''
+        # Ensure uploads directory exists and is properly linked
         mkdir -p ${cfg.uploadsPath}
-        chown -R wiki-js:wiki-js ${cfg.dataDir}
-      '';
+
+        # Create symlink from default location to custom uploads path
+        if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
+          rm -rf "${cfg.dataDir}/data/uploads"
+          ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
+        fi
+
+        chown -R wiki-js:wiki-js ${cfg.uploadsPath}
+      '');
 
       serviceConfig = {
         Restart = "on-failure";
         RestartSec = "10s";
       } // lib.optionalAttrs (cfg.dataDir != "/var/lib/wiki-js") {
+        # Override the state directory location
         StateDirectory = lib.mkForce "";
-        WorkingDirectory = cfg.dataDir;
-      } // lib.optionalAttrs (cfg.uploadsPath != "${cfg.dataDir}/data/uploads") {
-        BindPaths = "${cfg.uploadsPath}:${cfg.dataDir}/data/uploads";
+        WorkingDirectory = lib.mkForce cfg.dataDir;
       };
     };
 
@@ -184,11 +189,17 @@ in
     port = 3000;
     bindIP = "127.0.0.1";
 
-    dataDir = "/var/lib/wiki-js";                             # Application data on SSD
-    uploadsPath = "/home/temhr/shelf/wiki-js/wiki-uploads";   # Large files on HDD
-    backupPath = "/home/temhr/shelf/wiki-js/backup";          # Backups on separate disk
-    backupSchedule = "02:30";                                 # Run at 2:30 AM
+    # Custom data directory
+    dataDir = "/data/wiki-js";
 
+    # Optional: Custom uploads directory (creates symlink)
+    uploadsPath = "/mnt/storage/wiki-uploads";
+
+    # Optional: Backups
+    backupPath = "/backup/wiki-js";
+    backupSchedule = "02:30";
+
+    # Optional: Nginx reverse proxy
     domain = "wiki.example.com";  # Optional
     enableSSL = true;              # Optional
   };
