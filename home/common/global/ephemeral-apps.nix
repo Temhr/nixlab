@@ -189,7 +189,7 @@
       [Desktop Entry]
       Name=Zed Editor ⚡
       Comment=High-performance, multiplayer code editor from the creators of Atom and Tree-sitter
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs#superTuxKart; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs#zed-editor-fhs; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
       Icon=zedEditor
       Terminal=false
       Type=Application
