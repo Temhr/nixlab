@@ -88,10 +88,6 @@ in
     services.wiki-js = {
       enable = true;
 
-      # Set custom state directory
-      stateDirectoryName = lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
-        (lib.removePrefix "/var/lib/" cfg.dataDir);
-
       settings = {
         port = cfg.port;
         bindIP = cfg.bindIP;
@@ -122,12 +118,6 @@ in
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
 
-      # Override the state directory if custom path is set
-      serviceConfig = lib.mkIf (cfg.dataDir != "/var/lib/wiki-js") {
-        StateDirectory = lib.mkForce "";
-        WorkingDirectory = cfg.dataDir;
-      };
-
       # Ensure directories exist before starting
       preStart = ''
         mkdir -p ${cfg.uploadsPath}
@@ -137,11 +127,11 @@ in
       serviceConfig = {
         Restart = "on-failure";
         RestartSec = "10s";
-
-        # Bind mount for uploads if different from dataDir
-        ${lib.optionalString (cfg.uploadsPath != "${cfg.dataDir}/data/uploads") ''
-          BindPaths = "${cfg.uploadsPath}:${cfg.dataDir}/data/uploads"
-        ''}
+      } // lib.optionalAttrs (cfg.dataDir != "/var/lib/wiki-js") {
+        StateDirectory = lib.mkForce "";
+        WorkingDirectory = cfg.dataDir;
+      } // lib.optionalAttrs (cfg.uploadsPath != "${cfg.dataDir}/data/uploads") {
+        BindPaths = "${cfg.uploadsPath}:${cfg.dataDir}/data/uploads";
       };
     };
 
@@ -182,14 +172,7 @@ in
       databases = [ "wiki-js" ];
       location = cfg.backupPath;
       startAt = cfg.backupSchedule;
-      compression = "zstd";  # Better compression than gzip
-
-      # Keep last 7 daily backups
-      backupOptions = [
-        "--create"
-        "--clean"
-        "--if-exists"
-      ];
+      compression = "zstd";
     };
   };
 }
@@ -201,7 +184,7 @@ in
     port = 3000;
     bindIP = "127.0.0.1";
 
-    dataDir = "/var/lib/wiki-js";                                 # Application data on SSD
+    dataDir = "/var/lib/wiki-js";                             # Application data on SSD
     uploadsPath = "/home/temhr/shelf/wiki-js/wiki-uploads";   # Large files on HDD
     backupPath = "/home/temhr/shelf/wiki-js/backup";          # Backups on separate disk
     backupSchedule = "02:30";                                 # Run at 2:30 AM

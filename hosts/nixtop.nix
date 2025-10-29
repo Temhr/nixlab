@@ -76,6 +76,7 @@
     enable = true;
     port = 3000;
     bindIP = "127.0.0.1";
+    uploadsPath = "/home/temhr/shelf/wiki-js/wiki-uploads"
   };
 
   ## List packages installed in system profile. To search, run:
