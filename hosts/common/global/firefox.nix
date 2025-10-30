@@ -41,6 +41,11 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/betterttv/latest.xpi";
           installation_mode = "force_installed";
         };
+        # Canadian English Dictionary:
+        "pschmiedge@gmail.com" = {
+          install_url = "https://addons.mozilla.org/firefox/downloads/file/3819420/canadian_english_dictionary-3.1.3.xpi";
+          installation_mode = "force_installed";
+        };
         # Enhancer for YouTube:
         "enhancerforyoutube@maximerf.addons.mozilla.org" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi";
