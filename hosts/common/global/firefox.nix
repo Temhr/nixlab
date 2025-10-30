@@ -107,12 +107,18 @@
 
       # Preferences for Canadian English and privacy
       Preferences = {
-        "intl.accept_languages" = "en-CA, en";
-        "spellchecker.dictionary" = "en-CA";
-        "dom.security.https_only_mode" = true;
-        "privacy.donottrackheader.enabled" = true;
-        "privacy.trackingprotection.enabled" = true;
-        "privacy.trackingprotection.socialtracking.enabled" = true;
+        # Canadian English localization
+        "intl.accept_languages" = { Value = "en-CA, en"; Status = "locked"; };
+        "intl.locale.requested" = { Value = "en-CA"; Status = "locked"; };
+        "spellchecker.dictionary" = { Value = "en-CA"; Status = "locked"; };
+        "browser.search.region" = { Value = "CA"; Status = "locked"; };
+        "browser.search.countryCode" = { Value = "CA"; Status = "locked"; };
+        "distribution.searchplugins.defaultLocale" = { Value = "en-CA"; Status = "locked"; };
+        # Privacy settings
+        "dom.security.https_only_mode" = { Value = true; Status = "locked"; };
+        "privacy.donottrackheader.enabled" = { Value = true; Status = "locked"; };
+        "privacy.trackingprotection.enabled" = { Value = true; Status = "locked"; };
+        "privacy.trackingprotection.socialtracking.enabled" = { Value = true; Status = "locked"; };
       };
     };
   };
