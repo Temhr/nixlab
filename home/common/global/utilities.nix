@@ -36,7 +36,7 @@
     ## Device/Info (safe for user)
     ncdu             # ncurses-based disk usage viewer
     clinfo           # lists OpenCL devices and capabilities
-    glxinfo          # OpenGL renderer and extension information
+    mesa-demos       # OpenGL renderer and extension information
     #kdePackages.filelight  # GUI disk usage visualizer using concentric rings
 
     ## Applications
