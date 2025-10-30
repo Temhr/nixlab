@@ -59,6 +59,6 @@
   };
   environment.systemPackages = with pkgs; [
     vulkan-tools  #Khronos official Vulkan Tools and Utilities
-    cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
+    stable.cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
   ];
 }

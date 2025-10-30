@@ -116,6 +116,7 @@
           ];
         }
         # Add other common modules here
+        { nixpkgs.config.allowBroken = true; }
       ];
 
       # Enhanced helper function to create NixOS configurations
