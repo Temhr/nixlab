@@ -116,7 +116,7 @@
           ];
         }
         # Add other common modules here
-        { nixpkgs.config.allowBroken = true; }
+        { nixpkgs.config.allowBroken = true; } # broken CUDA packages are being pulled in
       ];
 
       # Enhanced helper function to create NixOS configurations
