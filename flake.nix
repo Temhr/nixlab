@@ -152,7 +152,7 @@
             inherit system;
             config = {
               allowUnfree = true;
-              cudaSupport = true;  # Add this line for GPU support
+              #cudaSupport = true;  # Disabled - CUDA provided per-shell or per-app
             };
           };
         in
