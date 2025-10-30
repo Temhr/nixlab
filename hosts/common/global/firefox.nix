@@ -36,8 +36,10 @@
       # Check about:support for extension/add-on ID strings.
       # Valid strings for installation_mode are "allowed", "blocked",
       # "force_installed" and "normal_installed".
+      # NOTE: Dictionary extensions cannot be force-installed via policies.
+      # Install manually from: https://addons.mozilla.org/firefox/addon/canadian-english-dictionary/
       ExtensionSettings = {
-        "*".installation_mode = "blocked"; # blocks all addons except the ones specified below
+        "*".installation_mode = "allowed"; # blocks all addons except the ones specified below
         # Augmented Steam:
         "augmentedsteam@isthereanydeal.com" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/augmented-steam/latest.xpi";
@@ -46,11 +48,6 @@
         # BetterTTV:
         "firefox@betterttv.net" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/betterttv/latest.xpi";
-          installation_mode = "force_installed";
-        };
-        # Canadian English Dictionary:
-        "pschmiedge@gmail.com" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/file/3819420/canadian_english_dictionary-3.1.3.xpi";
           installation_mode = "force_installed";
         };
         # Enhancer for YouTube:
