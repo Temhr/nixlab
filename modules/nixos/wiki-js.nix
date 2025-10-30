@@ -169,7 +169,7 @@ in
     };
 
     # Firewall configuration
-    networking.firewall.allowedTCPPorts = lib.mkIf (cfg.domain != null) [ 80 443 3000 ];
+    networking.firewall.allowedTCPPorts = [ 80 443 3000 ];
 
     # Automatic PostgreSQL backups
     services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
