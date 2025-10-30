@@ -187,8 +187,6 @@ alias nixzen='ssh temhr@192.168.0.204'
 
 ## Check video drivers in use
 alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
-## Check active GPU driver
-alias gpudr='glxinfo | grep -e OpenGL.vendor -e OpenGL.renderer'
 ## List available and default GPU
 alias gpu='switcherooctl list'
 
