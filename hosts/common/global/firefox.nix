@@ -25,6 +25,13 @@
       OverridePostUpdatePage = "";  #blank if you want to disable the post-update page
       RequestedLocales = "en-CA";
       SearchBar = "unified"; # alternative: "separate"
+
+      # Firefox Home settings
+      FirefoxHome = {
+        Pocket = false;
+        Snippets = false;
+      };
+
       /* ---- EXTENSIONS ---- */
       # Check about:support for extension/add-on ID strings.
       # Valid strings for installation_mode are "allowed", "blocked",
@@ -96,6 +103,16 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/youtube-playlist-duration-calc/latest.xpi";
           installation_mode = "force_installed";
         };
+      };
+
+      # Preferences for Canadian English and privacy
+      Preferences = {
+        "intl.accept_languages" = "en-CA, en";
+        "spellchecker.dictionary" = "en-CA";
+        "dom.security.https_only_mode" = true;
+        "privacy.donottrackheader.enabled" = true;
+        "privacy.trackingprotection.enabled" = true;
+        "privacy.trackingprotection.socialtracking.enabled" = true;
       };
     };
   };
