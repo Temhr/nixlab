@@ -90,6 +90,34 @@ in
       ${cfg.extraModprobeConfig}
     '';
 
+    # Journal-watching service (catches failures instantly)
+    systemd.services.wifi-driver-monitor = {
+      description = "Monitor for iwlwifi driver crashes";
+      after = [ "multi-user.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "simple";
+        Restart = "always";
+        RestartSec = "10";
+        ExecStart = pkgs.writeShellScript "wifi-driver-monitor" ''
+          ${pkgs.systemd}/bin/journalctl -f -u NetworkManager -k | while read -r line; do
+            if echo "$line" | grep -q "iwlwifi.*enqueue_hcmd failed"; then
+              echo "$(date): Detected iwlwifi firmware crash, reloading..."
+              ${pkgs.kmod}/bin/modprobe -r iwlmvm
+              ${pkgs.kmod}/bin/modprobe -r iwlwifi
+              sleep 3
+              ${pkgs.kmod}/bin/modprobe iwlwifi
+              sleep 5
+              ${pkgs.networkmanager}/bin/nmcli device connect wlp61s0 || true
+              echo "$(date): Driver reloaded" >> /var/log/wifi-crashes.log
+              # Wait 60 seconds before monitoring again to avoid reload loops
+              sleep 60
+            fi
+          done
+        '';
+      };
+    };
+
     # NetworkManager configuration (only if NetworkManager is enabled)
     networking.networkmanager = mkIf (cfg.powerSaveDisable && config.networking.networkmanager.enable) {
       wifi.powersave = false;
