@@ -101,16 +101,52 @@ in
         ExecStart = pkgs.writeShellScript "wifi-driver-monitor" ''
           ${pkgs.systemd}/bin/journalctl -f -u NetworkManager -k | while read -r line; do
             if echo "$line" | grep -q "iwlwifi.*enqueue_hcmd failed"; then
-              echo "$(date): Detected iwlwifi firmware crash, reloading..."
-              ${pkgs.kmod}/bin/modprobe -r iwlmvm
-              ${pkgs.kmod}/bin/modprobe -r iwlwifi
-              sleep 3
-              ${pkgs.kmod}/bin/modprobe iwlwifi
+              echo "$(date): Detected iwlwifi firmware crash, reloading..." | tee -a /var/log/wifi-crashes.log
+
+              # Unload modules
+              ${pkgs.kmod}/bin/modprobe -r iwlmvm 2>/dev/null || true
+              ${pkgs.kmod}/bin/modprobe -r iwlwifi 2>/dev/null || true
               sleep 5
-              ${pkgs.networkmanager}/bin/nmcli device connect wlp61s0 || true
-              echo "$(date): Driver reloaded" >> /var/log/wifi-crashes.log
-              # Wait 60 seconds before monitoring again to avoid reload loops
-              sleep 60
+
+              # Reload driver
+              ${pkgs.kmod}/bin/modprobe iwlwifi
+              echo "$(date): Driver reloaded, waiting for initialization..." | tee -a /var/log/wifi-crashes.log
+              sleep 10
+
+              # Wait for interface to appear
+              timeout=20
+              while [ $timeout -gt 0 ]; do
+                if ${pkgs.iproute2}/bin/ip link show ${cfg.interface} >/dev/null 2>&1; then
+                  echo "$(date): Interface ${cfg.interface} is back" | tee -a /var/log/wifi-crashes.log
+                  break
+                fi
+                sleep 1
+                timeout=$((timeout - 1))
+              done
+
+              # Bring interface up
+              ${pkgs.iproute2}/bin/ip link set ${cfg.interface} up 2>/dev/null || true
+              sleep 3
+
+              # Force a WiFi scan
+              echo "$(date): Forcing WiFi scan..." | tee -a /var/log/wifi-crashes.log
+              ${pkgs.networkmanager}/bin/nmcli device wifi rescan || true
+              sleep 5
+
+              # Try to reconnect
+              echo "$(date): Attempting reconnection..." | tee -a /var/log/wifi-crashes.log
+              ${pkgs.networkmanager}/bin/nmcli device connect ${cfg.interface} 2>&1 | tee -a /var/log/wifi-crashes.log || true
+
+              # Wait and verify
+              sleep 10
+              if ${pkgs.iputils}/bin/ping -c 2 ${cfg.gateway} >/dev/null 2>&1; then
+                echo "$(date): SUCCESS - WiFi restored!" | tee -a /var/log/wifi-crashes.log
+              else
+                echo "$(date): FAILED - Manual intervention may be needed" | tee -a /var/log/wifi-crashes.log
+              fi
+
+              # Wait before monitoring again to avoid reload loops
+              sleep 90
             fi
           done
         '';
