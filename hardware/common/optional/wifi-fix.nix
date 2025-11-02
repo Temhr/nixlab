@@ -83,7 +83,6 @@ in
       # Disable power saving features that cause WiFi hangs
       options ${cfg.driver} power_save=0
       ${optionalString (cfg.driver == "iwlwifi") ''
-      options iwlwifi d0i3_disable=1
       options iwlwifi uapsd_disable=1
       options iwlwifi wd_disable=0
       ''}

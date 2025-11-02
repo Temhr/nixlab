@@ -22,21 +22,19 @@
   # Enable and configure the WiFi fix
   hardware.wifi-fix = {
     enable = true;
-    interface = "wlp61s0";        # Your WiFi interface
-    gateway = "192.168.0.1";      # Your router's IP
-    watchdogInterval = 120;       # Check every 2 minutes
-    driver = "iwlwifi";           # Intel WiFi driver
+    interface = "wlp61s0";
+    gateway = "192.168.0.1";
+    driver = "iwlwifi";
 
-    # Optional: disable specific features if needed
-    enableWatchdog = true;        # Enable automatic monitoring
-    enableResumefix = true;       # Fix WiFi after suspend/resume
-    powerSaveDisable = true;      # Disable power saving
+    # Use instant crash monitoring instead of slow polling
+    enableWatchdog = false;  # DISABLE the slow 2-minute watchdog
+    enableResumefix = true;
+    powerSaveDisable = true;
 
-    # Optional: extra driver configuration
+    # Try disabling 11n to see if it helps stability
     extraModprobeConfig = ''
-      # Uncomment if you need these for your specific card
-      # options iwlwifi 11n_disable=1
-      # options iwlwifi swcrypto=1
+      options iwlwifi 11n_disable=8
+      options iwlwifi bt_coex_active=0
     '';
   };
 
