@@ -153,8 +153,13 @@
             inherit system;
             config = {
               allowUnfree = true;
-              #cudaSupport = true;  # Disabled - CUDA provided per-shell or per-app
             };
+            overlays = [
+              # Import all your overlays
+              self.overlays.additions
+              self.overlays.modifications
+              self.overlays.stable-packages
+            ];
           };
         in
         import ./shells { inherit pkgs; }

@@ -2,7 +2,8 @@
 
 let
   # Override mpi4py tests for CPU (we won't use nix-python mpi4py in GPU mode)
-  python3WithOverrides = pkgs.python3.override {
+  # Use stable Python to avoid broken CUDA packages
+  python3WithOverrides = pkgs.stable.python3.override {
     packageOverrides = self: super: {
       mpi4py = super.mpi4py.overridePythonAttrs (old: {
         doCheck = false;
@@ -25,7 +26,7 @@ let
         numba
         pyyaml
         mpi4py
-        pytorch-bin
+        torch-bin
         cython
         pip
         setuptools
@@ -44,7 +45,7 @@ let
     pkgs.mkShell {
       name = "repast4py-dev-${if useGPU then "gpu" else "cpu"}";
 
-      buildInputs = with pkgs; [
+      buildInputs = with pkgs.stable; [
         pythonEnv
         openmpi
         gcc
