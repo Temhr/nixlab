@@ -73,7 +73,7 @@
 
   ##wiki.js
   wikijs = {
-    enable = true;
+    enable = false;
     port = 3000;
     bindIP = "0.0.0.0";
   };
