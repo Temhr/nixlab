@@ -26,7 +26,7 @@
           home.packages = with pkgs; [ microsoft-edge ];  #The web browser from Microsoft
         })
         (lib.mkIf config.zen.enable {
-          home.packages = [ inputs.zen-browser.packages.x86_64-linux.beta ];  #
+          home.packages = [ inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta ];  #
         })
     ];
 
