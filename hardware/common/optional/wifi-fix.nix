@@ -84,7 +84,6 @@ in
       options ${cfg.driver} power_save=0
       ${optionalString (cfg.driver == "iwlwifi") ''
       options iwlwifi uapsd_disable=1
-      options iwlwifi wd_disable=0
       ''}
       ${cfg.extraModprobeConfig}
     '';
@@ -99,7 +98,7 @@ in
         Restart = "always";
         RestartSec = "10";
         ExecStart = pkgs.writeShellScript "wifi-driver-monitor" ''
-          ${pkgs.systemd}/bin/journalctl -f -u NetworkManager -k | while read -r line; do
+          ${pkgs.systemd}/bin/journalctl -f -k | while read -r line; do
             if echo "$line" | grep -q "iwlwifi.*enqueue_hcmd failed"; then
               echo "$(date): Detected iwlwifi firmware crash, reloading..." | tee -a /var/log/wifi-crashes.log
 
