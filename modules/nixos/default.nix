@@ -5,6 +5,7 @@
     ./development.nix
     ./education.nix
     ./games.nix
+    ./homepage-dashboard.nix
     ./productivity.nix
     ./media.nix
     ./virtualizations.nix

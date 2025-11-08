@@ -10,7 +10,7 @@ in
 
       port = lib.mkOption {
         type = lib.types.port;
-        default = 3000;
+        default = 3001;
         description = "Port for Wiki.js to listen on";
       };
 
@@ -169,7 +169,7 @@ in
     };
 
     # Firewall configuration
-    networking.firewall.allowedTCPPorts = [ 80 443 3000 ];
+    networking.firewall.allowedTCPPorts = [ 80 443 3001 ];
 
     # Automatic PostgreSQL backups
     services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
@@ -186,7 +186,7 @@ in
 
   wikijs = {
     enable = true;
-    port = 3000;
+    port = 3001;
     bindIP = "127.0.0.1";
 
     # Custom data directory
