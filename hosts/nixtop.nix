@@ -80,7 +80,7 @@
   ##wiki.js
   wikijs = {
     enable = false;
-    port = 3000;
+    port = 3001;
     bindIP = "0.0.0.0";
   };
 

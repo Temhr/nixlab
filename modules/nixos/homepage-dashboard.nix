@@ -10,7 +10,7 @@ in
 
       port = lib.mkOption {
         type = lib.types.port;
-        default = 3000 ;
+        default = 3000;
         description = "Port for Homepage to listen on";
       };
 
@@ -46,6 +46,13 @@ in
         defaultText = lib.literalExpression "pkgs.homepage-dashboard";
         description = "The Homepage package to use";
       };
+
+      allowedHosts = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ "*" ];
+        example = [ "localhost" "127.0.0.1" "home.example.com" "192.168.1.100" ];
+        description = "List of allowed hostnames/IPs (use [\"*\"] to allow all)";
+      };
     };
   };
 
@@ -75,6 +82,8 @@ in
         HOMEPAGE_CONFIG_DIR = "${cfg.dataDir}/config";
         PORT = toString cfg.port;
         HOSTNAME = cfg.bindIP;
+        # Allow access from specified hosts (no spaces in comma-separated list)
+        HOMEPAGE_ALLOWED_HOSTS = lib.concatStringsSep "," cfg.allowedHosts;
       };
 
       serviceConfig = {
