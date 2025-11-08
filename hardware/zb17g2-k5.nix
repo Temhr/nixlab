@@ -4,7 +4,6 @@
     ./common/optional
     ./common/optional/drives.nix
     ./common/optional/drives-additional.nix
-    ./common/optional/wifi-fix.nix
     #./zb17g2-k5/disko-impermanence.nix
     #./zb17g2-k5/boilerplate.nix
   ];
@@ -17,25 +16,5 @@
   #mount-mirror.enable = true; #mounts mirror drive
   mount-mirk1.enable = true; #mounts mirk1 nfs
   mount-mirk3.enable = true; #mounts mirk3 nfs
-
-
-  # Enable and configure the WiFi fix
-  hardware.wifi-fix = {
-    enable = true;
-    interface = "wlp61s0";
-    gateway = "192.168.0.1";
-    driver = "iwlwifi";
-
-    # Use instant crash monitoring instead of slow polling
-    enableWatchdog = false;  # DISABLE the slow 2-minute watchdog
-    enableResumefix = true;
-    powerSaveDisable = true;
-
-    # Try disabling 11n to see if it helps stability
-    extraModprobeConfig = ''
-      options iwlwifi 11n_disable=8
-      options iwlwifi bt_coex_active=0
-    '';
-  };
 
 }
