@@ -85,9 +85,7 @@
   };
 
   services.bookstack-custom = {
-    enable = true;
-    port = 3002;
-    bindIP = "0.0.0.0";
+    enable = false;
     domain = "wiki.example.com";
   };
 
