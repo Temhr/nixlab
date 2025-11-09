@@ -100,6 +100,7 @@
     enable = true;
     port = 1880;
     bindIP = "0.0.0.0";
+    openFirewall = true;
   };
 
   ## List packages installed in system profile. To search, run:
