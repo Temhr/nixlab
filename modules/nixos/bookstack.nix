@@ -1,11 +1,11 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.bookstack;
+  cfg = config.services.bookstack-custom;
 in
 {
   options = {
-    services.bookstack = {
+    services.bookstack-custom = {
       enable = lib.mkEnableOption "BookStack service";
 
       port = lib.mkOption {
@@ -79,7 +79,7 @@ in
 
     # Firewall configuration
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      [ cfg.port ] ++ lib.optionals cfg.enableSSL [ 80 443 3002 ]
+      [ cfg.port ] ++ lib.optionals cfg.enableSSL [ 80 443 ]
     );
   };
 }
@@ -87,7 +87,7 @@ in
 /*
 Usage example:
 
-services.bookstack = {
+services.bookstack-custom = {
   enable = true;
   domain = "wiki.example.com";
   port = 3002;
