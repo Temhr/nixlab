@@ -84,7 +84,7 @@
     bindIP = "0.0.0.0";
   };
 
-  services.bookstack-custom = {
+  services.bookstack = {
     enable = false;
     port = 3002;
     bindIP = "0.0.0.0";

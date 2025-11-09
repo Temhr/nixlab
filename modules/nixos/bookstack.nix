@@ -1,11 +1,11 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.bookstack-custom;
+  cfg = config.services.bookstack;
 in
 {
   options = {
-    services.bookstack-custom = {
+    services.bookstack = {
       enable = lib.mkEnableOption "BookStack service";
 
       port = lib.mkOption {
@@ -87,7 +87,7 @@ in
 /*
 Usage example:
 
-services.bookstack-custom = {
+services.bookstack = {
   enable = true;
   domain = "wiki.example.com";
   port = 3002;
