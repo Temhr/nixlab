@@ -85,9 +85,10 @@
   };
 
   services.bookstack = {
-    enable = false;
+    enable = true;
     port = 3002;
     bindIP = "0.0.0.0";
+    domain = "wiki.example.com";
   };
 
   ## List packages installed in system profile. To search, run:
