@@ -60,13 +60,28 @@ in
       "f ${cfg.appKeyFile} 0600 bookstack bookstack -"
     ];
 
+    # Setup MySQL database
+    services.mysql = {
+      enable = true;
+      package = pkgs.mariadb;
+      ensureDatabases = [ "bookstack" ];
+      ensureUsers = [{
+        name = "bookstack";
+        ensurePermissions = {
+          "bookstack.*" = "ALL PRIVILEGES";
+        };
+      }];
+    };
+
     # Use the built-in BookStack module
     services.bookstack = {
       enable = true;
       hostname = cfg.domain;
-      appKeyFile = cfg.appKeyFile;
 
-      database.createLocally = true;
+      # Use new settings API
+      settings = {
+        APP_KEY_FILE = cfg.appKeyFile;
+      };
 
       nginx = {
         enableACME = cfg.enableSSL;
