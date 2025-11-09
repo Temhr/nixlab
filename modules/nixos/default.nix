@@ -6,6 +6,7 @@
     ./development.nix
     ./education.nix
     ./games.nix
+    ./home-assistant.nix
     ./homepage-dashboard.nix
     ./productivity.nix
     ./media.nix

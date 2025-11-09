@@ -89,6 +89,13 @@
     domain = "wiki.example.com";
   };
 
+  services.homeassistant-custom = {
+    enable = true;
+    port = 8123;
+    bindIP = "0.0.0.0";
+  };
+
+
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
