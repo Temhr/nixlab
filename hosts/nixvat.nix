@@ -95,6 +95,10 @@
     bindIP = "0.0.0.0";
   };
 
+  services.nodered-service = {
+    enable = true;
+    port = 1880;
+  };
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

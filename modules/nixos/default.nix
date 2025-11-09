@@ -8,8 +8,9 @@
     ./games.nix
     ./home-assistant.nix
     ./homepage-dashboard.nix
-    ./productivity.nix
     ./media.nix
+    ./node-red.nix
+    ./productivity.nix
     ./virtualizations.nix
     ./wiki-js.nix
   ];
