@@ -87,6 +87,7 @@
   services.bookstack-custom = {
     enable = false;
     domain = "wiki.example.com";
+    bindIP = "0.0.0.0";
   };
 
   services.homeassistant-custom = {
@@ -98,6 +99,7 @@
   services.nodered-service = {
     enable = true;
     port = 1880;
+    bindIP = "0.0.0.0";
   };
 
   ## List packages installed in system profile. To search, run:

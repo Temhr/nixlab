@@ -23,8 +23,8 @@ in
       # Use "127.0.0.1" for localhost-only access
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "0.0.0.0";
-        description = "IP address to bind to";
+        default = "127.0.0.1"; #localhost only
+        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 
       # REQUIRED: Your domain name for BookStack

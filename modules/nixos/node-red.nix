@@ -23,7 +23,7 @@ in
       # Use "0.0.0.0" for access from other devices
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "127.0.0.1";
+        default = "127.0.0.1"; #localhost only
         description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 

@@ -23,8 +23,8 @@ in
       # Home Assistant typically needs network access for IoT devices
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "0.0.0.0";
-        description = "IP address to bind to";
+        default = "127.0.0.1"; #localhost only
+        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 
       # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
