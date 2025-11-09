@@ -55,7 +55,7 @@ in
       # Set to true if accessing from other devices
       openFirewall = lib.mkOption {
         type = lib.types.bool;
-        default = false;
+        default = true;
         description = "Open firewall ports";
       };
     };
