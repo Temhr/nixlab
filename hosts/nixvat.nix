@@ -73,7 +73,7 @@
 
   #homepage
   services.homepage = {
-    enable = enable;
+    enable = true;
     port = 3000;
     bindIP = "0.0.0.0";
   };
