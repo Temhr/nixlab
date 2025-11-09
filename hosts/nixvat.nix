@@ -71,7 +71,7 @@
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
-  ##self-hosted
+  ## Self-hosted apps and service
   services.homepage = {
     enable = true;
     port = 3000;
