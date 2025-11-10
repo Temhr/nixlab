@@ -36,9 +36,6 @@
   ## Enable automatic login for the user.
   services.displayManager.autoLogin.user =  "temhr";
 
-  ## Enable Syncthing ("hostname" or "none")
-  syncthing.system = "nixzen";
-
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
@@ -72,18 +69,58 @@
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
-  #homepage
-  services.homepage = {
-    enable = false;
-    port = 3000;
-    bindIP = "0.0.0.0";
-  };
 
-  ##wiki.js
-  wikijs = {
-    enable = false;
-    port = 3000;
-    bindIP = "0.0.0.0";
+  services.syncthing-custom = {
+    enable = true;
+    user = "temhr";
+    group = "users";
+    guiPort = 8384;
+    guiAddress = "0.0.0.0";
+    configDir = "/home/temhr/.config/syncthing";
+
+    # OPTIONAL: Configure devices (requires overrideDevices = true)
+    devices = {
+      "nixvat" = {
+        id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP";
+        addresses = [ "dynamic" ];
+        introducer = false;
+      };
+      "Pixel XL" = {
+        id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4";
+        addresses = [ "dynamic" ];
+      };
+      "Pixel 3a XL" = {
+        id = "VZJIMGH-5ZGJ3SO-PHNSMDO-AVCCG7L-ZNCDDTW-3QTIWD7-IVO352T-A6P43AU";
+        addresses = [ "dynamic" ];
+      };
+      "Pixel 6 Pro" = {
+        id = "ONYBLUB-XOJUXRG-VQEOPRZ-THOAPKN-UU2MBOY-M4PGI4Y-4J5Q4LT-SHSDLAF";
+        addresses = [ "dynamic" ];
+      };
+    };
+    folders = {
+      "mirror" = {
+        path = "/mirror";
+        id = "mirror";
+        label = "mirror";
+        devices = [ "nixvat" ];
+        type = "sendreceive";  # or "sendonly" or "receiveonly"
+      };
+      "Phone media" = {
+        path = "/mirror/phshare/photos";
+        id = "Phone media";
+        label = "Phone media";
+        devices = [ "Pixel XL" "Pixel 3a XL" "Pixel 6 Pro"];
+        type = "sendreceive";  # or "sendonly" or "receiveonly"
+      };
+      "Docs" = {
+        path = "/mirror/phshare/docs";
+        id = "Docs";
+        label = "Docs";
+        devices = [ "Pixel XL" "Pixel 6 Pro"];
+        type = "sendreceive";  # or "sendonly" or "receiveonly"
+      };
+    };
   };
 
   ## List packages installed in system profile. To search, run:

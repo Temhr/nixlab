@@ -35,9 +35,6 @@
   ## Enable automatic login for the user.
   services.displayManager.autoLogin.user =  "temhr";
 
-  ## Enable Syncthing ("hostname" or "none")
-  syncthing.system = "nixvat";
-
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
@@ -102,6 +99,34 @@
     bindIP = "0.0.0.0";
     openFirewall = true;
   };
+
+  services.syncthing-custom = {
+    enable = true;
+    user = "temhr";
+    group = "users";
+    guiPort = 8384;
+    guiAddress = "0.0.0.0";
+    configDir = "/home/temhr/.config/syncthing";
+
+    # OPTIONAL: Configure devices (requires overrideDevices = true)
+    devices = {
+      "nixzen" = {
+        id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
+        addresses = [ "dynamic" ];
+        introducer = false;
+      };
+    };
+    folders = {
+      "mirror" = {
+        path = "/mirror";
+        id = "mirror";
+        label = "mirror";
+        devices = [ "nixzen" ];
+        type = "sendreceive";  # or "sendonly" or "receiveonly"
+      };
+    };
+  };
+
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
