@@ -330,10 +330,16 @@ in
     };
 
     # ----------------------------------------------------------------------------
-    # FIREWALL - Open GUI port if using reverse proxy
+    # FIREWALL - Open necessary ports
     # ----------------------------------------------------------------------------
-    # Open HTTP/HTTPS ports if domain is configured
-    networking.firewall.allowedTCPPorts = lib.mkIf (cfg.domain != null && cfg.openFirewall) [ 80 443 ];
+    # Open sync ports (22000, 21027) via openDefaultPorts in services.syncthing
+    # Open GUI port if binding to non-localhost
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
+      # Open GUI port if not localhost-only
+      lib.optionals (cfg.guiAddress != "127.0.0.1") [ cfg.guiPort ]
+      # Also open HTTP/HTTPS if using reverse proxy
+      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+    );
   };
 }
 

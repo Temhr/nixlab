@@ -107,8 +107,8 @@
     guiPort = 8384;
     guiAddress = "0.0.0.0";
     configDir = "/home/temhr/.config/syncthing";
+    openFirewall = true;
 
-    # OPTIONAL: Configure devices (requires overrideDevices = true)
     devices = {
       "nixzen" = {
         id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
@@ -122,7 +122,7 @@
         id = "mirror";
         label = "mirror";
         devices = [ "nixzen" ];
-        type = "sendreceive";  # or "sendonly" or "receiveonly"
+        type = "sendreceive";
       };
     };
   };
