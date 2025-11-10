@@ -61,7 +61,7 @@ settings:
         widget:
           type: syncthing
           url: http://192.168.0.201:8384
-          key: "{{SYNCTHING_API_KEY}}"
+          key: "{{SYNCTHING-NIXVAT_API_KEY}}"
         server: nixvat
         ping: http://192.168.0.201:8384
     - Syncthing-nixzen:
@@ -71,6 +71,6 @@ settings:
         widget:
           type: syncthing
           url: http://192.168.0.204:8384
-          key: "{{SYNCTHING_API_KEY}}"
+          key: "{{SYNCTHING-NIXZEN_API_KEY}}"
         server: nixzen
         ping: http://192.168.0.204:8384
