@@ -74,7 +74,6 @@
     port = 3000;
     bindIP = "0.0.0.0";
     openFirewall = true;
-    dataDir = "/home/temhr/shelf/homepage";
   };
 
   services.wikijs-custom = {
