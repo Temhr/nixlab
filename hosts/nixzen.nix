@@ -78,8 +78,6 @@
     guiAddress = "0.0.0.0";
     configDir = "/home/temhr/.config/syncthing";
     openFirewall = true;
-
-    # OPTIONAL: Configure devices (requires overrideDevices = true)
     devices = {
       "nixvat" = {
         id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP";

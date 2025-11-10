@@ -108,7 +108,6 @@
     guiAddress = "0.0.0.0";
     configDir = "/home/temhr/.config/syncthing";
     openFirewall = true;
-
     devices = {
       "nixzen" = {
         id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
