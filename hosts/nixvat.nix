@@ -92,6 +92,7 @@
     enable = true;
     port = 8123;
     bindIP = "0.0.0.0";
+    openFirewall = true;
   };
 
   services.nodered-service = {
