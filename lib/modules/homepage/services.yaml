@@ -3,13 +3,6 @@
 # Homepage dashboard configuration
 # Docs: https://gethomepage.dev/en/configs/services/
 
-# Global settings (optional, adjust to your setup)
-settings:
-  theme: dark
-  title: "Homelab Dashboard"
-  hideVersion: true
-  showStats: true
-
 # ──────────────────────────────────────────────
 # SECTION: Home Automation
 # ──────────────────────────────────────────────
