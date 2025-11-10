@@ -1,25 +1,33 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.homepage;
+  cfg = config.services.homepage-custom;
 in
 {
+  # ============================================================================
+  # OPTIONS - Define what can be configured
+  # ============================================================================
   options = {
-    services.homepage = {
+    services.homepage-custom = {
+      # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Homepage service";
 
+      # OPTIONAL: Port to listen on (default: 3000)
       port = lib.mkOption {
         type = lib.types.port;
         default = 3000;
         description = "Port for Homepage to listen on";
       };
 
+      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+      # Use "0.0.0.0" for access from other devices
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "127.0.0.1"; #localhost only
+        default = "127.0.0.1";
         description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 
+      # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
       domain = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -27,12 +35,15 @@ in
         description = "Domain name for nginx reverse proxy (optional)";
       };
 
+      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
+      # Only works if domain is set
       enableSSL = lib.mkOption {
         type = lib.types.bool;
         default = false;
         description = "Enable HTTPS with Let's Encrypt (requires domain)";
       };
 
+      # OPTIONAL: Where to store Homepage config (default: /var/lib/homepage)
       dataDir = lib.mkOption {
         type = lib.types.path;
         default = "/var/lib/homepage";
@@ -40,6 +51,7 @@ in
         description = "Directory for Homepage configuration and data";
       };
 
+      # OPTIONAL: Homepage package to use (default: pkgs.homepage-dashboard)
       package = lib.mkOption {
         type = lib.types.package;
         default = pkgs.homepage-dashboard;
@@ -47,23 +59,40 @@ in
         description = "The Homepage package to use";
       };
 
+      # OPTIONAL: Allowed hostnames/IPs for host validation (default: ["*"] = all)
+      # Homepage validates the Host header for security
       allowedHosts = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ "*" ];
         example = [ "localhost" "127.0.0.1" "home.example.com" "192.168.1.100" ];
         description = "List of allowed hostnames/IPs (use [\"*\"] to allow all)";
       };
+
+      # OPTIONAL: Auto-open firewall ports (default: true)
+      openFirewall = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Open firewall ports for HTTP/HTTPS";
+      };
     };
   };
 
+  # ============================================================================
+  # CONFIG - What happens when the service is enabled
+  # ============================================================================
   config = lib.mkIf cfg.enable {
-    # Create necessary directories
+
+    # ----------------------------------------------------------------------------
+    # DIRECTORY SETUP - Create necessary directories with proper permissions
+    # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0750 homepage homepage -"
       "d ${cfg.dataDir}/config 0750 homepage homepage -"
     ];
 
-    # Create homepage user
+    # ----------------------------------------------------------------------------
+    # USER SETUP - Create dedicated system user for Homepage
+    # ----------------------------------------------------------------------------
     users.users.homepage = {
       isSystemUser = true;
       group = "homepage";
@@ -72,17 +101,20 @@ in
 
     users.groups.homepage = {};
 
-    # Homepage service
+    # ----------------------------------------------------------------------------
+    # HOMEPAGE SERVICE - Configure the systemd service
+    # ----------------------------------------------------------------------------
     systemd.services.homepage = {
       description = "Homepage Dashboard";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
 
+      # Environment variables for Homepage configuration
       environment = {
         HOMEPAGE_CONFIG_DIR = "${cfg.dataDir}/config";
         PORT = toString cfg.port;
         HOSTNAME = cfg.bindIP;
-        # Allow access from specified hosts (no spaces in comma-separated list)
+        # Host validation: comma-separated list (no spaces)
         HOMEPAGE_ALLOWED_HOSTS = lib.concatStringsSep "," cfg.allowedHosts;
       };
 
@@ -104,7 +136,9 @@ in
       };
     };
 
-    # Optional: Nginx reverse proxy
+    # ----------------------------------------------------------------------------
+    # NGINX REVERSE PROXY - Only configured if domain is set
+    # ----------------------------------------------------------------------------
     services.nginx = lib.mkIf (cfg.domain != null) {
       enable = true;
       recommendedProxySettings = true;
@@ -129,24 +163,115 @@ in
       };
     };
 
-    # Firewall configuration
-    networking.firewall.allowedTCPPorts = [ 80 443 3000 ];
+    # ----------------------------------------------------------------------------
+    # FIREWALL - Open necessary ports if requested
+    # ----------------------------------------------------------------------------
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
+      # Open Homepage port if not using reverse proxy or binding to non-localhost
+      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [ cfg.port ]
+      # Open HTTP/HTTPS if using reverse proxy
+      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+    );
   };
 }
 
 /*
-Usage example:
+================================================================================
+USAGE EXAMPLE
+================================================================================
 
-services.homepage = {
+Minimal configuration:
+----------------------
+services.homepage-custom = {
+  enable = true;
+};
+# Access at: http://localhost:3000
+
+
+Network access without domain:
+-------------------------------
+services.homepage-custom = {
+  enable = true;
+  bindIP = "0.0.0.0";
+  openFirewall = true;
+};
+# Access at: http://your-ip:3000
+
+
+Full configuration with domain:
+--------------------------------
+services.homepage-custom = {
   enable = true;
   port = 3000;
   bindIP = "127.0.0.1";
-
-  # Custom data directory (optional)
   dataDir = "/data/homepage";
 
-  # Optional: Nginx reverse proxy
+  # Host validation (add all ways you'll access it)
+  allowedHosts = [ "home.example.com" "localhost" "192.168.1.100" ];
+
+  # Nginx reverse proxy
   domain = "home.example.com";
   enableSSL = true;
+  openFirewall = true;
 };
+
+
+================================================================================
+HOST VALIDATION
+================================================================================
+
+Homepage validates the Host header for security. If you get "Host validation
+failed" errors, add the hostname/IP to allowedHosts:
+
+  allowedHosts = [
+    "localhost"
+    "127.0.0.1"
+    "192.168.1.100"
+    "home.example.com"
+  ];
+
+Or disable validation entirely (not recommended):
+  allowedHosts = [ "*" ];
+
+
+================================================================================
+CONFIGURATION
+================================================================================
+
+Homepage stores config in YAML files under dataDir/config/:
+- services.yaml  - Dashboard services/links
+- widgets.yaml   - Dashboard widgets
+- bookmarks.yaml - Quick links
+- settings.yaml  - General settings
+
+Edit these files manually or use the built-in editor (if enabled).
+
+Example services.yaml:
+  - Group 1:
+      - Service 1:
+          href: http://example.com
+          description: My service
+
+Restart after config changes:
+  sudo systemctl restart homepage
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Check service status:
+  sudo systemctl status homepage
+
+View logs:
+  sudo journalctl -u homepage -f
+
+Host validation error:
+  Add your IP/hostname to allowedHosts
+
+Cannot access from network:
+  Set bindIP = "0.0.0.0" and openFirewall = true
+
+Check config files:
+  ls -la /var/lib/homepage/config/
 */

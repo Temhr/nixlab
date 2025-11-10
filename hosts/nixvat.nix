@@ -69,10 +69,11 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and service
-  services.homepage = {
+  services.homepage-custom = {
     enable = true;
     port = 3000;
     bindIP = "0.0.0.0";
+    openFirewall = true;
   };
 
   services.wikijs-custom = {
