@@ -1,18 +1,13 @@
+{ ... }:
 {
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./bookstack.nix
-    ./development.nix
-    ./education.nix
-    ./games.nix
     ./home-assistant.nix
     ./homepage-dashboard.nix
-    ./media.nix
     ./node-red.nix
-    ./productivity.nix
     ./syncthing.nix
-    ./virtualizations.nix
     ./wiki-js.nix
   ];
 
