@@ -4,7 +4,6 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./graphical-shells.nix
-    #./syncthing.nix
   ];
 
   options = {
