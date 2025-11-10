@@ -11,6 +11,7 @@
     ./media.nix
     ./node-red.nix
     ./productivity.nix
+    ./syncthing.nix
     ./virtualizations.nix
     ./wiki-js.nix
   ];
