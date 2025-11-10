@@ -75,10 +75,11 @@
     bindIP = "0.0.0.0";
   };
 
-  wikijs = {
+  services.wikijs-custom = {
     enable = true;
     port = 3001;
     bindIP = "0.0.0.0";
+    openFirewall = true;
   };
 
   services.bookstack-custom = {
