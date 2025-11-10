@@ -12,10 +12,10 @@ in
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "BookStack service";
 
-      # OPTIONAL: Port to listen on (default: 3002)
+      # OPTIONAL: Port to listen on (default: 6875)
       port = lib.mkOption {
         type = lib.types.port;
-        default = 3002;
+        default = 6875;
         description = "Port for BookStack to listen on";
       };
 

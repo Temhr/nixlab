@@ -1,0 +1,76 @@
+---
+# /var/lib/homepage/config/services.yaml
+# Homepage dashboard configuration
+# Docs: https://gethomepage.dev/en/configs/services/
+
+# Global settings (optional, adjust to your setup)
+settings:
+  theme: dark
+  title: "Homelab Dashboard"
+  hideVersion: true
+  showStats: true
+
+# ──────────────────────────────────────────────
+# SECTION: Home Automation
+# ──────────────────────────────────────────────
+- Home Automation:
+    - Home Assistant:
+        href: http://192.168.0.201:8123
+        icon: home-assistant
+        description: Central home automation hub
+        widget:
+          type: homeassistant
+          url: http://192.168.0.201:8123
+          key: "{{HASS_TOKEN}}"   # store securely in .env
+        server: nixvat
+        ping: http://192.168.0.201:8123
+
+    - Node-RED:
+        href: http://192.168.0.201:1880
+        icon: nodered
+        description: Visual automation and flow-based logic editor
+        server: nixvat
+        ping: http://192.168.0.201:1880
+
+# ──────────────────────────────────────────────
+# SECTION: Knowledge Base
+# ──────────────────────────────────────────────
+- Knowledge Base:
+    - BookStack:
+        href: http://192.168.0.201:6875
+        icon: bookstack
+        description: Self-hosted documentation and notes
+        server: nixvat
+        ping: http://192.168.0.201:6875
+
+    - Wiki.js:
+        href: http://192.168.0.201:3001
+        icon: wikijs
+        description: Structured and collaborative wiki platform
+        server: nixvat
+        ping: http://192.168.0.201:3001
+
+# ──────────────────────────────────────────────
+# SECTION: Sync and Storage
+# ──────────────────────────────────────────────
+- Sync and Storage:
+    - Syncthing-nixvat:
+        href: http://192.168.0.201:8384
+        icon: syncthing
+        description: Peer-to-peer file synchronization
+        widget:
+          type: syncthing
+          url: http://192.168.0.201:8384
+          key: "{{SYNCTHING_API_KEY}}"
+        server: nixvat
+        ping: http://192.168.0.201:8384
+    - Syncthing-nixzen:
+        href: http://192.168.0.204:8384
+        icon: syncthing
+        description: Peer-to-peer file synchronization
+        widget:
+          type: syncthing
+          url: http://192.168.0.204:8384
+          key: "{{SYNCTHING_API_KEY}}"
+        server: nixzen
+        ping: http://192.168.0.204:8384
