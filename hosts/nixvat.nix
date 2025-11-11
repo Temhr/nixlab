@@ -104,6 +104,21 @@
     openFirewall = true;
   };
 
+  services.zola-custom = {
+    enable = true;
+    port = 3003;
+    siteDir = "/var/www/my-blog";
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+  };
+
+  services.glance-custom = {
+    enable = true;
+    port = 3004;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+  };
+
   services.syncthing-custom = {
     enable = true;
     user = "temhr";

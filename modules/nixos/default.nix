@@ -4,11 +4,13 @@
     # Paths to other modules.
     # Compose this module out of smaller ones.
     ./bookstack.nix
+    ./glance.nix
     ./home-assistant.nix
     ./homepage-dashboard.nix
     ./node-red.nix
     ./syncthing.nix
     ./wiki-js.nix
+    ./zola.nix
   ];
 
   options = {
