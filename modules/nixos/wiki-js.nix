@@ -96,16 +96,18 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       # Create main data directory owned by wiki-js user
-      "d ${cfg.dataDir} 0750 wiki-js wiki-js -"
+      "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
     ]
     # Create custom uploads directory if specified
     ++ lib.optionals (cfg.uploadsPath != null) [
-      "d ${cfg.uploadsPath} 0750 wiki-js wiki-js -"
+      "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
     ]
     # Create backup directory if specified (owned by postgres user)
     ++ lib.optionals (cfg.backupPath != null) [
-      "d ${cfg.backupPath} 0750 postgres postgres -"
+      "d ${cfg.backupPath} 0770 postgres postgres -"
     ];
+
+    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - Wiki.js requires PostgreSQL

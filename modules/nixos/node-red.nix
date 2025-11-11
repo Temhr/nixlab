@@ -71,7 +71,7 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       # Create data directory for Node-RED flows and configuration
-      "d ${cfg.dataDir} 0750 node-red node-red -"
+      "d ${cfg.dataDir} 0770 node-red node-red -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -84,6 +84,8 @@ in
     };
 
     users.groups.node-red = {};
+
+    users.users.temhr.extraGroups = [ "node-red" ];
 
     # ----------------------------------------------------------------------------
     # NODE-RED SERVICE - Configure the systemd service

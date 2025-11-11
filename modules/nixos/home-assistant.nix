@@ -159,8 +159,10 @@ in
 
     # Create custom data directory with proper permissions
     systemd.tmpfiles.rules = lib.mkIf (cfg.dataDir != "/var/lib/hass") [
-      "d ${cfg.dataDir} 0750 hass hass -"
+      "d ${cfg.dataDir} 0770 hass hass -"
     ];
+
+    users.users.temhr.extraGroups = [ "hass" ];
 
     # ----------------------------------------------------------------------------
     # NGINX REVERSE PROXY - Only configured if domain is set

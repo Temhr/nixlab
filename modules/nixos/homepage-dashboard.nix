@@ -86,8 +86,8 @@ in
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0750 homepage homepage -"
-      "d ${cfg.dataDir}/config 0750 homepage homepage -"
+      "d ${cfg.dataDir} 0770 homepage homepage -"
+      "d ${cfg.dataDir}/config 0770 homepage homepage -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -100,6 +100,8 @@ in
     };
 
     users.groups.homepage = {};
+
+    users.users.temhr.extraGroups = [ "homepage" ];
 
     # ----------------------------------------------------------------------------
     # HOMEPAGE SERVICE - Configure the systemd service

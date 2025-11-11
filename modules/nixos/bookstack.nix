@@ -76,10 +76,12 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       # Create data directory owned by bookstack user
-      "d ${cfg.dataDir} 0750 bookstack bookstack -"
+      "d ${cfg.dataDir} 0770 bookstack bookstack -"
       # Create app key file (you must populate it manually)
-      "f ${cfg.appKeyFile} 0600 bookstack bookstack -"
+      "f ${cfg.appKeyFile} 0660 bookstack bookstack -"
     ];
+
+    users.users.temhr.extraGroups = [ "bookstack" ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - BookStack requires MySQL/MariaDB
