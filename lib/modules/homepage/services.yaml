@@ -11,19 +11,23 @@
         href: http://192.168.0.201:8123
         icon: home-assistant
         description: Central home automation hub
+        target: _blank
         widget:
           type: homeassistant
           url: http://192.168.0.201:8123
           key: "{{HASS_TOKEN}}"   # store securely in .env
         server: nixvat
         ping: http://192.168.0.201:8123
+        statusStyle: dot
 
     - Node-RED:
         href: http://192.168.0.201:1880
         icon: nodered
         description: Visual automation and flow-based logic editor
+        target: _blank
         server: nixvat
         ping: http://192.168.0.201:1880
+        statusStyle: dot
 
 # ──────────────────────────────────────────────
 # SECTION: Knowledge Base
@@ -33,37 +37,280 @@
         href: http://192.168.0.201:6875
         icon: bookstack
         description: Self-hosted documentation and notes
+        target: _blank
         server: nixvat
         ping: http://192.168.0.201:6875
+        statusStyle: dot
 
     - Wiki.js:
         href: http://192.168.0.201:3001
         icon: wikijs
         description: Structured and collaborative wiki platform
+        target: _blank
         server: nixvat
         ping: http://192.168.0.201:3001
+        statusStyle: dot
 
 # ──────────────────────────────────────────────
 # SECTION: Sync and Storage
 # ──────────────────────────────────────────────
 - Sync and Storage:
-    - Syncthing-nixvat:
+    - Syncthing nixvat:
         href: http://192.168.0.201:8384
         icon: syncthing
-        description: Peer-to-peer file synchronization
+        description: Main sync node - Peer-to-peer file synchronization
+        target: _blank
         widget:
           type: syncthing
           url: http://192.168.0.201:8384
-          key: "{{SYNCTHING-NIXVAT_API_KEY}}"
+          key: "{{SYNCTHING_NIXVAT_API_KEY}}"
         server: nixvat
         ping: http://192.168.0.201:8384
-    - Syncthing-nixzen:
+        statusStyle: dot
+
+    - Syncthing nixzen:
         href: http://192.168.0.204:8384
         icon: syncthing
-        description: Peer-to-peer file synchronization
+        description: Secondary sync node - Peer-to-peer file synchronization
+        target: _blank
         widget:
           type: syncthing
           url: http://192.168.0.204:8384
-          key: "{{SYNCTHING-NIXZEN_API_KEY}}"
+          key: "{{SYNCTHING_NIXZEN_API_KEY}}"
         server: nixzen
         ping: http://192.168.0.204:8384
+        statusStyle: dot
+
+# ──────────────────────────────────────────────
+# SECTION: Media
+# ──────────────────────────────────────────────
+# Uncomment and configure media services as needed
+# - Media:
+#     - Plex:
+#         href: http://192.168.0.xxx:32400
+#         icon: plex
+#         description: Media streaming server
+#         target: _blank
+#         widget:
+#           type: plex
+#           url: http://192.168.0.xxx:32400
+#           key: "{{PLEX_TOKEN}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:32400
+#         statusStyle: dot
+#
+#     - Jellyfin:
+#         href: http://192.168.0.xxx:8096
+#         icon: jellyfin
+#         description: Open-source media system
+#         target: _blank
+#         widget:
+#           type: jellyfin
+#           url: http://192.168.0.xxx:8096
+#           key: "{{JELLYFIN_API_KEY}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8096
+#         statusStyle: dot
+#
+#     - Sonarr:
+#         href: http://192.168.0.xxx:8989
+#         icon: sonarr
+#         description: TV show management
+#         target: _blank
+#         widget:
+#           type: sonarr
+#           url: http://192.168.0.xxx:8989
+#           key: "{{SONARR_API_KEY}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8989
+#         statusStyle: dot
+#
+#     - Radarr:
+#         href: http://192.168.0.xxx:7878
+#         icon: radarr
+#         description: Movie management
+#         target: _blank
+#         widget:
+#           type: radarr
+#           url: http://192.168.0.xxx:7878
+#           key: "{{RADARR_API_KEY}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:7878
+#         statusStyle: dot
+
+# ──────────────────────────────────────────────
+# SECTION: Monitoring & Logs
+# ──────────────────────────────────────────────
+# Uncomment and configure monitoring services as needed
+# - Monitoring & Logs:
+#     - Grafana:
+#         href: http://192.168.0.xxx:3000
+#         icon: grafana
+#         description: Metrics visualization and dashboards
+#         target: _blank
+#         widget:
+#           type: grafana
+#           url: http://192.168.0.xxx:3000
+#           username: "{{GRAFANA_USERNAME}}"
+#           password: "{{GRAFANA_PASSWORD}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:3000
+#         statusStyle: dot
+#
+#     - Prometheus:
+#         href: http://192.168.0.xxx:9090
+#         icon: prometheus
+#         description: Metrics collection and monitoring
+#         target: _blank
+#         widget:
+#           type: prometheus
+#           url: http://192.168.0.xxx:9090
+#         server: nixvat
+#         ping: http://192.168.0.xxx:9090
+#         statusStyle: dot
+#
+#     - Portainer:
+#         href: http://192.168.0.xxx:9000
+#         icon: portainer
+#         description: Docker container management
+#         target: _blank
+#         widget:
+#           type: portainer
+#           url: http://192.168.0.xxx:9000
+#           env: 1
+#           key: "{{PORTAINER_API_KEY}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:9000
+#         statusStyle: dot
+#
+#     - Dozzle:
+#         href: http://192.168.0.xxx:8080
+#         icon: dozzle
+#         description: Real-time Docker log viewer
+#         target: _blank
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8080
+#         statusStyle: dot
+#
+#     - Uptime Kuma:
+#         href: http://192.168.0.xxx:3001
+#         icon: uptime-kuma
+#         description: Self-hosted monitoring tool
+#         target: _blank
+#         widget:
+#           type: uptimekuma
+#           url: http://192.168.0.xxx:3001
+#           slug: "{{UPTIME_KUMA_SLUG}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:3001
+#         statusStyle: dot
+
+# ──────────────────────────────────────────────
+# SECTION: Network Services
+# ──────────────────────────────────────────────
+# Uncomment and configure network services as needed
+# - Network Services:
+#     - Pi-hole:
+#         href: http://192.168.0.xxx/admin
+#         icon: pi-hole
+#         description: Network-wide ad blocking
+#         target: _blank
+#         widget:
+#           type: pihole
+#           url: http://192.168.0.xxx
+#           key: "{{PIHOLE_API_KEY}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx
+#         statusStyle: dot
+#
+#     - AdGuard Home:
+#         href: http://192.168.0.xxx:3000
+#         icon: adguard-home
+#         description: Network-wide ad and tracker blocking
+#         target: _blank
+#         widget:
+#           type: adguard
+#           url: http://192.168.0.xxx:3000
+#           username: "{{ADGUARD_USERNAME}}"
+#           password: "{{ADGUARD_PASSWORD}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:3000
+#         statusStyle: dot
+#
+#     - Unifi Controller:
+#         href: http://192.168.0.xxx:8443
+#         icon: unifi
+#         description: Network management and monitoring
+#         target: _blank
+#         widget:
+#           type: unifi
+#           url: http://192.168.0.xxx:8443
+#           username: "{{UNIFI_USERNAME}}"
+#           password: "{{UNIFI_PASSWORD}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8443
+#         statusStyle: dot
+#
+#     - Nginx Proxy Manager:
+#         href: http://192.168.0.xxx:81
+#         icon: nginx-proxy-manager
+#         description: Reverse proxy with SSL management
+#         target: _blank
+#         widget:
+#           type: npm
+#           url: http://192.168.0.xxx:81
+#           username: "{{NPM_USERNAME}}"
+#           password: "{{NPM_PASSWORD}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:81
+#         statusStyle: dot
+#
+#     - WireGuard:
+#         href: http://192.168.0.xxx:51821
+#         icon: wireguard
+#         description: VPN server for secure remote access
+#         target: _blank
+#         server: nixvat
+#         ping: http://192.168.0.xxx:51821
+#         statusStyle: dot
+
+# ──────────────────────────────────────────────
+# SECTION: Productivity & Tools
+# ──────────────────────────────────────────────
+# Uncomment and configure productivity services as needed
+# - Productivity & Tools:
+#     - Nextcloud:
+#         href: http://192.168.0.xxx:8080
+#         icon: nextcloud
+#         description: File sync and collaboration platform
+#         target: _blank
+#         widget:
+#           type: nextcloud
+#           url: http://192.168.0.xxx:8080
+#           username: "{{NEXTCLOUD_USERNAME}}"
+#           password: "{{NEXTCLOUD_PASSWORD}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8080
+#         statusStyle: dot
+#
+#     - Vaultwarden:
+#         href: http://192.168.0.xxx:8000
+#         icon: vaultwarden
+#         description: Self-hosted password manager
+#         target: _blank
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8000
+#         statusStyle: dot
+#
+#     - Paperless-ngx:
+#         href: http://192.168.0.xxx:8000
+#         icon: paperless
+#         description: Document management system
+#         target: _blank
+#         widget:
+#           type: paperlessngx
+#           url: http://192.168.0.xxx:8000
+#           key: "{{PAPERLESS_API_KEY}}"
+#         server: nixvat
+#         ping: http://192.168.0.xxx:8000
+#         statusStyle: dot

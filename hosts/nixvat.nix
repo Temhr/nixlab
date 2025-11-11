@@ -91,7 +91,7 @@
   };
 
   services.homeassistant-custom = {
-    enable = false;
+    enable = true;
     port = 8123;
     bindIP = "0.0.0.0";
     openFirewall = true;
