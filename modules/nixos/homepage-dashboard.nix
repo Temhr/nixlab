@@ -120,6 +120,18 @@ in
         HOMEPAGE_ALLOWED_HOSTS = lib.concatStringsSep "," cfg.allowedHosts;
       };
 
+      # Fix config file permissions on startup
+      preStart = ''
+        # Ensure config directory exists with proper permissions
+        mkdir -p ${cfg.dataDir}/config
+
+        # Fix permissions on config files (make writable by homepage user)
+        if [ -d ${cfg.dataDir}/config ]; then
+          chmod -R ug+w ${cfg.dataDir}/config/
+          chown -R homepage:homepage ${cfg.dataDir}/config/
+        fi
+      '';
+
       serviceConfig = {
         Type = "simple";
         User = "homepage";
