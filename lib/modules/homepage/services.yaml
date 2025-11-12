@@ -82,6 +82,28 @@
         statusStyle: dot
 
 # ──────────────────────────────────────────────
+# SECTION: System & Web Services
+# ──────────────────────────────────────────────
+- System & Web Services:
+    - Glance:
+        href: http://192.168.0.201:3004
+        icon: gauge
+        description: Lightweight system overview dashboard
+        target: _blank
+        server: nixvat
+        ping: http://192.168.0.201:3004
+        statusStyle: dot
+
+    - Zola:
+        href: http://192.168.0.201:3003
+        icon: zola
+        description: Static site generator for personal or project pages
+        target: _blank
+        server: nixvat
+        ping: http://192.168.0.201:3003
+        statusStyle: dot
+
+# ──────────────────────────────────────────────
 # SECTION: Media
 # ──────────────────────────────────────────────
 # Uncomment and configure media services as needed

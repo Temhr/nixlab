@@ -37,15 +37,15 @@
               default = false;
             };
         };
-        wine = {
+        waydroid = {
             enable = lib.mkEnableOption {
-              description = "Enables Wine";
+              description = "Enables waydroid";
               default = false;
             };
         };
-        home-assistant = {
+        wine = {
             enable = lib.mkEnableOption {
-              description = "Enables Home-Assistant";
+              description = "Enables Wine";
               default = false;
             };
         };
@@ -105,6 +105,9 @@
           virtualisation.spiceUSBRedirection.enable = true;
           users.users."temhr".extraGroups = ["libvirtd"];
         })
+        (lib.mkIf config.waydroid.enable {
+          #environment.systemPackages = [ pkgs.home-assistant ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
+        })
         (lib.mkIf config.wine.enable {  #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
           environment.systemPackages = with pkgs; [
             wineWowPackages.stable #support both 32-bit and 64-bit applications
@@ -115,9 +118,6 @@
             winetricks  #winetricks (all versions)
             wineWowPackages.waylandFull  #native wayland support (unstable)
           ];
-        })
-        (lib.mkIf config.home-assistant.enable {
-          #environment.systemPackages = [ pkgs.home-assistant ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines
         })
     ];
 
