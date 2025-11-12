@@ -107,8 +107,9 @@ in
         User = "glance";
         Group = "glance";
         WorkingDirectory = cfg.dataDir;
-        # Glance looks for glance.yml in current directory
-        ExecStart = "${cfg.package}/bin/glance --bind ${cfg.bindIP}:${toString cfg.port}";
+        # Glance reads config from glance.yml in current directory
+        # No command-line flags needed - it just runs
+        ExecStart = "${cfg.package}/bin/glance";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -121,10 +122,16 @@ in
       };
 
       # Ensure config file exists with proper permissions
+      # Port and bind address are configured in the YAML file
       preStart = ''
         # Create default config if it doesn't exist
         if [ ! -f ${cfg.dataDir}/glance.yml ]; then
           cat > ${cfg.dataDir}/glance.yml << 'EOF'
+# Glance configuration
+server:
+  port: ${toString cfg.port}
+  host: ${cfg.bindIP}
+
 pages:
   - name: Home
     columns:
@@ -146,7 +153,7 @@ pages:
                 title: Hacker News
 EOF
           chown glance:glance ${cfg.dataDir}/glance.yml
-          chmod 640 ${cfg.dataDir}/glance.yml
+          chmod 660 ${cfg.dataDir}/glance.yml
         fi
       '';
     };

@@ -8,6 +8,7 @@
     ./home-assistant.nix
     ./homepage-dashboard.nix
     ./node-red.nix
+    ./ollama.nix
     ./syncthing.nix
     ./wiki-js.nix
     ./zola.nix
