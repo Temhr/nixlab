@@ -126,11 +126,10 @@ in
       preStart = ''
         # Create default config if it doesn't exist
         if [ ! -f ${cfg.dataDir}/glance.yml ]; then
-          cat > ${cfg.dataDir}/glance.yml << 'EOF'
-# Glance configuration
+          cat > ${cfg.dataDir}/glance.yml << EOF
 server:
   port: ${toString cfg.port}
-  host: ${cfg.bindIP}
+  host: "${cfg.bindIP}"
 
 pages:
   - name: Home
