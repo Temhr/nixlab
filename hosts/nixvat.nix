@@ -107,7 +107,7 @@
   services.zola-custom = {
     enable = true;
     port = 3003;
-    siteDir = "/var/www/my-blog";
+    siteDir = "/var/www/myblog";
     bindIP = "0.0.0.0";
     openFirewall = true;
   };
