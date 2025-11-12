@@ -70,7 +70,7 @@ in
       # OPTIONAL: Auto-open firewall ports (default: false)
       openFirewall = lib.mkOption {
         type = lib.types.bool;
-        default = false;
+        default = true;
         description = "Open firewall ports";
       };
     };
@@ -92,6 +92,64 @@ in
 
     users.groups.zola = {};
     users.users.temhr.extraGroups = [ "zola" ];
+
+    # Initialize a Zola site if not already initialized
+    system.activationScripts.initZolaSite = {
+      text = ''
+        SITE_DIR="${cfg.siteDir}"
+
+        # Create site directory structure if config.toml doesn't exist
+        if [ ! -f "$SITE_DIR/config.toml" ]; then
+          echo "Initializing Zola site at $SITE_DIR..."
+
+          # Create base directories
+          mkdir -p "$SITE_DIR"/{content,templates,static}
+
+          # Create config.toml
+          cat > "$SITE_DIR/config.toml" << 'EOF'
+base_url = "http://localhost:${toString cfg.port}"
+title = "My Blog"
+compile_sass = true
+build_search_index = false
+
+[markdown]
+highlight_code = true
+EOF
+
+          # Create default content index
+          cat > "$SITE_DIR/content/_index.md" << 'EOF'
++++
+title = "Home"
++++
+
+# Welcome!
+
+This is my Zola site.
+EOF
+
+          # Create default template
+          cat > "$SITE_DIR/templates/index.html" << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ config.title }}</title>
+</head>
+<body>
+    <h1>{{ section.title }}</h1>
+    {{ section.content | safe }}
+</body>
+</html>
+EOF
+
+          # Set proper ownership and permissions
+          chown -R zola:zola "$SITE_DIR"
+          chmod -R 775 "$SITE_DIR"
+
+          echo "Zola site initialized successfully at $SITE_DIR"
+        fi
+      '';
+    };
 
     # ----------------------------------------------------------------------------
     # ZOLA SERVICE - Configure the systemd service
