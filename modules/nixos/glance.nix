@@ -87,7 +87,6 @@ in
       isSystemUser = true;
       group = "glance";
       home = cfg.dataDir;
-      createHome = true;
       description = "Glance dashboard user";
     };
 
