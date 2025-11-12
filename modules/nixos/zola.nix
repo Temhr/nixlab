@@ -122,12 +122,8 @@ in
         Restart = "on-failure";
         RestartSec = "10s";
 
-        # Security hardening
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        ReadOnlyPaths = [ cfg.siteDir ];
+        # Allow read-write access to site directory
+        ReadWritePaths = [ cfg.siteDir ];
       };
     };
 
