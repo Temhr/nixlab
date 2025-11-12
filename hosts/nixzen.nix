@@ -34,7 +34,7 @@
   services.printing.enable = true;
 
   ## Enable automatic login for the user.
-  services.displayManager.autoLogin.user =  "temhr";
+  services.displayManager.autoLogin.user =  "guest";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";

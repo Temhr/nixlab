@@ -10,7 +10,6 @@
     ./node-red.nix
     ./ollama.nix
     ./syncthing.nix
-    ./waydroid.nix
     ./wiki-js.nix
     ./zola.nix
   ];
