@@ -93,11 +93,6 @@ in
     users.groups.zola = {};
     users.users.temhr.extraGroups = [ "zola" ];
 
-    # Ensure Zola site directory exists with correct permissions
-    systemd.tmpfiles.rules = [
-      "d ${cfg.siteDir} 0775 zola zola -"
-    ];
-
     # ----------------------------------------------------------------------------
     # ZOLA SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
@@ -134,17 +129,6 @@ in
         ProtectHome = true;
         ReadOnlyPaths = [ cfg.siteDir ];
       };
-    };
-
-    # Initialize a Zola site if not already initialized
-    system.activationScripts.initZolaSite = {
-      text = ''
-        if [ ! -f ${cfg.siteDir}/config.toml ]; then
-          echo "Initializing Zola site at ${cfg.siteDir}..."
-          ${pkgs.zola}/bin/zola init --force --path ${cfg.siteDir}
-          chown -R zola:zola ${cfg.siteDir}
-        fi
-      '';
     };
 
     # ----------------------------------------------------------------------------
