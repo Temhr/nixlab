@@ -101,14 +101,14 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
 
-      # Validate site directory before starting
-      preStart = ''
-        if [ ! -f ${cfg.siteDir}/config.toml ]; then
-          echo "ERROR: Zola site not found at ${cfg.siteDir}"
-          echo "Please create a Zola site first: zola init ${cfg.siteDir}"
-          exit 1
-        fi
-      '';
+      # Validate site directory before starting (can be disabled for debugging)
+      # preStart = ''
+      #   if [ ! -f ${cfg.siteDir}/config.toml ]; then
+      #     echo "ERROR: Zola site not found at ${cfg.siteDir}"
+      #     echo "Please create a Zola site first: zola init ${cfg.siteDir}"
+      #     exit 1
+      #   fi
+      # '';
 
       serviceConfig = {
         Type = "simple";
