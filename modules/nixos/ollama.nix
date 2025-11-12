@@ -19,12 +19,12 @@ in
         description = "Port for Ollama API to listen on";
       };
 
-      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+      # OPTIONAL: IP to bind to (default: 0.0.0.0 for all interfaces)
       # Use "0.0.0.0" for access from other devices (e.g., for Open WebUI)
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "127.0.0.1";
-        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
+        default = "0.0.0.0";
+        description = "IP address to bind to (127.0.0.1 = localhost only)";
       };
 
       # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
@@ -111,7 +111,7 @@ in
 
       # Models to pre-download
       # Note: This downloads on service start, can take time for large models
-      models = cfg.models;
+      loadModels = cfg.models;
 
       # Additional environment variables
       environmentVariables = cfg.environmentVariables;

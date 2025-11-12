@@ -69,7 +69,13 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
-
+  services.ollama-custom = {
+    enable = true;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+    acceleration = "cuda";
+    models = [ "llama3.2" "mistral" ];
+  };
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
