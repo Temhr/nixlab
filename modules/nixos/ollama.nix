@@ -78,12 +78,62 @@ in
         description = "Additional environment variables for Ollama";
       };
 
-      # OPTIONAL: Auto-open firewall ports (default: false)
+      # OPTIONAL: Auto-open firewall ports (default: true)
       # Usually you access Ollama via localhost or reverse proxy
       openFirewall = lib.mkOption {
         type = lib.types.bool;
-        default = false;
+        default = true;
         description = "Open firewall ports";
+      };
+
+      # ============================================================================
+      # OPEN WEBUI OPTIONS
+      # ============================================================================
+
+      webui = {
+        # Enable Open WebUI web interface
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Enable Open WebUI web interface for Ollama";
+        };
+
+        # Port for Open WebUI (default: 3006)
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 3006;
+          description = "Port for Open WebUI to listen on";
+        };
+
+        # Domain for Open WebUI nginx reverse proxy
+        domain = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "chat.example.com";
+          description = "Domain name for Open WebUI nginx reverse proxy (optional)";
+        };
+
+        # Enable SSL for Open WebUI
+        enableSSL = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable HTTPS with Let's Encrypt for Open WebUI (requires domain)";
+        };
+
+        # Open firewall for Open WebUI
+        openFirewall = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Open firewall port for Open WebUI";
+        };
+
+        # Additional environment variables for Open WebUI
+        environment = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          default = {};
+          example = { WEBUI_AUTH = "false"; };
+          description = "Additional environment variables for Open WebUI";
+        };
       };
     };
   };
@@ -118,267 +168,256 @@ in
     };
 
     # ----------------------------------------------------------------------------
-    # NGINX REVERSE PROXY - Only configured if domain is set
+    # OPEN WEBUI - Configure if enabled
     # ----------------------------------------------------------------------------
-    services.nginx.enable = lib.mkIf (cfg.domain != null) true;
+    services.open-webui = lib.mkIf cfg.webui.enable {
+      enable = true;
+      port = cfg.webui.port;
 
-    services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-      ${cfg.domain} = {
-        forceSSL = cfg.enableSSL;
-        enableACME = cfg.enableSSL;
-
-        locations."/" = {
-          proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-
-            # Increase timeout for long-running LLM requests
-            proxy_read_timeout 300s;
-            proxy_connect_timeout 75s;
-
-            # Allow streaming responses
-            proxy_buffering off;
-          '';
-        };
-      };
+      # Automatically point to Ollama instance
+      environment = {
+        OLLAMA_BASE_URL = "http://${cfg.bindIP}:${toString cfg.port}";
+      } // cfg.webui.environment;
     };
+
+    # ----------------------------------------------------------------------------
+    # NGINX REVERSE PROXY - Ollama
+    # ----------------------------------------------------------------------------
+    services.nginx.enable = lib.mkIf (cfg.domain != null || cfg.webui.domain != null) true;
+
+    services.nginx.virtualHosts = lib.mkMerge [
+      # Ollama reverse proxy
+      (lib.mkIf (cfg.domain != null) {
+        ${cfg.domain} = {
+          forceSSL = cfg.enableSSL;
+          enableACME = cfg.enableSSL;
+
+          locations."/" = {
+            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+
+              # Increase timeout for long-running LLM requests
+              proxy_read_timeout 300s;
+              proxy_connect_timeout 75s;
+
+              # Allow streaming responses
+              proxy_buffering off;
+            '';
+          };
+        };
+      })
+
+      # Open WebUI reverse proxy
+      (lib.mkIf (cfg.webui.enable && cfg.webui.domain != null) {
+        ${cfg.webui.domain} = {
+          forceSSL = cfg.webui.enableSSL;
+          enableACME = cfg.webui.enableSSL;
+
+          locations."/" = {
+            proxyPass = "http://127.0.0.1:${toString cfg.webui.port}";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+
+              # WebSocket support for real-time updates
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+
+              # Increase timeout for long-running requests
+              proxy_read_timeout 300s;
+              proxy_connect_timeout 75s;
+            '';
+          };
+        };
+      })
+    ];
 
     # ----------------------------------------------------------------------------
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open Ollama port if not using reverse proxy or binding to non-localhost
-      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [ cfg.port ]
-      # Open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
-    );
+    networking.firewall.allowedTCPPorts = lib.mkMerge [
+      # Ollama firewall rules
+      (lib.mkIf cfg.openFirewall (
+        # Open Ollama port if not using reverse proxy or binding to non-localhost
+        lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [ cfg.port ]
+        # Open HTTP/HTTPS if using reverse proxy
+        ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ))
+
+      # Open WebUI firewall rules
+      (lib.mkIf (cfg.webui.enable && cfg.webui.openFirewall) (
+        # Open WebUI port if not using reverse proxy
+        lib.optionals (cfg.webui.domain == null) [ cfg.webui.port ]
+        # Open HTTP/HTTPS if using reverse proxy
+        ++ lib.optionals (cfg.webui.domain != null) [ 80 443 ]
+      ))
+    ];
   };
 }
 
 /*
 ================================================================================
-USAGE EXAMPLE
+USAGE EXAMPLES
 ================================================================================
 
-Minimal configuration (CPU only):
-----------------------------------
+Minimal configuration (CPU only, no WebUI):
+--------------------------------------------
 services.ollama-custom = {
   enable = true;
 };
 # API at: http://localhost:11434
 
 
-With GPU acceleration (NVIDIA):
---------------------------------
+With Open WebUI (local access only):
+-------------------------------------
 services.ollama-custom = {
   enable = true;
   acceleration = "cuda";
-  models = [ "llama3.2" ];  # Pre-download models
+  models = [ "llama3.2" "mistral" ];
+
+  webui = {
+    enable = true;
+    # Access at: http://localhost:3006
+  };
 };
 
 
-Network access (for Open WebUI):
----------------------------------
+With Open WebUI (network access):
+----------------------------------
 services.ollama-custom = {
   enable = true;
   bindIP = "0.0.0.0";
   openFirewall = true;
   acceleration = "cuda";
   models = [ "llama3.2" "mistral" ];
+
+  webui = {
+    enable = true;
+    port = 3006;
+    openFirewall = true;
+  };
 };
+# Ollama API: http://YOUR-IP:11434
+# Open WebUI: http://YOUR-IP:3006
 
 
-Full configuration with domain:
---------------------------------
+Full configuration with domains and SSL:
+-----------------------------------------
 services.ollama-custom = {
   enable = true;
   port = 11434;
   bindIP = "127.0.0.1";
-  dataDir = "/mnt/storage/ollama";  # Large storage for models
+  dataDir = "/mnt/storage/ollama";
   acceleration = "cuda";
-
-  # Pre-download models
   models = [ "llama3.2" "mistral" "codellama" ];
 
   # Performance tuning
   environmentVariables = {
-    OLLAMA_NUM_PARALLEL = "4";      # Parallel requests
-    OLLAMA_MAX_LOADED_MODELS = "2"; # Models in memory
+    OLLAMA_NUM_PARALLEL = "4";
+    OLLAMA_MAX_LOADED_MODELS = "2";
   };
 
-  # Nginx reverse proxy
+  # Ollama API reverse proxy
   domain = "ollama.example.com";
   enableSSL = true;
   openFirewall = true;
+
+  # Open WebUI configuration
+  webui = {
+    enable = true;
+    port = 3006;
+    domain = "chat.example.com";
+    enableSSL = true;
+    openFirewall = true;
+
+    # Optional: Disable authentication
+    environment = {
+      # WEBUI_AUTH = "false";  # Uncomment to disable login
+    };
+  };
 };
+# Ollama API: https://ollama.example.com
+# Open WebUI: https://chat.example.com
 
 
-================================================================================
-GPU ACCELERATION
-================================================================================
-
-NVIDIA GPU (CUDA):
+Custom WebUI port with authentication disabled:
+------------------------------------------------
+services.ollama-custom = {
+  enable = true;
   acceleration = "cuda";
-  Requires: nvidia drivers installed
-  Check: nvidia-smi
+  models = [ "llama3.2" ];
 
-AMD GPU (ROCm):
-  acceleration = "rocm";
-  Requires: AMD GPU drivers
-
-Auto-detect:
-  acceleration = null;
-  Ollama will auto-detect available GPU
-
-CPU only:
-  acceleration = false;
-  Slower but works on any hardware
+  webui = {
+    enable = true;
+    port = 3000;  # Custom port
+    openFirewall = true;
+    environment = {
+      WEBUI_AUTH = "false";  # No login required
+    };
+  };
+};
+# Access at: http://localhost:3000
 
 
 ================================================================================
-MANAGING MODELS
+OPEN WEBUI FEATURES
 ================================================================================
 
-Pre-download models (in config):
-  models = [ "llama3.2" "mistral" ];
-  Downloaded on service start
+Authentication:
+  - First user becomes admin
+  - Set WEBUI_AUTH = "false" to disable login
+  - Supports OAuth/OIDC integration
 
-Download models manually:
-  ollama pull llama3.2
-  ollama pull mistral
-  ollama pull codellama:7b
+Features:
+  - Multiple chat sessions
+  - Model switching (dropdown)
+  - Document uploads (RAG)
+  - Image generation support
+  - Voice input
+  - Chat history & export
+  - Prompt templates
+  - User management
+  - Dark/light themes
 
-List installed models:
-  ollama list
-
-Remove a model:
-  ollama rm llama3.2
-
-Model sizes (approximate):
-  - llama3.2:1b      ~1.3GB
-  - llama3.2:3b      ~2.0GB
-  - llama3.2         ~4.9GB (default, 3B params)
-  - mistral          ~4.1GB
-  - codellama        ~3.8GB
-  - llama3.1:70b     ~40GB
-  - llama3.1:405b    ~231GB
-
-
-================================================================================
-USING OLLAMA
-================================================================================
-
-Test the API:
-  curl http://localhost:11434/api/generate -d '{
-    "model": "llama3.2",
-    "prompt": "Why is the sky blue?"
-  }'
-
-Interactive chat:
-  ollama run llama3.2
-
-List running models:
-  ollama ps
-
-Stop a model:
-  ollama stop llama3.2
-
-
-================================================================================
-INTEGRATIONS
-================================================================================
-
-Open WebUI (Web interface for Ollama):
-  Install Open WebUI separately
-  Point it to: http://localhost:11434
-  Or use bindIP = "0.0.0.0" for network access
-
-Continue.dev (VSCode extension):
-  Install Continue extension
-  Configure Ollama endpoint: http://localhost:11434
-
-LangChain / LlamaIndex:
-  Use Ollama's OpenAI-compatible API
-  Endpoint: http://localhost:11434/v1
-
-
-================================================================================
-PERFORMANCE TUNING
-================================================================================
-
-Environment variables for tuning:
-
-OLLAMA_NUM_PARALLEL:
-  Number of parallel requests (default: 1)
-  Set higher for multiple concurrent users
-  Example: "4"
-
-OLLAMA_MAX_LOADED_MODELS:
-  Models to keep in memory (default: 1)
-  Set higher if you use multiple models
-  Uses more RAM
-  Example: "2"
-
-OLLAMA_MAX_QUEUE:
-  Max queued requests (default: 512)
-  Example: "1024"
-
-OLLAMA_DEBUG:
-  Enable debug logging
-  Example: "1"
-
-
-================================================================================
-STORAGE REQUIREMENTS
-================================================================================
-
-Ollama stores models in dataDir (default: /var/lib/ollama)
-
-Plan storage carefully:
-  - Small models: 1-4GB each
-  - Medium models: 7-13GB each
-  - Large models: 40-70GB each
-  - XL models: 200GB+ each
-
-Recommended:
-  - Use separate large drive for models
-  - Set dataDir to mounted storage
-  - Monitor disk usage
+Accessing from other devices:
+  1. Set webui.openFirewall = true
+  2. Find your IP: ip addr show
+  3. Access from browser: http://YOUR-IP:3006
 
 
 ================================================================================
 TROUBLESHOOTING
 ================================================================================
 
-Check service status:
-  sudo systemctl status ollama
+Open WebUI can't connect to Ollama:
+  - Check Ollama is running: systemctl status ollama
+  - Check bindIP allows connection (use "0.0.0.0" for network access)
+  - Check firewall: systemctl status firewall
+  - Test Ollama API: curl http://localhost:11434/api/tags
 
-View logs:
-  sudo journalctl -u ollama -f
+Open WebUI not accessible:
+  - Check service: systemctl status open-webui
+  - Check port is open: ss -tlnp | grep 3006
+  - Check firewall: systemctl status firewall
+  - View logs: journalctl -u open-webui -f
 
-Test API manually:
-  curl http://localhost:11434/api/tags
+Models not showing in WebUI:
+  - Wait for model download to complete
+  - Check Ollama logs: journalctl -u ollama -f
+  - Manually pull: ollama pull llama3.2
+  - Refresh WebUI browser page
 
-GPU not detected:
-  Check drivers: nvidia-smi (NVIDIA) or rocm-smi (AMD)
-  Check logs: journalctl -u ollama -f
-
-Out of memory:
-  Reduce OLLAMA_MAX_LOADED_MODELS
-  Use smaller models
-  Add more RAM
-
-Model download failed:
-  Check internet connection
-  Check disk space: df -h
-  Manually download: ollama pull llama3.2
-
-Slow responses:
-  Enable GPU acceleration
-  Use smaller models
-  Reduce OLLAMA_NUM_PARALLEL
+Performance issues:
+  - Enable GPU acceleration
+  - Use smaller models
+  - Tune environment variables (OLLAMA_NUM_PARALLEL, etc)
+  - Check GPU usage: nvidia-smi (NVIDIA) or rocm-smi (AMD)
 
 */
