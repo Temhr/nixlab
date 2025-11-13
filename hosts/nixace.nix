@@ -69,24 +69,6 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
-  services.ollama-custom = {
-    enable = true;
-    # Enable CUDA for Pascal GPU
-    acceleration = false; #"cuda";#
-    bindIP = "0.0.0.0";
-    openFirewall = true;
-    # Pre-download models
-    models = [ "llama3.2" "mistral" ];
-    environmentVariables = {
-      OLLAMA_MAX_LOADED_MODELS = "2";
-      OLLAMA_NUM_PARALLEL = "4";
-    };
-    webui = {
-      enable = true;
-      port = 3006;
-      openFirewall = true;
-    };
-  };
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
