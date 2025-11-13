@@ -78,11 +78,11 @@ in
         description = "Additional environment variables for Ollama";
       };
 
-      # OPTIONAL: Auto-open firewall ports (default: true)
+      # OPTIONAL: Auto-open firewall ports (default: false)
       # Usually you access Ollama via localhost or reverse proxy
       openFirewall = lib.mkOption {
         type = lib.types.bool;
-        default = true;
+        default = false;
         description = "Open firewall ports";
       };
 
@@ -94,7 +94,7 @@ in
         # Enable Open WebUI web interface
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = true;
+          default = false;
           description = "Enable Open WebUI web interface for Ollama";
         };
 
@@ -123,7 +123,7 @@ in
         # Open firewall for Open WebUI
         openFirewall = lib.mkOption {
           type = lib.types.bool;
-          default = true;
+          default = false;
           description = "Open firewall port for Open WebUI";
         };
 
@@ -263,6 +263,21 @@ in
 }
 
 /*
+================================================================================
+AUTOMATIC SETUP - PASCAL GPU (Quadro P5000) SUPPORT
+================================================================================
+
+This module uses the NixOS stable Ollama package with proper CUDA 11.x library
+paths to support your Pascal architecture GPU (compute capability 6.1).
+
+The approach mirrors your successful Repast4Py GPU shell:
+- Uses CUDA 11.x libraries (with sm_61 support)
+- Sets LD_LIBRARY_PATH to include NVIDIA drivers
+- Automatically configures the service environment
+
+Everything is automatic - just enable the service and rebuild!
+
+
 ================================================================================
 USAGE EXAMPLES
 ================================================================================

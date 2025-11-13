@@ -71,24 +71,22 @@
   ## Self-hosted apps and services
   services.ollama-custom = {
     enable = true;
+    # Enable CUDA for Pascal GPU
+    acceleration = false; #"cuda";#
     bindIP = "0.0.0.0";
     openFirewall = true;
-    acceleration = false;
-    # Use smaller models for CPU
-    models = [ "llama3.2:1b" ];  # 1B parameter model is fast on CPU
-
+    # Pre-download models
+    models = [ "llama3.2" "mistral" ];
     environmentVariables = {
-      OLLAMA_NUM_PARALLEL = "2";
+      OLLAMA_MAX_LOADED_MODELS = "2";
+      OLLAMA_NUM_PARALLEL = "4";
     };
-
     webui = {
       enable = true;
       port = 3006;
       openFirewall = true;
     };
   };
-  # Ollama API: http://YOUR-IP:11434
-  # Open WebUI: http://YOUR-IP:3006
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
