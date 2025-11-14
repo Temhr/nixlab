@@ -83,13 +83,6 @@
     openFirewall = true;
   };
 
-  services.bookstack-custom = {
-    enable = true;
-    port = 6875;
-    domain = "wiki.example.com";
-    bindIP = "0.0.0.0";
-  };
-
   services.homeassistant-custom = {
     enable = true;
     port = 8123;
