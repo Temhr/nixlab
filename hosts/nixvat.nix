@@ -84,7 +84,7 @@
   };
 
   services.bookstack-custom = {
-    enable = false;
+    enable = true;
     port = 6875;
     domain = "wiki.example.com";
     bindIP = "0.0.0.0";
@@ -117,25 +117,6 @@
     port = 3004;
     bindIP = "0.0.0.0";
     openFirewall = true;
-  };
-
-  services.ollama-custom = {
-    enable = true;
-    # Enable CUDA for Pascal GPU
-    acceleration = false; #"cuda";#
-    bindIP = "0.0.0.0";
-    openFirewall = true;
-    # Pre-download models
-    models = [ "llama3.2" "mistral" ];
-    environmentVariables = {
-      OLLAMA_MAX_LOADED_MODELS = "2";
-      OLLAMA_NUM_PARALLEL = "4";
-    };
-    webui = {
-      enable = true;
-      port = 3006;
-      openFirewall = true;
-    };
   };
 
   services.syncthing-custom = {
