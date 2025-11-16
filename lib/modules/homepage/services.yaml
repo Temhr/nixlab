@@ -8,16 +8,16 @@
 # ──────────────────────────────────────────────
 - Home Automation:
     - Home Assistant:
-        href: http://192.168.0.201:8123
+        href: http://192.168.0.200:8123
         icon: home-assistant
         description: Central home automation hub
         target: _blank
         widget:
           type: homeassistant
-          url: http://192.168.0.201:8123
+          url: http://192.168.0.200:8123
           key: "{{HASS_TOKEN}}"   # store securely in .env
         server: nixvat
-        ping: http://192.168.0.201:8123
+        ping: http://192.168.0.200:8123
         statusStyle: dot
 
     - Node-RED:
