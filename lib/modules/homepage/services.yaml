@@ -4,44 +4,44 @@
 # Docs: https://gethomepage.dev/en/configs/services/
 
 # ──────────────────────────────────────────────
-# SECTION: Home Automation
+# SECTION: Incus - HomeAssistant
 # ──────────────────────────────────────────────
-- Home Automation:
+- Incus Server:
     - Home Assistant:
-        href: http://192.168.0.200:8123
+        href: http://10.24.51.164:8123
         icon: home-assistant
         description: Central home automation hub
         target: _blank
         widget:
           type: homeassistant
-          url: http://192.168.0.200:8123
+          url: http://10.24.51.164:8123
           key: "{{HASS_TOKEN}}"   # store securely in .env
-        server: nixvat
-        ping: http://192.168.0.200:8123
+        server: nixace - Incus - HomeAssistant
+        ping: http://10.24.51.164:8123
         statusStyle: dot
 
     - Node-RED:
-        href: http://192.168.0.201:1880
+        href: http://10.24.51.164:8123/hassio/ingress/a0d7b954_nodered
         icon: nodered
         description: Visual automation and flow-based logic editor
         target: _blank
-        server: nixvat
-        ping: http://192.168.0.201:1880
+        server: nixace - Incus - HomeAssistant
+        ping: http://10.24.51.164:8123/hassio/ingress/a0d7b954_nodered
+        statusStyle: dot
+
+    - BookStack:
+        href: http://10.24.51.164:2665/
+        icon: bookstack
+        description: Self-hosted documentation and notes
+        target: _blank
+        server: nixace - Incus - HomeAssistant
+        ping: http://10.24.51.164:2665/
         statusStyle: dot
 
 # ──────────────────────────────────────────────
 # SECTION: Knowledge Base
 # ──────────────────────────────────────────────
 - Knowledge Base:
-    - BookStack:
-        href: http://192.168.0.201:6875
-        icon: bookstack
-        description: Self-hosted documentation and notes
-        target: _blank
-        server: nixvat
-        ping: http://192.168.0.201:6875
-        statusStyle: dot
-
     - Wiki.js:
         href: http://192.168.0.201:3001
         icon: wikijs
