@@ -60,10 +60,6 @@
         icon: syncthing
         description: Main sync node - Peer-to-peer file synchronization
         target: _blank
-        widget:
-          type: syncthing
-          url: http://192.168.0.201:8384
-          key: "{{SYNCTHING_NIXVAT_API_KEY}}"
         server: nixvat
         ping: http://192.168.0.201:8384
         statusStyle: dot
@@ -73,10 +69,6 @@
         icon: syncthing
         description: Secondary sync node - Peer-to-peer file synchronization
         target: _blank
-        widget:
-          type: syncthing
-          url: http://192.168.0.204:8384
-          key: "{{SYNCTHING_NIXZEN_API_KEY}}"
         server: nixzen
         ping: http://192.168.0.204:8384
         statusStyle: dot
