@@ -74,16 +74,28 @@
 
           # Network configuration for Incus
           networking = {
-            # Enable nftables (required for Incus)
             nftables.enable = true;
-
             firewall = {
               enable = true;
-              # Allow Home Assistant port
-              allowedTCPPorts = [ 8123 ];
-
-              # Trust Incus bridge interface
+              # Allow port range
+              allowedTCPPortRanges = [
+                { from = 8123; to = 8123; }
+                { from = 1880; to = 1880; }
+                { from = 2665; to = 2665; }
+                # Or a wider range if needed
+                # { from = 8000; to = 9000; }
+              ];
               trustedInterfaces = [ "incusbr0" ];
+            };
+            nat = {
+              enable = true;
+              internalInterfaces = ["incusbr0"];
+              externalInterface = "wlp3s0";
+              forwardPorts = [
+                { destination = "10.24.51.164:8123"; proto = "tcp"; sourcePort = 8123; }
+                { destination = "10.24.51.164:1880"; proto = "tcp"; sourcePort = 1880; }
+                { destination = "10.24.51.164:2665"; proto = "tcp"; sourcePort = 2665; }
+              ];
             };
           };
 
