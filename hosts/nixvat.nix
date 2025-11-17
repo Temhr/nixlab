@@ -83,15 +83,22 @@
     openFirewall = true;
   };
 
+  services.bookstack-custom = {
+    enable = false;
+    port = 3002;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+  };
+
   services.homeassistant-custom = {
-    enable = true;
+    enable = false;
     port = 8123;
     bindIP = "0.0.0.0";
     openFirewall = true;
   };
 
   services.nodered-service = {
-    enable = true;
+    enable = false;
     port = 1880;
     bindIP = "0.0.0.0";
     openFirewall = true;
