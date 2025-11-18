@@ -144,11 +144,9 @@ in
 
       # Ensure config file exists with proper permissions
       preStart = ''
-        # Create default config if it doesn't exist
-        if [ ! -f ${cfg.dataDir}/prometheus.yml ]; then
-          cat > ${cfg.dataDir}/prometheus.yml << 'EOF'
+  if [ ! -f ${cfg.dataDir}/prometheus.yml ]; then
+    cat > ${cfg.dataDir}/prometheus.yml << EOF
 # Prometheus Configuration
-# See: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
 
 global:
   scrape_interval: 15s
@@ -156,45 +154,25 @@ global:
   external_labels:
     monitor: 'prometheus'
 
-# Alertmanager configuration (optional)
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: []
-          # - 'localhost:9093'
-
-# Load rules once and periodically evaluate them
-rule_files:
-  # - "alerts.yml"
-  # - "rules.yml"
-
-# Scrape configurations
 scrape_configs:
-  # Prometheus itself
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:${toString cfg.port}']
 ${lib.optionalString cfg.enableNodeExporter ''
-  # Node Exporter (system metrics)
   - job_name: 'node'
     static_configs:
       - targets: ['localhost:9100']
         labels:
           instance: 'localhost'
 ''}
-  # Add more scrape targets here
-  # Example:
-  # - job_name: 'my-app'
-  #   static_configs:
-  #     - targets: ['localhost:8080']
 EOF
-          chown prometheus:prometheus ${cfg.dataDir}/prometheus.yml
-          chmod 660 ${cfg.dataDir}/prometheus.yml
-        fi
 
-        # Create data directory
-        mkdir -p ${cfg.dataDir}/data
-        chown prometheus:prometheus ${cfg.dataDir}/data
+    chown prometheus:prometheus ${cfg.dataDir}/prometheus.yml
+    chmod 660 ${cfg.dataDir}/prometheus.yml
+  fi
+
+  mkdir -p ${cfg.dataDir}/data
+  chown prometheus:prometheus ${cfg.dataDir}/data
       '';
     };
 
