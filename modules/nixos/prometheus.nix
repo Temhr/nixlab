@@ -175,7 +175,6 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:${toString cfg.port}']
 ${lib.optionalString cfg.enableNodeExporter ''
-
   # Node Exporter (system metrics)
   - job_name: 'node'
     static_configs:
@@ -183,7 +182,6 @@ ${lib.optionalString cfg.enableNodeExporter ''
         labels:
           instance: 'localhost'
 ''}
-
   # Add more scrape targets here
   # Example:
   # - job_name: 'my-app'
