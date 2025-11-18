@@ -92,7 +92,7 @@ in
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0750 prometheus prometheus -"
+      "d ${cfg.dataDir} 0770 prometheus prometheus -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -143,58 +143,47 @@ in
       };
 
       # Ensure config file exists with proper permissions
-      preStart = ''
-        # Create default config if it doesn't exist
-        if [ ! -f ${cfg.dataDir}/prometheus.yml ]; then
-          cat > ${cfg.dataDir}/prometheus.yml << 'EOF'
-# Prometheus Configuration
-# See: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+      preStart = let
+        prometheusConfig = {
+          global = {
+            scrape_interval = "15s";
+            evaluation_interval = "15s";
+            external_labels.monitor = "prometheus";
+          };
 
-global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
-  external_labels:
-    monitor: 'prometheus'
+          alerting.alertmanagers = [{
+            static_configs = [{
+              targets = [];
+            }];
+          }];
 
-# Alertmanager configuration (optional)
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: []
-          # - 'localhost:9093'
+          rule_files = [];
 
-# Load rules once and periodically evaluate them
-rule_files:
-  # - "alerts.yml"
-  # - "rules.yml"
+          scrape_configs =
+            [
+              {
+                job_name = "prometheus";
+                static_configs = [{
+                  targets = [ "localhost:${toString cfg.port}" ];
+                }];
+              }
+            ]
+            ++ lib.optional cfg.enableNodeExporter {
+              job_name = "node";
+              static_configs = [{
+                targets = [ "localhost:9100" ];
+                labels.instance = "localhost";
+              }];
+            };
+        };
 
-# Scrape configurations
-scrape_configs:
-  # Prometheus itself
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:${toString cfg.port}']
-${lib.optionalString cfg.enableNodeExporter ''
+        prometheusYAML = builtins.toFile "prometheus.yml"
+          (builtins.toJSON prometheusConfig
+            |> pkgs.remarshal.toYAML);
+      in
+      ''
+        install -m 660 -o prometheus -g prometheus ${prometheusYAML} ${cfg.dataDir}/prometheus.yml
 
-  # Node Exporter (system metrics)
-  - job_name: 'node'
-    static_configs:
-      - targets: ['localhost:9100']
-        labels:
-          instance: 'localhost'
-''}
-
-  # Add more scrape targets here
-  # Example:
-  # - job_name: 'my-app'
-  #   static_configs:
-  #     - targets: ['localhost:8080']
-EOF
-          chown prometheus:prometheus ${cfg.dataDir}/prometheus.yml
-          chmod 660 ${cfg.dataDir}/prometheus.yml
-        fi
-
-        # Create data directory
         mkdir -p ${cfg.dataDir}/data
         chown prometheus:prometheus ${cfg.dataDir}/data
       '';
