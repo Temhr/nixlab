@@ -148,14 +148,16 @@ in
           global = {
             scrape_interval = "15s";
             evaluation_interval = "15s";
-            external_labels.monitor = "prometheus";
+            external_labels = { monitor = "prometheus"; };
           };
 
-          alerting.alertmanagers = [{
-            static_configs = [{
-              targets = [];
+          alerting = {
+            alertmanagers = [{
+              static_configs = [{
+                targets = [];
+              }];
             }];
-          }];
+          };
 
           rule_files = [];
 
@@ -172,17 +174,19 @@ in
               job_name = "node";
               static_configs = [{
                 targets = [ "localhost:9100" ];
-                labels.instance = "localhost";
+                labels = { instance = "localhost"; };
               }];
             };
         };
 
-        prometheusYAML = builtins.toFile "prometheus.yml"
-          (builtins.toJSON prometheusConfig
-            |> pkgs.remarshal.toYAML);
+        # Convert Nix → JSON → YAML manually
+        prometheusJSON = builtins.toJSON prometheusConfig;
+        prometheusYAML = pkgs.remarshal.toYAML prometheusJSON;
+        prometheusFile = builtins.toFile "prometheus.yml" prometheusYAML;
+
       in
       ''
-        install -m 660 -o prometheus -g prometheus ${prometheusYAML} ${cfg.dataDir}/prometheus.yml
+        install -m 660 -o prometheus -g prometheus ${prometheusFile} ${cfg.dataDir}/prometheus.yml
 
         mkdir -p ${cfg.dataDir}/data
         chown prometheus:prometheus ${cfg.dataDir}/data
