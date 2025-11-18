@@ -130,8 +130,8 @@
     enable = true;
     user = "temhr";
     group = "users";
-    port = 8384;
-    bindIP = "0.0.0.0";
+    guiPort = 8384;
+    guiAddress = "0.0.0.0";
     configDir = "/home/temhr/.config/syncthing";
     openFirewall = true;
     devices = {
