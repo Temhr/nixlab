@@ -174,8 +174,8 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:${toString cfg.port}']
-
 ${lib.optionalString cfg.enableNodeExporter ''
+
   # Node Exporter (system metrics)
   - job_name: 'node'
     static_configs:
