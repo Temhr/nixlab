@@ -110,6 +110,8 @@ in
 
     users.groups.grafana = {};
 
+    users.users.temhr.extraGroups = [ "grafana" ];
+
     # ----------------------------------------------------------------------------
     # GRAFANA SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
@@ -189,7 +191,7 @@ mode = console file
 level = info
 EOF
           chown grafana:grafana ${cfg.dataDir}/grafana.ini
-          chmod 640 ${cfg.dataDir}/grafana.ini
+          chmod 660 ${cfg.dataDir}/grafana.ini
         fi
       '';
     };

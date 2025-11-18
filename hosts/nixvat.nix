@@ -126,6 +126,13 @@
     openFirewall = true;
   };
 
+  services.prometheus-custom = {
+    enable = true;
+    port = 9090;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+  };
+
   services.syncthing-custom = {
     enable = true;
     user = "temhr";

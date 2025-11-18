@@ -100,6 +100,8 @@ in
 
     users.groups.gotosocial = {};
 
+    users.users.temhr.extraGroups = [ "gotosocial" ];
+
     # ----------------------------------------------------------------------------
     # GOTOSOCIAL SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
