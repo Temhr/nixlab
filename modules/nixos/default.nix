@@ -5,6 +5,8 @@
     # Compose this module out of smaller ones.
     ./bookstack.nix
     ./glance.nix
+    ./gotosocial.nix
+    ./grafana.nix
     ./home-assistant.nix
     ./homepage-dashboard.nix
     ./node-red.nix

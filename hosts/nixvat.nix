@@ -119,6 +119,13 @@
     openFirewall = true;
   };
 
+  services.grafana-custom = {
+    enable = true;
+    port = 3100;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+  };
+
   services.syncthing-custom = {
     enable = true;
     user = "temhr";
