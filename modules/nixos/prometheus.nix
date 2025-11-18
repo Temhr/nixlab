@@ -179,15 +179,25 @@ in
             };
         };
 
-        # Convert Nix → JSON → YAML manually
-        prometheusJSON = builtins.toJSON prometheusConfig;
-        prometheusYAML = pkgs.remarshal.toYAML prometheusJSON;
-        prometheusFile = builtins.toFile "prometheus.yml" prometheusYAML;
+        # Convert to JSON file
+        jsonFile = builtins.toFile "prometheus.json"
+          (builtins.toJSON prometheusConfig);
 
-      in
-      ''
-        install -m 660 -o prometheus -g prometheus ${prometheusFile} ${cfg.dataDir}/prometheus.yml
+        # Output temporary YAML file
+        yamlTmp = "${cfg.dataDir}/prometheus.yml.tmp";
 
+      in ''
+        # Convert JSON → YAML using remarshal
+        ${pkgs.remarshal}/bin/remarshal \
+          -i ${jsonFile} \
+          -o ${yamlTmp} \
+          -if json \
+          -of yaml
+
+        # Ensure correct permissions
+        install -m 660 -o prometheus -g prometheus ${yamlTmp} ${cfg.dataDir}/prometheus.yml
+
+        # Data directory
         mkdir -p ${cfg.dataDir}/data
         chown prometheus:prometheus ${cfg.dataDir}/data
       '';
