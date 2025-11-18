@@ -12,7 +12,7 @@ in
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Grafana monitoring and visualization platform";
 
-      # OPTIONAL: Port to listen on (default: 3000)
+      # OPTIONAL: Port to listen on (default: 3100)
       port = lib.mkOption {
         type = lib.types.port;
         default = 3100;
@@ -140,7 +140,7 @@ in
         User = "grafana";
         Group = "grafana";
         WorkingDirectory = cfg.dataDir;
-        ExecStart = "${cfg.package}/bin/grafana-server --config=${cfg.dataDir}/grafana.ini";
+        ExecStart = "${cfg.package}/bin/grafana server --config=${cfg.dataDir}/grafana.ini --homepath=${cfg.package}/share/grafana";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -248,7 +248,7 @@ Minimal configuration:
 services.grafana-custom = {
   enable = true;
 };
-# Access at: http://your-ip:3000
+# Access at: http://your-ip:3100
 # Default login: admin / admin
 
 
@@ -277,7 +277,7 @@ INITIAL SETUP
 ================================================================================
 
 1. First Login:
-   - Navigate to http://your-server:3000 (or your domain)
+   - Navigate to http://your-server:3100 (or your domain)
    - Username: admin
    - Password: admin (or your configured adminPassword)
    - Change password immediately!
@@ -380,14 +380,14 @@ View logs:
   sudo tail -f /var/lib/grafana/logs/grafana.log
 
 Reset admin password:
-  sudo -u grafana ${pkgs.grafana}/bin/grafana-cli admin reset-admin-password newpassword
+  sudo -u grafana ${pkgs.grafana}/bin/grafana server admin reset-admin-password newpassword --homepath=${pkgs.grafana}/share/grafana
 
 Install plugins:
-  sudo -u grafana ${pkgs.grafana}/bin/grafana-cli plugins install <plugin-id>
+  sudo -u grafana ${pkgs.grafana}/bin/grafana server plugins install <plugin-id> --homepath=${pkgs.grafana}/share/grafana
   sudo systemctl restart grafana
 
 List installed plugins:
-  sudo -u grafana ${pkgs.grafana}/bin/grafana-cli plugins ls
+  sudo -u grafana ${pkgs.grafana}/bin/grafana server plugins ls --homepath=${pkgs.grafana}/share/grafana
 
 Common issues:
   - Cannot connect to data source: Check firewall rules
@@ -415,7 +415,7 @@ PLUGIN MANAGEMENT
 ================================================================================
 
 Install plugins via CLI:
-  sudo -u grafana ${pkgs.grafana}/bin/grafana-cli plugins install grafana-clock-panel
+  sudo -u grafana ${pkgs.grafana}/bin/grafana server plugins install grafana-clock-panel --homepath=${pkgs.grafana}/share/grafana
   sudo systemctl restart grafana
 
 Popular plugins:
