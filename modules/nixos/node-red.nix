@@ -19,12 +19,12 @@ in
         description = "Port for Node-RED to listen on";
       };
 
-      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+      # OPTIONAL: IP to bind GUI to (default: 127.0.0.1 = localhost only)
       # Use "0.0.0.0" for access from other devices
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "127.0.0.1"; #localhost only
-        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
+        default = "127.0.0.1";
+        description = "IP address for web GUI (use 0.0.0.0 for all interfaces)";
       };
 
       # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)

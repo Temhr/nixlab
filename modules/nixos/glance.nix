@@ -19,12 +19,12 @@ in
         description = "Port for Glance to listen on";
       };
 
-      # OPTIONAL: IP to bind to (default: 0.0.0.0 = all interfaces)
+      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
       # Glance is typically accessed from network
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "0.0.0.0";
-        description = "IP address to bind to";
+        default = "127.0.0.1";
+        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 
       # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)

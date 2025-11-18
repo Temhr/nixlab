@@ -19,12 +19,12 @@ in
         description = "Port for Ollama API to listen on";
       };
 
-      # OPTIONAL: IP to bind to (default: 0.0.0.0 for all interfaces)
-      # Use "0.0.0.0" for access from other devices (e.g., for Open WebUI)
+      # OPTIONAL: IP to bind GUI to (default: 127.0.0.1 = localhost only)
+      # Use "0.0.0.0" for access from other devices
       bindIP = lib.mkOption {
         type = lib.types.str;
-        default = "0.0.0.0";
-        description = "IP address to bind to (127.0.0.1 = localhost only)";
+        default = "127.0.0.1";
+        description = "IP address for web GUI (use 0.0.0.0 for all interfaces)";
       };
 
       # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)

@@ -30,7 +30,7 @@ in
       };
 
       # OPTIONAL: Web GUI port (default: 8384)
-      guiPort = lib.mkOption {
+      port = lib.mkOption {
         type = lib.types.port;
         default = 8384;
         description = "Port for Syncthing web GUI";
@@ -38,7 +38,7 @@ in
 
       # OPTIONAL: IP to bind GUI to (default: 127.0.0.1 = localhost only)
       # Use "0.0.0.0" for access from other devices
-      guiAddress = lib.mkOption {
+      bindIP = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
         description = "IP address for web GUI (use 0.0.0.0 for all interfaces)";
@@ -257,7 +257,7 @@ in
       configDir = cfg.configDir;
 
       # Web GUI configuration
-      guiAddress = "${cfg.guiAddress}:${toString cfg.guiPort}";
+      bindIP = "${cfg.bindIP}:${toString cfg.port}";
 
       # Open firewall ports for sync traffic
       openDefaultPorts = cfg.openFirewall;
@@ -315,7 +315,7 @@ in
 
         # Proxy all requests to Syncthing GUI
         locations."/" = {
-          proxyPass = "http://${cfg.guiAddress}:${toString cfg.guiPort}";
+          proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
           proxyWebsockets = true;
           extraConfig = ''
             proxy_set_header Host $host;
@@ -336,7 +336,7 @@ in
     # Open GUI port if binding to non-localhost
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Open GUI port if not localhost-only
-      lib.optionals (cfg.guiAddress != "127.0.0.1") [ cfg.guiPort ]
+      lib.optionals (cfg.bindIP != "127.0.0.1") [ cfg.port ]
       # Also open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
@@ -431,7 +431,7 @@ services.syncthing-custom = {
   enable = true;
   user = "myuser";              # Run as this user
   group = "users";              # User's group
-  guiAddress = "0.0.0.0";      # Allow network access to GUI
+  bindIP = "0.0.0.0";      # Allow network access to GUI
 };
 # GUI accessible at: http://your-ip:8384
 
@@ -442,8 +442,8 @@ services.syncthing-custom = {
   enable = true;                # REQUIRED: Turn on the service
   user = "syncthing";           # OPTIONAL: User to run as (default: syncthing)
   group = "syncthing";          # OPTIONAL: Group (default: same as user)
-  guiPort = 8384;               # OPTIONAL: Web GUI port (default: 8384)
-  guiAddress = "0.0.0.0";      # OPTIONAL: GUI bind IP (default: 127.0.0.1)
+  port = 8384;               # OPTIONAL: Web GUI port (default: 8384)
+  bindIP = "0.0.0.0";      # OPTIONAL: GUI bind IP (default: 127.0.0.1)
   dataDir = "/data/syncthing";  # OPTIONAL: Main data directory (default: auto)
   configDir = "/home/user/.config/syncthing";  # OPTIONAL: Config directory (default: null)
 
@@ -506,7 +506,7 @@ Step 1: Apply your NixOS configuration
 Step 2: Access Syncthing web GUI
 ---------------------------------
 Local access (default):    http://localhost:8384
-Network access:            http://your-ip:8384 (if guiAddress = "0.0.0.0")
+Network access:            http://your-ip:8384 (if bindIP = "0.0.0.0")
 Domain access:             https://sync.example.com (if configured)
 
 
@@ -584,7 +584,7 @@ PORTS USED BY SYNCTHING
 TCP 22000:  Sync protocol (encrypted file transfers)
 UDP 22000:  QUIC sync protocol
 UDP 21027:  Local discovery broadcasts
-TCP 8384:   Web GUI (configurable via guiPort)
+TCP 8384:   Web GUI (configurable via port)
 
 All sync ports (22000, 21027) are automatically opened if openFirewall = true.
 
@@ -650,7 +650,7 @@ Personal file sync between computers:
 services.syncthing-custom = {
   enable = true;
   user = "myuser";
-  guiAddress = "127.0.0.1";  # Only local access
+  bindIP = "127.0.0.1";  # Only local access
 };
 
 
@@ -659,7 +659,7 @@ Family file sharing server:
 services.syncthing-custom = {
   enable = true;
   user = "syncthing";
-  guiAddress = "0.0.0.0";    # Allow network access
+  bindIP = "0.0.0.0";    # Allow network access
   folders = {
     family-photos = {
       path = "/mnt/storage/photos";
@@ -676,7 +676,7 @@ services.syncthing-custom = {
   enable = true;
   domain = "sync.example.com";
   enableSSL = true;
-  guiAddress = "127.0.0.1";  # Only via reverse proxy
+  bindIP = "127.0.0.1";  # Only via reverse proxy
 };
 
 

@@ -24,7 +24,7 @@ in
       bindIP = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
-        description = "IP address to bind to";
+        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
       };
 
       # REQUIRED: Domain for your instance
