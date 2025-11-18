@@ -143,6 +143,7 @@ in
       };
 
       # Ensure config file exists with proper permissions
+      # Using JSON → YAML conversion to avoid heredoc indentation issues
       preStart = let
         prometheusConfig = {
           global = {
@@ -324,45 +325,30 @@ INITIAL SETUP
 CONFIGURATION
 ================================================================================
 
-Prometheus configuration is in prometheus.yml in dataDir.
-A default config is created automatically on first run.
+Prometheus configuration is generated automatically from Nix config.
+The YAML file is regenerated on every service start.
 
-Edit configuration:
-  sudo nano /var/lib/prometheus2/prometheus.yml
-  sudo systemctl reload prometheus  # Reload without restart
-
-Validate configuration:
-  ${pkgs.prometheus}/bin/promtool check config /var/lib/prometheus2/prometheus.yml
+View generated configuration:
+  cat /var/lib/prometheus2/prometheus.yml
 
 Configuration reference:
   https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+
+Note: Manual edits to prometheus.yml will be overwritten on restart.
+To persist changes, modify the Nix module instead.
 
 
 ================================================================================
 ADDING SCRAPE TARGETS
 ================================================================================
 
-Edit prometheus.yml and add scrape targets:
+To add custom scrape targets, you'll need to modify the module's
+scrape_configs section in the preStart script, or manually manage
+prometheus.yml (noting it will be regenerated).
 
-Example - Monitor a web application:
-  - job_name: 'my-app'
-    static_configs:
-      - targets: ['localhost:8080']
-        labels:
-          service: 'webapp'
-          environment: 'production'
-
-Example - Monitor multiple hosts:
-  - job_name: 'servers'
-    static_configs:
-      - targets:
-          - 'server1.example.com:9100'
-          - 'server2.example.com:9100'
-        labels:
-          datacenter: 'dc1'
-
-Then reload:
-  sudo systemctl reload prometheus
+For production use, consider using the official NixOS prometheus module
+which provides more configuration options:
+  services.prometheus.enable = true;
 
 
 ================================================================================
@@ -393,7 +379,13 @@ More exporters:
 ALERTING
 ================================================================================
 
-Create alert rules file:
+To add alerting rules, you'll need to modify the prometheusConfig
+in the preStart section to include rule_files.
+
+Example modification:
+  rule_files = [ "${cfg.dataDir}/alerts.yml" ];
+
+Then create alerts.yml manually:
   sudo nano /var/lib/prometheus2/alerts.yml
 
 Example alerts.yml:
@@ -408,23 +400,6 @@ Example alerts.yml:
           annotations:
             summary: "High CPU usage on {{ $labels.instance }}"
             description: "CPU usage is {{ $value }}%"
-
-        - alert: DiskSpaceLow
-          expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
-          for: 5m
-          labels:
-            severity: critical
-          annotations:
-            summary: "Low disk space on {{ $labels.instance }}"
-
-Update prometheus.yml to include:
-  rule_files:
-    - "alerts.yml"
-
-Reload:
-  sudo systemctl reload prometheus
-
-Check alerts at: http://your-ip:9090/alerts
 
 
 ================================================================================
@@ -461,10 +436,7 @@ View logs:
   sudo journalctl -u prometheus -f
 
 Reload configuration:
-  sudo systemctl reload prometheus
-
-Validate config syntax:
-  ${pkgs.prometheus}/bin/promtool check config /var/lib/prometheus2/prometheus.yml
+  sudo systemctl restart prometheus
 
 Check target connectivity:
   curl http://localhost:9100/metrics  # Node exporter
@@ -474,7 +446,7 @@ Query Prometheus API:
 
 Common issues:
   - Target down: Check firewall, verify exporter is running
-  - Config reload fails: Validate YAML syntax
+  - Config issues: Check logs for YAML parsing errors
   - High memory usage: Reduce retention time or scrape frequency
   - Disk full: Increase retention or add more storage
 
@@ -488,7 +460,7 @@ Adjust with: retention = "30d";
 
 Retention options:
   - Time-based: "15d", "30d", "1y"
-  - Size-based: Set in ExecStart with --storage.tsdb.retention.size
+  - Size-based: Add --storage.tsdb.retention.size to ExecStart
 
 Estimate storage needs:
   ~1-2 bytes per sample
@@ -514,6 +486,6 @@ SECURITY BEST PRACTICES
 5. Regularly update Prometheus package
 6. Monitor Prometheus resource usage
 7. Set up alerting for Prometheus health
-8. Backup prometheus.yml and alert rules
+8. Backup prometheus configuration
 
 */
