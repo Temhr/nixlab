@@ -210,13 +210,6 @@ ingester:
       kvstore:
         store: inmemory
       replication_factor: 1
-
-chunk_store_config:
-  max_look_back_period: 0s
-
-table_manager:
-  retention_deletes_enabled: true
-  retention_period: ${cfg.retention}
 EOF
           chown loki:loki ${cfg.dataDir}/loki.yaml
           chmod 640 ${cfg.dataDir}/loki.yaml
