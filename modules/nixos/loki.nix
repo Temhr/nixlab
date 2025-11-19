@@ -112,6 +112,8 @@ in
 
     users.groups.loki = {};
 
+    users.users.temhr.extraGroups = [ "loki" ];
+
     users.users.promtail = lib.mkIf cfg.enablePromtail {
       isSystemUser = true;
       group = "promtail";
@@ -212,7 +214,7 @@ ingester:
       replication_factor: 1
 EOF
           chown loki:loki ${cfg.dataDir}/loki.yaml
-          chmod 640 ${cfg.dataDir}/loki.yaml
+          chmod 660 ${cfg.dataDir}/loki.yaml
         fi
       '';
     };
