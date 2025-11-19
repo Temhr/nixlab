@@ -202,8 +202,6 @@ compactor:
   retention_enabled: true
   retention_delete_delay: 2h
   retention_delete_worker_count: 150
-
-  # REQUIRED in Loki 2.9+ when retention_enabled = true
   delete_request_store:
     type: filesystem
     filesystem:
