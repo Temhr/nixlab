@@ -96,6 +96,7 @@ in
       "d ${cfg.dataDir}/chunks 0750 loki loki -"
       "d ${cfg.dataDir}/index 0750 loki loki -"
       "d ${cfg.dataDir}/wal 0750 loki loki -"
+      "d ${cfg.dataDir}/delete-requests 0750 loki loki -"
     ] ++ lib.optionals cfg.enablePromtail [
       "d /var/lib/promtail 0750 promtail promtail -"
     ];
@@ -201,6 +202,12 @@ compactor:
   retention_enabled: true
   retention_delete_delay: 2h
   retention_delete_worker_count: 150
+
+  # REQUIRED in Loki 2.9+ when retention_enabled = true
+  delete_request_store:
+    type: filesystem
+    filesystem:
+      directory: ${cfg.dataDir}/delete-requests
 
 ingester:
   wal:
