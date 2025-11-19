@@ -202,10 +202,7 @@ compactor:
   retention_enabled: true
   retention_delete_delay: 2h
   retention_delete_worker_count: 150
-  delete_request_store:
-    type: filesystem
-    filesystem:
-      directory: ${cfg.dataDir}/delete-requests
+  delete_request_store: filesystem:${cfg.dataDir}/delete-requests
 
 ingester:
   wal:
