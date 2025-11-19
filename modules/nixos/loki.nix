@@ -96,8 +96,6 @@ in
       "d ${cfg.dataDir}/chunks 0750 loki loki -"
       "d ${cfg.dataDir}/index 0750 loki loki -"
       "d ${cfg.dataDir}/wal 0750 loki loki -"
-      "d ${cfg.dataDir}/compactor 0750 loki loki -"
-      "d ${cfg.dataDir}/delete-requests 0750 loki loki -"
     ] ++ lib.optionals cfg.enablePromtail [
       "d /var/lib/promtail 0750 promtail promtail -"
     ];
@@ -146,16 +144,12 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ "${cfg.dataDir}" ];
+        ReadWritePaths = [ cfg.dataDir ];
       };
 
       # Ensure config file exists with proper permissions
       preStart = ''
-        # Ensure directories exist and have proper ownership before creating the config
-        mkdir -p ${cfg.dataDir} ${cfg.dataDir}/chunks ${cfg.dataDir}/index ${cfg.dataDir}/wal ${cfg.dataDir}/compactor ${cfg.dataDir}/delete-requests
-        chown -R loki:loki ${cfg.dataDir}
-        chmod 0750 ${cfg.dataDir}
-
+        # Create default config if it doesn't exist
         if [ ! -f ${cfg.dataDir}/loki.yaml ]; then
           cat > ${cfg.dataDir}/loki.yaml << EOF
 # Loki Configuration
@@ -207,10 +201,6 @@ compactor:
   retention_enabled: true
   retention_delete_delay: 2h
   retention_delete_worker_count: 150
-  delete_request_store:
-    backend: filesystem
-    filesystem:
-      dir: /path/to/delete-requests
 
 ingester:
   wal:
@@ -255,7 +245,6 @@ EOF
 
       preStart = ''
         # Create default Promtail config if it doesn't exist
-        mkdir -p /var/lib/promtail
         if [ ! -f /var/lib/promtail/promtail.yaml ]; then
           cat > /var/lib/promtail/promtail.yaml << EOF
 # Promtail Configuration
@@ -294,7 +283,7 @@ scrape_configs:
           __path__: /var/log/*.log
 EOF
           chown promtail:promtail /var/lib/promtail/promtail.yaml
-          chmod 640 /var/lib/promtail/promtail.yaml
+          chmod 660 /var/lib/promtail/promtail.yaml
         fi
       '';
     };
