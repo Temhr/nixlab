@@ -9,6 +9,7 @@
     ./grafana.nix
     ./home-assistant.nix
     ./homepage-dashboard.nix
+    ./loki.nix
     ./node-red.nix
     ./ollama.nix
     ./prometheus.nix
