@@ -206,19 +206,12 @@ in
             max_query_lookback = "720h";
           };
 
-          compactor = {
-            working_directory = "${cfg.dataDir}/compactor";
-            retention_enabled = true;
-            retention_delete_delay = "2h";
-            retention_delete_worker_count = 150;
-
-            delete_request_store = {
-              backend = "filesystem";
-              filesystem = {
-                dir = "${cfg.dataDir}/delete-requests";
-              };
-            };
-          };
+          compactor:
+            working_directory: ${cfg.dataDir}/compactor
+            retention_enabled: true
+            retention_delete_delay: 2h
+            retention_delete_worker_count: 150
+            delete_request_store: filesystem:${cfg.dataDir}/delete-requests
 
           ingester = {
             wal = {
