@@ -121,7 +121,7 @@
 
   services.grafana-custom = {
     enable = true;
-    port = 3101;
+    port = 3100;
     bindIP = "0.0.0.0";
     openFirewall = true;
   };

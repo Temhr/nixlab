@@ -12,10 +12,10 @@ in
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Grafana monitoring and visualization platform";
 
-      # OPTIONAL: Port to listen on (default: 3101)
+      # OPTIONAL: Port to listen on (default: 3100)
       port = lib.mkOption {
         type = lib.types.port;
-        default = 3101;
+        default = 3100;
         description = "Port for Grafana to listen on";
       };
 
@@ -250,7 +250,7 @@ Minimal configuration:
 services.grafana-custom = {
   enable = true;
 };
-# Access at: http://your-ip:3101
+# Access at: http://your-ip:3100
 # Default login: admin / admin
 
 
@@ -258,7 +258,7 @@ Full configuration with domain:
 --------------------------------
 services.grafana-custom = {
   enable = true;
-  port = 3101;
+  port = 3100;
   bindIP = "0.0.0.0";
   dataDir = "/data/grafana";
 
@@ -279,7 +279,7 @@ INITIAL SETUP
 ================================================================================
 
 1. First Login:
-   - Navigate to http://your-server:3101 (or your domain)
+   - Navigate to http://your-server:3100 (or your domain)
    - Username: admin
    - Password: admin (or your configured adminPassword)
    - Change password immediately!
@@ -338,7 +338,7 @@ Loki (logs):
   services.loki = {
     enable = true;
   };
-  Then add http://localhost:3101 as Loki data source in Grafana
+  Then add http://localhost:3100 as Loki data source in Grafana
 
 InfluxDB (time-series):
   services.influxdb2.enable = true;
