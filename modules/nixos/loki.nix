@@ -213,7 +213,7 @@ in
             retention_delete_worker_count = 150;
             delete_request_store = "filesystem";
             filesystem = {
-              dir = "${cfg.dataDir}/delete-requests";
+              directory = "${cfg.dataDir}/delete-requests";
             };
           };
 
