@@ -211,6 +211,13 @@ in
             retention_enabled = true;
             retention_delete_delay = "2h";
             retention_delete_worker_count = 150;
+
+            delete_request_store = {
+              backend = "filesystem";
+              filesystem = {
+                dir = "${cfg.dataDir}/delete-requests";
+              };
+            };
           };
 
           ingester = {
