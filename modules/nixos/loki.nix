@@ -12,10 +12,10 @@ in
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Loki log aggregation system";
 
-      # OPTIONAL: Port to listen on (default: 3101)
+      # OPTIONAL: Port to listen on (default: 3100)
       port = lib.mkOption {
         type = lib.types.port;
-        default = 3101;
+        default = 3100;
         description = "Port for Loki to listen on";
       };
 
@@ -148,74 +148,109 @@ in
       };
 
       # Ensure config file exists with proper permissions
-      preStart = ''
-        # Create default config if it doesn't exist
-        if [ ! -f ${cfg.dataDir}/loki.yaml ]; then
-          cat > ${cfg.dataDir}/loki.yaml << EOF
-# Loki Configuration
-# See: https://grafana.com/docs/loki/latest/configuration/
+      # Using JSON → YAML conversion to avoid heredoc indentation issues
+      preStart = let
+        lokiConfig = {
+          auth_enabled = false;
 
-auth_enabled: false
+          server = {
+            http_listen_address = cfg.bindIP;
+            http_listen_port = cfg.port;
+            grpc_listen_port = 9096;
+            log_level = "info";
+          };
 
-server:
-  http_listen_address: ${cfg.bindIP}
-  http_listen_port: ${toString cfg.port}
-  grpc_listen_port: 9096
-  log_level: info
+          common = {
+            path_prefix = cfg.dataDir;
+            storage = {
+              filesystem = {
+                chunks_directory = "${cfg.dataDir}/chunks";
+                rules_directory = "${cfg.dataDir}/rules";
+              };
+            };
+            replication_factor = 1;
+            ring = {
+              kvstore = {
+                store = "inmemory";
+              };
+            };
+          };
 
-common:
-  path_prefix: ${cfg.dataDir}
-  storage:
-    filesystem:
-      chunks_directory: ${cfg.dataDir}/chunks
-      rules_directory: ${cfg.dataDir}/rules
-  replication_factor: 1
-  ring:
-    kvstore:
-      store: inmemory
+          query_range = {
+            results_cache = {
+              cache = {
+                embedded_cache = {
+                  enabled = true;
+                  max_size_mb = 100;
+                };
+              };
+            };
+          };
 
-query_range:
-  results_cache:
-    cache:
-      embedded_cache:
-        enabled: true
-        max_size_mb: 100
+          schema_config = {
+            configs = [{
+              from = "2023-01-01";
+              store = "tsdb";
+              object_store = "filesystem";
+              schema = "v13";
+              index = {
+                prefix = "index_";
+                period = "24h";
+              };
+            }];
+          };
 
-schema_config:
-  configs:
-    - from: 2023-01-01
-      store: tsdb
-      object_store: filesystem
-      schema: v13
-      index:
-        prefix: index_
-        period: 24h
+          limits_config = {
+            retention_period = cfg.retention;
+            max_query_series = 10000;
+            max_query_lookback = "720h";
+          };
 
-limits_config:
-  retention_period: ${cfg.retention}
-  max_query_series: 10000
-  max_query_lookback: 720h
+          compactor = {
+            working_directory = "${cfg.dataDir}/compactor";
+            retention_enabled = true;
+            retention_delete_delay = "2h";
+            retention_delete_worker_count = 150;
+          };
 
-compactor:
-  working_directory: ${cfg.dataDir}/compactor
-  retention_enabled: true
-  retention_delete_delay: 2h
-  retention_delete_worker_count: 150
+          ingester = {
+            wal = {
+              enabled = true;
+              dir = "${cfg.dataDir}/wal";
+            };
+            lifecycler = {
+              address = "127.0.0.1";
+              ring = {
+                kvstore = {
+                  store = "inmemory";
+                };
+                replication_factor = 1;
+              };
+            };
+          };
+        };
 
-ingester:
-  wal:
-    enabled: true
-    dir: ${cfg.dataDir}/wal
-  lifecycler:
-    address: 127.0.0.1
-    ring:
-      kvstore:
-        store: inmemory
-      replication_factor: 1
-EOF
-          chown loki:loki ${cfg.dataDir}/loki.yaml
-          chmod 660 ${cfg.dataDir}/loki.yaml
-        fi
+        # Convert to JSON file
+        jsonFile = builtins.toFile "loki.json"
+          (builtins.toJSON lokiConfig);
+
+        # Output temporary YAML file
+        yamlTmp = "${cfg.dataDir}/loki.yaml.tmp";
+
+      in ''
+        # Convert JSON → YAML using remarshal
+        ${pkgs.remarshal}/bin/remarshal \
+          -i ${jsonFile} \
+          -o ${yamlTmp} \
+          -if json \
+          -of yaml
+
+        # Ensure correct permissions
+        install -m 660 -o loki -g loki ${yamlTmp} ${cfg.dataDir}/loki.yaml
+
+        # Data directories
+        mkdir -p ${cfg.dataDir}/data ${cfg.dataDir}/chunks ${cfg.dataDir}/wal ${cfg.dataDir}/compactor
+        chown -R loki:loki ${cfg.dataDir}
       '';
     };
 
@@ -243,48 +278,65 @@ EOF
         ReadWritePaths = [ "/var/lib/promtail" ];
       };
 
-      preStart = ''
-        # Create default Promtail config if it doesn't exist
-        if [ ! -f /var/lib/promtail/promtail.yaml ]; then
-          cat > /var/lib/promtail/promtail.yaml << EOF
-# Promtail Configuration
-# See: https://grafana.com/docs/loki/latest/send-data/promtail/
+      preStart = let
+        promtailConfig = {
+          server = {
+            http_listen_port = 9080;
+            grpc_listen_port = 0;
+          };
 
-server:
-  http_listen_port: 9080
-  grpc_listen_port: 0
+          positions = {
+            filename = "/var/lib/promtail/positions.yaml";
+          };
 
-positions:
-  filename: /var/lib/promtail/positions.yaml
+          clients = [{
+            url = "http://localhost:${toString cfg.port}/loki/api/v1/push";
+          }];
 
-clients:
-  - url: http://localhost:${toString cfg.port}/loki/api/v1/push
+          scrape_configs = [
+            {
+              job_name = "journal";
+              journal = {
+                max_age = "12h";
+                labels = {
+                  job = "systemd-journal";
+                };
+              };
+              relabel_configs = [{
+                source_labels = [ "__journal__systemd_unit" ];
+                target_label = "unit";
+              }];
+            }
+            {
+              job_name = "system";
+              static_configs = [{
+                targets = [ "localhost" ];
+                labels = {
+                  job = "varlogs";
+                  __path__ = "/var/log/*.log";
+                };
+              }];
+            }
+          ];
+        };
 
-scrape_configs:
-  # Collect systemd journal logs
-  - job_name: journal
-    journal:
-      max_age: 12h
-      labels:
-        job: systemd-journal
-        host: \$(hostname)
-    relabel_configs:
-      - source_labels: ['__journal__systemd_unit']
-        target_label: 'unit'
+        # Convert to JSON file
+        jsonFile = builtins.toFile "promtail.json"
+          (builtins.toJSON promtailConfig);
 
-  # Collect logs from /var/log
-  - job_name: system
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: varlogs
-          host: \$(hostname)
-          __path__: /var/log/*.log
-EOF
-          chown promtail:promtail /var/lib/promtail/promtail.yaml
-          chmod 660 /var/lib/promtail/promtail.yaml
-        fi
+        # Output temporary YAML file
+        yamlTmp = "/var/lib/promtail/promtail.yaml.tmp";
+
+      in ''
+        # Convert JSON → YAML using remarshal
+        ${pkgs.remarshal}/bin/remarshal \
+          -i ${jsonFile} \
+          -o ${yamlTmp} \
+          -if json \
+          -of yaml
+
+        # Ensure correct permissions
+        install -m 640 -o promtail -g promtail ${yamlTmp} /var/lib/promtail/promtail.yaml
       '';
     };
 
@@ -337,7 +389,7 @@ Minimal configuration:
 services.loki-custom = {
   enable = true;
 };
-# Access at: http://your-ip:3101
+# Access at: http://your-ip:3100
 # Promtail enabled by default, collecting system logs
 
 
@@ -345,7 +397,7 @@ Full configuration with domain:
 --------------------------------
 services.loki-custom = {
   enable = true;
-  port = 3101;
+  port = 3100;
   bindIP = "0.0.0.0";
   dataDir = "/data/loki";
   retention = "2160h";  # 90 days
@@ -364,16 +416,16 @@ INITIAL SETUP
 ================================================================================
 
 1. Verify Loki is running:
-   curl http://localhost:3101/ready
+   curl http://localhost:3100/ready
    # Should return "ready"
 
 2. Check Promtail is sending logs:
-   curl http://localhost:3101/loki/api/v1/label/__name__/values
+   curl http://localhost:3100/loki/api/v1/label/__name__/values
    # Should show log stream labels
 
 3. Add to Grafana:
    - In Grafana: Configuration → Data Sources → Add Loki
-   - URL: http://localhost:3101
+   - URL: http://localhost:3100
    - Click "Save & Test"
 
 4. Query logs in Grafana:
@@ -387,22 +439,17 @@ INITIAL SETUP
 CONFIGURATION
 ================================================================================
 
-Loki configuration is in loki.yaml in dataDir.
-A default config is created automatically on first run.
+Loki configuration is generated automatically from Nix config.
+The YAML file is regenerated on every service start.
 
-Edit Loki configuration:
-  sudo nano /var/lib/loki/loki.yaml
-  sudo systemctl restart loki
-
-Edit Promtail configuration:
-  sudo nano /var/lib/promtail/promtail.yaml
-  sudo systemctl restart promtail
-
-Validate Loki config:
-  ${pkgs.grafana-loki}/bin/loki --config.file=/var/lib/loki/loki.yaml --verify-config
+View generated configuration:
+  cat /var/lib/loki/loki.yaml
 
 Configuration reference:
   https://grafana.com/docs/loki/latest/configuration/
+
+Note: Manual edits to loki.yaml will be overwritten on restart.
+To persist changes, modify the Nix module instead.
 
 
 ================================================================================
@@ -433,73 +480,6 @@ Aggregations:
 
 
 ================================================================================
-ADDING LOG SOURCES
-================================================================================
-
-To collect logs from other sources, edit Promtail config:
-
-Example - Application logs:
-  - job_name: myapp
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: myapp
-          __path__: /var/log/myapp/*.log
-
-Example - Docker containers:
-  - job_name: docker
-    docker_sd_configs:
-      - host: unix:///var/run/docker.sock
-    relabel_configs:
-      - source_labels: ['__meta_docker_container_name']
-        target_label: 'container'
-
-Example - Custom format:
-  - job_name: custom
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: custom
-          __path__: /var/log/custom/*.log
-    pipeline_stages:
-      - regex:
-          expression: '(?P<timestamp>\\S+) (?P<level>\\S+) (?P<message>.*)'
-      - labels:
-          level:
-      - timestamp:
-          source: timestamp
-          format: RFC3339
-
-
-================================================================================
-SENDING LOGS FROM APPLICATIONS
-================================================================================
-
-Applications can send logs directly to Loki via HTTP:
-
-Using curl:
-  curl -X POST http://localhost:3101/loki/api/v1/push \
-    -H "Content-Type: application/json" \
-    -d '{
-      "streams": [
-        {
-          "stream": {"job": "myapp", "level": "info"},
-          "values": [
-            ["'$(date +%s)000000000'", "Application started"]
-          ]
-        }
-      ]
-    }'
-
-Using LogCLI:
-  ${pkgs.grafana-loki}/bin/logcli --addr=http://localhost:3101 \
-    --labels='job=test' \
-    push "Test log message"
-
-
-================================================================================
 TROUBLESHOOTING
 ================================================================================
 
@@ -516,11 +496,11 @@ View Promtail logs:
   sudo journalctl -u promtail -f
 
 Test Loki API:
-  curl http://localhost:3101/ready
-  curl http://localhost:3101/metrics
+  curl http://localhost:3100/ready
+  curl http://localhost:3100/metrics
 
 Query logs via API:
-  curl -G -s "http://localhost:3101/loki/api/v1/query" \
+  curl -G -s "http://localhost:3100/loki/api/v1/query" \
     --data-urlencode 'query={job="systemd-journal"}' \
     --data-urlencode 'limit=10'
 
