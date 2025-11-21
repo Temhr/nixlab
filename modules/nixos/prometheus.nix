@@ -113,14 +113,33 @@ in
     # PROMETHEUS SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
     systemd.services.prometheus = {
+      # Set a description that will appear in systemctl output
+      # Change this if you want a different display name
       description = "Prometheus Monitoring System";
+
+      # Control when this service starts during boot
+      # Options: multi-user.target (normal), graphical.target (GUI systems)
       wantedBy = [ "multi-user.target" ];
+
+      # Add dependencies here - services that must start before Prometheus
+      # Example: after = [ "network.target" "postgresql.service" ];
       after = [ "network.target" ];
 
       serviceConfig = {
+        # Service type determines how systemd manages the process
+        # Use "simple" for processes that don't fork, "forking" if they daemonize
         Type = "simple";
+
+        # Set which user/group runs Prometheus for security isolation
+        # Change these if you need different permissions or user separation
         User = "prometheus";
         Group = "prometheus";
+
+        # Main command - add or modify flags to customize Prometheus behavior
+        # Common additions:
+        # --web.external-url=https://your-domain.com/prometheus (for reverse proxy)
+        # --log.level=debug (for more verbose logging)
+        # --storage.tsdb.retention.size=10GB (limit storage by size instead of time)
         ExecStart = ''
           ${cfg.package}/bin/prometheus \
             --config.file=${cfg.dataDir}/prometheus.yml \
@@ -130,40 +149,76 @@ in
             --web.console.templates=${cfg.package}/etc/prometheus/consoles \
             --web.console.libraries=${cfg.package}/etc/prometheus/console_libraries
         '';
+
+        # Define how to reload config without restarting (preserves metrics data)
+        # HUP signal tells Prometheus to reload its configuration file
         ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
+
+        # Control restart behavior on failure
+        # Options: "no", "on-success", "on-failure", "always"
         Restart = "on-failure";
+
+        # Adjust delay before restart attempts (increase if startup is slow)
         RestartSec = "10s";
 
-        # Security hardening
+        # ---- Security hardening - uncomment/add options as needed ----
+
+        # Prevent privilege escalation attacks
         NoNewPrivileges = true;
+
+        # Isolate /tmp from other services (recommended for security)
         PrivateTmp = true;
+
+        # Filesystem protection level: "strict" (read-only), "full", or "true"
         ProtectSystem = "strict";
+
+        # Hide /home directories from this service
         ProtectHome = true;
+
+        # List directories that need write access
+        # Add more paths if Prometheus needs to write elsewhere:
+        # ReadWritePaths = [ cfg.dataDir "/var/log/prometheus" ];
         ReadWritePaths = [ cfg.dataDir ];
+
+        # Additional security options you can enable:
+        # PrivateDevices = true;  # Restrict device access
+        # ProtectKernelTunables = true;  # Protect /proc and /sys
+        # RestrictAddressFamilies = [ "AF_INET" "AF_INET6" ];  # Limit network protocols
       };
 
-      # Ensure config file exists with proper permissions
-      # Using JSON → YAML conversion to avoid heredoc indentation issues
+      # ----------------------------------------------------------------------------
+      # PRE-START SCRIPT - Runs before service starts each time
+      # Use this to generate configs, check dependencies, or prepare directories
+      # ----------------------------------------------------------------------------
       preStart = let
+        # Define your Prometheus configuration here
+        # This Nix structure gets converted to prometheus.yml automatically
         prometheusConfig = {
+          # Global defaults - adjust timing based on your monitoring needs
+          # Shorter intervals = more data points but higher resource usage
           global = {
-            scrape_interval = "15s";
-            evaluation_interval = "15s";
-            external_labels = { monitor = "prometheus"; };
+            scrape_interval = "15s";       # Change to 30s or 60s for less frequent scraping
+            evaluation_interval = "15s";   # How often to check alerting rules
+            external_labels = { monitor = "prometheus"; };  # Add labels to identify this instance
           };
 
+          # Configure alertmanager endpoints (add your alertmanager targets here)
           alerting = {
             alertmanagers = [{
               static_configs = [{
-                targets = [];
+                targets = [];  # Example: [ "alertmanager:9093" ]
               }];
             }];
           };
 
+          # Add paths to alerting rule files here
+          # rule_files = [ "/etc/prometheus/alerts/*.yml" ];
           rule_files = [];
 
+          # Define what to scrape - add new jobs here for each service you monitor
           scrape_configs =
             [
+              # Self-monitoring job - always keep this to monitor Prometheus health
               {
                 job_name = "prometheus";
                 static_configs = [{
@@ -171,36 +226,59 @@ in
                 }];
               }
             ]
+            # Example of conditional scrape config - add more with ++ operator
             ++ lib.optional cfg.enableNodeExporter {
               job_name = "node";
               static_configs = [{
                 targets = [ "localhost:9100" ];
                 labels = { instance = "localhost"; };
               }];
-            };
+            }
+            # Add your own scrape configs here:
+            # ++ [{
+            #   job_name = "my-app";
+            #   static_configs = [{
+            #     targets = [ "localhost:8080" ];
+            #     labels = { environment = "production"; };
+            #   }];
+            # }]
+            ;
         };
 
-        # Convert to JSON file
+        # Converts Nix config to JSON as an intermediate format
+        # Modify prometheusConfig above, not this line
         jsonFile = builtins.toFile "prometheus.json"
           (builtins.toJSON prometheusConfig);
 
-        # Output temporary YAML file
+        # Temporary file path for YAML conversion
         yamlTmp = "${cfg.dataDir}/prometheus.yml.tmp";
-
       in ''
-        # Convert JSON → YAML using remarshal
-        ${pkgs.remarshal}/bin/remarshal \
-          -i ${jsonFile} \
-          -o ${yamlTmp} \
-          -if json \
-          -of yaml
+# Convert JSON to YAML (Prometheus requires YAML format)
+# If you need a custom config file instead, replace this entire script
+${pkgs.remarshal}/bin/remarshal \
+  -i ${jsonFile} \
+  -o ${yamlTmp} \
+  -if json \
+  -of yaml
 
-        # Ensure correct permissions
-        install -m 660 -o prometheus -g prometheus ${yamlTmp} ${cfg.dataDir}/prometheus.yml
+# Install config with specific permissions (660 = user and group read/write)
+# Adjust -m flag if you need different permissions
+install -m 660 -o prometheus -g prometheus ${yamlTmp} ${cfg.dataDir}/prometheus.yml
 
-        # Data directory
-        mkdir -p ${cfg.dataDir}/data
-        chown prometheus:prometheus ${cfg.dataDir}/data
+# Ensure data directory exists
+# Add additional directories here if needed:
+# mkdir -p ${cfg.dataDir}/wal ${cfg.dataDir}/rules
+mkdir -p ${cfg.dataDir}/data
+
+# Set ownership on directories
+# Add chown commands for any additional directories you create
+chown prometheus:prometheus ${cfg.dataDir}/data
+
+# Additional preStart tasks you might add:
+# - Validate config: ${cfg.package}/bin/promtool check config ${cfg.dataDir}/prometheus.yml
+# - Download rule files from remote source
+# - Set up symbolic links to rule files
+# - Initialize databases or plugins
       '';
     };
 
