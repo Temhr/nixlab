@@ -3,19 +3,7 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./prometheus
-    ./bookstack.nix
-    ./glance.nix
-    ./gotosocial.nix
-    ./grafana.nix
-    ./home-assistant.nix
-    ./homepage-dashboard.nix
-    ./loki.nix
-    ./node-red.nix
-    ./ollama.nix
-    ./syncthing.nix
-    ./wiki-js.nix
-    ./zola.nix
+    ./prometheus.nix
   ];
 
   options = {
