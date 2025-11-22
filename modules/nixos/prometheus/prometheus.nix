@@ -197,6 +197,8 @@ in
       group = "prometheus";
       home = cfg.dataDir;
       description = "Prometheus service user";
+      # Add disk group if smartctl exporter is enabled (needed for SMART access)
+      extraGroups = lib.optional (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) "disk";
     };
 
     users.groups.prometheus = {};
@@ -244,16 +246,9 @@ in
       enable = true;
       port = 9633;
       devices = cfg.maintenance.exporters.smartctl.devices;
-      # Grant necessary capabilities to access SMART data
-      # The exporter needs CAP_SYS_RAWIO to query disk SMART attributes
     };
 
-    # Add prometheus user to disk group for SMART access
-    users.users.prometheus = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
-      extraGroups = [ "disk" ];
-    };
-
-    # Override the systemd service to add capabilities
+    # Override the systemd service to add capabilities for SMART access
     systemd.services.prometheus-smartctl-exporter = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
       serviceConfig = {
         # Add capability to access raw disk devices
