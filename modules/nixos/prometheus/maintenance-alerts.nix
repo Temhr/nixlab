@@ -39,15 +39,16 @@
         # 1. CPU Throttling
         {
           alert = "CPUThrottling";
-          expr = "|
-  (
-    node_cpu_scaling_frequency_hertz
-      < (node_cpu_scaling_frequency_max_hertz * 0.60)
-  )
-  and
-  (
-    rate(node_cpu_seconds_total{mode!='idle'}[5m]) > 0.5
-  )";
+          expr = ''
+            (
+              node_cpu_scaling_frequency_hertz
+                < (node_cpu_scaling_frequency_max_hertz * 0.60)
+            )
+            and
+            (
+              rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.5
+            )
+          '';
           for = "10m";
           labels = {
             severity = "warning";
@@ -56,7 +57,7 @@
           };
           annotations = {
             summary = "CPU throttling detected on {{ $labels.instance }}";
-            description = "CPU running <60% of max while under significant load.";
+            description = "CPU frequency reduced while under significant load. Check cooling or power settings.";
           };
         }
         # 1. Fan Speed (if available)
