@@ -475,8 +475,8 @@
           record = "system:health_score:percentage";
           expr = ''
             100 - (
-              count(ALERTS{alertstate="firing", severity="critical"}) * 20 +
-              count(ALERTS{alertstate="firing", severity="warning"}) * 5
+              (count(ALERTS{alertstate="firing", severity="critical"}) or vector(0)) * 20 +
+              (count(ALERTS{alertstate="firing", severity="warning"}) or vector(0)) * 5
             )
           '';
         }
