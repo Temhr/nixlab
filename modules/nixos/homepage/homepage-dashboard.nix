@@ -149,7 +149,7 @@ in
 
         # Install alert rules with correct ownership and permissions
         # Mode 644: owner read/write, group and others read-only
-        install -m 664 -o prometheus -g prometheus ${servicesYamlTmp} ${cfg.dataDir}/config/services.yaml
+        install -m 664 -o homepage -g homepage ${servicesYamlTmp} ${cfg.dataDir}/config/services.yaml
       '';
 
       serviceConfig = {
