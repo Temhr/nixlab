@@ -80,6 +80,25 @@ in
         default = "admin";
         description = "Initial admin password (change after first login!)";
       };
+
+      # ┌─────────────────────────────────────────────────────────┐
+      # │ NEW: MAINTENANCE MONITORING OPTIONS                     │
+      # └─────────────────────────────────────────────────────────┘
+      maintenance = {
+        enable = lib.mkEnableOption "maintenance monitoring dashboard";
+
+        dashboardPath = lib.mkOption {
+          type = lib.types.path;
+          default = ./grafana-maintenance-dashboard.json;
+          description = "Path to maintenance dashboard JSON file";
+        };
+
+        provisionPath = lib.mkOption {
+          type = lib.types.str;
+          default = "${cfg.dataDir}/dashboards/maintenance";
+          description = "Path where maintenance dashboard will be provisioned";
+        };
+      };
     };
   };
 
@@ -96,6 +115,8 @@ in
       "d ${cfg.dataDir}/data 0750 grafana grafana -"
       "d ${cfg.dataDir}/logs 0750 grafana grafana -"
       "d ${cfg.dataDir}/plugins 0750 grafana grafana -"
+    ] ++ lib.optionals cfg.maintenance.enable [
+      "d ${cfg.maintenance.provisionPath} 0755 grafana grafana -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -124,6 +145,7 @@ in
         GF_PATHS_DATA = "${cfg.dataDir}/data";
         GF_PATHS_LOGS = "${cfg.dataDir}/logs";
         GF_PATHS_PLUGINS = "${cfg.dataDir}/plugins";
+        GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
         GF_SERVER_HTTP_PORT = toString cfg.port;
         GF_SERVER_HTTP_ADDR = cfg.bindIP;
         GF_SERVER_DOMAIN = if cfg.domain != null then cfg.domain else "localhost";
@@ -166,6 +188,7 @@ in
 data = ${cfg.dataDir}/data
 logs = ${cfg.dataDir}/logs
 plugins = ${cfg.dataDir}/plugins
+provisioning = ${cfg.dataDir}/provisioning
 
 [server]
 http_port = ${toString cfg.port}
@@ -193,8 +216,77 @@ EOF
           chown grafana:grafana ${cfg.dataDir}/grafana.ini
           chmod 660 ${cfg.dataDir}/grafana.ini
         fi
+
+        # Set up provisioning directories
+        mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
+        chown -R grafana:grafana ${cfg.dataDir}/provisioning
+
+        ${lib.optionalString cfg.maintenance.enable ''
+          # Provision maintenance dashboard
+          mkdir -p ${cfg.maintenance.provisionPath}
+
+          # Copy dashboard JSON if it exists
+          if [ -f ${cfg.maintenance.dashboardPath} ]; then
+            cp ${cfg.maintenance.dashboardPath} ${cfg.maintenance.provisionPath}/maintenance.json
+            chown grafana:grafana ${cfg.maintenance.provisionPath}/maintenance.json
+          fi
+
+          # Create dashboard provisioning config
+          cat > ${cfg.dataDir}/provisioning/dashboards/maintenance.yaml << EOF
+apiVersion: 1
+
+providers:
+  - name: 'Maintenance'
+    orgId: 1
+    folder: 'Maintenance'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: ${cfg.maintenance.provisionPath}
+      foldersFromFilesStructure: false
+EOF
+          chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/maintenance.yaml
+
+          # Create datasource provisioning if Prometheus/Loki are enabled
+          cat > ${cfg.dataDir}/provisioning/datasources/default.yaml << EOF
+apiVersion: 1
+
+datasources:
+  ${lib.optionalString config.services.prometheus-custom.enable ''
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://localhost:${toString config.services.prometheus-custom.port}
+    isDefault: true
+    jsonData:
+      timeInterval: 15s
+  ''}
+  ${lib.optionalString config.services.loki-custom.enable ''
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://localhost:${toString config.services.loki-custom.port}
+    jsonData:
+      maxLines: 1000
+  ''}
+EOF
+          chown grafana:grafana ${cfg.dataDir}/provisioning/datasources/default.yaml
+        ''}
       '';
     };
+
+    # ┌─────────────────────────────────────────────────────────┐
+    # │ ACTIVATION SCRIPT - Copy dashboard on system rebuild   │
+    # └─────────────────────────────────────────────────────────┘
+    system.activationScripts.grafana-maintenance-dashboard = lib.mkIf cfg.maintenance.enable ''
+      if [ -f ${cfg.maintenance.dashboardPath} ]; then
+        mkdir -p ${cfg.maintenance.provisionPath}
+        cp ${cfg.maintenance.dashboardPath} ${cfg.maintenance.provisionPath}/maintenance.json
+        chown -R grafana:grafana ${cfg.maintenance.provisionPath}
+      fi
+    '';
 
     # ----------------------------------------------------------------------------
     # NGINX REVERSE PROXY - Only configured if domain is set
@@ -239,6 +331,47 @@ EOF
     );
   };
 }
+
+/*
+================================================================================
+MAINTENANCE DASHBOARD USAGE
+================================================================================
+
+Enable maintenance dashboard:
+------------------------------
+services.grafana-custom = {
+  enable = true;
+
+  # Enable maintenance dashboard
+  maintenance = {
+    enable = true;
+    dashboardPath = ./grafana-maintenance-dashboard.json;
+  };
+};
+
+This will:
+  - Auto-provision the maintenance dashboard on startup
+  - Create a "Maintenance" folder in Grafana
+  - Auto-configure Prometheus and Loki datasources if enabled
+  - Dashboard updates automatically on nixos-rebuild
+
+Access the dashboard:
+  1. Login to Grafana
+  2. Navigate to Dashboards
+  3. Find "Maintenance" folder
+  4. Open "System Maintenance Checklist" dashboard
+
+The dashboard will show:
+  - Health score gauge
+  - Active alerts by severity
+  - Resource utilization graphs
+  - Alert tables by checklist section
+  - Manual task checklists
+  - Certificate expiry timeline
+  - Service uptime matrix
+  - Maintenance task completion stats
+
+*/
 
 /*
 ================================================================================

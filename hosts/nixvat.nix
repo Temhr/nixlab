@@ -124,6 +124,7 @@
     port = 3101;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    maintenance.enable = true;
   };
 
   services.loki-custom = {
@@ -131,6 +132,7 @@
     port = 3100;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    maintenance.enable = true;
   };
 
   services.prometheus-custom = {
@@ -138,6 +140,7 @@
     port = 9090;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    maintenance.enable = true;
   };
 
   services.syncthing-custom = {

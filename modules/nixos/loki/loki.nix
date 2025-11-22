@@ -80,6 +80,19 @@ in
         default = true;
         description = "Enable Promtail to collect system logs";
       };
+
+      # ┌─────────────────────────────────────────────────────────┐
+      # │ NEW: MAINTENANCE MONITORING OPTIONS                     │
+      # └─────────────────────────────────────────────────────────┘
+      maintenance = {
+        enable = lib.mkEnableOption "maintenance task logging integration";
+
+        logPath = lib.mkOption {
+          type = lib.types.str;
+          default = "/var/log/maintenance.log";
+          description = "Path to maintenance log file";
+        };
+      };
     };
   };
 
@@ -98,6 +111,8 @@ in
       "d ${cfg.dataDir}/wal 0750 loki loki -"
     ] ++ lib.optionals cfg.enablePromtail [
       "d /var/lib/promtail 0750 promtail promtail -"
+    ] ++ lib.optionals cfg.maintenance.enable [
+      "f ${cfg.maintenance.logPath} 0666 root root - -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -280,6 +295,76 @@ in
       };
 
       preStart = let
+        # Base scrape configs
+        baseScrapeConfigs = [
+          {
+            job_name = "journal";
+            journal = {
+              max_age = "12h";
+              labels = {
+                job = "systemd-journal";
+                host = config.networking.hostName;
+              };
+            };
+            relabel_configs = [{
+              source_labels = [ "__journal__systemd_unit" ];
+              target_label = "unit";
+            }];
+          }
+          {
+            job_name = "system";
+            static_configs = [{
+              targets = [ "localhost" ];
+              labels = {
+                job = "varlogs";
+                __path__ = "/var/log/*.log";
+              };
+            }];
+          }
+        ];
+
+        # Maintenance log scrape config
+        maintenanceScrapeConfig = lib.optional cfg.maintenance.enable {
+          job_name = "maintenance";
+          static_configs = [{
+            targets = [ "localhost" ];
+            labels = {
+              job = "maintenance-log";
+              host = config.networking.hostName;
+              __path__ = cfg.maintenance.logPath;
+            };
+          }];
+          pipeline_stages = [
+            {
+              json = {
+                expressions = {
+                  timestamp = "timestamp";
+                  level = "level";
+                  section = "section";
+                  task = "task";
+                  status = "status";
+                  notes = "notes";
+                  user = "user";
+                };
+              };
+            }
+            {
+              labels = {
+                level = "";
+                section = "";
+                status = "";
+                user = "";
+              };
+            }
+            {
+              timestamp = {
+                source = "timestamp";
+                format = "RFC3339";
+              };
+            }
+          ];
+        };
+
         promtailConfig = {
           server = {
             http_listen_port = 9080;
@@ -294,31 +379,7 @@ in
             url = "http://localhost:${toString cfg.port}/loki/api/v1/push";
           }];
 
-          scrape_configs = [
-            {
-              job_name = "journal";
-              journal = {
-                max_age = "12h";
-                labels = {
-                  job = "systemd-journal";
-                };
-              };
-              relabel_configs = [{
-                source_labels = [ "__journal__systemd_unit" ];
-                target_label = "unit";
-              }];
-            }
-            {
-              job_name = "system";
-              static_configs = [{
-                targets = [ "localhost" ];
-                labels = {
-                  job = "varlogs";
-                  __path__ = "/var/log/*.log";
-                };
-              }];
-            }
-          ];
+          scrape_configs = baseScrapeConfigs ++ maintenanceScrapeConfig;
         };
 
         # Convert to JSON file
@@ -377,8 +438,54 @@ in
       # Open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
+
+    # ┌─────────────────────────────────────────────────────────┐
+    # │ MAINTENANCE LOG HELPER SCRIPT                           │
+    # └─────────────────────────────────────────────────────────┘
+    environment.systemPackages = lib.optionals cfg.maintenance.enable [
+      (pkgs.writeScriptBin "maintenance-log" ''
+        #!${pkgs.bash}/bin/bash
+        ${builtins.readFile ./maintenance-logger.sh}
+      '')
+      pkgs.jq
+    ];
   };
 }
+
+/*
+================================================================================
+MAINTENANCE LOGGING USAGE
+================================================================================
+
+Enable maintenance task logging:
+---------------------------------
+services.loki-custom = {
+  enable = true;
+
+  # Enable maintenance logging
+  maintenance = {
+    enable = true;
+    logPath = "/var/log/maintenance.log";  # Optional, this is the default
+  };
+};
+
+This will:
+  - Create maintenance log file with proper permissions
+  - Configure Promtail to collect maintenance logs
+  - Parse JSON structured logs automatically
+  - Extract labels: section, status, level, user
+  - Install maintenance-log command globally
+
+Usage:
+  maintenance-log              # Interactive CLI
+
+Query in Grafana:
+  {job="maintenance-log"}                           # All maintenance logs
+  {job="maintenance-log", section="I.1"}            # Hardware health logs
+  {job="maintenance-log", status="completed"}       # Completed tasks
+  {job="maintenance-log"} | json | status="failed"  # Failed tasks
+
+*/
 
 /*
 ================================================================================

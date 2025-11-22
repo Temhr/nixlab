@@ -6,9 +6,22 @@ let
   # Import the alerts configuration from alerts.nix
   alertRulesConfig = import ./alerts.nix;
 
+  # ┌─────────────────────────────────────────────────────────┐
+  # │ MAINTENANCE MONITORING INTEGRATION                      │
+  # │ Import maintenance alert rules if enabled               │
+  # └─────────────────────────────────────────────────────────┘
+  maintenanceAlertRules = if cfg.maintenance.enable
+    then import ./maintenance-alerts.nix
+    else { groups = []; };
+
+  # Merge your alerts with maintenance alerts
+  combinedAlertRules = {
+    groups = alertRulesConfig.groups ++ maintenanceAlertRules.groups;
+  };
+
   # Convert alerts to JSON file (will be converted to YAML in preStart)
   alertRulesJsonFile = builtins.toFile "alerts.json"
-    (builtins.toJSON alertRulesConfig);
+    (builtins.toJSON combinedAlertRules);
 in
 {
   # ============================================================================
@@ -87,6 +100,78 @@ in
         default = true;
         description = "Enable Prometheus Node Exporter for system metrics";
       };
+
+      # ┌─────────────────────────────────────────────────────────┐
+      # │ NEW: MAINTENANCE MONITORING OPTIONS                     │
+      # └─────────────────────────────────────────────────────────┘
+      maintenance = {
+        enable = lib.mkEnableOption "maintenance monitoring exporters and alerts";
+
+        exporters = {
+          systemd = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = "Enable systemd exporter for service status monitoring";
+          };
+
+          blackbox = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Enable blackbox exporter for network probing";
+            };
+            httpTargets = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              example = [ "https://example.com" ];
+              description = "HTTP targets to monitor";
+            };
+            icmpTargets = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ "8.8.8.8" "1.1.1.1" ];
+              description = "ICMP targets to ping";
+            };
+            sslTargets = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              example = [ "https://example.com" ];
+              description = "SSL certificate targets to monitor";
+            };
+          };
+
+          smartctl = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+              description = "Enable SMARTCTL exporter for disk health";
+            };
+            devices = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              example = [ "/dev/sda" "/dev/nvme0n1" ];
+              description = "Disk devices to monitor";
+            };
+          };
+
+          backup = {
+            enable = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Enable custom backup status exporter";
+            };
+            timestampFile = lib.mkOption {
+              type = lib.types.str;
+              default = "/var/backups/last_backup_timestamp";
+              description = "File containing last backup timestamp";
+            };
+            sizeFile = lib.mkOption {
+              type = lib.types.str;
+              default = "/var/backups/last_backup_size";
+              description = "File containing last backup size in bytes";
+            };
+          };
+        };
+      };
     };
   };
 
@@ -100,6 +185,8 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0770 prometheus prometheus -"
+    ] ++ lib.optionals cfg.maintenance.enable [
+      "d /var/lib/node_exporter 0755 prometheus prometheus -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -115,6 +202,90 @@ in
     users.groups.prometheus = {};
 
     users.users.temhr.extraGroups = [ "prometheus" ];
+
+    # ┌─────────────────────────────────────────────────────────┐
+    # │ MAINTENANCE EXPORTERS                                   │
+    # └─────────────────────────────────────────────────────────┘
+
+    # Systemd Exporter
+    services.prometheus.exporters.systemd = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.systemd) {
+      enable = true;
+      port = 9558;
+    };
+
+    # Blackbox Exporter
+    services.prometheus.exporters.blackbox = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.blackbox.enable) {
+      enable = true;
+      port = 9115;
+      configFile = pkgs.writeText "blackbox.yml" ''
+        modules:
+          http_2xx:
+            prober: http
+            timeout: 5s
+            http:
+              valid_status_codes: []
+              method: GET
+              preferred_ip_protocol: "ip4"
+
+          icmp:
+            prober: icmp
+            timeout: 5s
+            icmp:
+              preferred_ip_protocol: "ip4"
+
+          tcp_connect:
+            prober: tcp
+            timeout: 5s
+      '';
+    };
+
+    # SMARTCTL Exporter
+    services.prometheus.exporters.smartctl = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
+      enable = true;
+      port = 9633;
+      devices = cfg.maintenance.exporters.smartctl.devices;
+    };
+
+    # Custom Backup Exporter
+    systemd.services.backup-status-exporter = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.backup.enable) {
+      description = "Backup Status Exporter";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+
+      serviceConfig = {
+        Type = "simple";
+        User = "prometheus";
+        Group = "prometheus";
+        Restart = "always";
+        RestartSec = "10s";
+        ExecStart = pkgs.writeShellScript "backup-exporter" ''
+          #!${pkgs.bash}/bin/bash
+          set -euo pipefail
+
+          METRICS_DIR="/var/lib/node_exporter"
+          METRICS_FILE="$METRICS_DIR/backup_metrics.prom"
+
+          mkdir -p "$METRICS_DIR"
+
+          while true; do
+            {
+              if [[ -f "${cfg.maintenance.exporters.backup.timestampFile}" ]]; then
+                LAST_BACKUP=$(cat "${cfg.maintenance.exporters.backup.timestampFile}")
+                echo "backup_job_last_success_timestamp $LAST_BACKUP"
+              fi
+
+              if [[ -f "${cfg.maintenance.exporters.backup.sizeFile}" ]]; then
+                BACKUP_SIZE=$(cat "${cfg.maintenance.exporters.backup.sizeFile}")
+                echo "backup_job_size_bytes $BACKUP_SIZE"
+              fi
+            } > "$METRICS_FILE.tmp"
+
+            mv "$METRICS_FILE.tmp" "$METRICS_FILE"
+            sleep 300
+          done
+        '';
+      };
+    };
 
     # ----------------------------------------------------------------------------
     # PROMETHEUS SERVICE - Configure the systemd service
@@ -194,6 +365,123 @@ in
       preStart = let
         # Define your Prometheus configuration here
         # This Nix structure gets converted to prometheus.yml automatically
+        # Build scrape configs dynamically based on enabled features
+        baseScrapeConfigs = [
+          # Self-monitoring job - always keep this to monitor Prometheus health
+          {
+            job_name = "prometheus";
+            static_configs = [{
+              targets = [ "localhost:${toString cfg.port}" ];
+            }];
+          }
+        # Example of conditional scrape config - add more with ++ operator
+        ] ++ lib.optional cfg.enableNodeExporter {
+          job_name = "node";
+          static_configs = [{
+            targets = [ "localhost:9100" ];
+            labels = {
+              instance = "localhost";
+              alias = config.networking.hostName;
+            };
+          }];
+        }
+        # Add your own scrape configs here:
+        # ++ [{
+        #   job_name = "my-app";
+        #   static_configs = [{
+        #     targets = [ "localhost:8080" ];
+        #     labels = { environment = "production"; };
+        #   }];
+        # }]
+        ;
+
+        # Add maintenance scrape configs if enabled
+        maintenanceScrapeConfigs = lib.optionals cfg.maintenance.enable (
+          # Systemd exporter
+          lib.optional cfg.maintenance.exporters.systemd {
+            job_name = "systemd";
+            static_configs = [{
+              targets = [ "localhost:9558" ];
+            }];
+          }
+          # SMARTCTL exporter
+          ++ lib.optional cfg.maintenance.exporters.smartctl.enable {
+            job_name = "smartctl";
+            static_configs = [{
+              targets = [ "localhost:9633" ];
+            }];
+          }
+          # Blackbox HTTP
+          ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.httpTargets != []) {
+            job_name = "blackbox-http";
+            metrics_path = "/probe";
+            params.module = [ "http_2xx" ];
+            static_configs = [{
+              targets = cfg.maintenance.exporters.blackbox.httpTargets;
+            }];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                target_label = "__param_target";
+              }
+              {
+                source_labels = [ "__param_target" ];
+                target_label = "instance";
+              }
+              {
+                replacement = "localhost:9115";
+                target_label = "__address__";
+              }
+            ];
+          }
+          # Blackbox ICMP
+          ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.icmpTargets != []) {
+            job_name = "blackbox-icmp";
+            metrics_path = "/probe";
+            params.module = [ "icmp" ];
+            static_configs = [{
+              targets = cfg.maintenance.exporters.blackbox.icmpTargets;
+            }];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                target_label = "__param_target";
+              }
+              {
+                source_labels = [ "__param_target" ];
+                target_label = "instance";
+              }
+              {
+                replacement = "localhost:9115";
+                target_label = "__address__";
+              }
+            ];
+          }
+          # Blackbox SSL
+          ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.sslTargets != []) {
+            job_name = "blackbox-ssl";
+            metrics_path = "/probe";
+            params.module = [ "http_2xx" ];
+            static_configs = [{
+              targets = cfg.maintenance.exporters.blackbox.sslTargets;
+            }];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                target_label = "__param_target";
+              }
+              {
+                source_labels = [ "__param_target" ];
+                target_label = "instance";
+              }
+              {
+                replacement = "localhost:9115";
+                target_label = "__address__";
+              }
+            ];
+          }
+        );
+
         prometheusConfig = {
           # Global defaults - adjust timing based on your monitoring needs
           # Shorter intervals = more data points but higher resource usage
@@ -216,34 +504,7 @@ in
           # The wildcard pattern allows for multiple rule files in the future
           rule_files = [ "${cfg.dataDir}/rules/*.yml" ];
 
-          # Define what to scrape - add new jobs here for each service you monitor
-          scrape_configs =
-            [
-              # Self-monitoring job - always keep this to monitor Prometheus health
-              {
-                job_name = "prometheus";
-                static_configs = [{
-                  targets = [ "localhost:${toString cfg.port}" ];
-                }];
-              }
-            ]
-            # Example of conditional scrape config - add more with ++ operator
-            ++ lib.optional cfg.enableNodeExporter {
-              job_name = "node";
-              static_configs = [{
-                targets = [ "localhost:9100" ];
-                labels = { instance = "localhost"; };
-              }];
-            }
-            # Add your own scrape configs here:
-            # ++ [{
-            #   job_name = "my-app";
-            #   static_configs = [{
-            #     targets = [ "localhost:8080" ];
-            #     labels = { environment = "production"; };
-            #   }];
-            # }]
-            ;
+          scrape_configs = baseScrapeConfigs ++ maintenanceScrapeConfigs;
         };
 
         # Convert Prometheus config to JSON as an intermediate format
@@ -313,7 +574,10 @@ in
         Type = "simple";
         User = "prometheus";
         Group = "prometheus";
-        ExecStart = "${pkgs.prometheus-node-exporter}/bin/node_exporter --web.listen-address=localhost:9100";
+        ExecStart = "${pkgs.prometheus-node-exporter}/bin/node_exporter "
+          + "--web.listen-address=localhost:9100 "
+          + lib.optionalString cfg.maintenance.enable
+              "--collector.textfile.directory=/var/lib/node_exporter";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -362,6 +626,53 @@ in
     );
   };
 }
+
+/*
+================================================================================
+MAINTENANCE MONITORING USAGE
+================================================================================
+
+Enable maintenance monitoring features:
+---------------------------------------
+services.prometheus-custom = {
+  enable = true;
+
+  # Enable maintenance monitoring
+  maintenance = {
+    enable = true;
+
+    exporters = {
+      systemd = true;  # Service status monitoring
+
+      blackbox = {
+        enable = true;
+        httpTargets = [ "https://example.com" ];
+        icmpTargets = [ "8.8.8.8" "1.1.1.1" ];
+        sslTargets = [ "https://example.com" ];
+      };
+
+      smartctl = {
+        enable = true;
+        devices = [ "/dev/sda" "/dev/nvme0n1" ];
+      };
+
+      backup = {
+        enable = true;
+        timestampFile = "/var/backups/last_timestamp";
+        sizeFile = "/var/backups/last_size";
+      };
+    };
+  };
+};
+
+This will:
+  - Enable additional exporters for maintenance monitoring
+  - Add maintenance alert rules from maintenance-alerts.nix
+  - Auto-configure scrape jobs for all enabled exporters
+  - Merge maintenance alerts with your existing alerts.nix
+
+Your existing configuration continues to work unchanged!
+*/
 
 /*
 ================================================================================
