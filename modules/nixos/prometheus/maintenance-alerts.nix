@@ -39,7 +39,15 @@
         # 1. CPU Throttling
         {
           alert = "CPUThrottling";
-          expr = "rate(node_cpu_scaling_frequency_hertz[5m]) < (node_cpu_scaling_frequency_max_hertz * 0.8)";
+          expr = "|
+  (
+    node_cpu_scaling_frequency_hertz
+      < (node_cpu_scaling_frequency_max_hertz * 0.60)
+  )
+  and
+  (
+    rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.5
+  )";
           for = "10m";
           labels = {
             severity = "warning";
