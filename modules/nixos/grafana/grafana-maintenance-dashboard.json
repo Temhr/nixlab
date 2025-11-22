@@ -45,7 +45,7 @@
       "id": 2,
       "title": "🚨 Active Alerts by Severity",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 16, "x": 8, "y": 0 },
+      "gridPos": { "h": 2, "w": 16, "x": 8, "y": 0 },
       "targets": [
         {
           "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"})",
@@ -75,7 +75,7 @@
       "id": 3,
       "title": "📊 Resource Utilization Overview",
       "type": "timeseries",
-      "gridPos": { "h": 4, "w": 16, "x": 8, "y": 4 },
+      "gridPos": { "h": 6, "w": 16, "x": 8, "y": 2 },
       "targets": [
         {
           "expr": "node:cpu_usage:percentage",
