@@ -182,8 +182,6 @@ in
         if [ ! -f ${cfg.dataDir}/grafana.ini ]; then
           cat > ${cfg.dataDir}/grafana.ini << EOF
 # Grafana Configuration
-# Most settings are controlled via environment variables
-
 [paths]
 data = ${cfg.dataDir}/data
 logs = ${cfg.dataDir}/logs
@@ -224,15 +222,15 @@ EOF
         ${lib.optionalString cfg.maintenance.enable ''
           # Provision maintenance dashboard
           mkdir -p ${cfg.maintenance.provisionPath}
+          chown grafana:grafana ${cfg.maintenance.provisionPath}
 
           # Copy dashboard JSON if it exists
           if [ -f ${cfg.maintenance.dashboardPath} ]; then
-            cp ${cfg.maintenance.dashboardPath} ${cfg.maintenance.provisionPath}/maintenance.json
-            chown grafana:grafana ${cfg.maintenance.provisionPath}/maintenance.json
+            install -m 644 -o grafana -g grafana ${cfg.maintenance.dashboardPath} ${cfg.maintenance.provisionPath}/maintenance.json
           fi
 
           # Create dashboard provisioning config
-          cat > ${cfg.dataDir}/provisioning/dashboards/maintenance.yaml << EOF
+          cat > ${cfg.dataDir}/provisioning/dashboards/maintenance.yaml << 'EOF'
 apiVersion: 1
 
 providers:
@@ -248,31 +246,6 @@ providers:
       foldersFromFilesStructure: false
 EOF
           chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/maintenance.yaml
-
-          # Create datasource provisioning if Prometheus/Loki are enabled
-          cat > ${cfg.dataDir}/provisioning/datasources/default.yaml << EOF
-apiVersion: 1
-
-datasources:
-  ${lib.optionalString config.services.prometheus-custom.enable ''
-  - name: Prometheus
-    type: prometheus
-    access: proxy
-    url: http://localhost:${toString config.services.prometheus-custom.port}
-    isDefault: true
-    jsonData:
-      timeInterval: 15s
-  ''}
-  ${lib.optionalString config.services.loki-custom.enable ''
-  - name: Loki
-    type: loki
-    access: proxy
-    url: http://localhost:${toString config.services.loki-custom.port}
-    jsonData:
-      maxLines: 1000
-  ''}
-EOF
-          chown grafana:grafana ${cfg.dataDir}/provisioning/datasources/default.yaml
         ''}
       '';
     };
