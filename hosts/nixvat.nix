@@ -144,7 +144,17 @@
     port = 9090;
     bindIP = "0.0.0.0";
     openFirewall = true;
-    maintenance.enable = true;
+    # Enable maintenance monitoring
+    maintenance = {
+      enable = true;
+      exporters = {
+        systemd = true;  # Service status monitoring
+        smartctl = {
+          enable = true;
+          devices = [ "/dev/sda" "/dev/sdb" "/dev/sdc" "/dev/sdd" ];
+        };
+      };
+    };
   };
 
   services.syncthing-custom = {

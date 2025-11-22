@@ -318,7 +318,7 @@ services.grafana-custom = {
   # Enable maintenance dashboard
   maintenance = {
     enable = true;
-    dashboardPath = ./grafana-maintenance-dashboard.json;
+    dashboardPath = ../modules/nixos/grafana/grafana-maintenance-dashboard.json;
   };
 };
 
