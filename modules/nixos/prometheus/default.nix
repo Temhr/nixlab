@@ -22,8 +22,8 @@
 let
   cfg = config.services.prometheus-custom;
 
-  # Import all submodules
-  options = import ./options.nix { inherit lib; };
+  # Import all submodules - pass pkgs to options
+  options = import ./options.nix { inherit lib pkgs; };
   prometheusConfig = import ./config.nix { inherit config lib pkgs; };
 in
 {
