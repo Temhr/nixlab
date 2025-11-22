@@ -1,7 +1,7 @@
 # ============================================================================
 # FILE: prometheus/options.nix
 # ============================================================================
-{ lib, pkgs, ... }:
+{ lib }:
 
 {
   enable = lib.mkEnableOption "Prometheus monitoring system";
