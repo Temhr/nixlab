@@ -46,7 +46,7 @@
   )
   and
   (
-    rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.5
+    rate(node_cpu_seconds_total{mode!='idle'}[5m]) > 0.5
   )";
           for = "10m";
           labels = {
