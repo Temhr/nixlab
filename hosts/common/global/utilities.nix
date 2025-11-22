@@ -67,6 +67,7 @@
     psmisc                     # Utilities like `pstree`, `killall`, `fuser`
     smartmontools              # Monitor S.M.A.R.T. health of storage drives
     stress-ng                  # Apply configurable system stress for testing
+    sysstat                    # Collection of performance monitoring tools for Linux (such as sar, iostat and pidstat)
     wavemon                    # WiFi signal and quality monitor for terminals
 
     ## Disk & Partition Tools
