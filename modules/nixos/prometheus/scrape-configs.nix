@@ -1,7 +1,7 @@
 # ============================================================================
 # FILE: prometheus/scrape-configs.nix
 # ============================================================================
-{ config, lib, ... }:
+{ config, lib }:
 
 let
   cfg = config.services.prometheus-custom;
@@ -27,10 +27,9 @@ let
       }
     ];
   };
-in
-{
+
   # Base scrape configs
-  base = [
+  baseConfigs = [
     {
       job_name = "prometheus";
       static_configs = [{
@@ -49,7 +48,7 @@ in
   };
 
   # Maintenance scrape configs
-  maintenance = lib.optionals cfg.maintenance.enable (
+  maintenanceConfigs = lib.optionals cfg.maintenance.enable (
     lib.optional cfg.maintenance.exporters.systemd {
       job_name = "systemd";
       static_configs = [{ targets = [ "localhost:9558" ]; }];
@@ -65,9 +64,12 @@ in
     ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.sslTargets != [])
       (mkBlackboxJob "blackbox-ssl" "http_2xx" cfg.maintenance.exporters.blackbox.sslTargets)
   );
-
-  # Combined scrape configs
-  all = base ++ maintenance;
+in
+{
+  # Export the configs
+  base = baseConfigs;
+  maintenance = maintenanceConfigs;
+  all = baseConfigs ++ maintenanceConfigs;
 
   # Helper function (can be used by services/prometheus.nix)
   inherit mkBlackboxJob;
