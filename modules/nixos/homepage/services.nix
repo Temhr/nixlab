@@ -127,7 +127,97 @@
     # ──────────────────────────────────────────────
     # SECTION: Monitoring & Logs
     # ──────────────────────────────────────────────
-      "Monitoring & Logs" = [
+      "Monitoring & Logs - nixace" = [
+        {
+          "Grafana" = {
+            href = "http://192.168.0.200:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards";
+            target = "_blank";
+            server = "nixace";
+            ping = "http://192.168.0.200:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Prometheus" = {
+            href = "http://192.168.0.200:9090";
+            icon = "prometheus";
+            description = "Metrics collection and monitoring";
+            target = "_blank";
+            widget = {
+              type = "prometheus";
+              url = "http://192.168.0.200:9090";
+            };
+            server = "nixvat";
+            ping = "http://192.168.0.200:9090";
+            statusStyle = "dot";
+          };
+        }
+      ];
+    }
+    {
+      "Monitoring & Logs - nixsun" = [
+        {
+          "Grafana" = {
+            href = "http://192.168.0.203:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards";
+            target = "_blank";
+            server = "nixsun";
+            ping = "http://192.168.0.203:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Prometheus" = {
+            href = "http://192.168.0.203:9090";
+            icon = "prometheus";
+            description = "Metrics collection and monitoring";
+            target = "_blank";
+            widget = {
+              type = "prometheus";
+              url = "http://192.168.0.203:9090";
+            };
+            server = "nixsun";
+            ping = "http://192.168.0.203:9090";
+            statusStyle = "dot";
+          };
+        }
+      ];
+    }
+    {
+      "Monitoring & Logs - nixtop" = [
+        {
+          "Grafana" = {
+            href = "http://192.168.0.202:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards";
+            target = "_blank";
+            server = "nixtop";
+            ping = "http://192.168.0.202:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Prometheus" = {
+            href = "http://192.168.0.202:9090";
+            icon = "prometheus";
+            description = "Metrics collection and monitoring";
+            target = "_blank";
+            widget = {
+              type = "prometheus";
+              url = "http://192.168.0.202:9090";
+            };
+            server = "nixtop";
+            ping = "http://192.168.0.202:9090";
+            statusStyle = "dot";
+          };
+        }
+      ];
+    }
+    {
+      "Monitoring & Logs - nixvat" = [
         {
           "Grafana" = {
             href = "http://192.168.0.201:3101";
@@ -151,6 +241,36 @@
             };
             server = "nixvat";
             ping = "http://192.168.0.201:9090";
+            statusStyle = "dot";
+          };
+        }
+      ];
+    }
+    {
+      "Monitoring & Logs - nixzen" = [
+        {
+          "Grafana" = {
+            href = "http://192.168.0.204:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards";
+            target = "_blank";
+            server = "nixvat";
+            ping = "http://192.168.0.204:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Prometheus" = {
+            href = "http://192.168.0.204:9090";
+            icon = "prometheus";
+            description = "Metrics collection and monitoring";
+            target = "_blank";
+            widget = {
+              type = "prometheus";
+              url = "http://192.168.0.204:9090";
+            };
+            server = "nixvat";
+            ping = "http://192.168.0.204:9090";
             statusStyle = "dot";
           };
         }
