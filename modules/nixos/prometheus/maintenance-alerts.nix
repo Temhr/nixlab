@@ -56,7 +56,7 @@
           };
           annotations = {
             summary = "CPU throttling detected on {{ $labels.instance }}";
-            description = "CPU frequency reduced, check cooling system";
+            description = "CPU running <60% of max while under significant load.";
           };
         }
         # 1. Fan Speed (if available)
