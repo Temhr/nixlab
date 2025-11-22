@@ -1,4 +1,4 @@
-servicesYaml = [
+[
     {
       "Incus Server" = [
         {
