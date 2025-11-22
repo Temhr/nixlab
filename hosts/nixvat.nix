@@ -124,7 +124,11 @@
     port = 3101;
     bindIP = "0.0.0.0";
     openFirewall = true;
-    maintenance.enable = true;
+    # Enable maintenance dashboard
+    maintenance = {
+      enable = true;
+      dashboardPath = ./grafana-maintenance-dashboard.json;
+    };
   };
 
   services.loki-custom = {
