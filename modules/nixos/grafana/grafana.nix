@@ -167,8 +167,6 @@ in
         ExecStart = "${cfg.package}/bin/grafana server --config=${cfg.dataDir}/grafana.ini --homepath=${cfg.package}/share/grafana";
         Restart = "on-failure";
         RestartSec = "10s";
-
-        # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
@@ -176,7 +174,6 @@ in
         ReadWritePaths = [ cfg.dataDir ];
       };
 
-      # Ensure config file exists
       preStart = ''
         # Create minimal config if it doesn't exist
         if [ ! -f ${cfg.dataDir}/grafana.ini ]; then
@@ -219,7 +216,7 @@ EOF
         mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
         chown -R grafana:grafana ${cfg.dataDir}/provisioning
 
-        ${lib.optionalString cfg.maintenance.enable ''
+        ${lib.optionalString (cfg.maintenance.enable && cfg.maintenance.dashboardPath != null) ''
           # Provision maintenance dashboard
           mkdir -p ${cfg.maintenance.provisionPath}
           chown grafana:grafana ${cfg.maintenance.provisionPath}
@@ -253,10 +250,10 @@ EOF
     # ┌─────────────────────────────────────────────────────────┐
     # │ ACTIVATION SCRIPT - Copy dashboard on system rebuild   │
     # └─────────────────────────────────────────────────────────┘
-    system.activationScripts.grafana-maintenance-dashboard = lib.mkIf cfg.maintenance.enable ''
+    system.activationScripts.grafana-maintenance-dashboard = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.dashboardPath != null) ''
       if [ -f ${cfg.maintenance.dashboardPath} ]; then
         mkdir -p ${cfg.maintenance.provisionPath}
-        cp ${cfg.maintenance.dashboardPath} ${cfg.maintenance.provisionPath}/maintenance.json
+        install -m 644 ${cfg.maintenance.dashboardPath} ${cfg.maintenance.provisionPath}/maintenance.json
         chown -R grafana:grafana ${cfg.maintenance.provisionPath}
       fi
     '';
@@ -279,12 +276,8 @@ EOF
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-
-            # Required for Grafana Live and streaming
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
-
-            # Increase buffer sizes for large dashboards
             proxy_buffer_size 128k;
             proxy_buffers 4 256k;
             proxy_busy_buffers_size 256k;
@@ -297,9 +290,7 @@ EOF
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open Grafana port if not using reverse proxy
       lib.optionals (cfg.domain == null) [ cfg.port ]
-      # Open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
   };
