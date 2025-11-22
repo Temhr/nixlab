@@ -2,6 +2,12 @@
 
 let
   cfg = config.services.homepage-custom;
+
+  # Import the services configuration from services.nix
+  servicesConfig = import ./services.nix;
+  # Convert services to JSON file (will be converted to YAML in preStart)
+  servicesJsonFile = builtins.toFile "services.json"
+    (builtins.toJSON servicesConfig);
 in
 {
   # ============================================================================
@@ -121,7 +127,9 @@ in
       };
 
       # Fix config file permissions on startup
-      preStart = ''
+      preStart = let
+        servicesYamlTmp = "${cfg.dataDir}/config/services.yaml.tmp";
+      in ''
         # Ensure config directory exists with proper permissions
         mkdir -p ${cfg.dataDir}/config
 
@@ -130,6 +138,18 @@ in
           chmod -R ug+w ${cfg.dataDir}/config/
           chown -R homepage:homepage ${cfg.dataDir}/config/
         fi
+
+        # Convert service rules from services.nix: JSON → YAML
+        # This happens automatically on every service start/rebuild
+        ${pkgs.remarshal}/bin/remarshal \
+          -i ${servicesJsonFile} \
+          -o ${servicesYamlTmp} \
+          -if json \
+          -of yaml
+
+        # Install alert rules with correct ownership and permissions
+        # Mode 644: owner read/write, group and others read-only
+        install -m 644 -o prometheus -g prometheus ${servicesYamlTmp} ${cfg.dataDir}/config/services.yaml
       '';
 
       serviceConfig = {
