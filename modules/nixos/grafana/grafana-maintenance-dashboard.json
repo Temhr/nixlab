@@ -343,7 +343,7 @@
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 60 },
       "targets": [
         {
-          "expr": "up{job=~\"wikijs|syncthing|glance|zola|grafana\"}",
+          "expr": "up{job!~\"prometheus|node\"}",
           "legendFormat": "{{ job }} - {{ instance }}",
           "refId": "A",
           "interval": "1m"
