@@ -1,7 +1,7 @@
 # ============================================================================
 # FILE: prometheus/scrape-configs.nix
 # ============================================================================
-{ config, lib }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.services.prometheus-custom;

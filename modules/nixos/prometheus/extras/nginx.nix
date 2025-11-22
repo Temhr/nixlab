@@ -1,7 +1,7 @@
 # ============================================================================
 # FILE: prometheus/extras/nginx.nix
 # ============================================================================
-{ config, lib }:
+{ config, lib, pkgs, ... }:
 
 let
   cfg = config.services.prometheus-custom;
