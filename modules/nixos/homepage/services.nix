@@ -1,4 +1,5 @@
-    [
+servicesYaml = [
+    {
       "Incus Server" = [
         {
           "Home Assistant" = {
@@ -33,10 +34,10 @@
             statusStyle = "dot";
           };
         }
-      ]
-    ]
+      ];
+    }
 
-    [
+    {
       "Knowledge Base" = [
         {
           "Wiki.js" = {
@@ -49,10 +50,10 @@
             statusStyle = "dot";
           };
         }
-      ]
-    ]
+      ];
+    }
 
-    [
+    {
       "Sync and Storage" = [
         {
           "Syncthing nixvat" = {
@@ -76,10 +77,10 @@
             statusStyle = "dot";
           };
         }
-      ]
-    ]
+      ];
+    }
 
-    [
+    {
       "System & Web Services" = [
         {
           "Glance" = {
@@ -103,10 +104,10 @@
             statusStyle = "dot";
           };
         }
-      ]
-    ]
+      ];
+    }
 
-    [
+    {
       "Monitoring & Logs" = [
         {
           "Grafana" = {
@@ -134,5 +135,6 @@
             statusStyle = "dot";
           };
         }
-      ]
-    ]
+      ];
+    }
+]
