@@ -70,7 +70,41 @@
   virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
   ## Self-hosted apps and services
-
+  services.grafana-custom = {
+    enable = true;
+    port = 3101;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+    # Enable maintenance dashboard
+    maintenance = {
+      enable = true;
+      dashboardPath = ../modules/nixos/grafana/grafana-maintenance-dashboard.json;
+    };
+  };
+  services.loki-custom = {
+    enable = true;
+    port = 3100;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+    maintenance.enable = true;
+  };
+  services.prometheus-custom = {
+    enable = true;
+    port = 9090;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+    # Enable maintenance monitoring
+    maintenance = {
+      enable = true;
+      exporters = {
+        systemd = true;  # Service status monitoring
+        smartctl = {
+          enable = true;
+          devices = [ "/dev/sda" "/dev/sdb" "/dev/sdc" "/dev/sdd" ];
+        };
+      };
+    };
+  };
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget

@@ -130,7 +130,6 @@
       dashboardPath = ../modules/nixos/grafana/grafana-maintenance-dashboard.json;
     };
   };
-
   services.loki-custom = {
     enable = true;
     port = 3100;
@@ -138,7 +137,6 @@
     openFirewall = true;
     maintenance.enable = true;
   };
-
   services.prometheus-custom = {
     enable = true;
     port = 9090;
