@@ -1,5 +1,12 @@
 [
     {
+# /var/lib/homepage/config/services.yaml
+# Homepage dashboard configuration
+# Docs: https://gethomepage.dev/en/configs/services/
+
+    # ──────────────────────────────────────────────
+    # SECTION: Incus - HomeAssistant
+    # ──────────────────────────────────────────────
       "Incus Server" = [
         {
           "Home Assistant" = {
@@ -38,6 +45,9 @@
     }
 
     {
+    # ──────────────────────────────────────────────
+    # SECTION: Knowledge Base
+    # ──────────────────────────────────────────────
       "Knowledge Base" = [
         {
           "Wiki.js" = {
@@ -54,6 +64,9 @@
     }
 
     {
+    # ──────────────────────────────────────────────
+    # SECTION: Sync and Storage
+    # ──────────────────────────────────────────────
       "Sync and Storage" = [
         {
           "Syncthing nixvat" = {
@@ -81,6 +94,9 @@
     }
 
     {
+    # ──────────────────────────────────────────────
+    # SECTION: System & Web Services
+    # ──────────────────────────────────────────────
       "System & Web Services" = [
         {
           "Glance" = {
@@ -108,6 +124,9 @@
     }
 
     {
+    # ──────────────────────────────────────────────
+    # SECTION: Monitoring & Logs
+    # ──────────────────────────────────────────────
       "Monitoring & Logs" = [
         {
           "Grafana" = {
