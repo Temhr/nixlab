@@ -221,7 +221,15 @@
         # 6. High I/O Wait
         {
           alert = "HighIOWait";
-          expr = ''rate(node_cpu_seconds_total{mode="iowait"}[5m]) * 100 > 40'';
+          expr = ''
+            (
+            rate(node_cpu_seconds_total{mode='iowait'}[5m]) * 100 > 35
+            )
+            and
+            (
+              rate(node_cpu_seconds_total{mode!='idle'}[5m]) > 50
+            )
+          '';
           for = "10m";
           labels = {
             severity = "warning";
