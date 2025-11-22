@@ -10,7 +10,7 @@
         # 1. CPU Temperature
         {
           alert = "HighCPUTemperature";
-          expr = "node_hwmon_temp_celsius{chip!='acpitz', chip!='thermal'} > 80";
+          expr = "node_hwmon_temp_celsius{chip=~"coretemp|k10temp|amdgpu|nvidia|nvme"} > 80";
           for = "5m";
           labels = {
             severity = "warning";
@@ -24,7 +24,7 @@
         }
         {
           alert = "CriticalCPUTemperature";
-          expr = "node_hwmon_temp_celsius{chip!='acpitz', chip!='thermal'} > 90";
+          expr = "node_hwmon_temp_celsius{chip=~"coretemp|k10temp|amdgpu|nvidia|nvme"} > 90";
           for = "2m";
           labels = {
             severity = "critical";
