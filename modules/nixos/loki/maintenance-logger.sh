@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # maintenance-logger.sh
-# Helper script to log manual maintenance tasks to Loki via Promtail
+# Helper script to log manual maintenance tasks to Loki
 
 set -euo pipefail
 

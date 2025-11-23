@@ -20,7 +20,6 @@ in
       };
 
       # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-      # Use "0.0.0.0" for access from other devices
       bindIP = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
@@ -36,7 +35,6 @@ in
       };
 
       # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
-      # Only works if domain is set
       enableSSL = lib.mkOption {
         type = lib.types.bool;
         default = false;
@@ -67,6 +65,14 @@ in
         description = "The Loki package to use";
       };
 
+      # OPTIONAL: Alloy package to use (default: pkgs.grafana-alloy)
+      alloyPackage = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.grafana-alloy;
+        defaultText = lib.literalExpression "pkgs.grafana-alloy";
+        description = "The Grafana Alloy package to use";
+      };
+
       # OPTIONAL: Auto-open firewall ports (default: true)
       openFirewall = lib.mkOption {
         type = lib.types.bool;
@@ -74,16 +80,14 @@ in
         description = "Open firewall ports";
       };
 
-      # OPTIONAL: Enable Promtail for local log collection (default: true)
-      enablePromtail = lib.mkOption {
+      # OPTIONAL: Enable Alloy for local log collection (default: true)
+      enableAlloy = lib.mkOption {
         type = lib.types.bool;
         default = true;
-        description = "Enable Promtail to collect system logs";
+        description = "Enable Grafana Alloy to collect system logs";
       };
 
-      # ┌─────────────────────────────────────────────────────────┐
-      # │ NEW: MAINTENANCE MONITORING OPTIONS                     │
-      # └─────────────────────────────────────────────────────────┘
+      # Maintenance monitoring options
       maintenance = {
         enable = lib.mkEnableOption "maintenance task logging integration";
 
@@ -109,8 +113,9 @@ in
       "d ${cfg.dataDir}/chunks 0750 loki loki -"
       "d ${cfg.dataDir}/index 0750 loki loki -"
       "d ${cfg.dataDir}/wal 0750 loki loki -"
-    ] ++ lib.optionals cfg.enablePromtail [
-      "d /var/lib/promtail 0750 promtail promtail -"
+    ] ++ lib.optionals cfg.enableAlloy [
+      "d /var/lib/alloy 0750 alloy alloy -"
+      "d /var/lib/alloy/data 0750 alloy alloy -"
     ] ++ lib.optionals cfg.maintenance.enable [
       "f ${cfg.maintenance.logPath} 0666 root root - -"
     ];
@@ -129,14 +134,14 @@ in
 
     users.users.temhr.extraGroups = [ "loki" ];
 
-    users.users.promtail = lib.mkIf cfg.enablePromtail {
+    users.users.alloy = lib.mkIf cfg.enableAlloy {
       isSystemUser = true;
-      group = "promtail";
-      description = "Promtail service user";
+      group = "alloy";
+      description = "Grafana Alloy service user";
       extraGroups = [ "systemd-journal" ];
     };
 
-    users.groups.promtail = lib.mkIf cfg.enablePromtail {};
+    users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
     # ----------------------------------------------------------------------------
     # LOKI SERVICE - Configure the systemd service
@@ -162,8 +167,6 @@ in
         ReadWritePaths = [ cfg.dataDir ];
       };
 
-      # Ensure config file exists with proper permissions
-      # Using JSON → YAML conversion to avoid heredoc indentation issues
       preStart = let
         lokiConfig = {
           auth_enabled = false;
@@ -246,43 +249,38 @@ in
           };
         };
 
-        # Convert to JSON file
         jsonFile = builtins.toFile "loki.json"
           (builtins.toJSON lokiConfig);
 
-        # Output temporary YAML file
         yamlTmp = "${cfg.dataDir}/loki.yaml.tmp";
 
       in ''
-        # Convert JSON → YAML using remarshal
         ${pkgs.remarshal}/bin/remarshal \
           -i ${jsonFile} \
           -o ${yamlTmp} \
           -if json \
           -of yaml
 
-        # Ensure correct permissions
         install -m 660 -o loki -g loki ${yamlTmp} ${cfg.dataDir}/loki.yaml
 
-        # Data directories
         mkdir -p ${cfg.dataDir}/data ${cfg.dataDir}/chunks ${cfg.dataDir}/wal ${cfg.dataDir}/compactor
         chown -R loki:loki ${cfg.dataDir}
       '';
     };
 
     # ----------------------------------------------------------------------------
-    # PROMTAIL SERVICE - Enable if requested
+    # GRAFANA ALLOY SERVICE - Enable if requested
     # ----------------------------------------------------------------------------
-    systemd.services.promtail = lib.mkIf cfg.enablePromtail {
-      description = "Promtail Log Collector";
+    systemd.services.alloy = lib.mkIf cfg.enableAlloy {
+      description = "Grafana Alloy Telemetry Collector";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "loki.service" ];
 
       serviceConfig = {
         Type = "simple";
-        User = "promtail";
-        Group = "promtail";
-        ExecStart = "${cfg.package}/bin/promtail --config.file=/var/lib/promtail/promtail.yaml";
+        User = "alloy";
+        Group = "alloy";
+        ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -291,114 +289,122 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ "/var/lib/promtail" ];
+        ReadWritePaths = [ "/var/lib/alloy" ];
       };
 
       preStart = let
-        # Base scrape configs
-        baseScrapeConfigs = [
-          {
-            job_name = "journal";
-            journal = {
-              max_age = "12h";
-              labels = {
-                job = "systemd-journal";
-                host = config.networking.hostName;
-              };
-            };
-            relabel_configs = [{
-              source_labels = [ "__journal__systemd_unit" ];
-              target_label = "unit";
-            }];
+        # Base configuration in Alloy's River configuration language
+        baseAlloyConfig = ''
+          // Loki client for sending logs
+          loki.write "local" {
+            endpoint {
+              url = "http://localhost:${toString cfg.port}/loki/api/v1/push"
+            }
           }
-          {
-            job_name = "system";
-            static_configs = [{
-              targets = [ "localhost" ];
-              labels = {
-                job = "varlogs";
-                __path__ = "/var/log/*.log";
-              };
-            }];
+
+          // Collect systemd journal logs
+          loki.source.journal "systemd" {
+            max_age      = "12h"
+            labels       = {
+              job  = "systemd-journal",
+              host = "${config.networking.hostName}",
+            }
+
+            relabel_rules = rule {
+              source_labels = ["__journal__systemd_unit"]
+              target_label  = "unit"
+            }
+
+            forward_to = [loki.write.local.receiver]
           }
-        ];
 
-        # Maintenance log scrape config
-        maintenanceScrapeConfig = lib.optional cfg.maintenance.enable {
-          job_name = "maintenance";
-          static_configs = [{
-            targets = [ "localhost" ];
-            labels = {
-              job = "maintenance-log";
-              host = config.networking.hostName;
-              __path__ = cfg.maintenance.logPath;
-            };
-          }];
-          pipeline_stages = [
-            {
-              json = {
-                expressions = {
-                  timestamp = "timestamp";
-                  level = "level";
-                  section = "section";
-                  task = "task";
-                  status = "status";
-                  notes = "notes";
-                  user = "user";
-                };
-              };
+          // Collect system log files
+          local.file_match "varlogs" {
+            path_targets = [{
+              __address__ = "localhost",
+              __path__    = "/var/log/*.log",
+            }]
+          }
+
+          loki.source.file "varlogs" {
+            targets    = local.file_match.varlogs.targets
+            forward_to = [loki.process.varlogs.receiver]
+          }
+
+          loki.process "varlogs" {
+            forward_to = [loki.write.local.receiver]
+
+            stage.static_labels {
+              values = {
+                job  = "varlogs",
+                host = "${config.networking.hostName}",
+              }
             }
-            {
-              labels = {
-                level = "";
-                section = "";
-                status = "";
-                user = "";
-              };
+          }
+        '';
+
+        # Maintenance log configuration
+        maintenanceAlloyConfig = lib.optionalString cfg.maintenance.enable ''
+          // Collect maintenance logs
+          local.file_match "maintenance" {
+            path_targets = [{
+              __address__ = "localhost",
+              __path__    = "${cfg.maintenance.logPath}",
+            }]
+          }
+
+          loki.source.file "maintenance" {
+            targets    = local.file_match.maintenance.targets
+            forward_to = [loki.process.maintenance.receiver]
+          }
+
+          loki.process "maintenance" {
+            forward_to = [loki.write.local.receiver]
+
+            // Parse JSON logs
+            stage.json {
+              expressions = {
+                timestamp = "timestamp",
+                level     = "level",
+                section   = "section",
+                task      = "task",
+                status    = "status",
+                notes     = "notes",
+                user      = "user",
+              }
             }
-            {
-              timestamp = {
-                source = "timestamp";
-                format = "RFC3339";
-              };
+
+            // Extract labels
+            stage.labels {
+              values = {
+                job     = "maintenance-log",
+                host    = "${config.networking.hostName}",
+                level   = "",
+                section = "",
+                status  = "",
+                user    = "",
+              }
             }
-          ];
-        };
 
-        promtailConfig = {
-          server = {
-            http_listen_port = 9080;
-            grpc_listen_port = 0;
-          };
+            // Parse timestamp
+            stage.timestamp {
+              source = "timestamp"
+              format = "RFC3339"
+            }
+          }
+        '';
 
-          positions = {
-            filename = "/var/lib/promtail/positions.yaml";
-          };
-
-          clients = [{
-            url = "http://localhost:${toString cfg.port}/loki/api/v1/push";
-          }];
-
-          scrape_configs = baseScrapeConfigs ++ maintenanceScrapeConfig;
-        };
-
-        # Convert to JSON file
-        jsonFile = builtins.toFile "promtail.json"
-          (builtins.toJSON promtailConfig);
-
-        # Output temporary YAML file
-        yamlTmp = "/var/lib/promtail/promtail.yaml.tmp";
+        alloyConfig = baseAlloyConfig + maintenanceAlloyConfig;
 
       in ''
-        # Convert JSON → YAML using remarshal
-        ${pkgs.remarshal}/bin/remarshal \
-          -i ${jsonFile} \
-          -o ${yamlTmp} \
-          -if json \
-          -of yaml
+        # Write Alloy configuration
+        echo '${alloyConfig}' > /var/lib/alloy/config.alloy
+        chown alloy:alloy /var/lib/alloy/config.alloy
+        chmod 640 /var/lib/alloy/config.alloy
 
-        # Ensure correct permissions
-        install -m 640 -o promtail -g promtail ${yamlTmp} /var/lib/promtail/promtail.yaml
+        # Ensure data directory exists
+        mkdir -p /var/lib/alloy/data
+        chown -R alloy:alloy /var/lib/alloy
       '';
     };
 
@@ -433,15 +439,13 @@ in
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open Loki port if not using reverse proxy
       lib.optionals (cfg.domain == null) [ cfg.port ]
-      # Open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
 
-    # ┌─────────────────────────────────────────────────────────┐
-    # │ MAINTENANCE LOG HELPER SCRIPT                           │
-    # └─────────────────────────────────────────────────────────┘
+    # ----------------------------------------------------------------------------
+    # MAINTENANCE LOG HELPER SCRIPT
+    # ----------------------------------------------------------------------------
     environment.systemPackages = lib.optionals cfg.maintenance.enable [
       (pkgs.writeScriptBin "maintenance-log" ''
         #!${pkgs.bash}/bin/bash
@@ -454,40 +458,36 @@ in
 
 /*
 ================================================================================
-MAINTENANCE LOGGING USAGE
+GRAFANA ALLOY MIGRATION NOTES
 ================================================================================
 
-Enable maintenance task logging:
----------------------------------
-services.loki-custom = {
-  enable = true;
+What Changed:
+-------------
+1. Replaced Promtail with Grafana Alloy (the recommended successor)
+2. Configuration language changed from YAML to River (Alloy's config language)
+3. Option renamed: enablePromtail → enableAlloy
+4. New option: alloyPackage to specify Alloy version
+5. User/group changed from promtail → alloy
 
-  # Enable maintenance logging
-  maintenance = {
-    enable = true;
-    logPath = "/var/log/maintenance.log";  # Optional, this is the default
-  };
-};
+Why Migrate:
+------------
+- Promtail is deprecated (EOL: March 2, 2026)
+- Alloy is a unified collector for logs, metrics, and traces
+- Better performance and more features
+- Active development and long-term support
+- Native OpenTelemetry support
 
-This will:
-  - Create maintenance log file with proper permissions
-  - Configure Promtail to collect maintenance logs
-  - Parse JSON structured logs automatically
-  - Extract labels: section, status, level, user
-  - Install maintenance-log command globally
+Migration from Old Config:
+--------------------------
+If you had:
+  services.loki-custom.enablePromtail = true;
 
-Usage:
-  maintenance-log              # Interactive CLI
+Now use:
+  services.loki-custom.enableAlloy = true;
 
-Query in Grafana:
-  {job="maintenance-log"}                           # All maintenance logs
-  {job="maintenance-log", section="I.1"}            # Hardware health logs
-  {job="maintenance-log", status="completed"}       # Completed tasks
-  {job="maintenance-log"} | json | status="failed"  # Failed tasks
+Everything else remains the same!
 
-*/
 
-/*
 ================================================================================
 USAGE EXAMPLE
 ================================================================================
@@ -496,9 +496,10 @@ Minimal configuration:
 ----------------------
 services.loki-custom = {
   enable = true;
+  enableAlloy = true;  # Changed from enablePromtail
 };
 # Access at: http://your-ip:3100
-# Promtail enabled by default, collecting system logs
+# Alloy enabled by default, collecting system logs
 
 
 Full configuration with domain:
@@ -514,8 +515,21 @@ services.loki-custom = {
   domain = "loki.example.com";
   enableSSL = true;
 
-  enablePromtail = true;
+  enableAlloy = true;
   openFirewall = true;
+};
+
+
+With maintenance logging:
+--------------------------
+services.loki-custom = {
+  enable = true;
+  enableAlloy = true;
+
+  maintenance = {
+    enable = true;
+    logPath = "/var/log/maintenance.log";
+  };
 };
 
 
@@ -527,16 +541,20 @@ INITIAL SETUP
    curl http://localhost:3100/ready
    # Should return "ready"
 
-2. Check Promtail is sending logs:
+2. Check Alloy is sending logs:
    curl http://localhost:3100/loki/api/v1/label/__name__/values
    # Should show log stream labels
 
-3. Add to Grafana:
+3. View Alloy UI (for debugging):
+   http://localhost:12345
+   # Shows component graph and health
+
+4. Add to Grafana:
    - In Grafana: Configuration → Data Sources → Add Loki
    - URL: http://localhost:3100
    - Click "Save & Test"
 
-4. Query logs in Grafana:
+5. Query logs in Grafana:
    - Create new dashboard
    - Add panel → Select Loki data source
    - Query: {job="systemd-journal"}
@@ -544,64 +562,100 @@ INITIAL SETUP
 
 
 ================================================================================
-CONFIGURATION
+ALLOY CONFIGURATION
 ================================================================================
 
-Loki configuration is generated automatically from Nix config.
-The YAML file is regenerated on every service start.
+Alloy uses River configuration language (similar to HCL/Terraform).
 
 View generated configuration:
-  cat /var/lib/loki/loki.yaml
+  cat /var/lib/alloy/config.alloy
 
-Configuration reference:
-  https://grafana.com/docs/loki/latest/configuration/
+Key concepts:
+  - Components: Building blocks (loki.source.*, loki.write, etc.)
+  - Pipelines: Components forward data to each other
+  - Labels: Metadata attached to log streams
 
-Note: Manual edits to loki.yaml will be overwritten on restart.
-To persist changes, modify the Nix module instead.
+River syntax example:
+  loki.source.file "mylogs" {
+    targets    = [{ __path__ = "/var/log/*.log" }]
+    forward_to = [loki.write.local.receiver]
+  }
+
+Documentation:
+  https://grafana.com/docs/alloy/latest/
 
 
 ================================================================================
-LOGQL QUERIES
+ALLOY COMPONENTS IN THIS CONFIG
 ================================================================================
 
-LogQL is Loki's query language (similar to PromQL).
+1. loki.write "local"
+   - Sends logs to Loki
+   - Endpoint: http://localhost:3100/loki/api/v1/push
+
+2. loki.source.journal "systemd"
+   - Collects systemd journal logs
+   - Adds labels: job=systemd-journal, host=<hostname>
+   - Relabels: __journal__systemd_unit → unit
+
+3. local.file_match "varlogs"
+   - Discovers log files matching /var/log/*.log
+   - Dynamic file discovery
+
+4. loki.source.file "varlogs"
+   - Tails discovered log files
+   - Sends to processing pipeline
+
+5. loki.process "varlogs"
+   - Adds static labels
+   - Forwards to Loki writer
+
+6. loki.source.file "maintenance" (if enabled)
+   - Tails maintenance log file
+   - Parses JSON logs
+   - Extracts labels from JSON fields
+
+
+================================================================================
+LOGQL QUERIES (Same as Before)
+================================================================================
 
 Basic queries:
   {job="systemd-journal"}                    # All journal logs
   {unit="nginx.service"}                     # Nginx logs
-  {job="varlogs", filename="/var/log/syslog"} # Specific file
+  {job="varlogs"}                            # /var/log/*.log files
+  {job="maintenance-log"}                    # Maintenance logs
 
 Filter by content:
-  {job="systemd-journal"} |= "error"         # Contains "error"
-  {job="systemd-journal"} != "debug"         # Doesn't contain "debug"
-  {job="systemd-journal"} |~ "error|failed"  # Regex match
+  {job="systemd-journal"} |= "error"
+  {job="systemd-journal"} != "debug"
+  {job="systemd-journal"} |~ "error|failed"
 
-Parsing and filtering:
-  {job="systemd-journal"} | json             # Parse JSON logs
-  {job="systemd-journal"} | logfmt           # Parse logfmt logs
-  {job="nginx"} | pattern "<ip> - - <_> \"<method> <uri> <_>\" <status>" | status >= 400
-
-Aggregations:
-  count_over_time({job="systemd-journal"}[5m])  # Count logs
-  rate({job="systemd-journal"}[5m])             # Logs per second
-  sum by (unit) (count_over_time({job="systemd-journal"}[1h]))  # Count by unit
+Maintenance log queries:
+  {job="maintenance-log"}
+  {job="maintenance-log", section="I.1"}
+  {job="maintenance-log", status="completed"}
+  {job="maintenance-log"} | json | status="failed"
 
 
 ================================================================================
 TROUBLESHOOTING
 ================================================================================
 
-Check Loki status:
-  sudo systemctl status loki
+Check Alloy status:
+  sudo systemctl status alloy
 
-Check Promtail status:
-  sudo systemctl status promtail
+View Alloy logs:
+  sudo journalctl -u alloy -f
 
-View Loki logs:
-  sudo journalctl -u loki -f
+Alloy debug UI:
+  http://localhost:12345
+  - View component graph
+  - Check component health
+  - See pipeline data flow
 
-View Promtail logs:
-  sudo journalctl -u promtail -f
+Check Alloy configuration syntax:
+  alloy fmt --write /var/lib/alloy/config.alloy
 
 Test Loki API:
   curl http://localhost:3100/ready
@@ -612,38 +666,80 @@ Query logs via API:
     --data-urlencode 'query={job="systemd-journal"}' \
     --data-urlencode 'limit=10'
 
-Check Promtail targets:
-  curl http://localhost:9080/targets
-
 Common issues:
-  - No logs appearing: Check Promtail is running and configured
-  - Permission denied: Ensure promtail user in systemd-journal group
-  - Out of disk space: Reduce retention period
-  - Query timeout: Reduce time range or add more filters
-  - Labels not appearing: Check relabel_configs in Promtail
+  - No logs appearing: Check Alloy is running and configuration is valid
+  - Permission denied: Ensure alloy user in systemd-journal group
+  - Component errors: Check debug UI at localhost:12345
+  - Configuration syntax errors: Use 'alloy fmt' to validate
 
 
 ================================================================================
-RETENTION AND STORAGE
+MIGRATING FROM PROMTAIL
 ================================================================================
 
-Default retention: 744 hours (31 days)
-Adjust with: retention = "2160h";  # 90 days
+If you have custom Promtail configs, use the converter:
 
-Storage locations:
-  - Chunks: ${cfg.dataDir}/chunks
-  - Index: ${cfg.dataDir}/index
-  - WAL: ${cfg.dataDir}/wal
+  # Install Alloy
+  nix-shell -p grafana-alloy
 
-Estimate storage needs:
-  - Highly variable based on log volume
-  - Typical: 1-10 GB per million log lines
-  - Monitor with: du -sh ${cfg.dataDir}/*
+  # Convert Promtail config
+  alloy convert --source-format=promtail \
+    --output=config.alloy \
+    promtail.yaml
 
-Compaction:
-  - Loki automatically compacts old data
-  - Configurable via compactor settings
-  - Old data deleted based on retention_period
+  # Review the generated config.alloy
+  # Integrate relevant parts into this module's alloyConfig
+
+Key differences:
+  - Promtail: YAML configuration
+  - Alloy: River configuration (HCL-like)
+  - Promtail: /var/lib/promtail/positions.yaml
+  - Alloy: /var/lib/alloy/data/positions/
+
+Metrics changes:
+  - Promtail metrics: promtail_*
+  - Alloy metrics: alloy_* and loki_source_*
+
+
+================================================================================
+ADVANCED ALLOY FEATURES
+================================================================================
+
+Alloy supports many more features not in this basic config:
+
+1. Multiple outputs:
+   - Send logs to multiple Loki instances
+   - Send to Grafana Cloud
+   - Export to other systems
+
+2. Advanced processing:
+   - Regex extraction
+   - Multiline log parsing
+   - Log sampling/filtering
+   - Label manipulation
+
+3. Service discovery:
+   - Kubernetes pods
+   - Docker containers
+   - Consul services
+   - File-based discovery
+
+4. Metrics collection:
+   - Prometheus scraping
+   - OTLP metrics
+   - Push metrics
+
+5. Traces collection:
+   - OTLP traces
+   - Zipkin
+   - Jaeger
+
+6. Clustering:
+   - Distribute workload across multiple Alloy instances
+   - High availability setup
+
+See documentation for advanced configurations:
+  https://grafana.com/docs/alloy/latest/reference/components/
 
 
 ================================================================================
@@ -653,10 +749,11 @@ SECURITY BEST PRACTICES
 1. Use nginx reverse proxy with authentication
 2. Restrict access with firewall rules
 3. Enable HTTPS (set enableSSL = true with domain)
-4. Use read-only access in Grafana
-5. Regularly update Loki package
-6. Monitor Loki resource usage
-7. Secure Promtail on remote hosts (use TLS)
-8. Backup configuration files
+4. Limit Alloy user permissions
+5. Regularly update Alloy package
+6. Monitor Alloy resource usage
+7. Secure log file permissions
+8. Use TLS for remote Alloy instances
+9. Backup configuration files
 
 */
