@@ -79,14 +79,14 @@
       # System maintenance dashboard
       maintenance = {
         path = ../modules/nixos/grafana/dashboards/maintenance-checklist.json;
-        folder = "all";
+        folder = "maintenance";
         editable = true;
       };
 
       # Node exporter system overview
       system-overview = {
         path = ../modules/nixos/grafana/dashboards/system-overview.json;
-        folder = "all";
+        folder = "maintenance";
         editable = true;
       };
     };
