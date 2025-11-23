@@ -76,9 +76,20 @@
     bindIP = "0.0.0.0";
     openFirewall = true;
     # Enable maintenance dashboard
-    maintenance = {
-      enable = true;
-      dashboardPath = ../modules/nixos/grafana/grafana-maintenance-dashboard.json;
+    dashboards = {
+      # System maintenance dashboard
+      maintenance = {
+        path = ../modules/nixos/grafana/dashboards/maintenance-checklist.json;
+        folder = "maintenance";
+        editable = true;
+      };
+
+      # Node exporter system overview
+      system-overview = {
+        path = ../modules/nixos/grafana/dashboards/system-overview.json;
+        folder = "maintenance";
+        editable = true;
+      };
     };
   };
   services.loki-custom = {

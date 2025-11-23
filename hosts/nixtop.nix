@@ -93,14 +93,20 @@
     port = 9090;
     bindIP = "0.0.0.0";
     openFirewall = true;
-    # Enable maintenance monitoring
-    maintenance = {
-      enable = true;
-      exporters = {
-        systemd = true;  # Service status monitoring
-        smartctl = {
-          enable = true;
-        };
+    # Enable maintenance dashboard
+    dashboards = {
+      # System maintenance dashboard
+      maintenance = {
+        path = ../modules/nixos/grafana/dashboards/maintenance-checklist.json;
+        folder = "maintenance";
+        editable = true;
+      };
+
+      # Node exporter system overview
+      system-overview = {
+        path = ../modules/nixos/grafana/dashboards/system-overview.json;
+        folder = "maintenance";
+        editable = true;
       };
     };
   };
