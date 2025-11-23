@@ -99,7 +99,7 @@
         systemd = true;  # Service status monitoring
         smartctl = {
           enable = true;
-          devices = [ "/dev/sda" "/dev/sdb" "/dev/mmcblk0" "/dev/nvme0n1" ];
+          devices = [ "/dev/disk/by-label/home" "/dev/disk/by-label/root" "/dev/disk/by-label/boot" "/dev/disk/by-label/shelf" ];
         };
       };
     };
