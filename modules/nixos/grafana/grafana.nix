@@ -81,9 +81,7 @@ in
         description = "Initial admin password (change after first login!)";
       };
 
-      # ┌─────────────────────────────────────────────────────────┐
-      # │ NEW: MULTIPLE DASHBOARDS SUPPORT                        │
-      # └─────────────────────────────────────────────────────────┘
+      # MULTIPLE DASHBOARDS SUPPORT
       dashboards = lib.mkOption {
         type = lib.types.attrsOf (lib.types.submodule {
           options = {
@@ -142,24 +140,6 @@ in
             };
           }
         '';
-      };
-
-      # ┌─────────────────────────────────────────────────────────┐
-      # │ LEGACY: Maintain backward compatibility                │
-      # └─────────────────────────────────────────────────────────┘
-      # Legacy option kept for backward compatibility - will be removed in future
-      maintenance = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = "DEPRECATED: Use dashboards option instead. Enable maintenance monitoring dashboard";
-        };
-
-        dashboardPath = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
-          default = null;
-          description = "DEPRECATED: Use dashboards option instead. Path to maintenance dashboard JSON";
-        };
       };
     };
   };
