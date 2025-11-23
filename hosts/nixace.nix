@@ -87,6 +87,7 @@
         path = ../modules/nixos/grafana/dashboards/system-overview.json;
         editable = true;
       };
+    };
   };
   services.loki-custom = {
     enable = true;
