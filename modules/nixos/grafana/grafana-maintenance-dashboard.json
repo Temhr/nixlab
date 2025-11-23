@@ -1,18 +1,30 @@
 {
-  "title": "System Maintenance Checklist",
-  "tags": ["maintenance", "checklist", "monitoring"],
+  "id": null,
+  "uid": "system-maintenance-overview",
+  "title": "System Monitoring & Maintenance Dashboard",
+  "tags": ["maintenance", "monitoring", "system", "homelab", "nixos"],
   "timezone": "browser",
+  "schemaVersion": 36,
+  "editable": true,
+  "version": 1,
   "refresh": "30s",
+  "style": "dark",
   "time": {
     "from": "now-6h",
     "to": "now"
   },
   "panels": [
     {
+      "type": "row",
+      "title": "🎯 System Health Overview",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+    },
+    {
       "id": 1,
-      "title": "🎯 Overall System Health Score",
+      "title": "Overall Health Score",
       "type": "gauge",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 1},
       "targets": [
         {
           "expr": "system:health_score:percentage",
@@ -29,10 +41,10 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": 0, "color": "red" },
-              { "value": 50, "color": "orange" },
-              { "value": 80, "color": "yellow" },
-              { "value": 95, "color": "green" }
+              {"value": 0, "color": "red"},
+              {"value": 50, "color": "orange"},
+              {"value": 80, "color": "yellow"},
+              {"value": 95, "color": "green"}
             ]
           },
           "min": 0,
@@ -43,9 +55,9 @@
     },
     {
       "id": 2,
-      "title": "🚨 Active Alerts by Severity",
+      "title": "Active Alerts by Severity",
       "type": "stat",
-      "gridPos": { "h": 3, "w": 16, "x": 8, "y": 0 },
+      "gridPos": {"h": 4, "w": 18, "x": 6, "y": 1},
       "targets": [
         {
           "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"})",
@@ -63,9 +75,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": 0, "color": "green" },
-              { "value": 1, "color": "orange" },
-              { "value": 5, "color": "red" }
+              {"value": 0, "color": "green"},
+              {"value": 1, "color": "orange"},
+              {"value": 5, "color": "red"}
             ]
           }
         }
@@ -73,228 +85,455 @@
     },
     {
       "id": 3,
-      "title": "📊 Resource Utilization Overview",
-      "type": "timeseries",
-      "gridPos": { "h": 5, "w": 16, "x": 8, "y": 3 },
+      "title": "System Uptime",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 5},
       "targets": [
         {
-          "expr": "node:cpu_usage:percentage",
-          "legendFormat": "CPU %",
-          "refId": "A"
-        },
+          "expr": "node_time_seconds - node_boot_time_seconds",
+          "legendFormat": "uptime"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 4,
+      "title": "Root Filesystem Usage",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 5},
+      "targets": [
         {
-          "expr": "node:memory_usage:percentage",
-          "legendFormat": "Memory %",
-          "refId": "B"
-        },
-        {
-          "expr": "avg(node:disk_usage:percentage)",
-          "legendFormat": "Disk %",
-          "refId": "C"
+          "expr": "100 * (node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"} - node_filesystem_free_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"}) / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"}",
+          "legendFormat": "/"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "max": 100,
-          "min": 0,
-          "unit": "percent"
-        }
-      }
-    },
-    {
-      "id": 4,
-      "title": "📋 I. Hardware & Physical Layer - Automated Checks",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-      "targets": [
-        {
-          "expr": "ALERTS{checklist_section=~\"I\\\\.*\", alertstate=\"firing\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "Value": true,
-              "__name__": true
-            },
-            "renameByName": {
-              "alertname": "Alert",
-              "severity": "Severity",
-              "checklist_section": "Section",
-              "instance": "Host"
-            }
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "sortBy": [{"displayName": "Severity", "desc": false}]
-      },
-      "fieldConfig": {
-        "overrides": [
-          {
-            "matcher": { "id": "byName", "options": "Severity" },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  { "value": "critical", "text": "🔴 Critical", "color": "red" },
-                  { "value": "warning", "text": "🟡 Warning", "color": "orange" }
-                ]
-              }
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 80, "color": "yellow"},
+              {"value": 90, "color": "red"}
             ]
           }
-        ]
+        }
       }
     },
     {
       "id": 5,
-      "title": "✅ I. Hardware & Physical Layer - Manual Tasks",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-      "options": {
-        "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Visual inspection: Check fan dust accumulation\n- [ ] Verify all fans are spinning properly\n- [ ] Check for unusual noises or vibrations\n\n### Monthly\n- [ ] Clean dust from fans and heatsinks\n- [ ] Inspect cable connections for looseness\n- [ ] Check UPS battery health indicator\n- [ ] Review SMART logs manually: `smartctl -a /dev/sdX`\n\n### Quarterly\n- [ ] Run extended SMART tests on all drives\n- [ ] Replace UPS batteries if needed\n- [ ] Deep clean server chassis\n- [ ] Inspect power cable integrity\n\n---\n**Note:** Log completions in your maintenance journal or use Loki logging."
-      }
-    },
-    {
-      "id": 6,
-      "title": "💾 Storage Health Metrics",
-      "type": "timeseries",
-      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 16 },
+      "title": "RAM Usage",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 5},
       "targets": [
         {
-          "expr": "node:disk_usage:percentage",
-          "legendFormat": "{{ instance }} - {{ mountpoint }}",
-          "refId": "A"
+          "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))",
+          "legendFormat": "RAM"
         }
       ],
       "fieldConfig": {
         "defaults": {
+          "unit": "percent",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": 0, "color": "green" },
-              { "value": 80, "color": "yellow" },
-              { "value": 90, "color": "red" }
+              {"value": 0, "color": "green"},
+              {"value": 80, "color": "yellow"},
+              {"value": 90, "color": "red"}
             ]
-          },
-          "max": 100,
-          "unit": "percent"
-        }
-      }
-    },
-    {
-      "id": 7,
-      "title": "📋 II. Operating System & Kernel - Automated Checks",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
-      "targets": [
-        {
-          "expr": "ALERTS{checklist_section=~\"II\\\\.*\", alertstate=\"firing\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "Value": true
-            },
-            "renameByName": {
-              "alertname": "Alert",
-              "severity": "Severity",
-              "checklist_section": "Section"
-            }
           }
         }
-      ]
-    },
-    {
-      "id": 8,
-      "title": "✅ II. OS & Kernel - Manual Tasks",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
-      "options": {
-        "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Review journalctl for recurring errors:\n  ```bash\n  journalctl -p err -b\n  ```\n- [ ] Check for available NixOS updates:\n  ```bash\n  nix-channel --update\n  nixos-rebuild dry-build\n  ```\n\n### Monthly\n- [ ] Apply NixOS system updates\n- [ ] Review kernel changes in changelog\n- [ ] Check firmware updates available:\n  ```bash\n  fwupdmgr get-updates\n  ```\n- [ ] Update BIOS/UEFI if needed\n- [ ] Review logrotate configuration\n\n### Quarterly\n- [ ] Audit system logs for patterns\n- [ ] Document any kernel tuning changes\n- [ ] Test system recovery after updates"
       }
     },
     {
-      "id": 9,
-      "title": "📋 III. Storage & Backups - Automated Checks",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "type": "row",
+      "title": "CPU Metrics",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9}
+    },
+    {
+      "type": "stat",
+      "title": "CPU Usage",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 3, "w": 4, "x": 0, "y": 10},
       "targets": [
-        {
-          "expr": "ALERTS{checklist_section=~\"III\\\\.*\", alertstate=\"firing\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
+        {"expr": "node:cpu_usage_percent:avg", "legendFormat": "CPU Usage"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 70, "color": "yellow"},
+              {"value": 90, "color": "red"}
+            ]
+          }
         }
-      ]
-    },
-    {
-      "id": 10,
-      "title": "✅ III. Storage & Backups - Manual Tasks",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
-      "options": {
-        "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Daily\n- [ ] Verify backup job completion logs\n- [ ] Check backup size consistency\n\n### Weekly\n- [ ] Verify offsite backup sync timestamps\n- [ ] Review snapshot retention policy\n\n### Monthly\n- [ ] **CRITICAL:** Perform restore test from backup\n- [ ] Run ZFS scrub:\n  ```bash\n  zpool scrub <pool-name>\n  zpool status\n  ```\n- [ ] Check Btrfs balance (if applicable):\n  ```bash\n  btrfs balance status /\n  ```\n- [ ] Audit snapshot storage usage\n- [ ] Verify replication logs\n\n### Quarterly\n- [ ] Test full system restore procedure\n- [ ] Review backup retention policy\n- [ ] Verify backup encryption keys accessible"
       }
     },
     {
-      "id": 11,
-      "title": "📋 IV. Network & Security - Automated Checks",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
-      "targets": [
-        {
-          "expr": "ALERTS{checklist_section=~\"IV\\\\.*\", alertstate=\"firing\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 12,
-      "title": "✅ IV. Network & Security - Manual Tasks",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
-      "options": {
-        "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Review fail2ban/CrowdSec ban lists\n- [ ] Check VPN tunnel status manually\n- [ ] Verify certificate expiry dates >30 days\n\n### Monthly\n- [ ] Audit firewall rules for obsolete entries\n- [ ] Review open ports:\n  ```bash\n  ss -tulpn\n  ```\n- [ ] Verify SSH key-only authentication\n- [ ] Check ACME renewal logs\n- [ ] Audit user access and permissions\n- [ ] Rotate API tokens and admin passwords\n\n### Quarterly\n- [ ] Review SSO/authentication backend health\n- [ ] Audit LDAP/Keycloak user accounts\n- [ ] Verify internal CA certificate chain\n- [ ] Scan network for rogue devices:\n  ```bash\n  nmap -sn 192.168.1.0/24\n  ```\n- [ ] Test VPN failover procedures"
-      }
-    },
-    {
-      "id": 13,
-      "title": "🔐 Certificate Expiry Timeline",
       "type": "timeseries",
-      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 46 },
+      "title": "CPU Usage Over Time",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 4, "y": 10},
       "targets": [
         {
-          "expr": "(probe_ssl_earliest_cert_expiry - time()) / 86400",
-          "legendFormat": "{{ instance }} - Days until expiry",
-          "refId": "A"
+          "expr": "node:cpu_usage_percent:avg",
+          "legendFormat": "CPU Usage"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Load Average",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 10},
+      "targets": [
+        {"expr": "node_load1 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})", "legendFormat": "1m"},
+        {"expr": "node_load5 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})", "legendFormat": "5m"},
+        {"expr": "node_load15 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})", "legendFormat": "15m"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU Pressure",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 18},
+      "targets": [
+        {
+          "expr": "rate(node_pressure_cpu_waiting_seconds_total{type=\"some\"}[5m]) * 100",
+          "legendFormat": "Some processes waiting"
+        },
+        {
+          "expr": "rate(node_pressure_cpu_waiting_seconds_total{type=\"full\"}[5m]) * 100",
+          "legendFormat": "All processes blocked"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "fillOpacity": 20
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Pressure",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 18},
+      "targets": [
+        {
+          "expr": "rate(node_pressure_memory_waiting_seconds_total{type=\"some\"}[5m]) * 100",
+          "legendFormat": "Some processes waiting"
+        },
+        {
+          "expr": "rate(node_pressure_memory_waiting_seconds_total{type=\"full\"}[5m]) * 100",
+          "legendFormat": "All processes blocked"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "fillOpacity": 20
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 1, "color": "yellow"},
+              {"value": 10, "color": "red"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Memory Metrics",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 24}
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Usage Breakdown",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 16, "x": 0, "y": 25},
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "node_memory_MemAvailable_bytes",
+          "legendFormat": "Available"
+        },
+        {
+          "expr": "node_memory_Buffers_bytes",
+          "legendFormat": "Buffers"
+        },
+        {
+          "expr": "node_memory_Cached_bytes",
+          "legendFormat": "Cached"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "fillOpacity": 10,
+            "stacking": {"mode": "normal"}
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Swap Usage",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 25},
+      "targets": [
+        {"expr": "node_swap_used_bytes", "legendFormat": "Used"},
+        {"expr": "node_swap_free_bytes", "legendFormat": "Free"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "fillOpacity": 20
+          }
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Storage and Disk Metrics",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33}
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk Space Usage",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 34},
+      "targets": [
+        {
+          "expr": "100 * (node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"} - node_filesystem_free_bytes{fstype!~\"tmpfs|overlay\"}) / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"}",
+          "legendFormat": "{{mountpoint}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 80, "color": "yellow"},
+              {"value": 90, "color": "red"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Inode Usage",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 34},
+      "targets": [
+        {
+          "expr": "(1 - node_filesystem_files_free{fstype!~\"tmpfs|overlay\"} / node_filesystem_files{fstype!~\"tmpfs|overlay\"}) * 100",
+          "legendFormat": "{{mountpoint}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 80, "color": "yellow"},
+              {"value": 90, "color": "red"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk IO Operations",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 42},
+      "targets": [
+        {"expr": "rate(node_disk_reads_completed_total[5m])", "legendFormat": "{{device}} reads"},
+        {"expr": "rate(node_disk_writes_completed_total[5m])", "legendFormat": "{{device}} writes"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "iops"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "IO Pressure",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 42},
+      "targets": [
+        {
+          "expr": "rate(node_pressure_io_waiting_seconds_total{type=\"some\"}[5m]) * 100",
+          "legendFormat": "Some processes waiting"
+        },
+        {
+          "expr": "rate(node_pressure_io_waiting_seconds_total{type=\"full\"}[5m]) * 100",
+          "legendFormat": "All processes blocked"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "fillOpacity": 20
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 5, "color": "yellow"},
+              {"value": 20, "color": "red"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Network Metrics",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 50}
+    },
+    {
+      "type": "stat",
+      "title": "Network In",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 3, "w": 6, "x": 0, "y": 51},
+      "targets": [
+        {
+          "expr": "sum(rate(node_network_receive_bytes_total[5m]))",
+          "legendFormat": "rx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Network Out",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 3, "w": 6, "x": 6, "y": 51},
+      "targets": [
+        {
+          "expr": "sum(rate(node_network_transmit_bytes_total[5m]))",
+          "legendFormat": "tx"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Traffic",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 51},
+      "targets": [
+        {"expr": "rate(node_network_receive_bytes_total[5m])", "legendFormat": "{{device}} rx"},
+        {"expr": "rate(node_network_transmit_bytes_total[5m])", "legendFormat": "{{device}} tx"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "fillOpacity": 10
+          }
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Hardware and System Info",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 59}
+    },
+    {
+      "type": "timeseries",
+      "title": "Temperature Sensors",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 60},
+      "targets": [
+        {"expr": "node_hwmon_temp_celsius", "legendFormat": "{{sensor}} {{chip}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "blue"},
+              {"value": 60, "color": "green"},
+              {"value": 75, "color": "yellow"},
+              {"value": 85, "color": "red"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Systemd Failed Units",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 60},
+      "targets": [
+        {
+          "expr": "node_systemd_units{state=\"failed\"}",
+          "legendFormat": "{{name}}"
         }
       ],
       "fieldConfig": {
@@ -302,49 +541,28 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "value": 0, "color": "red" },
-              { "value": 7, "color": "orange" },
-              { "value": 30, "color": "yellow" },
-              { "value": 60, "color": "green" }
+              {"value": 0, "color": "green"},
+              {"value": 1, "color": "red"}
             ]
-          },
-          "unit": "days"
+          }
         }
       }
     },
     {
-      "id": 14,
-      "title": "📋 V. Applications & Services - Automated Checks",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 52 },
-      "targets": [
-        {
-          "expr": "ALERTS{checklist_section=~\"V\\\\.*\", alertstate=\"firing\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ]
+      "type": "row",
+      "title": "Service Monitoring",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 68}
     },
     {
-      "id": 15,
-      "title": "✅ V. Applications - Manual Tasks",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 52 },
-      "options": {
-        "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Review application error logs in Loki\n- [ ] Check systemd service status:\n  ```bash\n  systemctl --failed\n  ```\n\n### Monthly\n- [ ] Review slow database queries\n- [ ] Check database replication status\n- [ ] Verify database backup retention\n- [ ] Run database vacuum/analyze (Postgres):\n  ```bash\n  vacuumdb --all --analyze\n  ```\n- [ ] Review Redis/cache memory usage\n- [ ] Check message queue depths (MQTT/NATS)\n- [ ] Audit reverse proxy routing rules\n\n### Quarterly\n- [ ] Review application dependency updates\n- [ ] Test application restore from backup\n- [ ] Audit consumer service health\n- [ ] Review load balancer backend health"
-      }
-    },
-    {
-      "id": 16,
-      "title": "📊 Service Uptime Matrix",
       "type": "status-history",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 60 },
+      "title": "Service Uptime History",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 69},
       "targets": [
         {
           "expr": "up{job!~\"prometheus|node\"}",
-          "legendFormat": "{{ job }} - {{ instance }}",
+          "legendFormat": "{{job}} - {{instance}}",
           "refId": "A",
           "interval": "1m"
         }
@@ -363,68 +581,14 @@
       }
     },
     {
-      "id": 17,
-      "title": "📋 VI. Containers & VMs - Automated Checks",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 68 },
-      "targets": [
-        {
-          "expr": "ALERTS{checklist_section=~\"VI\\\\.*\", alertstate=\"firing\"}",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ]
-    },
-    {
-      "id": 18,
-      "title": "✅ VI. Containers & VMs - Manual Tasks",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 68 },
-      "options": {
-        "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Review container logs for errors\n- [ ] Check for container restart loops\n\n### Monthly\n- [ ] Remove stale Docker images:\n  ```bash\n  docker system prune -a\n  ```\n- [ ] Review container resource limits\n- [ ] Verify container network isolation\n- [ ] Check VM guest agent health\n- [ ] Review QCOW2 disk usage\n- [ ] Prune old VM snapshots\n\n### Quarterly\n- [ ] Review NUMA placement for VMs\n- [ ] Audit container security policies\n- [ ] Test VM live migration\n- [ ] Review orchestration cluster health (K8s/Nomad)"
-      }
-    },
-    {
-      "id": 19,
-      "title": "🔄 Weekly Maintenance Summary",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 76 },
-      "options": {
-        "mode": "markdown",
-        "content": "# 📅 Weekly Tasks\n\n## Critical\n- [ ] Review all Prometheus alerts\n- [ ] Check backup job completion\n- [ ] Verify storage pool health\n- [ ] Inspect certificate expiry\n- [ ] Review system logs\n\n## Routine\n- [ ] Check service status dashboard\n- [ ] Monitor resource utilization trends\n- [ ] Review network connectivity\n\n---\n**Last completed:** _[Manual entry]_"
-      }
-    },
-    {
-      "id": 20,
-      "title": "📆 Monthly Maintenance Summary",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 76 },
-      "options": {
-        "mode": "markdown",
-        "content": "# 📅 Monthly Tasks\n\n## System Updates\n- [ ] Apply NixOS updates\n- [ ] Update firmware (BIOS/RAID/NIC)\n- [ ] Review kernel changes\n\n## Storage & Backups\n- [ ] Run ZFS/Btrfs scrub\n- [ ] **Test backup restore**\n- [ ] Verify snapshot retention\n\n## Security\n- [ ] Audit firewall rules\n- [ ] Review SSH access logs\n- [ ] Rotate credentials\n- [ ] Check fail2ban effectiveness\n\n## Database\n- [ ] Run vacuum/analyze\n- [ ] Check index bloat\n\n---\n**Last completed:** _[Manual entry]_"
-      }
-    },
-    {
-      "id": 21,
-      "title": "🗓️ Quarterly Maintenance Summary",
-      "type": "text",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 76 },
-      "options": {
-        "mode": "markdown",
-        "content": "# 📅 Quarterly Tasks\n\n## Hardware\n- [ ] Deep hardware cleaning\n- [ ] RAID consistency check\n- [ ] Replace aging components\n\n## Disaster Recovery\n- [ ] **DR rehearsal/test**\n- [ ] Update recovery playbooks\n- [ ] Test cold site backups\n\n## Security & Compliance\n- [ ] Full access audit\n- [ ] Network device scan\n- [ ] Review security baselines\n- [ ] License compliance check\n\n## Documentation\n- [ ] Update network map\n- [ ] Review service inventory\n- [ ] Update runbooks\n\n---\n**Last completed:** _[Manual entry]_"
-      }
-    },
-    {
-      "id": 22,
-      "title": "📈 Alert History (Last 7 Days)",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 84 },
+      "title": "Alert History",
+      "datasource": "Prometheus",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 77},
       "targets": [
         {
           "expr": "count by (severity) (ALERTS{alertstate=\"firing\"})",
-          "legendFormat": "{{ severity }}",
+          "legendFormat": "{{severity}}",
           "refId": "A"
         }
       ],
@@ -437,15 +601,53 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "critical" },
-            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }]
+            "matcher": {"id": "byName", "options": "critical"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
           },
           {
-            "matcher": { "id": "byName", "options": "warning" },
-            "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }]
+            "matcher": {"id": "byName", "options": "warning"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]
           }
         ]
       }
+    },
+    {
+      "type": "row",
+      "title": "Maintenance Checklists",
+      "collapsed": true,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 85},
+      "panels": [
+        {
+          "id": 501,
+          "title": "Weekly Summary",
+          "type": "text",
+          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 86},
+          "options": {
+            "mode": "markdown",
+            "content": "# Weekly Tasks\n\n## Critical\n- [ ] Review all Prometheus alerts\n- [ ] Check backup completion\n- [ ] Verify storage pool health\n- [ ] Inspect certificate expiry\n- [ ] Review system logs\n\n## Routine\n- [ ] Check service status dashboard\n- [ ] Monitor resource utilization trends\n- [ ] Review network connectivity\n\n---\n**Last completed:** _[Manual entry]_"
+          }
+        },
+        {
+          "id": 502,
+          "title": "Monthly Summary",
+          "type": "text",
+          "gridPos": {"h": 8, "w": 8, "x": 8, "y": 86},
+          "options": {
+            "mode": "markdown",
+            "content": "# Monthly Tasks\n\n## System Updates\n- [ ] Apply NixOS updates\n- [ ] Update firmware\n- [ ] Review kernel changes\n\n## Storage\n- [ ] Run ZFS/Btrfs scrub\n- [ ] Test backup restore\n- [ ] Verify snapshot retention\n\n## Security\n- [ ] Audit firewall rules\n- [ ] Review SSH access logs\n- [ ] Rotate credentials\n- [ ] Check fail2ban effectiveness\n\n## Database\n- [ ] Run vacuum/analyze\n- [ ] Check index bloat\n\n---\n**Last completed:** _[Manual entry]_"
+          }
+        },
+        {
+          "id": 503,
+          "title": "Quarterly Summary",
+          "type": "text",
+          "gridPos": {"h": 8, "w": 8, "x": 16, "y": 86},
+          "options": {
+            "mode": "markdown",
+            "content": "# Quarterly Tasks\n\n## Hardware\n- [ ] Deep hardware cleaning\n- [ ] RAID consistency check\n- [ ] Replace aging components\n\n## Disaster Recovery\n- [ ] DR rehearsal/test\n- [ ] Update recovery playbooks\n- [ ] Test cold site backups\n\n## Security\n- [ ] Full access audit\n- [ ] Network device scan\n- [ ] Review security baselines\n- [ ] License compliance check\n\n## Documentation\n- [ ] Update network map\n- [ ] Review service inventory\n- [ ] Update runbooks\n\n---\n**Last completed:** _[Manual entry]_"
+          }
+        }
+      ]
     }
   ]
 }
