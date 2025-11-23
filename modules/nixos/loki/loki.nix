@@ -132,8 +132,6 @@ in
 
     users.groups.loki = {};
 
-    users.users.temhr.extraGroups = [ "loki" ];
-
     users.users.alloy = lib.mkIf cfg.enableAlloy {
       isSystemUser = true;
       group = "alloy";
@@ -142,6 +140,8 @@ in
     };
 
     users.groups.alloy = lib.mkIf cfg.enableAlloy {};
+
+    users.users.temhr.extraGroups = [ "loki" "alloy" ];
 
     # ----------------------------------------------------------------------------
     # LOKI SERVICE - Configure the systemd service
