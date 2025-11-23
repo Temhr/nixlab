@@ -304,18 +304,28 @@ in
 
           // Collect systemd journal logs
           loki.source.journal "systemd" {
-            max_age      = "12h"
-            labels       = {
+            max_age = "12h"
+            labels = {
               job  = "systemd-journal",
               host = "${config.networking.hostName}",
             }
 
-            relabel_rules = rule {
-              source_labels = ["__journal__systemd_unit"]
-              target_label  = "unit"
+            forward_to = [loki.process.systemd.receiver]
+          }
+
+          loki.process "systemd" {
+            forward_to = [loki.write.local.receiver]
+
+            stage.static_labels {
+              values = {
+                job  = "systemd-journal",
+                host = "${config.networking.hostName}",
+              }
             }
 
-            forward_to = [loki.write.local.receiver]
+            stage.label_keep {
+              values = ["job", "host", "unit"]
+            }
           }
 
           // Collect system log files
@@ -396,11 +406,12 @@ in
 
         alloyConfig = baseAlloyConfig + maintenanceAlloyConfig;
 
+        # Write config to file using writeText to avoid shell escaping issues
+        configFile = pkgs.writeText "alloy-config.alloy" alloyConfig;
+
       in ''
-        # Write Alloy configuration
-        echo '${alloyConfig}' > /var/lib/alloy/config.alloy
-        chown alloy:alloy /var/lib/alloy/config.alloy
-        chmod 640 /var/lib/alloy/config.alloy
+        # Copy Alloy configuration
+        install -m 640 -o alloy -g alloy ${configFile} /var/lib/alloy/config.alloy
 
         # Ensure data directory exists
         mkdir -p /var/lib/alloy/data
