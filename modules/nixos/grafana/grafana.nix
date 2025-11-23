@@ -147,6 +147,7 @@ in
       # ┌─────────────────────────────────────────────────────────┐
       # │ LEGACY: Maintain backward compatibility                │
       # └─────────────────────────────────────────────────────────┘
+      # Legacy option kept for backward compatibility - will be removed in future
       maintenance = {
         enable = lib.mkOption {
           type = lib.types.bool;
@@ -157,13 +158,7 @@ in
         dashboardPath = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
           default = null;
-          description = "DEPRECATED: Use dashboards option instead";
-        };
-
-        provisionPath = lib.mkOption {
-          type = lib.types.str;
-          default = "${cfg.dataDir}/dashboards/maintenance";
-          description = "DEPRECATED: Path where maintenance dashboard will be provisioned";
+          description = "DEPRECATED: Use dashboards option instead. Path to maintenance dashboard JSON";
         };
       };
     };
