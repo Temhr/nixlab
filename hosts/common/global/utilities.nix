@@ -72,6 +72,7 @@
 
     ## Disk & Partition Tools
     kdePackages.partitionmanager  # GUI for managing partitions and filesystems
+    usbimager                     # Very minimal GUI app that can write compressed disk images to USB drives
   ];
 
   programs.adb.enable = true; #Whether to configure system to use Android Debug Bridge (adb). To grant access to a user, it must be part of adbusers group
