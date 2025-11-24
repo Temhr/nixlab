@@ -33,6 +33,20 @@ in {
       services.displayManager.sddm.wayland.enable = true;   #enables wayland as default
       services.desktopManager.plasma6.enable = true;  #installs plasma 6
 
+
+      # In your configuration.nix or wherever you configure Plasma
+      services.displayManager.defaultSession = "plasma"; # Make sure it's just "plasma" not "plasmax11"
+      # Add environment variables for Plasma Wayland
+      environment.sessionVariables = {
+        QT_QPA_PLATFORM = "wayland";
+        NIXOS_OZONE_WL = "1";
+      };
+      # Or specifically for the user systemd session:
+      systemd.user.sessionVariables = {
+        QT_QPA_PLATFORM = "wayland";
+      };
+
+
     })
   ];
 }
