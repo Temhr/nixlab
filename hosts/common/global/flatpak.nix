@@ -7,5 +7,8 @@
     script = ''
       flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     '';
+    # Wait for network to be available before running
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
   };
 }
