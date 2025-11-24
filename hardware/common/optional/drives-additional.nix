@@ -49,18 +49,13 @@
         systemd.services.fix-shelf-permissions = {
           description = "Fix ownership of /home/temhr/shelf for temhr user";
           wantedBy = [ "multi-user.target" ];
-          # Delay until user units are fully initialized
-          after = [
-            "multi-user.target"
-            "systemd-user-sessions.service"
-          ];
-          serviceConfig.Type = "oneshot";
+          after = [ "local-fs.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+          };
           script = ''
             if [ -d /home/temhr/shelf ]; then
-              ${pkgs.findutils}/bin/find /home/temhr/shelf \
-                -path /home/temhr/shelf/data -prune -o \
-                -path '*/.config/systemd/user/*' -prune -o \
-                -exec ${pkgs.coreutils}/bin/chown --no-dereference temhr:users {} +
+              ${pkgs.findutils}/bin/find /home/temhr/shelf -path /home/temhr/shelf/data -prune -o -exec ${pkgs.coreutils}/bin/chown temhr:users {} +
             fi
           '';
         };
