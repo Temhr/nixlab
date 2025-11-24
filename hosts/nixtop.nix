@@ -74,7 +74,7 @@
     enable = true;
     port = 3000;
     bindIP = "0.0.0.0";
-    dataDir = ""/home/temhr/shelf/data/homepage"";
+    dataDir = /home/temhr/shelf/data/homepage;
     openFirewall = true;
   };
 
