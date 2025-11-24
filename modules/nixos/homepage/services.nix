@@ -127,12 +127,12 @@
     # ──────────────────────────────────────────────
     # SECTION: Monitoring & Logs
     # ──────────────────────────────────────────────
-      "Monitoring & Logs - nixace" = [
+      "Monitoring & Logs - Grafana" = [
         {
           "Grafana" = {
             href = "http://192.168.0.200:3101";
             icon = "grafana";
-            description = "Metrics visualization and dashboards";
+            description = "Metrics visualization and dashboards - nixace";
             target = "_blank";
             server = "nixace";
             ping = "http://192.168.0.200:3101";
@@ -140,10 +140,58 @@
           };
         }
         {
+          "Grafana" = {
+            href = "http://192.168.0.203:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards - nixsun";
+            target = "_blank";
+            server = "nixsun";
+            ping = "http://192.168.0.203:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Grafana" = {
+            href = "http://192.168.0.202:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards - nixtop";
+            target = "_blank";
+            server = "nixtop";
+            ping = "http://192.168.0.202:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Grafana" = {
+            href = "http://192.168.0.201:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards - nixvat";
+            target = "_blank";
+            server = "nixvat";
+            ping = "http://192.168.0.201:3101";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Grafana" = {
+            href = "http://192.168.0.204:3101";
+            icon = "grafana";
+            description = "Metrics visualization and dashboards - nixzen";
+            target = "_blank";
+            server = "nixvat";
+            ping = "http://192.168.0.204:3101";
+            statusStyle = "dot";
+          };
+        }
+      ];
+    }
+    {
+      "Monitoring & Logs - Prometheus" = [
+        {
           "Prometheus" = {
             href = "http://192.168.0.200:9090";
             icon = "prometheus";
-            description = "Metrics collection and monitoring";
+            description = "Metrics collection and monitoring - nixace";
             target = "_blank";
             widget = {
               type = "prometheus";
@@ -154,26 +202,11 @@
             statusStyle = "dot";
           };
         }
-      ];
-    }
-    {
-      "Monitoring & Logs - nixsun" = [
-        {
-          "Grafana" = {
-            href = "http://192.168.0.203:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards";
-            target = "_blank";
-            server = "nixsun";
-            ping = "http://192.168.0.203:3101";
-            statusStyle = "dot";
-          };
-        }
         {
           "Prometheus" = {
             href = "http://192.168.0.203:9090";
             icon = "prometheus";
-            description = "Metrics collection and monitoring";
+            description = "Metrics collection and monitoring - nixsun";
             target = "_blank";
             widget = {
               type = "prometheus";
@@ -184,26 +217,11 @@
             statusStyle = "dot";
           };
         }
-      ];
-    }
-    {
-      "Monitoring & Logs - nixtop" = [
-        {
-          "Grafana" = {
-            href = "http://192.168.0.202:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards";
-            target = "_blank";
-            server = "nixtop";
-            ping = "http://192.168.0.202:3101";
-            statusStyle = "dot";
-          };
-        }
         {
           "Prometheus" = {
             href = "http://192.168.0.202:9090";
             icon = "prometheus";
-            description = "Metrics collection and monitoring";
+            description = "Metrics collection and monitoring - nixtop";
             target = "_blank";
             widget = {
               type = "prometheus";
@@ -214,26 +232,11 @@
             statusStyle = "dot";
           };
         }
-      ];
-    }
-    {
-      "Monitoring & Logs - nixvat" = [
-        {
-          "Grafana" = {
-            href = "http://192.168.0.201:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3101";
-            statusStyle = "dot";
-          };
-        }
         {
           "Prometheus" = {
             href = "http://192.168.0.201:9090";
             icon = "prometheus";
-            description = "Metrics collection and monitoring";
+            description = "Metrics collection and monitoring - nixvat";
             target = "_blank";
             widget = {
               type = "prometheus";
@@ -244,26 +247,11 @@
             statusStyle = "dot";
           };
         }
-      ];
-    }
-    {
-      "Monitoring & Logs - nixzen" = [
-        {
-          "Grafana" = {
-            href = "http://192.168.0.204:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.204:3101";
-            statusStyle = "dot";
-          };
-        }
         {
           "Prometheus" = {
             href = "http://192.168.0.204:9090";
             icon = "prometheus";
-            description = "Metrics collection and monitoring";
+            description = "Metrics collection and monitoring - nixzen";
             target = "_blank";
             widget = {
               type = "prometheus";
