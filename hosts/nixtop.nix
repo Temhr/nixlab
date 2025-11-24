@@ -71,7 +71,7 @@
 
   ## Self-hosted apps and services
   services.homepage-custom = {
-    enable = true;
+    enable = false;
     port = 3000;
     bindIP = "0.0.0.0";
     dataDir = "/home/temhr/shelf/data/homepage";
