@@ -149,15 +149,6 @@ in
   # ============================================================================
   config = lib.mkIf cfg.enable {
 
-    # Convert legacy maintenance option to new dashboards format
-    services.grafana-custom.dashboards = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.dashboardPath != null) {
-      maintenance = {
-        path = cfg.maintenance.dashboardPath;
-        folder = "Maintenance";
-        editable = true;
-      };
-    };
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
