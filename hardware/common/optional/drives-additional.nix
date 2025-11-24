@@ -46,19 +46,19 @@
               fsType = "ext4";
               options = [ "defaults" "auto" ];
             };
-            systemd.services.fix-shelf-permissions = {
-              description = "Fix ownership of /home/temhr/shelf for temhr user";
-              wantedBy = [ "local-fs.target" ];
-              after = [ "local-fs.target" ];
-              serviceConfig = {
-                Type = "oneshot";
-              };
-              script = ''
-                if [ -d /home/temhr/shelf ]; then
-                  ${pkgs.findutils}/bin/find /home/temhr/shelf -path /home/temhr/shelf/data -prune -o -exec ${pkgs.coreutils}/bin/chown temhr:users {} +
-                fi
-              '';
-            };
+        systemd.services.fix-shelf-permissions = {
+          description = "Fix ownership of /home/temhr/shelf for temhr user";
+          wantedBy = [ "multi-user.target" ];
+          after = [ "local-fs.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+          };
+          script = ''
+            if [ -d /home/temhr/shelf ]; then
+              ${pkgs.findutils}/bin/find /home/temhr/shelf -path /home/temhr/shelf/data -prune -o -exec ${pkgs.coreutils}/bin/chown temhr:users {} +
+            fi
+          '';
+        };
     })
     (lib.mkIf config.mount-mirror.enable {
         fileSystems."/mirror" =
