@@ -106,7 +106,7 @@ in
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-    "d ${cfg.dataDir} 0770 homepage homepage -"
+      "d ${cfg.dataDir} 0770 homepage homepage -"
     ];
 
     # ----------------------------------------------------------------------------

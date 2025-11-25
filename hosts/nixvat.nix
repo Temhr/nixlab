@@ -78,7 +78,7 @@
   };
 
   services.wikijs-custom = {
-    enable = true;
+    enable = false;
     port = 3001;
     bindIP = "0.0.0.0";
     openFirewall = true;
@@ -112,7 +112,7 @@
   services.zola-custom = {
     enable = true;
     port = 3003;
-    siteDir = "/var/www/myblog";
+    siteDir = "/data/www/myblog";
     bindIP = "0.0.0.0";
     openFirewall = true;
   };

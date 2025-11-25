@@ -79,7 +79,6 @@ in
 
     users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
 
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
