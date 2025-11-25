@@ -157,7 +157,6 @@ in
     users.groups.wikijs = {};
     users.users.temhr.extraGroups = [ "wikijs" ];
 
-
     # ----------------------------------------------------------------------------
     # POSTGRESQL SETUP - Optional automatic database configuration
     # ----------------------------------------------------------------------------
@@ -222,6 +221,9 @@ in
         # Create config directory structure
         mkdir -p ${cfg.dataDir}/data
 
+        # Remove old symlinks if they exist
+        rm -f ${cfg.dataDir}/server ${cfg.dataDir}/node_modules ${cfg.dataDir}/assets
+
         # Symlink necessary Wiki.js directories
         ln -sf ${cfg.package}/server ${cfg.dataDir}/server
         ln -sf ${cfg.package}/node_modules ${cfg.dataDir}/node_modules
@@ -229,32 +231,30 @@ in
 
         # Create config.yml if it doesn't exist
         if [ ! -f ${cfg.dataDir}/config.yml ]; then
-          cat > ${cfg.dataDir}/config.yml << EOF
-# Wiki.js Configuration
-# See https://docs.js.wiki/install for details
-
-bindIP: ${cfg.bindIP}
-port: ${toString cfg.port}
-
-db:
-  type: ${cfg.databaseType}
+          {
+            echo "# Wiki.js Configuration"
+            echo "# See https://docs.js.wiki/install for details"
+            echo ""
+            echo "bindIP: ${cfg.bindIP}"
+            echo "port: ${toString cfg.port}"
+            echo ""
+            echo "db:"
+            echo "  type: ${cfg.databaseType}"
 ${lib.optionalString (cfg.databaseType == "sqlite") ''
-  storage: ${cfg.dataDir}/data/${cfg.databaseName}.db
+            echo "  storage: ${cfg.dataDir}/data/${cfg.databaseName}.db"
 ''}
 ${lib.optionalString (cfg.databaseType != "sqlite") ''
-  host: ${cfg.databaseHost}
-  port: ${toString cfg.databasePort}
-  user: ${cfg.databaseUser}
-  db: ${cfg.databaseName}
-  ssl: false
+            echo "  host: ${cfg.databaseHost}"
+            echo "  port: ${toString cfg.databasePort}"
+            echo "  user: ${cfg.databaseUser}"
+            echo "  db: ${cfg.databaseName}"
+            echo "  ssl: false"
 ''}
-
-logLevel: info
-
-dataPath: ${cfg.dataDir}/data
-
-# Session secret will be auto-generated on first run
-EOF
+            echo ""
+            echo "logLevel: info"
+            echo ""
+            echo "dataPath: ${cfg.dataDir}/data"
+          } > ${cfg.dataDir}/config.yml
           chown wikijs:wikijs ${cfg.dataDir}/config.yml
           chmod 640 ${cfg.dataDir}/config.yml
         fi
