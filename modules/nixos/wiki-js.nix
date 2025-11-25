@@ -20,7 +20,6 @@ in
       };
 
       # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-      # Use "0.0.0.0" for access from other devices
       bindIP = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
@@ -43,19 +42,77 @@ in
         description = "Enable HTTPS with Let's Encrypt (requires domain)";
       };
 
-      # OPTIONAL: Where to store Wiki.js data (default: /var/lib/wiki-js)
+      # OPTIONAL: Where to store Wiki.js data (default: /var/lib/wikijs)
       dataDir = lib.mkOption {
         type = lib.types.path;
-        default = "/var/lib/wiki-js";
-        example = "/data/wiki-js";
+        default = "/var/lib/wikijs";
+        example = "/data/wikijs";
         description = "Directory for Wiki.js data and configuration";
+      };
+
+      # OPTIONAL: Database type (default: sqlite)
+      databaseType = lib.mkOption {
+        type = lib.types.enum [ "sqlite" "postgres" "mysql" "mariadb" "mssql" ];
+        default = "sqlite";
+        description = "Database type to use";
+      };
+
+      # OPTIONAL: Database host (only for non-sqlite databases)
+      databaseHost = lib.mkOption {
+        type = lib.types.str;
+        default = "localhost";
+        description = "Database host (ignored for SQLite)";
+      };
+
+      # OPTIONAL: Database port
+      databasePort = lib.mkOption {
+        type = lib.types.port;
+        default = 5432;
+        description = "Database port (ignored for SQLite)";
+      };
+
+      # OPTIONAL: Database name
+      databaseName = lib.mkOption {
+        type = lib.types.str;
+        default = "wikijs";
+        description = "Database name (for SQLite: filename without extension)";
+      };
+
+      # OPTIONAL: Database user
+      databaseUser = lib.mkOption {
+        type = lib.types.str;
+        default = "wikijs";
+        description = "Database user (ignored for SQLite)";
+      };
+
+      # OPTIONAL: Database password file (for security)
+      databasePasswordFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        example = "/run/secrets/wikijs-db-password";
+        description = "File containing database password (ignored for SQLite)";
+      };
+
+      # OPTIONAL: Wiki.js package to use (default: pkgs.wiki-js)
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.wiki-js;
+        defaultText = lib.literalExpression "pkgs.wiki-js";
+        description = "The Wiki.js package to use";
       };
 
       # OPTIONAL: Auto-open firewall ports (default: true)
       openFirewall = lib.mkOption {
         type = lib.types.bool;
         default = true;
-        description = "Open firewall ports for HTTP/HTTPS";
+        description = "Open firewall ports";
+      };
+
+      # OPTIONAL: Enable automatic PostgreSQL database setup
+      autoSetupPostgres = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Automatically setup PostgreSQL database and user";
       };
     };
   };
@@ -66,132 +123,170 @@ in
   config = lib.mkIf cfg.enable {
 
     # ----------------------------------------------------------------------------
-    # USER SETUP - Create dedicated system user for wiki-js
+    # ASSERTIONS - Validate configuration
     # ----------------------------------------------------------------------------
-    users.users.wiki-js = {
-      isSystemUser = true;
-      group = "wiki-js";
-      home = cfg.dataDir;
-      extraGroups = [ "users" ];
-    };
-
-    users.groups.wiki-js = {};
-
-    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
+    assertions = [
+      {
+        assertion = cfg.enableSSL -> cfg.domain != null;
+        message = "services.wikijs-custom.enableSSL requires services.wikijs-custom.domain to be set";
+      }
+      {
+        assertion = cfg.autoSetupPostgres -> cfg.databaseType == "postgres";
+        message = "services.wikijs-custom.autoSetupPostgres requires databaseType to be postgres";
+      }
+    ];
 
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
+      "d ${cfg.dataDir} 0770 wikijs wikijs -"
+      "d ${cfg.dataDir}/data 0770 wikijs wikijs -"
     ];
 
     # ----------------------------------------------------------------------------
-    # SERVICE CUSTOMIZATION - Additional systemd service configuration
+    # USER SETUP - Create dedicated system user for Wiki.js
     # ----------------------------------------------------------------------------
-    systemd.services.wiki-js = {
-      # Ensure PostgreSQL is running before Wiki.js starts
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
-
-      preStart = ''
-
-        # Example: ensure custom data directory exists
-        if [ ! -d "${cfg.dataDir}" ]; then
-          mkdir -p "${cfg.dataDir}"
-        fi
-
-      '';
-
-      serviceConfig = {
-        # Restart on failure
-        Restart = "on-failure";
-        RestartSec = "10s";
-      }
-      # Override directory settings if using custom data path
-      // lib.optionalAttrs (cfg.dataDir != "/var/lib/wiki-js") {
-        StateDirectory = lib.mkForce "";
-        WorkingDirectory = lib.mkForce cfg.dataDir;
-      };
+    users.users.wikijs = {
+      isSystemUser = true;
+      group = "wikijs";
+      home = cfg.dataDir;
+      description = "Wiki.js service user";
     };
 
+    users.groups.wikijs = {};
+    users.users.temhr.extraGroups = [ "wikijs" ];
+
     # ----------------------------------------------------------------------------
-    # WIKI.JS SERVICE - Configure the built-in NixOS Wiki.js module
+    # POSTGRESQL SETUP - Optional automatic database configuration
     # ----------------------------------------------------------------------------
-    services.wiki-js = {
+    services.postgresql = lib.mkIf cfg.autoSetupPostgres {
       enable = true;
-
-      # Override state directory name if using custom path
-      # This tells the module to use a different base directory
-      stateDirectoryName = lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
-        (baseNameOf cfg.dataDir);
-
-      # Wiki.js application settings
-      settings = {
-        # Network configuration
-        port = cfg.port;
-        bindIP = cfg.bindIP;
-
-        # Database configuration (PostgreSQL via Unix socket)
-        db = {
-          type = "postgres";
-          host = "/run/postgresql";  # Unix socket connection
-          db = "wiki-js";
-          user = "wiki-js";
-        };
-
-        # Logging and high-availability settings
-        logLevel = "info";
-        ha = false;  # High availability mode disabled (single instance)
-      };
-    };
-
-    # ----------------------------------------------------------------------------
-    # DATABASE SETUP - Wiki.js requires PostgreSQL
-    # ----------------------------------------------------------------------------
-    services.postgresql = {
-      enable = true;
-      # Create the 'wiki-js' database automatically
-      ensureDatabases = [ "wiki-js" ];
-      # Create 'wiki-js' user with ownership of the database
+      ensureDatabases = [ cfg.databaseName ];
       ensureUsers = [{
-        name = "wiki-js";
+        name = cfg.databaseUser;
         ensureDBOwnership = true;
       }];
     };
 
     # ----------------------------------------------------------------------------
+    # WIKI.JS SERVICE - Configure the systemd service
+    # ----------------------------------------------------------------------------
+    systemd.services.wikijs = {
+      description = "Wiki.js";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ]
+        ++ lib.optionals cfg.autoSetupPostgres [ "postgresql.service" ];
+      requires = lib.optionals cfg.autoSetupPostgres [ "postgresql.service" ];
+
+      environment = {
+        NODE_ENV = "production";
+        WIKI_HOST = cfg.bindIP;
+        WIKI_PORT = toString cfg.port;
+
+        # Database configuration
+        DB_TYPE = cfg.databaseType;
+      } // lib.optionalAttrs (cfg.databaseType != "sqlite") {
+        DB_HOST = cfg.databaseHost;
+        DB_PORT = toString cfg.databasePort;
+        DB_USER = cfg.databaseUser;
+        DB_NAME = cfg.databaseName;
+      } // lib.optionalAttrs (cfg.databaseType == "sqlite") {
+        DB_FILEPATH = "${cfg.dataDir}/data/${cfg.databaseName}.db";
+      };
+
+      serviceConfig = {
+        Type = "simple";
+        User = "wikijs";
+        Group = "wikijs";
+        WorkingDirectory = cfg.dataDir;
+        ExecStart = "${cfg.package}/bin/wiki";
+        Restart = "on-failure";
+        RestartSec = "10s";
+
+        # Security hardening
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        ReadWritePaths = [ cfg.dataDir ];
+
+        # Load database password from file if specified
+        EnvironmentFile = lib.mkIf (cfg.databasePasswordFile != null)
+          cfg.databasePasswordFile;
+      };
+
+      preStart = ''
+        # Create config directory structure
+        mkdir -p ${cfg.dataDir}/data
+
+        # Create config.yml if it doesn't exist
+        if [ ! -f ${cfg.dataDir}/config.yml ]; then
+          cat > ${cfg.dataDir}/config.yml << EOF
+# Wiki.js Configuration
+# See https://docs.js.wiki/install for details
+
+bindIP: ${cfg.bindIP}
+port: ${toString cfg.port}
+
+db:
+  type: ${cfg.databaseType}
+${lib.optionalString (cfg.databaseType == "sqlite") ''
+  storage: ${cfg.dataDir}/data/${cfg.databaseName}.db
+''}
+${lib.optionalString (cfg.databaseType != "sqlite") ''
+  host: ${cfg.databaseHost}
+  port: ${toString cfg.databasePort}
+  user: ${cfg.databaseUser}
+  db: ${cfg.databaseName}
+  ssl: false
+''}
+
+logLevel: info
+
+dataPath: ${cfg.dataDir}/data
+
+# Session secret will be auto-generated on first run
+EOF
+          chown wikijs:wikijs ${cfg.dataDir}/config.yml
+          chmod 640 ${cfg.dataDir}/config.yml
+        fi
+      '';
+    };
+
+    # ----------------------------------------------------------------------------
     # NGINX REVERSE PROXY - Only configured if domain is set
     # ----------------------------------------------------------------------------
-    services.nginx = lib.mkIf (cfg.domain != null) {
-      enable = true;
-      # Enable recommended security and performance settings
-      recommendedProxySettings = true;
-      recommendedTlsSettings = true;
-      recommendedOptimisation = true;
-      recommendedGzipSettings = true;
+    services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
-      virtualHosts.${cfg.domain} = {
-        # Proxy all requests to Wiki.js
+    services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
+      ${cfg.domain} = {
+        forceSSL = cfg.enableSSL;
+        enableACME = cfg.enableSSL;
+
         locations."/" = {
           proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
-          # Enable WebSocket support (required for real-time collaboration)
           proxyWebsockets = true;
           extraConfig = ''
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_redirect off;
 
-            # Increase upload size limit for file attachments
-            client_max_body_size 50M;
+            # Increase buffer sizes for Wiki.js
+            proxy_buffer_size 128k;
+            proxy_buffers 4 256k;
+            proxy_busy_buffers_size 256k;
+
+            # Increase timeout for long operations
+            proxy_connect_timeout 600s;
+            proxy_send_timeout 600s;
+            proxy_read_timeout 600s;
           '';
         };
-
-        # Force HTTPS if SSL is enabled
-        forceSSL = cfg.enableSSL;
-        # Get automatic SSL certificate from Let's Encrypt
-        enableACME = cfg.enableSSL;
       };
     };
 
@@ -199,8 +294,8 @@ in
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open Wiki.js port if not using reverse proxy or binding to non-localhost
-      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [ cfg.port ]
+      # Open Wiki.js port if not using reverse proxy
+      lib.optionals (cfg.domain == null) [ cfg.port ]
       # Open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
@@ -209,257 +304,157 @@ in
 
 /*
 ================================================================================
-USAGE EXAMPLE
+USAGE EXAMPLES
 ================================================================================
 
-Minimal configuration (only required options):
-----------------------------------------------
-services.wikijs-custom = {
-  enable = true;  # REQUIRED
-};
-# Runs on localhost:3001, no backups, no reverse proxy
-
-
-Full configuration (all options):
-----------------------------------
-services.wikijs-custom = {
-  enable = true;                # REQUIRED: Turn on the service
-  port = 3001;                  # OPTIONAL: Default is 3001
-  bindIP = "127.0.0.1";        # OPTIONAL: Default is 127.0.0.1
-  dataDir = "/data/wiki-js";    # OPTIONAL: Default is /var/lib/wiki-js
-
-  # OPTIONAL: Nginx reverse proxy with SSL
-  domain = "wiki.example.com";  # Default is null (no proxy)
-  enableSSL = true;             # Default is false
-  openFirewall = true;          # Default is true
-};
-
-
-Network-accessible without reverse proxy:
-------------------------------------------
-services.wikijs-custom = {
-  enable = true;
-  port = 3001;
-  bindIP = "0.0.0.0";          # Allow network access
-  openFirewall = true;
-};
-# Access at: http://your-ip:3001
-
-
-================================================================================
-FIRST-TIME SETUP INSTRUCTIONS
-================================================================================
-
-Step 1: Apply your NixOS configuration
----------------------------------------
-  sudo nixos-rebuild switch
-
-
-Step 2: Access Wiki.js
------------------------
-Local access:      http://localhost:3001
-Network access:    http://your-ip:3001 (if bindIP = "0.0.0.0")
-Domain access:     https://wiki.example.com (if configured)
-
-
-Step 3: Complete setup wizard
-------------------------------
-On first access, Wiki.js will guide you through:
-1. Setting up administrator account
-2. Configuring site settings
-3. Choosing authentication methods
-4. Selecting storage options
-
-
-Step 4: Configure storage and authentication (optional)
---------------------------------------------------------
-After initial setup, you can configure:
-- Local storage or cloud storage (S3, Azure, etc.)
-- Authentication providers (local, OAuth, LDAP, etc.)
-- Search engines (database, elasticsearch, etc.)
-
-All configuration is done through the web interface:
-Administration → Storage/Authentication/Search
-
-
-================================================================================
-WHAT GETS INSTALLED
-================================================================================
-
-This module automatically sets up:
-- ✓ Wiki.js application
-- ✓ PostgreSQL database server
-- ✓ Wiki.js system user and directories
-- ✓ Nginx reverse proxy (if domain is set)
-- ✓ Automatic SSL certificates (if enableSSL = true)
-- ✓ Firewall rules (if openFirewall = true)
-
-
-================================================================================
-UNDERSTANDING WIKI.JS STRUCTURE
-================================================================================
-
-Data Directory (dataDir):
--------------------------
-Contains:
-- Wiki.js configuration files
-- Page cache
-- Temporary files
-- data/uploads/
-
-Default: /var/lib/wiki-js
-
-Database:
----------
-- PostgreSQL database named "wiki-js"
-- Stores page content, users, settings
-- Located in PostgreSQL's data directory
-
-
-================================================================================
-COMMON USE CASES
-================================================================================
-
-Personal wiki (localhost only):
+Minimal configuration (SQLite):
 --------------------------------
 services.wikijs-custom = {
   enable = true;
-  # All defaults work fine for personal use
 };
+# Access at: http://your-ip:3001
+# Complete setup wizard in browser
 
 
-Team wiki with network access:
--------------------------------
+With PostgreSQL (manual setup):
+--------------------------------
 services.wikijs-custom = {
   enable = true;
+  databaseType = "postgres";
+  databaseHost = "localhost";
+  databaseUser = "wikijs";
+  databaseName = "wikijs";
+  databasePasswordFile = "/run/secrets/wikijs-db-password";
+};
+
+# Create password file:
+echo "your-secure-password" | sudo tee /run/secrets/wikijs-db-password
+sudo chmod 600 /run/secrets/wikijs-db-password
+
+
+With PostgreSQL (automatic setup):
+-----------------------------------
+services.wikijs-custom = {
+  enable = true;
+  databaseType = "postgres";
+  autoSetupPostgres = true;
+};
+# PostgreSQL database and user created automatically
+# Uses peer authentication (no password needed)
+
+
+Full configuration with domain:
+--------------------------------
+services.wikijs-custom = {
+  enable = true;
+  port = 3001;
   bindIP = "0.0.0.0";
-};
+  dataDir = "/data/wikijs";
 
+  # Database
+  databaseType = "postgres";
+  autoSetupPostgres = true;
 
-Production wiki with domain and SSL:
--------------------------------------
-services.wikijs-custom = {
-  enable = true;
+  # Nginx reverse proxy
   domain = "wiki.example.com";
   enableSSL = true;
-  dataDir = "/data/wiki-js";
+  openFirewall = true;
 };
 
 
 ================================================================================
-STORAGE OPTIONS IN WIKI.JS
+CONFIGURATION
 ================================================================================
 
-After setup, you can configure different storage backends in the Wiki.js admin:
+Wiki.js configuration is stored in config.yml in dataDir.
+A default config is created automatically on first run.
 
-Local Storage (default):
-  - Files stored in dataDir/data/uploads
-  - Good for: Small wikis, single server
+Edit configuration:
+  sudo nano /var/lib/wikijs/config.yml
+  sudo systemctl restart wikijs
 
-Git Storage:
-  - Store pages in Git repository
-  - Good for: Version control, collaboration
+On first access via web browser, complete the setup wizard:
+  1. Create administrator account
+  2. Configure site settings
+  3. Set up authentication providers
+  4. Choose storage targets (local, git, S3, etc.)
 
-Cloud Storage:
-  - AWS S3, Azure Blob, Google Cloud Storage
-  - Good for: Scalability, redundancy
 
-Database Storage:
-  - Store everything in PostgreSQL
-  - Good for: Simplicity, atomic backups
+================================================================================
+DATABASE SETUP
+================================================================================
+
+SQLite (default):
+  - No setup required
+  - Database file: /var/lib/wikijs/data/wikijs.db
+  - Good for small wikis (<10 concurrent users)
+
+PostgreSQL (recommended for production):
+  - Option 1: Use autoSetupPostgres = true
+  - Option 2: Manual setup:
+
+    sudo -u postgres psql
+    CREATE DATABASE wikijs;
+    CREATE USER wikijs WITH PASSWORD 'your-password';
+    GRANT ALL PRIVILEGES ON DATABASE wikijs TO wikijs;
+    \q
+
+MySQL/MariaDB:
+  - Install MySQL/MariaDB separately
+  - Create database and user manually
+  - Set databaseType = "mysql" or "mariadb"
+
+
+================================================================================
+BACKUP AND RESTORE
+================================================================================
+
+Backup:
+  sudo systemctl stop wikijs
+  sudo tar -czf wikijs-backup.tar.gz /var/lib/wikijs
+  sudo systemctl start wikijs
+
+Restore:
+  sudo systemctl stop wikijs
+  sudo tar -xzf wikijs-backup.tar.gz -C /
+  sudo systemctl start wikijs
+
 
 ================================================================================
 TROUBLESHOOTING
 ================================================================================
 
 Check service status:
-  sudo systemctl status wiki-js
+  sudo systemctl status wikijs
 
 View logs:
-  sudo journalctl -u wiki-js -f
+  sudo journalctl -u wikijs -f
 
-Check database connection:
-  sudo -u wiki-js psql -d wiki-js -c "\dt"
+Edit configuration:
+  sudo nano /var/lib/wikijs/config.yml
+  sudo systemctl restart wikijs
 
-Verify uploads symlink (if using custom path):
-  ls -la /var/lib/wiki-js/data/uploads
+Database connection issues:
+  - Verify database is running
+  - Check credentials in config.yml
+  - For PostgreSQL: ensure user has proper permissions
 
-Check backup location:
-  ls -lh /backup/wiki-js/
+Port already in use:
+  - Check what's using the port: sudo ss -tulpn | grep :3001
+  - Change port in module configuration
 
-Reset to defaults (WARNING: deletes all content):
-  sudo systemctl stop wiki-js
-  sudo -u postgres dropdb wiki-js
-  sudo -u postgres createdb -O wiki-js wiki-js
-  sudo rm -rf /var/lib/wiki-js/*
-  sudo systemctl start wiki-js
+Can't access via domain:
+  - Verify nginx is running: sudo systemctl status nginx
+  - Check DNS records point to your server
+  - Review nginx logs: sudo journalctl -u nginx -f
 
-Cannot access web interface:
-  1. Check if service is running: systemctl status wiki-js
-  2. Check firewall: sudo ss -tulpn | grep 3001
-  3. Check logs: journalctl -u wiki-js -n 50
+Setup wizard shows error:
+  - Check file permissions: ls -la /var/lib/wikijs
+  - Verify database connectivity
+  - Check logs for specific error messages
 
-
-Database connection errors:
-  1. Ensure PostgreSQL is running: systemctl status postgresql
-  2. Check database exists: sudo -u postgres psql -l | grep wiki-js
-  3. Check user permissions: sudo -u postgres psql wiki-js -c "\du"
-
-
-Out of disk space:
-  1. Check disk usage: df -h
-  2. Clean old backups: find /backup/wiki-js -mtime +30 -delete
-
-
-================================================================================
-SECURITY BEST PRACTICES
-================================================================================
-
-✓ Use HTTPS in production (set enableSSL = true)
-✓ Keep Wiki.js updated (rebuild NixOS regularly)
-✓ Use strong admin password
-✓ Enable 2FA for administrator accounts
-✓ Restrict bindIP to localhost if using reverse proxy
-✓ Monitor logs for suspicious activity
-✓ Use authentication providers (LDAP/OAuth) for team wikis
-
-
-================================================================================
-UPGRADING WIKI.JS
-================================================================================
-
-Wiki.js is automatically updated when you rebuild NixOS:
-
-  sudo nixos-rebuild switch
-
-The service will restart automatically with the new version.
-Your data and configuration are preserved during upgrades.
-
-Note: Major version upgrades may require database migrations.
-Always backup before upgrading!
-
-
-================================================================================
-INTEGRATIONS
-================================================================================
-
-Wiki.js supports many integrations via the admin interface:
-
-Authentication:
-  - Local accounts
-  - LDAP / Active Directory
-  - OAuth2 (Google, GitHub, etc.)
-  - SAML
-
-Search:
-  - PostgreSQL full-text search (default)
-  - Elasticsearch
-  - Algolia
-  - Azure Search
-
-Analytics:
-  - Google Analytics
-  - Matomo
-  - Fathom
+Reset admin password:
+  # Connect to database and run Wiki.js CLI commands
+  # See: https://docs.js.wiki/admin/password-reset
 
 */

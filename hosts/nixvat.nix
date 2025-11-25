@@ -78,11 +78,13 @@
   };
 
   services.wikijs-custom = {
-    enable = false;
+    enable = true;
     port = 3001;
     bindIP = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/wiki-js";
+    databaseType = "postgres";
+    autoSetupPostgres = true;
   };
 
   services.bookstack-custom = {
