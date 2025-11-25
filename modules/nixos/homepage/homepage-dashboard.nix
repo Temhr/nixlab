@@ -133,7 +133,7 @@ in
         servicesYamlTmp = "/tmp/homepage-services.yaml.tmp";
       in ''
 
-        mkdir ${cfg.dataDir}/config/
+        [ -d "${cfg.dataDir}/config" ] || mkdir -p "${cfg.dataDir}/config"
         chown homepage:homepage ${cfg.dataDir}/config/
         chmod 0770 ${cfg.dataDir}/config/
 
