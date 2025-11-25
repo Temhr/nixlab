@@ -51,32 +51,6 @@ in
         description = "Directory for Wiki.js data and configuration";
       };
 
-      # OPTIONAL: Custom path for uploaded files (default: null = under dataDir)
-      # Useful for storing uploads on a separate mount/drive
-      uploadsPath = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        example = "/mnt/storage/wiki-uploads";
-        description = "Path where uploaded files will be stored (null uses default under dataDir)";
-      };
-
-      # OPTIONAL: Path for PostgreSQL backups (default: null = no backups)
-      backupPath = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        example = "/backup/wiki-js";
-        description = "Path for automatic PostgreSQL backups (null disables backups)";
-      };
-
-      # OPTIONAL: Backup schedule (default: daily)
-      # Uses systemd timer format (e.g., "daily", "weekly", "02:30")
-      backupSchedule = lib.mkOption {
-        type = lib.types.str;
-        default = "daily";
-        example = "02:00";
-        description = "Backup schedule (systemd time format)";
-      };
-
       # OPTIONAL: Auto-open firewall ports (default: true)
       openFirewall = lib.mkOption {
         type = lib.types.bool;
@@ -92,7 +66,7 @@ in
   config = lib.mkIf cfg.enable {
 
     # ----------------------------------------------------------------------------
-    # USER SETUP - Create dedicated system user for wikijs
+    # USER SETUP - Create dedicated system user for wiki-js
     # ----------------------------------------------------------------------------
     users.users.wiki-js = {
       isSystemUser = true;
@@ -113,14 +87,6 @@ in
       # Create main data directory owned by wiki-js user
       "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
     ]
-    # Create custom uploads directory if specified
-    ++ lib.optionals (cfg.uploadsPath != null) [
-      "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
-    ]
-    # Create backup directory if specified (owned by postgres user)
-    ++ lib.optionals (cfg.backupPath != null) [
-      "d ${cfg.backupPath} 0770 postgres postgres -"
-    ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - Wiki.js requires PostgreSQL
@@ -175,20 +141,14 @@ in
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
 
-      # Custom preStart script for uploads directory (only if custom path specified)
-      preStart = lib.mkIf (cfg.uploadsPath != null) (lib.mkAfter ''
-        # Ensure uploads directory exists
-        mkdir -p ${cfg.uploadsPath}
+      preStart = ''
 
-        # Create symlink from default location to custom uploads path
-        if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
-          rm -rf "${cfg.dataDir}/data/uploads"
-          ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
+        # Example: ensure custom data directory exists
+        if [ ! -d "${cfg.dataDir}" ]; then
+          mkdir -p "${cfg.dataDir}"
         fi
 
-        # Ensure proper ownership
-        chown -R wiki-js:wiki-js ${cfg.uploadsPath}
-      '');
+      '';
 
       serviceConfig = {
         # Restart on failure
@@ -246,21 +206,6 @@ in
       # Open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
-
-    # ----------------------------------------------------------------------------
-    # AUTOMATIC BACKUPS - PostgreSQL database backups (optional)
-    # ----------------------------------------------------------------------------
-    services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
-      enable = true;
-      # Backup the wiki-js database
-      databases = [ "wiki-js" ];
-      # Store backups in specified location
-      location = cfg.backupPath;
-      # Schedule (e.g., "daily", "weekly", or specific time "02:30")
-      startAt = cfg.backupSchedule;
-      # Compress backups with zstd (good compression + speed)
-      compression = "zstd";
-    };
   };
 }
 
@@ -284,13 +229,6 @@ services.wikijs-custom = {
   port = 3001;                  # OPTIONAL: Default is 3001
   bindIP = "127.0.0.1";        # OPTIONAL: Default is 127.0.0.1
   dataDir = "/data/wiki-js";    # OPTIONAL: Default is /var/lib/wiki-js
-
-  # OPTIONAL: Store uploads on separate storage
-  uploadsPath = "/mnt/storage/wiki-uploads";
-
-  # OPTIONAL: Enable automatic database backups
-  backupPath = "/backup/wiki-js";
-  backupSchedule = "02:30";     # Daily at 2:30 AM
 
   # OPTIONAL: Nginx reverse proxy with SSL
   domain = "wiki.example.com";  # Default is null (no proxy)
@@ -356,7 +294,6 @@ This module automatically sets up:
 - ✓ Wiki.js system user and directories
 - ✓ Nginx reverse proxy (if domain is set)
 - ✓ Automatic SSL certificates (if enableSSL = true)
-- ✓ Database backups (if backupPath is set)
 - ✓ Firewall rules (if openFirewall = true)
 
 
@@ -370,36 +307,15 @@ Contains:
 - Wiki.js configuration files
 - Page cache
 - Temporary files
-- data/uploads/ (or symlink if using custom uploadsPath)
+- data/uploads/
 
 Default: /var/lib/wiki-js
-
-
-Uploads Path (uploadsPath):
----------------------------
-Stores:
-- Uploaded images
-- File attachments
-- User avatars
-
-By default, stored under dataDir/data/uploads/
-Set uploadsPath to use a different location (e.g., larger storage drive)
-
 
 Database:
 ---------
 - PostgreSQL database named "wiki-js"
 - Stores page content, users, settings
 - Located in PostgreSQL's data directory
-- Backed up automatically if backupPath is set
-
-
-Backups:
---------
-- Only backs up the PostgreSQL database
-- Uploads are NOT backed up automatically
-- Consider separate backup solution for uploadsPath
-- Backup files are compressed with zstd
 
 
 ================================================================================
@@ -419,8 +335,6 @@ Team wiki with network access:
 services.wikijs-custom = {
   enable = true;
   bindIP = "0.0.0.0";
-  backupPath = "/backup/wiki-js";
-  backupSchedule = "daily";
 };
 
 
@@ -431,9 +345,6 @@ services.wikijs-custom = {
   domain = "wiki.example.com";
   enableSSL = true;
   dataDir = "/data/wiki-js";
-  uploadsPath = "/mnt/storage/wiki-uploads";
-  backupPath = "/backup/wiki-js";
-  backupSchedule = "02:00";
 };
 
 
@@ -458,35 +369,6 @@ Cloud Storage:
 Database Storage:
   - Store everything in PostgreSQL
   - Good for: Simplicity, atomic backups
-
-
-================================================================================
-BACKUP STRATEGY
-================================================================================
-
-What gets backed up automatically:
-  ✓ PostgreSQL database (if backupPath is set)
-  ✓ Page content
-  ✓ User accounts
-  ✓ Configuration
-
-What you should backup separately:
-  ✗ Uploaded files (if using local storage)
-  ✗ Custom themes/templates
-  ✗ SSL certificates
-
-Recommended backup approach:
-  1. Enable automatic database backups (backupPath)
-  2. Set up rsync/restic for uploadsPath
-  3. Store backups off-site or on different drive
-
-
-Restore from backup:
-  1. Stop Wiki.js: sudo systemctl stop wiki-js
-  2. Restore database: sudo -u postgres psql wiki-js < backup.sql
-  3. Restore uploads: rsync -av backup/ /path/to/uploads/
-  4. Start Wiki.js: sudo systemctl start wiki-js
-
 
 ================================================================================
 TROUBLESHOOTING
@@ -529,7 +411,6 @@ Database connection errors:
 Out of disk space:
   1. Check disk usage: df -h
   2. Clean old backups: find /backup/wiki-js -mtime +30 -delete
-  3. Consider moving uploads: set uploadsPath to larger drive
 
 
 ================================================================================
@@ -541,7 +422,6 @@ SECURITY BEST PRACTICES
 ✓ Use strong admin password
 ✓ Enable 2FA for administrator accounts
 ✓ Restrict bindIP to localhost if using reverse proxy
-✓ Regular backups (enable backupPath)
 ✓ Monitor logs for suspicious activity
 ✓ Use authentication providers (LDAP/OAuth) for team wikis
 
