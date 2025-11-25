@@ -46,7 +46,7 @@ in
       # OPTIONAL: Where to store Wiki.js data (default: /var/lib/wiki-js)
       dataDir = lib.mkOption {
         type = lib.types.path;
-        default = "/var/lib/wiki-js";
+        default = "/data/wiki-js";
         example = "/data/wiki-js";
         description = "Directory for Wiki.js data and configuration";
       };
