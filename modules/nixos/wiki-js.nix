@@ -192,9 +192,9 @@ in
         Group = "wikijs";
 
         # IMPORTANT: Pre-start must not fail due to missing directory
-        WorkingDirectory = "/";
+        WorkingDirectory = "${cfg.dataDir}";
 
-        ExecStart = "${pkgs.nodejs}/bin/node ${pkgs.wikijs}/share/wikijs/server";
+        ExecStart = "${pkgs.nodejs}/bin/node ${pkgs.wiki-js}/share/wiki-js/server";
         Restart = "on-failure";
         RestartSec = "10s";
 
