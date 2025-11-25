@@ -78,11 +78,11 @@
   };
 
   services.wikijs-custom = {
-    enable = true;                # REQUIRED: Turn on the service
-    port = 3001;                  # OPTIONAL: Default is 3001
-    bindIP = "0.0.0.0";        # OPTIONAL: Default is 127.0.0.1
-    dataDir = "/data/wiki-js";    # OPTIONAL: Default is /var/lib/wiki-js
-    openFirewall = true;          # Default is true
+    enable = true;
+    port = 3001;
+    bindIP = "0.0.0.0";
+    dataDir = "/data/wiki-js";
+    openFirewall = true;
   };
 
   services.bookstack-custom = {
