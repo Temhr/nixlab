@@ -82,7 +82,7 @@
     port = 3001;
     bindIP = "0.0.0.0";
     openFirewall = true;
-    dataDir = "/data/wikijs";
+    dataDir = "/data/wiki-js";
   };
 
   services.bookstack-custom = {
