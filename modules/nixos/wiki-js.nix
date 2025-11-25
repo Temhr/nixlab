@@ -103,6 +103,8 @@ in
 
     users.groups.wiki-js = {};
 
+    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
+
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -118,8 +120,6 @@ in
     ++ lib.optionals (cfg.backupPath != null) [
       "d ${cfg.backupPath} 0770 postgres postgres -"
     ];
-
-    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - Wiki.js requires PostgreSQL
