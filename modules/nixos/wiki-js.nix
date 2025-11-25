@@ -191,26 +191,18 @@ in
         User = "wikijs";
         Group = "wikijs";
 
-        # Important: run Wiki.js from the application root
-        WorkingDirectory = "${cfg.dataDir}/app";
-        ExecStart = "${pkgs.nodejs}/bin/node ${cfg.dataDir}/app/server";
+        # IMPORTANT: Pre-start must not fail due to missing directory
+        WorkingDirectory = "${cfg.dataDir}";
 
+        ExecStart = "${pkgs.nodejs}/bin/node ${pkgs.wikijs}/share/wikijs/server";
         Restart = "on-failure";
         RestartSec = "10s";
 
-        # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-
-        # Wiki.js needs write access to two locations:
-        # - config.yml
-        # - data/
-        ReadWritePaths = [
-          "${cfg.dataDir}/data"
-          "${cfg.dataDir}/config.yml"
-        ];
+        ReadWritePaths = [ cfg.dataDir ];
 
         EnvironmentFile = lib.mkIf (cfg.databasePasswordFile != null)
           cfg.databasePasswordFile;
