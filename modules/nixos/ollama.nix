@@ -170,7 +170,8 @@ in
       postStart = lib.optionalString (cfg.models != [ ]) ''
         sleep 5  # Wait for Ollama to be ready
         ${lib.concatMapStringsSep "\n" (model: ''
-          ${pkgs.ollama}/bin/ollama pull ${model} || true
+          echo "Pulling model: ${model}"
+          TERM=dumb ${pkgs.ollama}/bin/ollama pull ${model} 2>&1 | cat || true
         '') cfg.models}
       '';
     };
