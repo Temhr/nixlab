@@ -184,24 +184,17 @@ in
         WIKI_HOST = cfg.bindIP;
         WIKI_PORT = toString cfg.port;
         CONFIG_FILE = "${cfg.dataDir}/config.yml";
-
-        # Database configuration
-        DB_TYPE = cfg.databaseType;
-      } // lib.optionalAttrs (cfg.databaseType != "sqlite") {
-        DB_HOST = cfg.databaseHost;
-        DB_PORT = toString cfg.databasePort;
-        DB_USER = cfg.databaseUser;
-        DB_NAME = cfg.databaseName;
-      } // lib.optionalAttrs (cfg.databaseType == "sqlite") {
-        DB_FILEPATH = "${cfg.dataDir}/data/${cfg.databaseName}.db";
       };
 
       serviceConfig = {
         Type = "simple";
         User = "wikijs";
         Group = "wikijs";
-        WorkingDirectory = cfg.dataDir;
-        ExecStart = "${pkgs.nodejs}/bin/node ${cfg.dataDir}/server";
+
+        # Important: run Wiki.js from the application root
+        WorkingDirectory = "${cfg.dataDir}/app";
+        ExecStart = "${pkgs.nodejs}/bin/node ${cfg.dataDir}/app/server";
+
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -210,9 +203,15 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
 
-        # Load database password from file if specified
+        # Wiki.js needs write access to two locations:
+        # - config.yml
+        # - data/
+        ReadWritePaths = [
+          "${cfg.dataDir}/data"
+          "${cfg.dataDir}/config.yml"
+        ];
+
         EnvironmentFile = lib.mkIf (cfg.databasePasswordFile != null)
           cfg.databasePasswordFile;
       };
@@ -230,7 +229,7 @@ in
             host = cfg.databaseHost;
             port = cfg.databasePort;
             user = cfg.databaseUser;
-            #pass = cfg.databasePassword;
+            #pass = cfg.databasePassword;  # optional
             db = cfg.databaseName;
             ssl = false;
           };
@@ -239,18 +238,26 @@ in
           dataPath = "${cfg.dataDir}/data";
         };
       in ''
-  mkdir -p ${cfg.dataDir}/data
+        # Ensure directories exist
+        mkdir -p ${cfg.dataDir}/data
+        mkdir -p ${cfg.dataDir}/app
 
-  cat > ${cfg.dataDir}/config.json <<'EOF'
+        # Symlink the full Wiki.js package to app/
+        ln -sfn ${cfg.package}/* ${cfg.dataDir}/app/
+
+        # Write JSON config
+        cat > ${cfg.dataDir}/config.json <<'EOF'
 ${builtins.toJSON wikiConfigJSON}
 EOF
 
-  ${pkgs.yq-go}/bin/yq -P ${cfg.dataDir}/config.json > ${cfg.dataDir}/config.yml
+        # Convert JSON → YAML
+        ${pkgs.yq-go}/bin/yq -P ${cfg.dataDir}/config.json > ${cfg.dataDir}/config.yml
 
-  chown wikijs:wikijs ${cfg.dataDir}/config.yml
-  chmod 640 ${cfg.dataDir}/config.yml
+        chown wikijs:wikijs ${cfg.dataDir}/config.yml
+        chmod 640 ${cfg.dataDir}/config.yml
       '';
     };
+
 
     # ----------------------------------------------------------------------------
     # NGINX REVERSE PROXY - Only configured if domain is set
