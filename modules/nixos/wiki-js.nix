@@ -86,7 +86,7 @@ in
     systemd.tmpfiles.rules = [
       # Create main data directory owned by wiki-js user
       "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
-    ]
+    ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - Wiki.js requires PostgreSQL
