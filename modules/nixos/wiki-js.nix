@@ -46,7 +46,7 @@ in
       # OPTIONAL: Where to store Wiki.js data (default: /var/lib/wiki-js)
       dataDir = lib.mkOption {
         type = lib.types.path;
-        default = "/data/wiki-js";
+        default = "/var/lib/wiki-js";
         example = "/data/wiki-js";
         description = "Directory for Wiki.js data and configuration";
       };
@@ -84,22 +84,36 @@ in
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      # Create main data directory owned by wiki-js user
       "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
     ];
 
     # ----------------------------------------------------------------------------
-    # DATABASE SETUP - Wiki.js requires PostgreSQL
+    # SERVICE CUSTOMIZATION - Additional systemd service configuration
     # ----------------------------------------------------------------------------
-    services.postgresql = {
-      enable = true;
-      # Create the 'wiki-js' database automatically
-      ensureDatabases = [ "wiki-js" ];
-      # Create 'wiki-js' user with ownership of the database
-      ensureUsers = [{
-        name = "wiki-js";
-        ensureDBOwnership = true;
-      }];
+    systemd.services.wiki-js = {
+      # Ensure PostgreSQL is running before Wiki.js starts
+      requires = [ "postgresql.service" ];
+      after = [ "postgresql.service" ];
+
+      preStart = ''
+
+        # Example: ensure custom data directory exists
+        if [ ! -d "${cfg.dataDir}" ]; then
+          mkdir -p "${cfg.dataDir}"
+        fi
+
+      '';
+
+      serviceConfig = {
+        # Restart on failure
+        Restart = "on-failure";
+        RestartSec = "10s";
+      }
+      # Override directory settings if using custom data path
+      // lib.optionalAttrs (cfg.dataDir != "/var/lib/wiki-js") {
+        StateDirectory = lib.mkForce "";
+        WorkingDirectory = lib.mkForce cfg.dataDir;
+      };
     };
 
     # ----------------------------------------------------------------------------
@@ -134,32 +148,17 @@ in
     };
 
     # ----------------------------------------------------------------------------
-    # SERVICE CUSTOMIZATION - Additional systemd service configuration
+    # DATABASE SETUP - Wiki.js requires PostgreSQL
     # ----------------------------------------------------------------------------
-    systemd.services.wiki-js = {
-      # Ensure PostgreSQL is running before Wiki.js starts
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
-
-      preStart = ''
-
-        # Example: ensure custom data directory exists
-        if [ ! -d "${cfg.dataDir}" ]; then
-          mkdir -p "${cfg.dataDir}"
-        fi
-
-      '';
-
-      serviceConfig = {
-        # Restart on failure
-        Restart = "on-failure";
-        RestartSec = "10s";
-      }
-      # Override directory settings if using custom data path
-      // lib.optionalAttrs (cfg.dataDir != "/var/lib/wiki-js") {
-        StateDirectory = lib.mkForce "";
-        WorkingDirectory = lib.mkForce cfg.dataDir;
-      };
+    services.postgresql = {
+      enable = true;
+      # Create the 'wiki-js' database automatically
+      ensureDatabases = [ "wiki-js" ];
+      # Create 'wiki-js' user with ownership of the database
+      ensureUsers = [{
+        name = "wiki-js";
+        ensureDBOwnership = true;
+      }];
     };
 
     # ----------------------------------------------------------------------------
