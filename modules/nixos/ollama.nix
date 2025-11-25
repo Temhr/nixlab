@@ -165,15 +165,54 @@ in
         # GPU device access
         DeviceAllow = [ "/dev/nvidia0" "/dev/nvidiactl" "/dev/nvidia-uvm" ];
       };
+    };
 
-      # Download requested models after service starts
-      postStart = lib.optionalString (cfg.models != [ ]) ''
-        sleep 5  # Wait for Ollama to be ready
+    # ----------------------------------------------------------------------------
+    # MODEL DOWNLOADER - Separate one-shot service for downloading models
+    # ----------------------------------------------------------------------------
+    systemd.services.ollama-models = lib.mkIf (cfg.models != [ ]) {
+      description = "Download Ollama Models";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "ollama.service" ];
+      requires = [ "ollama.service" ];
+
+      environment = {
+        OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+      };
+
+      serviceConfig = {
+        Type = "oneshot";
+        User = "ollama";
+        Group = "ollama";
+        RemainAfterExit = true;
+
+        # Models can take a long time to download
+        TimeoutStartSec = "infinity";
+      };
+
+      script = ''
+        # Wait for Ollama to be ready
+        echo "Waiting for Ollama service..."
+        for i in {1..30}; do
+          if ${pkgs.curl}/bin/curl -s http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}/ > /dev/null 2>&1; then
+            echo "Ollama is ready"
+            break
+          fi
+          sleep 1
+        done
+
+        # Download each model
         ${lib.concatMapStringsSep "\n" (model: ''
-          echo "Pulling model: ${model}"
-          ${pkgs.ollama}/bin/ollama pull ${model} > /dev/null 2>&1 || echo "Failed to pull ${model}"
+          echo "Checking model: ${model}"
+          if ! ${pkgs.ollama}/bin/ollama list | grep -q "^${model}"; then
+            echo "Downloading model: ${model} (this may take a while...)"
+            ${pkgs.ollama}/bin/ollama pull ${model} || echo "Warning: Failed to download ${model}"
+          else
+            echo "Model ${model} already exists, skipping"
+          fi
         '') cfg.models}
-        echo "Model download complete"
+
+        echo "Model setup complete"
       '';
     };
 
