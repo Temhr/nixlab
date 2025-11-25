@@ -107,9 +107,6 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
     "d ${cfg.dataDir} 0770 homepage homepage -"
-    ]
-    ++ [
-      "d ${cfg.dataDir}/config 0770 homepage homepage -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -135,6 +132,10 @@ in
         # Use /tmp for temporary file since preStart runs as homepage user
         servicesYamlTmp = "/tmp/homepage-services.yaml.tmp";
       in ''
+
+        [ -d "${cfg.dataDir}/config" ] || mkdir -p "${cfg.dataDir}/config"
+        chown homepage:homepage ${cfg.dataDir}/config/
+        chmod 0770 ${cfg.dataDir}/config/
 
         # Convert service rules from services.nix: JSON → YAML
         ${pkgs.remarshal}/bin/remarshal \
