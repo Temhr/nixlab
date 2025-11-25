@@ -248,7 +248,6 @@ ${lib.optionalString (cfg.databaseType == "sqlite") ''
   host: ${cfg.databaseHost}
   port: ${toString cfg.databasePort}
   user: ${cfg.databaseUser}
-  pass: ${cfg.databasePassword}
   db: ${cfg.databaseName}
   ssl: false
 ''}
