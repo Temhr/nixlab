@@ -41,12 +41,12 @@
             };
     })
     (lib.mkIf config.mount-shelf.enable {
+        /*
         fileSystems."/data" =
             { device = "/dev/disk/by-label/shelf";
               fsType = "ext4";
               options = [ "defaults" "auto" ];
             };
-        /*
         systemd.services.fix-shelf-permissions = {
           description = "Fix ownership of /home/temhr/shelf for temhr user";
           wantedBy = [ "local-fs.target" ];
