@@ -70,6 +70,13 @@
   virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
   ## Self-hosted apps and services
+  services.homepage-custom = {
+    enable = true;
+    port = 3000;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+    dataDir = "/home/temhr/shelf/data/homepage";
+  };
   services.grafana-custom = {
     enable = true;
     port = 3101;

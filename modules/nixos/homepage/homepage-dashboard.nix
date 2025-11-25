@@ -103,6 +103,7 @@ in
       isSystemUser = true;
       group = "homepage";
       home = cfg.dataDir;
+      extraGroups = [ "users" ];
     };
 
     users.groups.homepage = {};
@@ -127,46 +128,42 @@ in
       };
 
       # Fix config file permissions on startup
+      # Note: preStart inherits User/Group from serviceConfig
       preStart = let
-        servicesYamlTmp = "${cfg.dataDir}/config/services.yaml.tmp";
+        # Use /tmp for temporary file since preStart runs as homepage user
+        servicesYamlTmp = "/tmp/homepage-services.yaml.tmp";
       in ''
-        # Ensure config directory exists with proper permissions
-        mkdir -p ${cfg.dataDir}/config
-
-        # Fix permissions on config files (make writable by homepage user)
-        if [ -d ${cfg.dataDir}/config ]; then
-          chmod -R ug+w ${cfg.dataDir}/config/
-          chown -R homepage:homepage ${cfg.dataDir}/config/
-        fi
-
         # Convert service rules from services.nix: JSON → YAML
-        # This happens automatically on every service start/rebuild
         ${pkgs.remarshal}/bin/remarshal \
           -i ${servicesJsonFile} \
           -o ${servicesYamlTmp} \
           -if json \
           -of yaml
 
-        # Install alert rules with correct ownership and permissions
-        # Mode 644: owner read/write, group and others read-only
-        install -m 664 -o homepage -g homepage ${servicesYamlTmp} ${cfg.dataDir}/config/services.yaml
+        # Copy temp file to final location
+        cp -f ${servicesYamlTmp} ${cfg.dataDir}/config/services.yaml
+        chmod 664 ${cfg.dataDir}/config/services.yaml
+
+        # Clean up temp file
+        rm -f ${servicesYamlTmp}
       '';
 
       serviceConfig = {
         Type = "simple";
         User = "homepage";
         Group = "homepage";
-        WorkingDirectory = cfg.dataDir;
+        # NOTE: WorkingDirectory removed - Homepage uses HOMEPAGE_CONFIG_DIR env var
         ExecStart = "${cfg.package}/bin/homepage";
         Restart = "on-failure";
         RestartSec = "10s";
 
-        # Security hardening
+        # Security hardening - relaxed when using /home directory
         NoNewPrivileges = true;
         PrivateTmp = true;
-        ProtectSystem = "strict";
-        # FIXED: Conditionally disable ProtectHome if dataDir is in /home
-        ProtectHome = lib.mkIf (!lib.hasPrefix "/home/" cfg.dataDir) true;
+        # Temporarily disable ProtectSystem to test
+        ProtectSystem = if lib.hasPrefix "/home/" cfg.dataDir then "false" else "strict";
+        # Disable ProtectHome entirely when dataDir is in /home (required for access)
+        ProtectHome = if lib.hasPrefix "/home/" cfg.dataDir then false else true;
         ReadWritePaths = [ cfg.dataDir ];
       };
     };
