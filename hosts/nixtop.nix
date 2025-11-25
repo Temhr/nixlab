@@ -70,18 +70,12 @@
   virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
   ## Self-hosted apps and services
-  services.homepage-custom = {
-    enable = true;
-    port = 3000;
-    bindIP = "0.0.0.0";
-    openFirewall = true;
-    dataDir = "/data/homepage";
-  };
   services.grafana-custom = {
     enable = true;
     port = 3101;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/grafana";
     # Enable maintenance dashboard
     dashboards = {
       # System maintenance dashboard
@@ -104,6 +98,7 @@
     port = 3100;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/loki";
     maintenance.enable = true;
   };
   services.prometheus-custom = {
@@ -111,6 +106,7 @@
     port = 9090;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/prometheus";
     # Enable maintenance monitoring
     maintenance = {
       enable = true;
