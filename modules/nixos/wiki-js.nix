@@ -246,7 +246,6 @@ ${lib.optionalString (cfg.databaseType == "sqlite") ''
   storage: ${cfg.dataDir}/data/${cfg.databaseName}.db
 ''}${lib.optionalString (cfg.databaseType != "sqlite") ''
   host: ${cfg.databaseHost}
-  port: ${toString cfg.databasePort}
   user: ${cfg.databaseUser}
   db: ${cfg.databaseName}
   ssl: false
