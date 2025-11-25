@@ -74,6 +74,7 @@
     port = 3000;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/homepage";
   };
 
   services.wikijs-custom = {
@@ -81,6 +82,7 @@
     port = 3001;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/wikijs";
   };
 
   services.bookstack-custom = {
@@ -88,6 +90,7 @@
     port = 3002;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/bookstack";
   };
 
   services.homeassistant-custom = {
@@ -95,6 +98,7 @@
     port = 8123;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/homeassistant";
   };
 
   services.nodered-service = {
@@ -102,6 +106,7 @@
     port = 1880;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/node-red";
   };
 
   services.zola-custom = {
@@ -117,6 +122,7 @@
     port = 3004;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/glance";
   };
 
   services.grafana-custom = {
@@ -124,6 +130,7 @@
     port = 3101;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/grafana";
     # Enable maintenance dashboard
     dashboards = {
       # System maintenance dashboard
@@ -146,6 +153,7 @@
     port = 3100;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/loki";
     maintenance.enable = true;
   };
   services.prometheus-custom = {
@@ -153,6 +161,7 @@
     port = 9090;
     bindIP = "0.0.0.0";
     openFirewall = true;
+    dataDir = "/data/prometheus";
     # Enable maintenance monitoring
     maintenance = {
       enable = true;
