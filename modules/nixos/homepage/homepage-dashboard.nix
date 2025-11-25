@@ -165,7 +165,8 @@ in
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
-        ProtectHome = true;
+        # FIXED: Conditionally disable ProtectHome if dataDir is in /home
+        ProtectHome = lib.mkIf (!lib.hasPrefix "/home/" cfg.dataDir) true;
         ReadWritePaths = [ cfg.dataDir ];
       };
     };
@@ -230,6 +231,15 @@ services.homepage-custom = {
   openFirewall = true;
 };
 # Access at: http://your-ip:3000
+
+
+Configuration with home directory:
+-----------------------------------
+services.homepage-custom = {
+  enable = true;
+  dataDir = "/home/temhr/shelf/data/homepage";
+};
+# ProtectHome will automatically be disabled for home directory paths
 
 
 Full configuration with domain:
@@ -308,4 +318,8 @@ Cannot access from network:
 
 Check config files:
   ls -la /var/lib/homepage/config/
+
+Service fails with home directory:
+  The fix automatically disables ProtectHome when dataDir is in /home/
+  Make sure the homepage user has proper permissions to the directory
 */
