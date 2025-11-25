@@ -101,7 +101,7 @@ in
       extraGroups = [ "users" ];
     };
 
-    users.groups.wikijs = {};
+    users.groups.wiki-js = {};
 
     users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
 
