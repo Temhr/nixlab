@@ -103,7 +103,6 @@ in
       isSystemUser = true;
       group = "homepage";
       home = cfg.dataDir;
-      extraGroups = [ "users" ];
     };
 
     users.groups.homepage = {};
@@ -116,7 +115,7 @@ in
     systemd.services.homepage = {
       description = "Homepage Dashboard";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network.target" "local-fs.target" ];
 
       # Environment variables for Homepage configuration
       environment = {
