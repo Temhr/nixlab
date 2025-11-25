@@ -92,6 +92,18 @@ in
   config = lib.mkIf cfg.enable {
 
     # ----------------------------------------------------------------------------
+    # USER SETUP - Create dedicated system user for Glance
+    # ----------------------------------------------------------------------------
+    users.users.wiki-js = {
+      isSystemUser = true;
+      group = "wiki-js";
+      home = cfg.dataDir;
+      description = "wiki-js user";
+    };
+
+    users.groups.wiki-js = {};
+
+    # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
