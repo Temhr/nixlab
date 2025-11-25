@@ -181,11 +181,6 @@ in
         # Restart on failure
         Restart = "on-failure";
         RestartSec = "10s";
-      }
-      # Override directory settings if using custom data path
-      // lib.optionalAttrs (cfg.dataDir != "/var/lib/wiki-js") {
-        StateDirectory = lib.mkForce "";
-        WorkingDirectory = lib.mkForce cfg.dataDir;
       };
     };
 
