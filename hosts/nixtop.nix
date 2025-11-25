@@ -75,7 +75,7 @@
     port = 3000;
     bindIP = "0.0.0.0";
     openFirewall = true;
-    dataDir = "/home/temhr/shelf/data/homepage";
+    dataDir = "/data/homepage";
   };
   services.grafana-custom = {
     enable = true;
