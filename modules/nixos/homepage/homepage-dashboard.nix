@@ -134,7 +134,7 @@ in
       in ''
 
         mkdir ${cfg.dataDir}/config/
-        chown  ${cfg.dataDir}/config/ homepage:homepage
+        chown homepage:homepage ${cfg.dataDir}/config/
         chmod 0770 ${cfg.dataDir}/config/
 
         # Convert service rules from services.nix: JSON → YAML
