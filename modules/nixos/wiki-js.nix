@@ -230,6 +230,7 @@ in
             host = cfg.databaseHost;
             port = cfg.databasePort;
             user = cfg.databaseUser;
+            #pass = cfg.databasePassword;
             db = cfg.databaseName;
             ssl = false;
           };
@@ -238,16 +239,13 @@ in
           dataPath = "${cfg.dataDir}/data";
         };
       in ''
-  # Prepare directories
-  mkdir -p ${cfg.dataDir}
   mkdir -p ${cfg.dataDir}/data
 
-  # Write JSON and convert to YAML
   cat > ${cfg.dataDir}/config.json <<'EOF'
 ${builtins.toJSON wikiConfigJSON}
 EOF
 
-  ${pkgs.yq}/bin/yq -P eval -o=yaml ${cfg.dataDir}/config.json > ${cfg.dataDir}/config.yml
+  ${pkgs.yq-go}/bin/yq -P ${cfg.dataDir}/config.json > ${cfg.dataDir}/config.yml
 
   chown wikijs:wikijs ${cfg.dataDir}/config.yml
   chmod 640 ${cfg.dataDir}/config.yml
