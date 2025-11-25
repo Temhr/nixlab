@@ -92,6 +92,21 @@ in
   config = lib.mkIf cfg.enable {
 
     # ----------------------------------------------------------------------------
+    # USER SETUP - Create dedicated system user for wikijs
+    # ----------------------------------------------------------------------------
+    users.users.wiki-js = {
+      isSystemUser = true;
+      group = "wiki-js";
+      home = cfg.dataDir;
+      extraGroups = [ "users" ];
+    };
+
+    users.groups.wikijs = {};
+
+    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
+
+
+    # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
@@ -106,8 +121,6 @@ in
     ++ lib.optionals (cfg.backupPath != null) [
       "d ${cfg.backupPath} 0770 postgres postgres -"
     ];
-
-    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - Wiki.js requires PostgreSQL
