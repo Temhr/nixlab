@@ -125,6 +125,21 @@
     dataDir = "/data/glance";
   };
 
+  services.ollama-webui-custom = {
+    enable = true;
+    ollamaPort = 11434;
+    webuiPort = 3006;
+    ollamaBindIP = "0.0.0.0";
+    webuiBindIP = "0.0.0.0";
+    ollamaDataDir = "/data/ollama";
+    webuiDataDir = "/data/open-webui";
+    # GPU acceleration
+    enableGPU = false;
+    # Pre-download models
+    models = [ "llama2" "mistral" "codellama" ];
+    openFirewall = true;
+  };
+
   services.grafana-custom = {
     enable = true;
     port = 3101;
