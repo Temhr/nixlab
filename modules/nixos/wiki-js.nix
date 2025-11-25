@@ -12,10 +12,10 @@ in
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Wiki.js service";
 
-      # OPTIONAL: Port to listen on (default: 3001)
+      # OPTIONAL: Port to listen on (default: 3000)
       port = lib.mkOption {
         type = lib.types.port;
-        default = 3001;
+        default = 3000;
         description = "Port for Wiki.js to listen on";
       };
 
@@ -157,6 +157,7 @@ in
     users.groups.wikijs = {};
     users.users.temhr.extraGroups = [ "wikijs" ];
 
+
     # ----------------------------------------------------------------------------
     # POSTGRESQL SETUP - Optional automatic database configuration
     # ----------------------------------------------------------------------------
@@ -183,6 +184,7 @@ in
         NODE_ENV = "production";
         WIKI_HOST = cfg.bindIP;
         WIKI_PORT = toString cfg.port;
+        CONFIG_FILE = "${cfg.dataDir}/config.yml";
 
         # Database configuration
         DB_TYPE = cfg.databaseType;
@@ -200,7 +202,7 @@ in
         User = "wikijs";
         Group = "wikijs";
         WorkingDirectory = cfg.dataDir;
-        ExecStart = "${cfg.package}/bin/wiki";
+        ExecStart = "${pkgs.nodejs}/bin/node ${cfg.dataDir}/server";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -219,6 +221,11 @@ in
       preStart = ''
         # Create config directory structure
         mkdir -p ${cfg.dataDir}/data
+
+        # Symlink necessary Wiki.js directories
+        ln -sf ${cfg.package}/server ${cfg.dataDir}/server
+        ln -sf ${cfg.package}/node_modules ${cfg.dataDir}/node_modules
+        ln -sf ${cfg.package}/assets ${cfg.dataDir}/assets
 
         # Create config.yml if it doesn't exist
         if [ ! -f ${cfg.dataDir}/config.yml ]; then
@@ -312,7 +319,7 @@ Minimal configuration (SQLite):
 services.wikijs-custom = {
   enable = true;
 };
-# Access at: http://your-ip:3001
+# Access at: http://your-ip:3000
 # Complete setup wizard in browser
 
 
@@ -347,7 +354,7 @@ Full configuration with domain:
 --------------------------------
 services.wikijs-custom = {
   enable = true;
-  port = 3001;
+  port = 3000;
   bindIP = "0.0.0.0";
   dataDir = "/data/wikijs";
 
@@ -440,7 +447,7 @@ Database connection issues:
   - For PostgreSQL: ensure user has proper permissions
 
 Port already in use:
-  - Check what's using the port: sudo ss -tulpn | grep :3001
+  - Check what's using the port: sudo ss -tulpn | grep :3000
   - Change port in module configuration
 
 Can't access via domain:
