@@ -171,8 +171,9 @@ in
         sleep 5  # Wait for Ollama to be ready
         ${lib.concatMapStringsSep "\n" (model: ''
           echo "Pulling model: ${model}"
-          TERM=dumb ${pkgs.ollama}/bin/ollama pull ${model} 2>&1 | cat || true
+          ${pkgs.ollama}/bin/ollama pull ${model} > /dev/null 2>&1 || echo "Failed to pull ${model}"
         '') cfg.models}
+        echo "Model download complete"
       '';
     };
 
