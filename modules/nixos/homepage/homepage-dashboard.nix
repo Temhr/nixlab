@@ -89,14 +89,6 @@ in
   config = lib.mkIf cfg.enable {
 
     # ----------------------------------------------------------------------------
-    # DIRECTORY SETUP - Create necessary directories with proper permissions
-    # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0770 homepage homepage -"
-      "d ${cfg.dataDir}/config 0770 homepage homepage -"
-    ];
-
-    # ----------------------------------------------------------------------------
     # USER SETUP - Create dedicated system user for Homepage
     # ----------------------------------------------------------------------------
     users.users.homepage = {
@@ -109,6 +101,14 @@ in
     users.groups.homepage = {};
 
     users.users.temhr.extraGroups = [ "homepage" ];
+
+    # ----------------------------------------------------------------------------
+    # DIRECTORY SETUP - Create necessary directories with proper permissions
+    # ----------------------------------------------------------------------------
+    systemd.tmpfiles.rules = [
+    "d /var/lib/homepage 0770 homepage homepage - -"
+    "d /var/lib/homepage/config 0770 homepage homepage - -"
+    ];
 
     # ----------------------------------------------------------------------------
     # HOMEPAGE SERVICE - Configure the systemd service
