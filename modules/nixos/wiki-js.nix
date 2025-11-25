@@ -230,7 +230,6 @@ in
             host = cfg.databaseHost;
             port = cfg.databasePort;
             user = cfg.databaseUser;
-            pass = cfg.databasePassword;
             db = cfg.databaseName;
             ssl = false;
           };
