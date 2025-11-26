@@ -19,11 +19,18 @@ in
         description = "Port for Ollama API to listen on";
       };
 
-      # OPTIONAL: Port for Open WebUI (default: 3006)
+      # OPTIONAL: Port for Open WebUI (default: 3000)
       webuiPort = lib.mkOption {
         type = lib.types.port;
-        default = 3006;
+        default = 3000;
         description = "Port for Open WebUI to listen on";
+      };
+
+      # OPTIONAL: Open WebUI package (can be overridden if not in nixpkgs)
+      webuiPackage = lib.mkOption {
+        type = lib.types.nullOr lib.types.package;
+        default = null;
+        description = "The Open WebUI package to use (null = disable WebUI)";
       };
 
       # OPTIONAL: IP to bind Ollama to (default: 127.0.0.1 = localhost only)
@@ -105,6 +112,7 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       "d ${cfg.ollamaDataDir} 0770 ollama ollama -"
+    ] ++ lib.optionals (cfg.webuiPackage != null) [
       "d ${cfg.webuiDataDir} 0770 open-webui open-webui -"
     ];
 
@@ -120,15 +128,16 @@ in
 
     users.groups.ollama = {};
 
-    users.users.open-webui = {
+    users.users.open-webui = lib.mkIf (cfg.webuiPackage != null) {
       isSystemUser = true;
       group = "open-webui";
       home = cfg.webuiDataDir;
       description = "Open WebUI service user";
     };
 
-    users.groups.open-webui = {};
-    users.users.temhr.extraGroups = [ "ollama" "open-webui" ];
+    users.groups.open-webui = lib.mkIf (cfg.webuiPackage != null) {};
+    users.users.temhr.extraGroups = [ "ollama" ]
+      ++ lib.optionals (cfg.webuiPackage != null) [ "open-webui" ];
 
     # ----------------------------------------------------------------------------
     # OLLAMA SERVICE - Configure the systemd service
@@ -219,7 +228,7 @@ in
     # ----------------------------------------------------------------------------
     # OPEN WEBUI SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
-    systemd.services.open-webui = {
+    systemd.services.open-webui = lib.mkIf (cfg.webuiPackage != null) {
       description = "Open WebUI for Ollama";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "ollama.service" ];
@@ -229,8 +238,9 @@ in
         OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
         WEBUI_AUTH = "True";
         DATA_DIR = cfg.webuiDataDir;
-        HOST = cfg.webuiBindIP;
-        PORT = toString cfg.webuiPort;
+        # Explicitly set host and port
+        WEBUI_HOST = cfg.webuiBindIP;
+        WEBUI_PORT = toString cfg.webuiPort;
       };
 
       serviceConfig = {
@@ -238,7 +248,7 @@ in
         User = "open-webui";
         Group = "open-webui";
         WorkingDirectory = cfg.webuiDataDir;
-        ExecStart = "${pkgs.open-webui}/bin/open-webui serve";
+        ExecStart = "${cfg.webuiPackage}/bin/open-webui serve";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -290,8 +300,10 @@ in
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open WebUI and Ollama ports if not using reverse proxy
-      lib.optionals (cfg.domain == null) [ cfg.webuiPort cfg.ollamaPort ]
+      # Always open Ollama port if not using reverse proxy
+      lib.optionals (cfg.domain == null) [ cfg.ollamaPort ]
+      # Open WebUI port if package is set and not using reverse proxy
+      ++ lib.optionals (cfg.domain == null && cfg.webuiPackage != null) [ cfg.webuiPort ]
       # Open HTTP/HTTPS if using reverse proxy
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
@@ -316,7 +328,7 @@ services.ollama-webui-custom = {
   enable = true;
 };
 # Ollama API: http://your-ip:11434
-# Open WebUI: http://your-ip:3006
+# Open WebUI: http://your-ip:3000
 
 
 With models pre-downloaded:
@@ -332,7 +344,7 @@ Full configuration with domain and GPU:
 services.ollama-webui-custom = {
   enable = true;
   ollamaPort = 11434;
-  webuiPort = 3006;
+  webuiPort = 3000;
   ollamaBindIP = "0.0.0.0";
   webuiBindIP = "0.0.0.0";
   ollamaDataDir = "/data/ollama";
@@ -356,7 +368,7 @@ USAGE
 ================================================================================
 
 First-time setup:
-1. Access Open WebUI at http://your-ip:3006 (or your domain)
+1. Access Open WebUI at http://your-ip:3000 (or your domain)
 2. Create an admin account (first user becomes admin)
 3. Download models through the UI or configure in models list
 
