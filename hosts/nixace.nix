@@ -80,7 +80,7 @@
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
     # GPU acceleration
-    enableGPU = true;
+    enableGPU = false;
     # Pre-download models
     models = [ "llama2" "mistral" "codellama" ];
     openFirewall = true;
