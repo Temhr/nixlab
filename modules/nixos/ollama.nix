@@ -79,10 +79,19 @@ in
       };
 
       # OPTIONAL: Enable GPU acceleration (default: false)
+      # WARNING: GPU support requires compatible CUDA version
+      # Check logs with: sudo journalctl -u ollama | grep -i gpu
       enableGPU = lib.mkOption {
         type = lib.types.bool;
         default = false;
         description = "Enable GPU acceleration for Ollama (requires CUDA)";
+      };
+
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.ollama;
+        defaultText = lib.literalExpression "pkgs.ollama";
+        description = "The Ollama package to use";
       };
 
       # OPTIONAL: Models to download on first start
