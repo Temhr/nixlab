@@ -19,10 +19,10 @@ in
         description = "Port for Ollama API to listen on";
       };
 
-      # OPTIONAL: Port for Open WebUI (default: 3000)
+      # OPTIONAL: Port for Open WebUI (default: 3006)
       webuiPort = lib.mkOption {
         type = lib.types.port;
-        default = 3000;
+        default = 3006;
         description = "Port for Open WebUI to listen on";
       };
 
@@ -316,7 +316,7 @@ services.ollama-webui-custom = {
   enable = true;
 };
 # Ollama API: http://your-ip:11434
-# Open WebUI: http://your-ip:3000
+# Open WebUI: http://your-ip:3006
 
 
 With models pre-downloaded:
@@ -332,7 +332,7 @@ Full configuration with domain and GPU:
 services.ollama-webui-custom = {
   enable = true;
   ollamaPort = 11434;
-  webuiPort = 3000;
+  webuiPort = 3006;
   ollamaBindIP = "0.0.0.0";
   webuiBindIP = "0.0.0.0";
   ollamaDataDir = "/data/ollama";
@@ -356,7 +356,7 @@ USAGE
 ================================================================================
 
 First-time setup:
-1. Access Open WebUI at http://your-ip:3000 (or your domain)
+1. Access Open WebUI at http://your-ip:3006 (or your domain)
 2. Create an admin account (first user becomes admin)
 3. Download models through the UI or configure in models list
 
