@@ -153,6 +153,8 @@ in
       } // lib.optionalAttrs cfg.enableGPU {
         # Enable GPU acceleration if requested
         CUDA_VISIBLE_DEVICES = "0";
+        # Force CPU fallback off to ensure GPU usage
+        OLLAMA_NUM_GPU = "1";
       };
 
       serviceConfig = {
