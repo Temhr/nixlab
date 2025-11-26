@@ -60,6 +60,17 @@
             statusStyle = "dot";
           };
         }
+        {
+          "Ollama - CPU" = {
+            href = "http://192.168.0.201:3006";
+            icon = "ollama";
+            description = "Get up and running with large language models locally";
+            target = "_blank";
+            server = "nixvat";
+            ping = "http://192.168.0.201:3006";
+            statusStyle = "dot";
+          };
+        }
       ];
     }
 
