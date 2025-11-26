@@ -1,14 +1,14 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.ollama-gpu;
+  cfg = config.services.ollama-p5000;
 in
 {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
   options = {
-    services.ollama-gpu = {
+    services.ollama-p5000 = {
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Ollama with Open WebUI (GPU-accelerated)";
 
@@ -321,7 +321,7 @@ USAGE EXAMPLE - GPU-ACCELERATED OLLAMA
 
 Minimal configuration:
 ----------------------
-services.ollama-gpu = {
+services.ollama-p5000 = {
   enable = true;
 };
 # Ollama API: http://your-ip:11434 (GPU-accelerated)
@@ -330,7 +330,7 @@ services.ollama-gpu = {
 
 Full configuration:
 -------------------
-services.ollama-gpu = {
+services.ollama-p5000 = {
   enable = true;
   ollamaPort = 11434;
   webuiPort = 3006;

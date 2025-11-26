@@ -81,7 +81,7 @@
     models = [ "llama2" "mistral" "codellama" ];
     openFirewall = true;
   };
-  services.ollama-gpu = {
+  services.ollama-p5000 = {
     enable = false;
     ollamaPort = 11434;
     webuiPort = 3007;
