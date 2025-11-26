@@ -1,16 +1,16 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.ollama-webui-custom;
+  cfg = config.services.ollama-cpu;
 in
 {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
   options = {
-    services.ollama-webui-custom = {
+    services.ollama-cpu = {
       # REQUIRED: Enable the service
-      enable = lib.mkEnableOption "Ollama with Open WebUI";
+      enable = lib.mkEnableOption "Ollama with Open WebUI (CPU-only)";
 
       # OPTIONAL: Port for Ollama API (default: 11434)
       ollamaPort = lib.mkOption {
@@ -19,18 +19,11 @@ in
         description = "Port for Ollama API to listen on";
       };
 
-      # OPTIONAL: Port for Open WebUI (default: 3000)
+      # OPTIONAL: Port for Open WebUI (default: 3006)
       webuiPort = lib.mkOption {
         type = lib.types.port;
-        default = 3000;
+        default = 3006;
         description = "Port for Open WebUI to listen on";
-      };
-
-      # OPTIONAL: Open WebUI package (can be overridden if not in nixpkgs)
-      webuiPackage = lib.mkOption {
-        type = lib.types.nullOr lib.types.package;
-        default = null;
-        description = "The Open WebUI package to use (null = disable WebUI)";
       };
 
       # OPTIONAL: IP to bind Ollama to (default: 127.0.0.1 = localhost only)
@@ -45,21 +38,6 @@ in
         type = lib.types.str;
         default = "127.0.0.1";
         description = "IP address for Open WebUI to bind to (use 0.0.0.0 for all interfaces)";
-      };
-
-      # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
-      domain = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        example = "ollama.example.com";
-        description = "Domain name for nginx reverse proxy (optional)";
-      };
-
-      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
-      enableSSL = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable HTTPS with Let's Encrypt (requires domain)";
       };
 
       # OPTIONAL: Where to store Ollama models (default: /var/lib/ollama)
@@ -78,13 +56,6 @@ in
         description = "Directory for Open WebUI data";
       };
 
-      # OPTIONAL: Enable GPU acceleration (default: false)
-      enableGPU = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable GPU acceleration for Ollama (requires CUDA)";
-      };
-
       # OPTIONAL: Models to download on first start
       models = lib.mkOption {
         type = lib.types.listOf lib.types.str;
@@ -99,6 +70,21 @@ in
         default = true;
         description = "Open firewall ports";
       };
+
+      # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
+      domain = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "ollama.example.com";
+        description = "Domain name for nginx reverse proxy (optional)";
+      };
+
+      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
+      enableSSL = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable HTTPS with Let's Encrypt (requires domain)";
+      };
     };
   };
 
@@ -112,7 +98,6 @@ in
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       "d ${cfg.ollamaDataDir} 0770 ollama ollama -"
-    ] ++ lib.optionals (cfg.webuiPackage != null) [
       "d ${cfg.webuiDataDir} 0770 open-webui open-webui -"
     ];
 
@@ -128,31 +113,29 @@ in
 
     users.groups.ollama = {};
 
-    users.users.open-webui = lib.mkIf (cfg.webuiPackage != null) {
+    users.users.open-webui = {
       isSystemUser = true;
       group = "open-webui";
       home = cfg.webuiDataDir;
       description = "Open WebUI service user";
     };
 
-    users.groups.open-webui = lib.mkIf (cfg.webuiPackage != null) {};
-    users.users.temhr.extraGroups = [ "ollama" ]
-      ++ lib.optionals (cfg.webuiPackage != null) [ "open-webui" ];
+    users.groups.open-webui = {};
 
     # ----------------------------------------------------------------------------
-    # OLLAMA SERVICE - Configure the systemd service
+    # OLLAMA SERVICE - CPU-ONLY MODE
     # ----------------------------------------------------------------------------
     systemd.services.ollama = {
-      description = "Ollama LLM Service";
+      description = "Ollama LLM Service (CPU)";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
 
       environment = {
         OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
         OLLAMA_MODELS = "${cfg.ollamaDataDir}/models";
-      } // lib.optionalAttrs cfg.enableGPU {
-        # Enable GPU acceleration if requested
-        CUDA_VISIBLE_DEVICES = "0";
+        # Force CPU-only mode - no GPU detection
+        CUDA_VISIBLE_DEVICES = "";
+        OLLAMA_NUM_GPU = "0";
       };
 
       serviceConfig = {
@@ -170,9 +153,6 @@ in
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [ cfg.ollamaDataDir ];
-      } // lib.optionalAttrs cfg.enableGPU {
-        # GPU device access
-        DeviceAllow = [ "/dev/nvidia0" "/dev/nvidiactl" "/dev/nvidia-uvm" ];
       };
     };
 
@@ -194,8 +174,6 @@ in
         User = "ollama";
         Group = "ollama";
         RemainAfterExit = true;
-
-        # Models can take a long time to download
         TimeoutStartSec = "infinity";
       };
 
@@ -228,7 +206,7 @@ in
     # ----------------------------------------------------------------------------
     # OPEN WEBUI SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
-    systemd.services.open-webui = lib.mkIf (cfg.webuiPackage != null) {
+    systemd.services.open-webui = {
       description = "Open WebUI for Ollama";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "ollama.service" ];
@@ -238,9 +216,6 @@ in
         OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
         WEBUI_AUTH = "True";
         DATA_DIR = cfg.webuiDataDir;
-        # Explicitly set host and port
-        WEBUI_HOST = cfg.webuiBindIP;
-        WEBUI_PORT = toString cfg.webuiPort;
       };
 
       serviceConfig = {
@@ -248,8 +223,7 @@ in
         User = "open-webui";
         Group = "open-webui";
         WorkingDirectory = cfg.webuiDataDir;
-        # Use --port flag for non-Docker installations
-        ExecStart = "${cfg.webuiPackage}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
+        ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -284,7 +258,6 @@ in
           '';
         };
 
-        # Proxy for Ollama API (accessible at /api)
         locations."/api" = {
           proxyPass = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
           extraConfig = ''
@@ -301,58 +274,36 @@ in
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Always open Ollama port if not using reverse proxy
-      lib.optionals (cfg.domain == null) [ cfg.ollamaPort ]
-      # Open WebUI port if package is set and not using reverse proxy
-      ++ lib.optionals (cfg.domain == null && cfg.webuiPackage != null) [ cfg.webuiPort ]
-      # Open HTTP/HTTPS if using reverse proxy
+      lib.optionals (cfg.domain == null) [ cfg.ollamaPort cfg.webuiPort ]
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
-
-    # ----------------------------------------------------------------------------
-    # GPU SUPPORT - Add CUDA packages if GPU is enabled
-    # ----------------------------------------------------------------------------
-    environment.systemPackages = lib.optionals cfg.enableGPU [
-      pkgs.cudatoolkit
-    ];
   };
 }
 
 /*
 ================================================================================
-USAGE EXAMPLE
+USAGE EXAMPLE - CPU-ONLY OLLAMA
 ================================================================================
 
 Minimal configuration:
 ----------------------
-services.ollama-webui-custom = {
+services.ollama-cpu = {
   enable = true;
 };
 # Ollama API: http://your-ip:11434
-# Open WebUI: http://your-ip:3000
+# Open WebUI: http://your-ip:3006
 
 
-With models pre-downloaded:
-----------------------------
-services.ollama-webui-custom = {
-  enable = true;
-  models = [ "llama2" "mistral" "codellama" ];
-};
-
-
-Full configuration with domain and GPU:
-----------------------------------------
-services.ollama-webui-custom = {
+Full configuration:
+-------------------
+services.ollama-cpu = {
   enable = true;
   ollamaPort = 11434;
-  webuiPort = 3000;
+  webuiPort = 3006;
   ollamaBindIP = "0.0.0.0";
   webuiBindIP = "0.0.0.0";
   ollamaDataDir = "/data/ollama";
   webuiDataDir = "/data/open-webui";
-
-  # GPU acceleration
-  enableGPU = true;
 
   # Pre-download models
   models = [ "llama2" "mistral" "codellama" ];
@@ -365,54 +316,21 @@ services.ollama-webui-custom = {
 
 
 ================================================================================
-USAGE
+NOTES
 ================================================================================
 
-First-time setup:
-1. Access Open WebUI at http://your-ip:3000 (or your domain)
-2. Create an admin account (first user becomes admin)
-3. Download models through the UI or configure in models list
+This module is CPU-ONLY. It explicitly disables GPU detection to prevent
+crashes with unsupported or old GPUs.
 
-Download models manually:
-  ollama pull llama2
-  ollama pull mistral
-  ollama pull codellama
+Environment variables set:
+  CUDA_VISIBLE_DEVICES = ""     # No GPUs visible
+  OLLAMA_NUM_GPU = "0"           # Use 0 GPUs
 
-List downloaded models:
-  ollama list
+For GPU support, use the ollama-gpu.nix module instead.
 
-Run a model directly:
-  ollama run llama2
-
-
-================================================================================
-TROUBLESHOOTING
-================================================================================
-
-Check service status:
-  sudo systemctl status ollama
-  sudo systemctl status open-webui
-
-View logs:
-  sudo journalctl -u ollama -f
-  sudo journalctl -u open-webui -f
-
-Test Ollama API:
-  curl http://localhost:11434/api/tags
-
-Restart services:
-  sudo systemctl restart ollama
-  sudo systemctl restart open-webui
-
-GPU issues:
-  nvidia-smi  # Check GPU status
-  # Ensure CUDA is properly installed
-  # Check journalctl logs for CUDA errors
-
-Model storage location:
-  /var/lib/ollama/models (or your custom ollamaDataDir)
-
-WebUI data location:
-  /var/lib/open-webui (or your custom webuiDataDir)
+Performance expectations:
+- CPU inference is slower than GPU but perfectly functional
+- Works well with sufficient RAM (16GB+ recommended)
+- 7B models run fine, 13B+ models need more RAM
 
 */

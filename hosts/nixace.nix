@@ -69,6 +69,33 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
+  services.ollama-cpu = {
+    enable = true;
+    ollamaPort = 11434;
+    webuiPort = 3006;
+    ollamaBindIP = "0.0.0.0";
+    webuiBindIP = "0.0.0.0";
+    ollamaDataDir = "/data/ollama";
+    webuiDataDir = "/data/open-webui";
+    # Pre-download models
+    models = [ "llama2" "mistral" "codellama" ];
+    openFirewall = true;
+  };
+  services.ollama-gpu = {
+    enable = false;
+    ollamaPort = 11434;
+    webuiPort = 3007;
+    ollamaBindIP = "0.0.0.0";
+    webuiBindIP = "0.0.0.0";
+    ollamaDataDir = "/data/ollama";
+    webuiDataDir = "/data/open-webui";
+    # GPU settings
+    gpuDevice = 0;        # First GPU
+    gpuLayers = -1;       # Offload all layers (-1 = auto/all)
+    # Pre-download models
+    models = [ "llama2" "mistral" "codellama" ];
+    openFirewall = true;
+  };
 
   services.grafana-custom = {
     enable = true;
