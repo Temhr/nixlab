@@ -248,7 +248,8 @@ in
         User = "open-webui";
         Group = "open-webui";
         WorkingDirectory = cfg.webuiDataDir;
-        ExecStart = "${cfg.webuiPackage}/bin/open-webui serve";
+        # Use --port flag for non-Docker installations
+        ExecStart = "${cfg.webuiPackage}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
         Restart = "on-failure";
         RestartSec = "10s";
 
