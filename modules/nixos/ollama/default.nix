@@ -3,8 +3,8 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./ollama-cpu
-    ./ollama-gpu
+    ./ollama-cpu.nix
+    ./ollama-gpu.nix
   ];
 
   options = {
