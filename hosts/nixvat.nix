@@ -127,6 +127,7 @@
 
   services.ollama-webui-custom = {
     enable = true;
+    webuiPackage = pkgs.open-webui;
     ollamaPort = 11434;
     webuiPort = 3006;
     ollamaBindIP = "0.0.0.0";
