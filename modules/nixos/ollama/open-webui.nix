@@ -19,14 +19,14 @@ in {
     # OPTIONAL: IP to bind Open WebUI to (default: 127.0.0.1 = localhost only)
     webuiBindIP = lib.mkOption {
       type = lib.types.str;
-      default = "0.0.0.0";
+      default = "127.0.0.1";
       description = "IP to bind Open WebUI to";
     };
 
     # OPTIONAL: Where to store Open WebUI data (default: /var/lib/open-webui)
     webuiDataDir = lib.mkOption {
       type = lib.types.path;
-      default = "/data/open-webui";
+      default = "/var/lib/open-webui";
       example = "/data/open-webui";
       description = "Directory for Open WebUI data";
     };
