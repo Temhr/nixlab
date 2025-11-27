@@ -6,71 +6,75 @@ in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
-  options = {
-    services.open-webui = {
+  options.services.open-webui = {
     enable = lib.mkEnableOption "Open WebUI";
 
         # OPTIONAL: Port for Open WebUI (default: 3006)
-        webuiPort = lib.mkOption {
-            type = lib.types.port;
-            default = 3006;
-            description = "Port for Open WebUI to listen on";
-        };
+    webuiPort = lib.mkOption {
+      type = lib.types.port;
+      default = 3006;
+      description = "Port for Open WebUI to listen on";
+    };
 
         # OPTIONAL: IP to bind Open WebUI to (default: 127.0.0.1 = localhost only)
-        webuiBindIP = lib.mkOption {
-            type = lib.types.str;
-            default = "127.0.0.1";
-            description = "IP address for Open WebUI to bind to (use 0.0.0.0 for all interfaces)";
-        };
+      webuiBindIP = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1";
+      description = "IP to bind Open WebUI to";
+    };
 
         # OPTIONAL: Where to store Open WebUI data (default: /var/lib/open-webui)
-        webuiDataDir = lib.mkOption {
-            type = lib.types.path;
-            default = "/var/lib/open-webui";
-            example = "/data/open-webui";
-            description = "Directory for Open WebUI data";
-        };
+    webuiDataDir = lib.mkOption {
+      type = lib.types.path;
+      default = "/var/lib/open-webui";
+      example = "/data/open-webui";
+      description = "Directory for Open WebUI data";
+    };
 
-        ollamaBaseUrl = lib.mkOption {
-            type = lib.types.str;
-            default = "http://127.0.0.1:11434";
-            description = "URL of an Ollama instance";
-        };
+    ollamaBaseUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:11434";
+      description = "URL of an Ollama instance";
+    };
 
         # OPTIONAL: Auto-open firewall ports (default: true)
-        openFirewall = lib.mkOption {
-            type = lib.types.bool;
-            default = true;
-            description = "Open firewall ports";
-        };
+    openFirewall = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Open firewall ports";
+    };
 
         # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
-        domain = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
-            example = "ollama.example.com";
-            description = "Domain name for nginx reverse proxy (optional)";
-        };
+    domain = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Nginx domain";
+    };
 
         # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
-        enableSSL = lib.mkOption {
-            type = lib.types.bool;
-            default = false;
-            description = "Enable HTTPS with Let's Encrypt (requires domain)";
-        };
+    enableSSL = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable Let's Encrypt";
     };
   };
 
-  config = lib.mkIf cfg.enable {
-
+  #
+  # Auto-enable Open WebUI if Ollama CPU module is enabled
+  #
+  config = {
     # Auto-enable Open WebUI if Ollama CPU service is enabled
-    services.open-webui.enable = lib.mkDefault config.services.ollama-cpu.enable;
-
+    services.open-webui.enable =
+      lib.mkDefault config.services.ollama-cpu.enable;
     # Auto-connect to Ollama CPU service
-    services.open-webui.ollamaBaseUrl = lib.mkDefault
-        "http://${config.services.ollama-cpu.ollamaBindIP}:${toString config.services.ollama-cpu.ollamaPort}";
+    services.open-webui.ollamaBaseUrl =
+      lib.mkDefault "http://${config.services.ollama-cpu.ollamaBindIP}:${toString config.services.ollama-cpu.ollamaPort}";
+  };
 
+  #
+  # Main Open WebUI module (enabled only if cfg.enable = true)
+  #
+  config = lib.mkIf cfg.enable {
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -87,7 +91,6 @@ in {
       home = cfg.webuiDataDir;
       description = "Open WebUI service user";
     };
-
     users.groups.open-webui = {};
 
     users.users.temhr.extraGroups = [ "open-webui" ];
@@ -98,8 +101,9 @@ in {
     systemd.services.open-webui = {
       description = "Open WebUI";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "ollama.service" ];
-      requires = [ "ollama.service" ];
+      after = [ "network.target" ];
+      # No hard link to Ollama → safer unless Ollama is guaranteed
+      # requires = [ "ollama.service" ];  # optional
 
       environment = {
         DATA_DIR = cfg.webuiDataDir;
@@ -113,13 +117,10 @@ in {
         Group = "open-webui";
         WorkingDirectory = cfg.webuiDataDir;
 
-        ExecStart =
-          "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
+        ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
         Restart = "on-failure";
-        RestartSec = "10s";
 
         # Security hardening
-        NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
@@ -140,23 +141,11 @@ in {
         locations."/" = {
           proxyPass = "http://${cfg.webuiBindIP}:${toString cfg.webuiPort}";
           proxyWebsockets = true;
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_buffering off;
-          '';
         };
 
         locations."/api" = {
-          proxyPass = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          '';
+          proxyPass =
+            "http://${config.services.ollama-cpu.ollamaBindIP}:${toString config.services.ollama-cpu.ollamaPort}";
         };
       };
     };
@@ -164,10 +153,13 @@ in {
     # ----------------------------------------------------------------------------
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      lib.optionals (cfg.domain == null) [ cfg.ollamaPort cfg.webuiPort ]
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
-    );
+    networking.firewall.allowedTCPPorts =
+      lib.mkIf cfg.openFirewall (
+        lib.optionals (cfg.domain == null)
+          [ cfg.webuiPort ]
+        ++ lib.optionals (cfg.domain != null)
+          [ 80 443 ]
+      );
   };
 }
 
