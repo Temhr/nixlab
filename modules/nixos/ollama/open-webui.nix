@@ -62,7 +62,7 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
 
     # Auto-enable Open WebUI if Ollama CPU service is enabled
     services.open-webui.enable = lib.mkDefault config.services.ollama-cpu.enable;
@@ -195,3 +195,4 @@ services.open-webui = {
   enableSSL = true;
   openFirewall = true;
 };
+*/

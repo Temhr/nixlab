@@ -16,6 +16,7 @@ in {
         type = lib.types.port;
         default = 11434;
         description = "Port for Ollama API to listen on";
+      };
 
       # OPTIONAL: IP to bind Ollama to (default: 127.0.0.1 = localhost only)
       ollamaBindIP = lib.mkOption {
