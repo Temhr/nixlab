@@ -77,7 +77,7 @@ in {
     # ----------------------------------------------------------------------------
     # OLLAMA SERVICE - CPU-ONLY MODE
     # ----------------------------------------------------------------------------
-    systemd.services.ollama = {
+    systemd.services.ollama-cpu = {
       description = "Ollama LLM Service (CPU)";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
