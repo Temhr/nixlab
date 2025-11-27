@@ -131,6 +131,15 @@
             inherit disko impermanence inputs outputs hostname self;
           };
           modules = commonModules ++ modules ++ [
+            # Apply overlays to all hosts
+            {
+              nixpkgs.overlays = [
+                outputs.overlays.additions
+                outputs.overlays.modifications
+                outputs.overlays.stable-packages
+              ];
+            }
+
             # Set hostname automatically
             { networking.hostName = hostname; }
 
