@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.open-webui;
+  cfg = config.services.open-webui-custom;
 in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
-  options.services.open-webui = {
-    enable = lib.mkEnableOption "Open WebUI";
+  options.services.open-webui-custom = {
+    enable = lib.mkEnableOption "Open WebUI Custom";
 
     # OPTIONAL: Port for Open WebUI (default: 3006)
     webuiPort = lib.mkOption {
@@ -65,11 +65,11 @@ in {
   config = lib.mkMerge [
     # Auto-enable Open WebUI if Ollama CPU module is enabled
     {
-      services.open-webui.enable =
+      services.open-webui-custom.enable =
         lib.mkDefault config.services.ollama-cpu.enable;
 
       # Auto-connect to Ollama CPU service if it exists
-      services.open-webui.ollamaBaseUrl = lib.mkIf
+      services.open-webui-custom.ollamaBaseUrl = lib.mkIf
         (config.services.ollama-cpu.enable or false)
         (lib.mkDefault "http://${config.services.ollama-cpu.ollamaBindIP}:${toString config.services.ollama-cpu.ollamaPort}");
     }
@@ -170,20 +170,20 @@ in {
 USAGE EXAMPLE - CPU-ONLY OLLAMA
 ================================================================================
 
-Auto-enable (if ollama-cpu is enabled, open-webui enables automatically):
---------------------------------------------------------------------------
+Auto-enable (if ollama-cpu is enabled, open-webui-custom enables automatically):
+--------------------------------------------------------------------------------
 services.ollama-cpu.enable = true;
-# open-webui will auto-enable and auto-connect!
+# open-webui-custom will auto-enable and auto-connect!
 
 
 Disable auto-enable:
 --------------------
-services.open-webui.enable = false;
+services.open-webui-custom.enable = false;
 
 
 Full manual configuration:
 --------------------------
-services.open-webui = {
+services.open-webui-custom = {
   enable = true;
   webuiPort = 3006;
   webuiBindIP = "0.0.0.0";
