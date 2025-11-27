@@ -89,9 +89,7 @@
     webuiBindIP = "0.0.0.0";
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
-    package = pkgs.ollama.override {
-      acceleration = "cuda";
-    };
+    package = pkgs.ollama-cuda-p5000;  # Explicitly use the patched version
     # GPU settings
     gpuDevice = 0;        # First GPU
     gpuLayers = 35;       # Offload all layers (-1 = auto/all)
