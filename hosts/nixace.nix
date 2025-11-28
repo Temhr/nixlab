@@ -88,7 +88,6 @@
 
     # Pre-download models
     models = [ "llama2" "mistral" "codellama" ];
-
     openFirewall = true;
   };
 
