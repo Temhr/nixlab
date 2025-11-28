@@ -26,6 +26,7 @@
 
   # Add stuff for your user as you see fit:
   home = {
+    enableNixpkgsReleaseCheck = false;
     username = "temhr";
     homeDirectory = "/home/temhr";
     #Environment Variables

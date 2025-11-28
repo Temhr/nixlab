@@ -7,23 +7,43 @@
   modifications = final: prev: {
     # Create ollama-cuda-p5000 with compute capability 6.1 support
     ollama-cuda-p5000 = prev.ollama-cuda.overrideAttrs (old: {
-      name = "ollama-cuda-p5000-${old.version}";
+      name = "ollama-cuda-p5000-${old.version}-cc61v2";  # v2 to force rebuild
+      pname = "ollama-cuda-p5000-cc61v2";
 
-      preBuild = ''
-        ${old.preBuild or ""}
+      # Set environment variable that llama.cpp's CMakeLists.txt will read
+      env = (old.env or {}) // {
+        CMAKE_CUDA_ARCHITECTURES = "61";
+      };
 
-        echo "===== BUILDING LLAMA.CPP FOR P5000 (COMPUTE CAPABILITY 6.1) ====="
+      postPatch = (old.postPatch or "") + ''
+        echo "===== PATCHING FOR P5000 (COMPUTE CAPABILITY 6.1) ====="
 
-        cd llm/llama.cpp
-        cmake -B build \
-          -DCMAKE_SKIP_BUILD_RPATH=ON \
-          -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
-          -DCMAKE_CUDA_ARCHITECTURES='61' \
-          .
-        cmake --build build -j $NIX_BUILD_CORES
-        cd ../..
+        # Find all CMakeLists.txt and set CUDA architectures
+        find . -name CMakeLists.txt -type f -exec echo "Found CMakeLists.txt: {}" \;
 
-        echo "===== BUILD COMPLETE ====="
+        # Patch the generate script if it exists
+        if [ -f llm/generate/gen_linux.sh ]; then
+          echo "Patching llm/generate/gen_linux.sh"
+          # Add or replace CMAKE_CUDA_ARCHITECTURES in the cmake command
+          sed -i 's|-DCMAKE_CUDA_ARCHITECTURES=[^ ]*|-DCMAKE_CUDA_ARCHITECTURES=61|g' llm/generate/gen_linux.sh
+          # If it doesn't exist, add it after the cmake command starts
+          if ! grep -q "CMAKE_CUDA_ARCHITECTURES" llm/generate/gen_linux.sh; then
+            sed -i '/cmake -S/a\  -DCMAKE_CUDA_ARCHITECTURES=61 \\' llm/generate/gen_linux.sh
+          fi
+          echo "Contents of gen_linux.sh after patch:"
+          cat llm/generate/gen_linux.sh
+        fi
+
+        # Patch CMakeLists.txt files directly
+        for f in $(find . -name CMakeLists.txt -type f); do
+          if grep -q "CMAKE_CUDA_ARCHITECTURES" "$f"; then
+            echo "Patching $f"
+            sed -i 's/set(CMAKE_CUDA_ARCHITECTURES .*/set(CMAKE_CUDA_ARCHITECTURES "61")/g' "$f"
+            sed -i 's/CMAKE_CUDA_ARCHITECTURES "[^"]*"/CMAKE_CUDA_ARCHITECTURES "61"/g' "$f"
+          fi
+        done
+
+        echo "===== PATCH COMPLETE ====="
       '';
     });
 
