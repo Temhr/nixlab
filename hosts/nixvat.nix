@@ -125,7 +125,7 @@
     dataDir = "/data/glance";
   };
 
-  services.ollama-webui-custom = {
+  services.ollama-cpu = {
     enable = true;
     webuiPackage = pkgs.open-webui;
     ollamaPort = 11434;
