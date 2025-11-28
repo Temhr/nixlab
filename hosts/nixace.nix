@@ -71,18 +71,24 @@
   ## Self-hosted apps and services
   services.ollama-p5000 = {
     enable = true;
+
+    # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
-    ollamaBindIP = "0.0.0.0";
+    ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
     webuiBindIP = "0.0.0.0";
+
+    # Data directories
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
-    package = pkgs.ollama-cuda-p5000;  # Explicitly use the patched version
-    # GPU settings
-    gpuDevice = 0;        # First GPU
-    gpuLayers = 35;       # Offload all layers (-1 = auto/all)
+
+    # GPU configuration
+    gpuDevice = 0;      # First GPU
+    gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
+
     # Pre-download models
-    models = [ "llama2" "mistral" "codellama" "llama2:7b"];
+    models = [ "llama2" "mistral" "codellama" ];
+
     openFirewall = true;
   };
 
