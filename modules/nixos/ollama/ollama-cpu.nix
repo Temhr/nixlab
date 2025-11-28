@@ -110,7 +110,6 @@ in
       home = cfg.ollamaDataDir;
       description = "Ollama service user";
     };
-
     users.groups.ollama = {};
 
     users.users.open-webui = {
@@ -119,8 +118,10 @@ in
       home = cfg.webuiDataDir;
       description = "Open WebUI service user";
     };
-
     users.groups.open-webui = {};
+
+    # Allow current user to access ollama and open-webui data
+    users.users.temhr.extraGroups = [ "open-webui" "ollama" ];
 
     # ----------------------------------------------------------------------------
     # OLLAMA SERVICE - CPU-ONLY MODE

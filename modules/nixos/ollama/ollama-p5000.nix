@@ -4,6 +4,9 @@ let
   cfg = config.services.ollama-p5000;
 in
 {
+  # ============================================================================
+  # OPTIONS - Define what can be configured
+  # ============================================================================
   options = {
     services.ollama-p5000 = {
       enable = lib.mkEnableOption "Ollama with Open WebUI (GPU-accelerated for P5000)";
@@ -93,13 +96,22 @@ in
     };
   };
 
+  # ============================================================================
+  # CONFIG - What happens when the service is enabled
+  # ============================================================================
   config = lib.mkIf cfg.enable {
 
+    # ----------------------------------------------------------------------------
+    # DIRECTORY SETUP - Create necessary directories with proper permissions
+    # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       "d ${cfg.ollamaDataDir} 0770 ollama ollama -"
       "d ${cfg.webuiDataDir} 0770 open-webui open-webui -"
     ];
 
+    # ----------------------------------------------------------------------------
+    # USER SETUP - Create dedicated system users
+    # ----------------------------------------------------------------------------
     users.users.ollama = {
       isSystemUser = true;
       group = "ollama";
@@ -121,6 +133,9 @@ in
     # Allow current user to access ollama and open-webui data
     users.users.temhr.extraGroups = [ "open-webui" "ollama" ];
 
+    # ----------------------------------------------------------------------------
+    # OLLAMA SERVICE - CPU-ONLY MODE
+    # ----------------------------------------------------------------------------
     systemd.services.ollama = {
       description = "Ollama LLM Service (GPU - P5000)";
       wantedBy = [ "multi-user.target" ];
@@ -164,6 +179,9 @@ in
       };
     };
 
+    # ----------------------------------------------------------------------------
+    # MODEL DOWNLOADER - Separate one-shot service for downloading models
+    # ----------------------------------------------------------------------------
     systemd.services.ollama-models = lib.mkIf (cfg.models != [ ]) {
       description = "Download Ollama Models";
       wantedBy = [ "multi-user.target" ];
@@ -206,6 +224,9 @@ in
       '';
     };
 
+    # ----------------------------------------------------------------------------
+    # OPEN WEBUI SERVICE - Configure the systemd service
+    # ----------------------------------------------------------------------------
     systemd.services.open-webui = {
       description = "Open WebUI for Ollama";
       wantedBy = [ "multi-user.target" ];
@@ -213,8 +234,8 @@ in
       requires = [ "ollama.service" ];
 
       environment = {
-        OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
-        WEBUI_AUTH = "True";
+        OLLAMA_HOST = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+        WEBUI_AUTH = "true";
         DATA_DIR = cfg.webuiDataDir;
       };
 
@@ -236,7 +257,9 @@ in
       };
     };
 
-    # Nginx reverse proxy (optional)
+    # ----------------------------------------------------------------------------
+    # NGINX REVERSE PROXY - Only configured if domain is set
+    # ----------------------------------------------------------------------------
     services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
     services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
@@ -268,7 +291,9 @@ in
       };
     };
 
-    # Firewall configuration
+    # ----------------------------------------------------------------------------
+    # FIREWALL - Open necessary ports if requested
+    # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       lib.optionals (cfg.domain == null) [ cfg.ollamaPort cfg.webuiPort ]
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
