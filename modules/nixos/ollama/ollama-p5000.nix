@@ -119,7 +119,7 @@ in
     users.groups.open-webui = {};
 
     # Allow current user to access ollama and open-webui data
-    users.users.${config.users.users.temhr.name or "temhr"}.extraGroups = [ "open-webui" "ollama" ];
+    users.users.temhr.extraGroups = [ "open-webui" "ollama" ];
 
     systemd.services.ollama = {
       description = "Ollama LLM Service (GPU - P5000)";
