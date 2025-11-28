@@ -71,6 +71,17 @@
             statusStyle = "dot";
           };
         }
+        {
+          "Ollama - GPU" = {
+            href = "http://192.168.0.200:3007";
+            icon = "ollama";
+            description = "Get up and running with large language models locally";
+            target = "_blank";
+            server = "nixvat";
+            ping = "http://192.168.0.200:3000";
+            statusStyle = "dot";
+          };
+        }
       ];
     }
 
