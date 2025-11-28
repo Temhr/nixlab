@@ -10,9 +10,9 @@ in
 
       package = lib.mkOption {
         type = lib.types.package;
-        default = pkgs.ollama-cuda-p5000;  # Use the overlaid package
+        default = pkgs.ollama-cuda-p5000;
         defaultText = lib.literalExpression "pkgs.ollama-cuda-p5000";
-        description = "The Ollama package to use (patched for P5000 compute capability 6.1)";
+        description = "The Ollama package to use (built with P5000 compute capability 6.1 support)";
       };
 
       ollamaPort = lib.mkOption {
@@ -118,7 +118,8 @@ in
 
     users.groups.open-webui = {};
 
-    users.users.temhr.extraGroups = [ "open-webui" "ollama" ];
+    # Allow current user to access ollama and open-webui data
+    users.users.${config.users.users.temhr.name or "temhr"}.extraGroups = [ "open-webui" "ollama" ];
 
     systemd.services.ollama = {
       description = "Ollama LLM Service (GPU - P5000)";
@@ -143,6 +144,7 @@ in
         Restart = "on-failure";
         RestartSec = "10s";
 
+        # GPU device access
         DeviceAllow = [
           "/dev/nvidia0"
           "/dev/nvidia1"
@@ -153,6 +155,7 @@ in
           "/dev/nvidia-modeset"
         ];
 
+        # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
@@ -224,6 +227,7 @@ in
         Restart = "on-failure";
         RestartSec = "10s";
 
+        # Security hardening
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
@@ -232,6 +236,7 @@ in
       };
     };
 
+    # Nginx reverse proxy (optional)
     services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
     services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
@@ -263,11 +268,13 @@ in
       };
     };
 
+    # Firewall configuration
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       lib.optionals (cfg.domain == null) [ cfg.ollamaPort cfg.webuiPort ]
       ++ lib.optionals (cfg.domain != null) [ 80 443 ]
     );
 
+    # Include CUDA toolkit in system packages
     environment.systemPackages = [
       pkgs.cudatoolkit
     ];
@@ -276,26 +283,106 @@ in
 
 /*
 ================================================================================
-P5000-SPECIFIC OLLAMA MODULE
+OLLAMA P5000 MODULE - GPU-ACCELERATED INFERENCE
 ================================================================================
 
-This module patches Ollama's vendored llama.cpp to support CUDA compute
-capability 6.1, which is required for NVIDIA Quadro P5000 GPUs.
+This module provides Ollama with CUDA support for the NVIDIA Quadro P5000 GPU.
 
-The patching happens in postPatch, modifying the CMakeLists.txt files before
-the Go build process runs.
+IMPORTANT: This module requires a companion overlay to create the
+`pkgs.ollama-cuda-p5000` package with compute capability 6.1 support.
 
-USAGE:
-------
+Add to your overlays/default.nix:
+```nix
+modifications = final: prev: {
+  ollama-cuda-p5000 = (prev.ollama-cuda.override {
+    cudaArches = [ "sm_61" "sm_75" "sm_80" "sm_86" "sm_89" "sm_90" ];
+  }).overrideAttrs (old: {
+    pname = "ollama-cuda-p5000";
+    name = "ollama-cuda-p5000-${old.version}";
+  });
+};
+```
+
+USAGE
+-----
+Minimal configuration:
+```nix
 services.ollama-p5000 = {
   enable = true;
 };
+```
 
-DEBUGGING:
-----------
-If it still doesn't work, check the build logs to see if the patch was applied:
-  nix-store -qR $(which ollama) | grep ollama
+Access:
+- Ollama API: http://localhost:11434
+- Open WebUI: http://localhost:3007
 
-Then examine the build log to verify the patch ran successfully.
+Full configuration with all options:
+```nix
+services.ollama-p5000 = {
+  enable = true;
+
+  # Network configuration
+  ollamaPort = 11434;
+  webuiPort = 3007;
+  ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
+  webuiBindIP = "0.0.0.0";
+
+  # Data directories
+  ollamaDataDir = "/data/ollama";
+  webuiDataDir = "/data/open-webui";
+
+  # GPU configuration
+  gpuDevice = 0;      # First GPU
+  gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
+
+  # Pre-download models
+  models = [ "llama2" "mistral" "codellama" ];
+
+  # Reverse proxy with SSL
+  domain = "ollama.example.com";
+  enableSSL = true;
+  openFirewall = true;
+};
+```
+
+TECHNICAL DETAILS
+-----------------
+The P5000 has CUDA compute capability 6.1 (Pascal architecture).
+
+The default NixOS ollama-cuda package only supports compute capabilities
+75, 80, 86, 89, 90, 100, 120 (Turing and newer), which causes the error:
+"CUDA error: no kernel image is available for execution on the device"
+
+The solution is to override the `cudaArches` parameter to include "sm_61".
+The overlay creates a custom package that compiles CUDA kernels for multiple
+architectures including the P5000.
+
+TROUBLESHOOTING
+---------------
+Check GPU is being used:
+  watch nvidia-smi
+
+View service logs:
+  sudo journalctl -u ollama -f
+
+Test the API:
+  curl http://localhost:11434/api/generate -d '{
+    "model":"llama2",
+    "prompt":"Hello",
+    "stream":false
+  }'
+
+Verify correct package:
+  nix eval .#nixosConfigurations.YOUR_HOST.config.services.ollama-p5000.package.name
+  # Should output: "ollama-cuda-p5000-0.x.x"
+
+Check CUDA architectures in build log:
+  nix log $(nix-store -qd $(which ollama)) | grep "Using CUDA arch"
+  # Should include: 61
+
+CREDITS
+-------
+Solution based on the cudaArches override pattern documented in the
+NixOS ollama package.nix (line 18).
 
 */
