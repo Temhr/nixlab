@@ -9,6 +9,7 @@ in
   # ============================================================================
   options = {
     services.ollama-p5000 = {
+      # REQUIRED: Enable the service
       enable = lib.mkEnableOption "Ollama with Open WebUI (GPU-accelerated for P5000)";
 
       package = lib.mkOption {
@@ -18,30 +19,35 @@ in
         description = "The Ollama package to use (built with P5000 compute capability 6.1 support)";
       };
 
+      # OPTIONAL: Port for Ollama API (default: 11434)
       ollamaPort = lib.mkOption {
         type = lib.types.port;
         default = 11434;
         description = "Port for Ollama API to listen on";
       };
 
+      # OPTIONAL: Port for Open WebUI (default: 3006)
       webuiPort = lib.mkOption {
         type = lib.types.port;
         default = 3007;
         description = "Port for Open WebUI to listen on";
       };
 
+      # OPTIONAL: IP to bind Ollama to (default: 127.0.0.1 = localhost only)
       ollamaBindIP = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
         description = "IP address for Ollama to bind to (use 0.0.0.0 for all interfaces)";
       };
 
+      # OPTIONAL: IP to bind Open WebUI to (default: 127.0.0.1 = localhost only)
       webuiBindIP = lib.mkOption {
         type = lib.types.str;
         default = "127.0.0.1";
         description = "IP address for Open WebUI to bind to (use 0.0.0.0 for all interfaces)";
       };
 
+      # OPTIONAL: Where to store Ollama models (default: /var/lib/ollama)
       ollamaDataDir = lib.mkOption {
         type = lib.types.path;
         default = "/var/lib/ollama";
@@ -49,6 +55,7 @@ in
         description = "Directory for Ollama models and data";
       };
 
+      # OPTIONAL: Where to store Open WebUI data (default: /var/lib/open-webui)
       webuiDataDir = lib.mkOption {
         type = lib.types.path;
         default = "/var/lib/open-webui";
@@ -68,6 +75,7 @@ in
         description = "Number of layers to offload to GPU (-1 = all layers)";
       };
 
+      # OPTIONAL: Models to download on first start
       models = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
@@ -75,12 +83,14 @@ in
         description = "List of models to pull on service start";
       };
 
+      # OPTIONAL: Auto-open firewall ports (default: true)
       openFirewall = lib.mkOption {
         type = lib.types.bool;
         default = true;
         description = "Open firewall ports";
       };
 
+      # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
       domain = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -88,6 +98,7 @@ in
         description = "Domain name for nginx reverse proxy (optional)";
       };
 
+      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
       enableSSL = lib.mkOption {
         type = lib.types.bool;
         default = false;
@@ -118,7 +129,6 @@ in
       home = cfg.ollamaDataDir;
       description = "Ollama service user";
     };
-
     users.groups.ollama = {};
 
     users.users.open-webui = {
@@ -127,7 +137,6 @@ in
       home = cfg.webuiDataDir;
       description = "Open WebUI service user";
     };
-
     users.groups.open-webui = {};
 
     # Allow current user to access ollama and open-webui data
@@ -201,6 +210,7 @@ in
       };
 
       script = ''
+        # Wait for Ollama to be ready
         echo "Waiting for Ollama service..."
         for i in {1..30}; do
           if ${pkgs.curl}/bin/curl -s http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}/ > /dev/null 2>&1; then
@@ -210,6 +220,7 @@ in
           sleep 1
         done
 
+        # Download each model
         ${lib.concatMapStringsSep "\n" (model: ''
           echo "Checking model: ${model}"
           if ! ${cfg.package}/bin/ollama list | grep -q "^${model}"; then
@@ -234,8 +245,8 @@ in
       requires = [ "ollama.service" ];
 
       environment = {
-        OLLAMA_HOST = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
-        WEBUI_AUTH = "true";
+        OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+        WEBUI_AUTH = "True";
         DATA_DIR = cfg.webuiDataDir;
       };
 
