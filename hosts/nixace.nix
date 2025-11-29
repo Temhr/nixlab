@@ -87,7 +87,7 @@
     gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
 
     # Pre-download models
-    models = [ "llama2" "mistral" "codellama" "gpt-oss:latest" ];
+    models = [ "qwen3-coder:30b-a3b-q4_K_M" "gpt-oss:latest" "gemma3:27b-it-qat" ""];
     openFirewall = true;
   };
 
