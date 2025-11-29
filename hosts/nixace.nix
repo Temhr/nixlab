@@ -87,7 +87,7 @@
     gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
 
     # Pre-download models
-    models = [ "deepseek-r1:14b" "gemma3:27b-it-qat" "gpt-oss:latest" "qwen3-coder:30b-a3b-q4_K_M" ];
+    models = [ "deepseek-r1:14b" "gpt-oss:20b" "gemma3:27b-it-qat" "qwen3-coder:30b-a3b-q4_K_M" ];
     openFirewall = true;
   };
 
