@@ -31,6 +31,9 @@ final: prev: {
       einops
     ];
 
+    dontBuild = true;  # No build phase needed - pure Python
+    dontConfigure = true;  # No configure phase needed
+
     installPhase = ''
       mkdir -p $out/share/comfyui
       cp -r . $out/share/comfyui/
