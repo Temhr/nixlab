@@ -1,5 +1,6 @@
 # ComfyUI overlay with CUDA support for P5000
 final: prev: {
+  # ComfyUI with CUDA support for P5000
   comfyui = prev.stdenv.mkDerivation rec {
     pname = "comfyui";
     version = "unstable-2024-11-30";
@@ -8,7 +9,7 @@ final: prev: {
       owner = "comfyanonymous";
       repo = "ComfyUI";
       rev = "master";  # Or pin to a specific commit
-      sha256 = prev.lib.fakeSha256;  # Replace with actual hash after first build
+      sha256 = "sha256-pzklhRSicTu2GZS+sfd2x5Ph4IMvSq8LYlHo3gb1G54=";
     };
 
     nativeBuildInputs = [ prev.makeWrapper ];
