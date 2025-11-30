@@ -77,8 +77,19 @@
             icon = "ollama";
             description = "Get up and running with large language models locally";
             target = "_blank";
-            server = "nixvat";
+            server = "nixace";
             ping = "http://192.168.0.200:3000";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Comfyui - GPU" = {
+            href = "http://192.168.0.200:8188";
+            icon = "comfyui";
+            description = "Get up and running with large language models locally";
+            target = "_blank";
+            server = "nixace";
+            ping = "http://192.168.0.200:8188";
             statusStyle = "dot";
           };
         }
@@ -200,7 +211,7 @@
             icon = "grafana";
             description = "Metrics visualization and dashboards - nixzen";
             target = "_blank";
-            server = "nixvat";
+            server = "nixzen";
             ping = "http://192.168.0.204:3101";
             statusStyle = "dot";
           };
@@ -219,7 +230,7 @@
               type = "prometheus";
               url = "http://192.168.0.200:9090";
             };
-            server = "nixvat";
+            server = "nixace";
             ping = "http://192.168.0.200:9090";
             statusStyle = "dot";
           };
@@ -279,7 +290,7 @@
               type = "prometheus";
               url = "http://192.168.0.204:9090";
             };
-            server = "nixvat";
+            server = "nixzen";
             ping = "http://192.168.0.204:9090";
             statusStyle = "dot";
           };
