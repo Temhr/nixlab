@@ -46,20 +46,9 @@
 
     {
     # ──────────────────────────────────────────────
-    # SECTION: Knowledge Base
+    # SECTION: Generative AI
     # ──────────────────────────────────────────────
-      "Knowledge Base" = [
-        {
-          "Wiki.js" = {
-            href = "http://192.168.0.201:3001";
-            icon = "wikijs";
-            description = "Structured and collaborative wiki platform";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3001";
-            statusStyle = "dot";
-          };
-        }
+      "Generative AI" = [
         {
           "Ollama - CPU" = {
             href = "http://192.168.0.201:3006";
@@ -139,6 +128,17 @@
             target = "_blank";
             server = "nixvat";
             ping = "http://192.168.0.201:3004";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "Wiki.js" = {
+            href = "http://192.168.0.201:3001";
+            icon = "wikijs";
+            description = "Structured and collaborative wiki platform";
+            target = "_blank";
+            server = "nixvat";
+            ping = "http://192.168.0.201:3001";
             statusStyle = "dot";
           };
         }
