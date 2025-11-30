@@ -96,18 +96,68 @@ in
     users.users.temhr.extraGroups = [ "comfyui" ];
 
     # ----------------------------------------------------------------------------
+    # PYTORCH INSTALLER - One-shot service to install PyTorch 2.2 with CUDA support
+    # ----------------------------------------------------------------------------
+    systemd.services.comfyui-pytorch-setup = {
+      description = "Install PyTorch 2.2 for ComfyUI (P5000 support)";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "comfyui.service" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        User = "comfyui";
+        Group = "comfyui";
+        RemainAfterExit = true;
+        WorkingDirectory = cfg.dataDir;
+      };
+
+      script = ''
+        VENV_DIR="${cfg.dataDir}/venv"
+
+        # Create venv if it doesn't exist
+        if [ ! -d "$VENV_DIR" ]; then
+          echo "Creating Python virtual environment..."
+          ${pkgs.python311}/bin/python -m venv "$VENV_DIR"
+        fi
+
+        # Check if torch is already installed with correct version
+        if $VENV_DIR/bin/python -c "import torch; assert torch.__version__.startswith('2.2')" 2>/dev/null; then
+          echo "PyTorch 2.2 already installed"
+          exit 0
+        fi
+
+        echo "Installing PyTorch 2.2.2 with CUDA 11.8 support..."
+        $VENV_DIR/bin/pip install --no-cache-dir \
+          torch==2.2.2 \
+          torchvision==0.17.2 \
+          torchaudio==2.2.2 \
+          --index-url https://download.pytorch.org/whl/cu118
+
+        echo "Installing additional dependencies..."
+        $VENV_DIR/bin/pip install --no-cache-dir \
+          kornia \
+          || echo "Warning: Failed to install some dependencies"
+
+        echo "PyTorch setup complete"
+      '';
+    };
+
+    # ----------------------------------------------------------------------------
     # COMFYUI SERVICE - GPU-ACCELERATED
     # ----------------------------------------------------------------------------
     systemd.services.comfyui = {
       description = "ComfyUI Stable Diffusion Service (GPU - P5000)";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network.target" "comfyui-pytorch-setup.service" ];
+      requires = [ "comfyui-pytorch-setup.service" ];
 
       environment = {
         CUDA_VISIBLE_DEVICES = toString cfg.gpuDevice;
         PYTORCH_CUDA_ALLOC_CONF = "max_split_size_mb:512";
         # Use system-installed models directory
         COMFYUI_MODEL_PATH = "${cfg.dataDir}/models";
+        # Use the venv Python
+        VIRTUAL_ENV = "${cfg.dataDir}/venv";
       };
 
       serviceConfig = {
@@ -115,7 +165,8 @@ in
         User = "comfyui";
         Group = "comfyui";
         WorkingDirectory = cfg.dataDir;
-        ExecStart = "${pkgs.comfyui}/bin/comfyui --listen ${cfg.bindIP} --port ${toString cfg.port}";
+        # Use venv python instead of system python
+        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port}";
         Restart = "on-failure";
         RestartSec = "10s";
 
