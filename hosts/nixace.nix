@@ -71,23 +71,31 @@
   ## Self-hosted apps and services
   services.ollama-p5000 = {
     enable = true;
-
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
     ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
     webuiBindIP = "0.0.0.0";
-
     # Data directories
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
-
     # GPU configuration
     gpuDevice = 0;      # First GPU
     gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
-
     # Pre-download models
     models = [ "deepseek-r1:14b" "gpt-oss:20b" "gemma3:27b-it-qat" "qwen3-coder:30b-a3b-q4_K_M" ];
+    openFirewall = true;
+  };
+
+  services.comfyui-p5000 = {
+    enable = true;
+    # Network configuration
+    port = 8188;
+    bindIP = "0.0.0.0";  # Listen on all interfaces
+    # Data directory (models, outputs, inputs)
+    dataDir = "/data/comfyui";
+    # GPU configuration
+    gpuDevice = 0;      # First GPU
     openFirewall = true;
   };
 

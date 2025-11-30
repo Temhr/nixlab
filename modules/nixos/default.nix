@@ -9,6 +9,7 @@
     ./ollama
     ./prometheus
     ./bookstack.nix
+    ./comfyui.nix
     ./glance.nix
     ./gotosocial.nix
     ./home-assistant.nix
