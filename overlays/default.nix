@@ -8,7 +8,7 @@
     let
       # Load each overlay module
       ollamaOverlay = import ./ollama-p5000.nix final prev;
-      comfyuiOverlay = import ./comfyu-p5000.nix final prev;
+      comfyuiOverlay = import ./comfyui-p5000.nix final prev;
     in
       ollamaOverlay // comfyuiOverlay;
 
