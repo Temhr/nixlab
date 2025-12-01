@@ -208,8 +208,8 @@ in
         # Ensure user directory exists before starting
         ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
         # Use venv python instead of system python
-        # Pass --user-directory to tell ComfyUI where to store user data
-        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output";
+        # Explicitly specify all directory paths
+        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
         Restart = "on-failure";
         RestartSec = "10s";
 
