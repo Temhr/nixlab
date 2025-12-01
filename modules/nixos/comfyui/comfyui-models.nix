@@ -102,6 +102,7 @@ in
       "d ${cfg.dataDir}/models/clip 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/clip_vision 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/embeddings 0770 comfyui comfyui -"
+      "f ${cfg.dataDir}/extra_model_paths.yaml 0660 comfyui comfyui -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -256,32 +257,26 @@ in
     # ----------------------------------------------------------------------------
     # Generate extra_model_paths.yaml for ComfyUI
     # ----------------------------------------------------------------------------
-    environment.etc."comfyui/extra_model_paths.yaml".source =
-      pkgs.writeText "extra_model_paths.yaml" ''
-        checkpoint:
-          - ${cfg.dataDir}/models/checkpoints
-
-        vae:
-          - ${cfg.dataDir}/models/vae
-
-        lora:
-          - ${cfg.dataDir}/models/loras
-
-        controlnet:
-          - ${cfg.dataDir}/models/controlnet
-
-        upscale_models:
-          - ${cfg.dataDir}/models/upscale_models
-
-        clip:
-          - ${cfg.dataDir}/models/clip
-
-        clip_vision:
-          - ${cfg.dataDir}/models/clip_vision
-
-        embeddings:
-          - ${cfg.dataDir}/models/embeddings
-      '';
+    system.activationScripts.writeExtraModelPathsYaml = ''
+      cat > ${cfg.dataDir}/extra_model_paths.yaml <<EOF
+    checkpoint:
+      - ${cfg.dataDir}/models/checkpoints
+    vae:
+      - ${cfg.dataDir}/models/vae
+    lora:
+      - ${cfg.dataDir}/models/loras
+    controlnet:
+      - ${cfg.dataDir}/models/controlnet
+    upscale_models:
+      - ${cfg.dataDir}/models/upscale_models
+    clip:
+      - ${cfg.dataDir}/models/clip
+    clip_vision:
+      - ${cfg.dataDir}/models/clip_vision
+    embeddings:
+      - ${cfg.dataDir}/models/embeddings
+    EOF
+    '';
   };
 }
 
