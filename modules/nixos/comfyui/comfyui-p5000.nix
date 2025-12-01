@@ -218,6 +218,7 @@ in
           "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
           "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
           "COMFYUI_MODEL_PATH=${cfg.dataDir}/models"
+          "COMFYUI_EXTRA_MODEL_PATHS=${cfg.dataDir}/extra_model_paths.yaml"
           "VIRTUAL_ENV=${cfg.dataDir}/venv"
           # Tell ComfyUI to use our data directory for user data
           "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
