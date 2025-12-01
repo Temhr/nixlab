@@ -8,14 +8,14 @@ let
     last=$(cat "$STATE_FILE" 2>/dev/null || echo 0)
     days_since=$(( (now - last) / 86400 ))
 
-    # Skip if rebooted within 2 days
-    [ $days_since -lt 2 ] && exit 0
+    # Skip if rebooted within 5 days
+    [ $days_since -lt 5 ] && exit 0
 
-    # Force reboot after 5 days, otherwise 33% chance (1 in 3)
-    if [ $days_since -gt 5 ]; then
+    # Force reboot after 10 days, otherwise 10% chance (1 in 10)
+    if [ $days_since -gt 10 ]; then
       should_reboot=1
     else
-      should_reboot=$([ $(( RANDOM % 3 )) -eq 0 ] && echo 1 || echo 0)
+      should_reboot=$([ $(( RANDOM % 10 )) -eq 0 ] && echo 1 || echo 0)
     fi
 
     # Check for recent user activity (last 30 min)

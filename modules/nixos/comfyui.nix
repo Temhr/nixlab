@@ -100,7 +100,7 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-pytorch-setup = {
       description = "Install PyTorch 2.2 for ComfyUI (P5000 support)";
-      wantedBy = [ "multi-user.target" ];
+      wantedBy = [ "comfyui.service" ];
       before = [ "comfyui.service" ];
 
       serviceConfig = {
@@ -111,7 +111,10 @@ in
         WorkingDirectory = cfg.dataDir;
       };
 
+      path = [ pkgs.python311 ];
+
       script = ''
+        set -e
         VENV_DIR="${cfg.dataDir}/venv"
 
         # Create venv if it doesn't exist
@@ -126,7 +129,7 @@ in
           exit 0
         fi
 
-        echo "Installing PyTorch 2.2.2 with CUDA 11.8 support..."
+        echo "Installing PyTorch 2.2.2 with CUDA 11.8 support (sm_61 for P5000)..."
         $VENV_DIR/bin/pip install --no-cache-dir \
           torch==2.2.2 \
           torchvision==0.17.2 \
@@ -138,7 +141,9 @@ in
           kornia \
           || echo "Warning: Failed to install some dependencies"
 
-        echo "PyTorch setup complete"
+        echo "PyTorch setup complete!"
+        echo "Testing CUDA availability..."
+        $VENV_DIR/bin/python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')"
       '';
     };
 
@@ -150,6 +155,10 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "comfyui-pytorch-setup.service" ];
       requires = [ "comfyui-pytorch-setup.service" ];
+      # Wait for setup to complete
+      unitConfig = {
+        ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
+      };
 
       environment = {
         CUDA_VISIBLE_DEVICES = toString cfg.gpuDevice;
