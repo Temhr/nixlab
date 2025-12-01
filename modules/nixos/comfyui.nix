@@ -79,6 +79,7 @@ in
       "d ${cfg.dataDir}/output 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/input 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/temp 0770 comfyui comfyui -"
+      "d ${cfg.dataDir}/user 0770 comfyui comfyui -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -103,6 +104,14 @@ in
       wantedBy = [ "comfyui.service" ];
       before = [ "comfyui.service" ];
 
+      environment = {
+        LD_LIBRARY_PATH = lib.makeLibraryPath [
+          pkgs.stdenv.cc.cc.lib
+          pkgs.glib
+          pkgs.zlib
+        ];
+      };
+
       serviceConfig = {
         Type = "oneshot";
         User = "comfyui";
@@ -123,9 +132,16 @@ in
           ${pkgs.python311}/bin/python -m venv "$VENV_DIR"
         fi
 
-        # Check if torch is already installed with correct version
-        if $VENV_DIR/bin/python -c "import torch; assert torch.__version__.startswith('2.2')" 2>/dev/null; then
-          echo "PyTorch 2.2 already installed"
+        # Force reinstall if numpy 2.x is detected
+        NUMPY_VERSION=$($VENV_DIR/bin/python -c "import numpy; print(numpy.__version__)" 2>/dev/null || echo "0")
+        if [[ "$NUMPY_VERSION" == 2.* ]]; then
+          echo "NumPy 2.x detected, forcing reinstall with numpy<2..."
+          $VENV_DIR/bin/pip uninstall -y numpy
+        fi
+
+        # Check if all dependencies are installed
+        if $VENV_DIR/bin/python -c "import torch, torchvision, torchaudio, yaml, PIL, aiohttp, torchsde, av; import numpy; assert numpy.__version__.startswith('1.')" 2>/dev/null; then
+          echo "All dependencies already installed with correct versions"
           exit 0
         fi
 
@@ -136,14 +152,32 @@ in
           torchaudio==2.2.2 \
           --index-url https://download.pytorch.org/whl/cu118
 
-        echo "Installing additional dependencies..."
+        echo "Installing ComfyUI dependencies..."
         $VENV_DIR/bin/pip install --no-cache-dir \
+          "numpy<2" \
+          pillow \
+          safetensors \
+          aiohttp \
+          pyyaml \
+          tqdm \
+          psutil \
+          scipy \
+          einops \
+          opencv-python \
+          matplotlib \
+          transformers \
+          accelerate \
+          sentencepiece \
           kornia \
+          torchsde \
+          spandrel \
+          soundfile \
+          av \
           || echo "Warning: Failed to install some dependencies"
 
         echo "PyTorch setup complete!"
         echo "Testing CUDA availability..."
-        $VENV_DIR/bin/python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')"
+        $VENV_DIR/bin/python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')" || echo "Warning: CUDA test failed"
       '';
     };
 
@@ -160,24 +194,33 @@ in
         ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
       };
 
-      environment = {
-        CUDA_VISIBLE_DEVICES = toString cfg.gpuDevice;
-        PYTORCH_CUDA_ALLOC_CONF = "max_split_size_mb:512";
-        # Use system-installed models directory
-        COMFYUI_MODEL_PATH = "${cfg.dataDir}/models";
-        # Use the venv Python
-        VIRTUAL_ENV = "${cfg.dataDir}/venv";
-      };
-
       serviceConfig = {
         Type = "simple";
         User = "comfyui";
         Group = "comfyui";
         WorkingDirectory = cfg.dataDir;
         # Use venv python instead of system python
-        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port}";
+        # Pass --user-directory to tell ComfyUI where to store user data
+        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user";
         Restart = "on-failure";
         RestartSec = "10s";
+
+        # Environment variables
+        Environment = [
+          "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
+          "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
+          "COMFYUI_MODEL_PATH=${cfg.dataDir}/models"
+          "VIRTUAL_ENV=${cfg.dataDir}/venv"
+          # Tell ComfyUI to use our data directory for user data
+          "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
+          "LD_LIBRARY_PATH=${lib.makeLibraryPath [
+            pkgs.stdenv.cc.cc.lib
+            pkgs.glib
+            pkgs.zlib
+            pkgs.cudatoolkit
+            pkgs.linuxPackages.nvidia_x11
+          ]}"
+        ];
 
         # GPU device access
         DeviceAllow = [
@@ -190,12 +233,15 @@ in
           "/dev/nvidia-modeset"
         ];
 
-        # Security hardening
+        # Security hardening - relaxed for GPU access
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [ cfg.dataDir ];
+
+        # Allow access to GPU and driver
+        PrivateDevices = false;
       };
     };
 
