@@ -110,6 +110,7 @@ alias rfup='bash /home/temhr/nixlab/home/common/files/scripts/auto-update-flake.
 alias rswitch='sudo nixos-rebuild switch --flake github:temhr/nixlab'
 alias rtest='sudo nixos-rebuild test --flake github:temhr/nixlab'
 alias nlist='nixos-rebuild list-generations'
+alias ndel='nix-collect-garbage -d'
 
 # 9. 🧼 Cleanup & Temp - Cache clearing, temp management
 alias clr='clear && printf "\e[3J"'
