@@ -245,8 +245,8 @@ in
         # Security hardening - relaxed for GPU access
         NoNewPrivileges = true;
         PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
+        ProtectSystem = "full";
+        ProtectHome = false;
         ReadWritePaths = [ cfg.dataDir ];
 
         # Allow access to GPU and driver
