@@ -98,6 +98,52 @@
     gpuDevice = 0;      # First GPU
     openFirewall = true;
   };
+  services.comfyui-extensions = {
+    enable = true;
+    # Recommended: Install ComfyUI-Manager (enabled by default)
+    enableManager = true;
+    # Optional: Enable ControlNet support
+    enableControlNet = false;
+    # Optional: Enable common image processing nodes
+    enableImageProcessing = false;
+    # Optional: Enable video processing nodes
+    enableVideoProcessing = false;
+    # Optional: Install custom nodes from git repos
+    customNodes = [
+      /*
+      {
+        name = "ComfyUI-Impact-Pack";
+        url = "https://github.com/ltdrdata/ComfyUI-Impact-Pack";
+        rev = "main";
+      }
+      {
+        name = "ComfyUI-AnimateDiff-Evolved";
+        url = "https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved";
+        rev = "main";
+      }
+      */
+    ];
+  };
+  services.comfyui-models = {
+    enable = true;
+    # Download Stable Diffusion 1.5 (good for P5000 with 16GB VRAM)
+    downloadSD15 = true;
+    # Download SDXL (requires more VRAM, might need --lowvram flag)
+    downloadSDXL = true;
+    # Download recommended VAE models
+    downloadVAE = true;
+    # Download upscale models
+    downloadUpscalers = true;
+    # Download custom models
+    customModels = [
+      {
+        name = "my-custom-model.safetensors";
+        url = "https://civitai.com/api/download/models/12345";
+        type = "checkpoint";
+      }
+    ];
+  };
+
 
   services.grafana-custom = {
     enable = true;
