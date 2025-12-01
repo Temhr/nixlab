@@ -102,7 +102,7 @@ in
       "d ${cfg.dataDir}/models/clip 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/clip_vision 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/embeddings 0770 comfyui comfyui -"
-      "f ${cfg.dataDir}/extra_model_paths.yaml 0660 comfyui comfyui -"
+      "f ${cfg.dataDir}/extra_model_paths.yaml 0770 comfyui comfyui -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -276,6 +276,8 @@ in
     embeddings:
       - ${cfg.dataDir}/models/embeddings
     EOF
+    chown comfyui:comfyui ${cfg.dataDir}/extra_model_paths.yaml
+    chmod 770 ${cfg.dataDir}/extra_model_paths.yaml
     '';
   };
 }
