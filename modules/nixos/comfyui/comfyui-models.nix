@@ -94,7 +94,6 @@ in
     # MODEL DIRECTORIES - Create subdirectories for different model types
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir}/models 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/checkpoints 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/vae 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/loras 0770 comfyui comfyui -"
@@ -103,7 +102,6 @@ in
       "d ${cfg.dataDir}/models/clip 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/clip_vision 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/embeddings 0770 comfyui comfyui -"
-      "f ${cfg.dataDir}/extra_model_paths.yaml 0770 comfyui comfyui -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -266,32 +264,38 @@ in
         echo "  - Upscalers: $MODELS_DIR/upscale_models/"
       '';
     };
-
     # ----------------------------------------------------------------------------
     # Generate extra_model_paths.yaml for ComfyUI
     # ----------------------------------------------------------------------------
-    system.activationScripts.writeExtraModelPathsYaml = ''
-      cat > ${cfg.dataDir}/extra_model_paths.yaml <<EOF
-    checkpoint:
-      - ${cfg.dataDir}/models/checkpoints
-    vae:
-      - ${cfg.dataDir}/models/vae
-    lora:
-      - ${cfg.dataDir}/models/loras
-    controlnet:
-      - ${cfg.dataDir}/models/controlnet
-    upscale_models:
-      - ${cfg.dataDir}/models/upscale_models
-    clip:
-      - ${cfg.dataDir}/models/clip
-    clip_vision:
-      - ${cfg.dataDir}/models/clip_vision
-    embeddings:
-      - ${cfg.dataDir}/models/embeddings
-    EOF
-    chown comfyui:comfyui ${cfg.dataDir}/extra_model_paths.yaml
-    chmod 770 ${cfg.dataDir}/extra_model_paths.yaml
-    '';
+    systemd.services.comfyui-model-config = {
+      description = "Create ComfyUI model paths configuration";
+      wantedBy = [ "comfyui.service" ];
+      before = [ "comfyui.service" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        User = "comfyui";
+        Group = "comfyui";
+        RemainAfterExit = true;
+      };
+
+      script = ''
+        cat > ${cfg.dataDir}/extra_model_paths.yaml <<'EOF'
+comfyui:
+  base_path: ${cfg.dataDir}/
+  checkpoints: models/checkpoints/
+  vae: models/vae/
+  loras: models/loras/
+  controlnet: models/controlnet/
+  upscale_models: models/upscale_models/
+  embeddings: models/embeddings/
+  clip: models/clip/
+  clip_vision: models/clip_vision/
+EOF
+        chmod 644 ${cfg.dataDir}/extra_model_paths.yaml
+        echo "Created extra_model_paths.yaml"
+      '';
+    };
   };
 }
 

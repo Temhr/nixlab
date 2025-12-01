@@ -209,7 +209,7 @@ in
         ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
         # Use venv python instead of system python
         # Explicitly specify all directory paths
-        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output";
+        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -217,7 +217,7 @@ in
         Environment = [
           "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
           "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
-          "COMFYUI_EXTRA_MODEL_PATHS=${cfg.dataDir}/extra_model_paths.yaml"
+          "COMFYUI_MODEL_PATH=${cfg.dataDir}/models"
           "VIRTUAL_ENV=${cfg.dataDir}/venv"
           # Tell ComfyUI to use our data directory for user data
           "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
@@ -244,8 +244,8 @@ in
         # Security hardening - relaxed for GPU access
         NoNewPrivileges = true;
         PrivateTmp = true;
-        ProtectSystem = "full";
-        ProtectHome = false;
+        ProtectSystem = "strict";
+        ProtectHome = true;
         ReadWritePaths = [ cfg.dataDir ];
 
         # Allow access to GPU and driver
