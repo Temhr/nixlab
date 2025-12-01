@@ -136,11 +136,13 @@
     downloadUpscalers = true;
     # Download custom models
     customModels = [
+      /*
       {
         name = "my-custom-model.safetensors";
         url = "https://civitai.com/api/download/models/12345";
         type = "checkpoint";
       }
+      */
     ];
   };
 

@@ -94,6 +94,7 @@ in
     # MODEL DIRECTORIES - Create subdirectories for different model types
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
+      "d ${cfg.dataDir}/models 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/checkpoints 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/vae 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/models/loras 0770 comfyui comfyui -"
@@ -122,6 +123,8 @@ in
         WorkingDirectory = cfg.dataDir;
         # Models can be large, allow plenty of time
         TimeoutStartSec = "infinity";
+        # Allow writing to data directory
+        ReadWritePaths = [ cfg.dataDir ];
       };
 
       path = [ pkgs.curl pkgs.wget pkgs.coreutils ];
@@ -129,6 +132,16 @@ in
       script = ''
         set -e
         MODELS_DIR="${cfg.dataDir}/models"
+
+        # Ensure all model directories exist
+        mkdir -p "$MODELS_DIR/checkpoints"
+        mkdir -p "$MODELS_DIR/vae"
+        mkdir -p "$MODELS_DIR/loras"
+        mkdir -p "$MODELS_DIR/controlnet"
+        mkdir -p "$MODELS_DIR/upscale_models"
+        mkdir -p "$MODELS_DIR/clip"
+        mkdir -p "$MODELS_DIR/clip_vision"
+        mkdir -p "$MODELS_DIR/embeddings"
 
         echo "Starting model downloads..."
 
