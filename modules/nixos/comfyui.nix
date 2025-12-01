@@ -140,7 +140,7 @@ in
         fi
 
         # Check if all dependencies are installed
-        if $VENV_DIR/bin/python -c "import torch, torchvision, torchaudio, yaml, PIL, aiohttp, torchsde, av; import numpy; assert numpy.__version__.startswith('1.')" 2>/dev/null; then
+        if $VENV_DIR/bin/python -c "import torch, torchvision, torchaudio, yaml, PIL, aiohttp, torchsde, av, pydantic, alembic; import numpy; assert numpy.__version__.startswith('1.'); from comfyui_frontend_package import __version__; from comfyui_workflow_templates import __version__ as wt; from comfyui_embedded_docs import __version__ as ed" 2>/dev/null; then
           echo "All dependencies already installed with correct versions"
           exit 0
         fi
@@ -173,6 +173,12 @@ in
           spandrel \
           soundfile \
           av \
+          pydantic \
+          pydantic-settings \
+          alembic \
+          comfyui-frontend-package \
+          comfyui-workflow-templates \
+          comfyui-embedded-docs \
           || echo "Warning: Failed to install some dependencies"
 
         echo "PyTorch setup complete!"
@@ -199,9 +205,11 @@ in
         User = "comfyui";
         Group = "comfyui";
         WorkingDirectory = cfg.dataDir;
+        # Ensure user directory exists before starting
+        ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
         # Use venv python instead of system python
         # Pass --user-directory to tell ComfyUI where to store user data
-        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user";
+        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp";
         Restart = "on-failure";
         RestartSec = "10s";
 
