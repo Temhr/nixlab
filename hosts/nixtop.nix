@@ -70,20 +70,6 @@
   virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
   ## Self-hosted apps and services
-  services.ollama-cpu = {
-    enable = true;
-    ollamaPort = 11434;
-    webuiPort = 3006;
-    ollamaBindIP = "0.0.0.0";
-    webuiBindIP = "0.0.0.0";
-    ollamaDataDir = "/data/ollama";
-    webuiDataDir = "/data/open-webui";
-
-    # Pre-download models
-    models = [ "llama2" "mistral" "codellama" ];
-
-    openFirewall = true;
-  };
 
   services.grafana-custom = {
     enable = true;
