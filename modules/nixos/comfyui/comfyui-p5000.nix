@@ -278,6 +278,7 @@ in
             pkgs.zlib
             pkgs.cudatoolkit
             pkgs.linuxPackages.nvidia_x11
+            pkgs.git
           ]}"
         ];
 
