@@ -90,6 +90,7 @@ in
       group = "comfyui";
       home = cfg.dataDir;
       description = "ComfyUI service user";
+      extraGroups = [ "video" "render" ];
     };
     users.groups.comfyui = {};
 
@@ -263,6 +264,10 @@ in
         ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
         Restart = "on-failure";
         RestartSec = "10s";
+
+        DevicePolicy = "auto";
+        SupplementaryGroups = [ "video" "render" ];
+        BindReadOnlyPaths = [ "/run/opengl-driver" ];
 
         # Environment variables
         Environment = [
