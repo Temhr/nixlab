@@ -268,16 +268,22 @@ in
         Environment = [
           "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
           "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
-          "COMFYUI_MODEL_PATH=${cfg.dataDir}/models"
+          "COMFYUI_EXTRA_MODEL_PATHS=${cfg.dataDir}/extra_model_paths.yaml"
           "VIRTUAL_ENV=${cfg.dataDir}/venv"
           # Tell ComfyUI to use our data directory for user data
           "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
+          # Add git to PATH for ComfyUI-Manager
+          "PATH=${pkgs.git}/bin:${pkgs.coreutils}/bin"
           "LD_LIBRARY_PATH=${lib.makeLibraryPath [
             pkgs.stdenv.cc.cc.lib
             pkgs.glib
             pkgs.zlib
             pkgs.cudatoolkit
             pkgs.linuxPackages.nvidia_x11
+            pkgs.libGL
+            pkgs.libGLU
+            pkgs.xorg.libX11
+            pkgs.xorg.libXext
           ]}"
         ];
 

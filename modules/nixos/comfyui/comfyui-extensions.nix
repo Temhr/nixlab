@@ -106,6 +106,10 @@ in
         # Create custom_nodes directory if it doesn't exist
         mkdir -p "$CUSTOM_NODES_DIR"
 
+        # Install GitPython for ComfyUI-Manager
+        echo "Installing GitPython for Manager..."
+        $VENV_DIR/bin/pip install --no-cache-dir GitPython || echo "Warning: Failed to install GitPython"
+
         echo "Installing ComfyUI extensions..."
 
         ${lib.optionalString extensionsCfg.enableManager ''
