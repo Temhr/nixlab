@@ -123,6 +123,13 @@ in
           chmod -R u+w "$COMFYUI_PATCHED"
         fi
 
+        # Create symlink to custom_nodes directory
+        if [ ! -L "$COMFYUI_PATCHED/custom_nodes" ]; then
+          echo "Removing default custom_nodes and creating symlink..."
+          rm -rf "$COMFYUI_PATCHED/custom_nodes"
+          ln -sf "${cfg.dataDir}/custom_nodes" "$COMFYUI_PATCHED/custom_nodes"
+        fi
+
         # Patch ops.py for PyTorch 2.2 compatibility
         OPS_FILE="$COMFYUI_PATCHED/comfy/ops.py"
 
@@ -136,6 +143,8 @@ in
         else
           echo "ops.py already patched or doesn't need patching"
         fi
+
+        echo "ComfyUI patched and custom_nodes symlink created"
       '';
     };
 
