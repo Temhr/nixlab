@@ -97,6 +97,49 @@ in
     users.users.temhr.extraGroups = [ "comfyui" ];
 
     # ----------------------------------------------------------------------------
+    # COMFYUI PATCH - Fix PyTorch 2.2 compatibility
+    # ----------------------------------------------------------------------------
+    systemd.services.comfyui-patch = {
+      description = "Patch ComfyUI for PyTorch 2.2 compatibility";
+      wantedBy = [ "comfyui.service" ];
+      before = [ "comfyui.service" ];
+      after = [ "comfyui-pytorch-setup.service" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        User = "comfyui";
+        Group = "comfyui";
+        RemainAfterExit = true;
+      };
+
+      script = ''
+        # Copy ComfyUI to a writable location if not already done
+        COMFYUI_SRC="${pkgs.comfyui}/share/comfyui"
+        COMFYUI_PATCHED="${cfg.dataDir}/comfyui"
+
+        if [ ! -d "$COMFYUI_PATCHED" ]; then
+          echo "Copying ComfyUI to writable location..."
+          cp -r "$COMFYUI_SRC" "$COMFYUI_PATCHED"
+          chmod -R u+w "$COMFYUI_PATCHED"
+        fi
+
+        # Patch ops.py for PyTorch 2.2 compatibility
+        OPS_FILE="$COMFYUI_PATCHED/comfy/ops.py"
+
+        if grep -q "torch.compiler.is_compiling()" "$OPS_FILE"; then
+          echo "Patching ops.py for PyTorch 2.2 compatibility..."
+
+          # Replace torch.compiler.is_compiling() with a compatibility check
+          sed -i 's/if torch.compiler.is_compiling():/if hasattr(torch.compiler, "is_compiling") and torch.compiler.is_compiling():/' "$OPS_FILE"
+
+          echo "Patch applied successfully"
+        else
+          echo "ops.py already patched or doesn't need patching"
+        fi
+      '';
+    };
+
+    # ----------------------------------------------------------------------------
     # PYTORCH INSTALLER - One-shot service to install PyTorch 2.2 with CUDA support
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-pytorch-setup = {
@@ -193,8 +236,8 @@ in
     systemd.services.comfyui = {
       description = "ComfyUI Stable Diffusion Service (GPU - P5000)";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "comfyui-pytorch-setup.service" ];
-      requires = [ "comfyui-pytorch-setup.service" ];
+      after = [ "network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service" ];
+      requires = [ "comfyui-pytorch-setup.service" "comfyui-patch.service" ];
       # Wait for setup to complete
       unitConfig = {
         ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
@@ -207,9 +250,8 @@ in
         WorkingDirectory = cfg.dataDir;
         # Ensure user directory exists before starting
         ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
-        # Use venv python instead of system python
-        # Explicitly specify all directory paths
-        ExecStart = "${cfg.dataDir}/venv/bin/python ${pkgs.comfyui}/share/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
+        # Use patched ComfyUI from writable location
+        ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
         Restart = "on-failure";
         RestartSec = "10s";
 
