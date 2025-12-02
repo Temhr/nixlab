@@ -48,5 +48,3 @@ eval "$(zoxide init bash)"
 
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --bash)"
-
-export SCRCPY_RENDER_DRIVER=opengl
