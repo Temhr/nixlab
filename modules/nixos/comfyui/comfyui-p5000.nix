@@ -228,7 +228,6 @@ in
           pydantic \
           pydantic-settings \
           alembic \
-          opencv-python-headless \
           comfyui-frontend-package \
           comfyui-workflow-templates \
           comfyui-embedded-docs \
