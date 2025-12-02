@@ -103,11 +103,11 @@
     # Recommended: Install ComfyUI-Manager (enabled by default)
     enableManager = true;
     # Optional: Enable ControlNet support
-    enableControlNet = false;
+    enableControlNet = true;
     # Optional: Enable common image processing nodes
-    enableImageProcessing = false;
+    enableImageProcessing = true;
     # Optional: Enable video processing nodes
-    enableVideoProcessing = false;
+    enableVideoProcessing = true;
     # Optional: Install custom nodes from git repos
     customNodes = [
       /*
