@@ -228,6 +228,7 @@ in
           pydantic \
           pydantic-settings \
           alembic \
+          opencv-python-headless \
           comfyui-frontend-package \
           comfyui-workflow-templates \
           comfyui-embedded-docs \
@@ -278,7 +279,6 @@ in
             pkgs.zlib
             pkgs.cudatoolkit
             pkgs.linuxPackages.nvidia_x11
-            pkgs.git
           ]}"
         ];
 
