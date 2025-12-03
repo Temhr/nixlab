@@ -80,6 +80,7 @@ in
       "d ${cfg.dataDir}/input 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/temp 0770 comfyui comfyui -"
       "d ${cfg.dataDir}/user 0770 comfyui comfyui -"
+      "d ${cfg.dataDir}/database 0770 comfyui comfyui -"
     ];
 
     # ----------------------------------------------------------------------------
@@ -285,6 +286,7 @@ in
             pkgs.xorg.libX11
             pkgs.xorg.libXext
           ]}"
+          "COMFYUI_DB_PATH=${cfg.dataDir}/database/comfyui.db"
         ];
 
         # GPU device access
