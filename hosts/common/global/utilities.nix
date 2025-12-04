@@ -44,6 +44,7 @@
     usbutils                   # Inspect and interact with USB devices
     sysfsutils                 # Query device information from sysfs
     lshw-gui                   # Hardware lister with graphical interface
+    esptool                    # ESP8266 and ESP32 serial bootloader utility
 
     ## File Management
     curl                       # Transfer data from URLs (HTTP, FTP, etc.)
