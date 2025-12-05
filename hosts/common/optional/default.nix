@@ -7,6 +7,7 @@
     ./education.nix
     ./games.nix
     ./graphical-shells.nix
+    ./ignore-lid.nix
     ./media.nix
     ./productivity.nix
     ./virtualizations.nix
