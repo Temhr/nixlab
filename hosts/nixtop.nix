@@ -38,6 +38,12 @@
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
+  services.ignoreLid = {
+    enable = true;
+    # Optional:
+    disableSleepTargets = true;
+  };
+
   ## Development
   blender.enable = true;    #3D Creation/Animation/Publishing System
   godot.enable = true;    #Free and Open Source 2D and 3D game engine
