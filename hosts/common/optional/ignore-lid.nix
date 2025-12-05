@@ -15,10 +15,10 @@ in {
 
   config = lib.mkIf cfg.enable {
     # systemd-logind: ignore all lid events
-    services.logind = {
-      lidSwitch = "ignore";
-      lidSwitchDocked = "ignore";
-      lidSwitchExternalPower = "ignore";
+    services.logind.settings.Login = {
+      HandleLidSwitch = "ignore";
+      HandleLidSwitchDocked = "ignore";
+      HandleLidSwitchExternalPower = "ignore";
     };
 
     # Optional: disable all sleep mechanisms
