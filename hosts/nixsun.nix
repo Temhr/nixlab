@@ -29,6 +29,12 @@
   # TODO: Set your hostname
   networking.hostName = "nixsun";
 
+  services.ignoreLid = {
+    enable = true;
+    # Optional:
+    disableSleepTargets = true;
+  };
+
   ## Enable CUPS to print documents.
   services.printing.enable = true;
 
