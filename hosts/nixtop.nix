@@ -136,7 +136,7 @@
     scons         # Improved, cross-platform substitute for Make
     python3       # High-level dynamically-typed programming language
 
-    qBittorrent   # Featureful free software BitTorrent client
+    qbittorrent   # Featureful free software BitTorrent client
 
   ];
 
