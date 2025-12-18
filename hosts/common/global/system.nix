@@ -1,4 +1,3 @@
 { ... }: {
 
-  system.rebuild.enableNg = true;
 }
