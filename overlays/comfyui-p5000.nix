@@ -22,7 +22,7 @@ final: prev: {
       owner = "comfyanonymous";
       repo = "ComfyUI";
       rev = "master";
-      sha256 = "sha256-bCuT5KBp9bAb62ND1QWi5Ez6Xa8R0J8/ymlBvx4KELg=";
+      sha256 = "sha256-YTuJJKs29O937VfwTEpQ26GofhRNVLfKFIMEgCYlBjM=";
     };
 
     nativeBuildInputs = [ prev.makeWrapper prev.autoPatchelfHook ];
