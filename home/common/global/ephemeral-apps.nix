@@ -64,6 +64,18 @@
       Categories=AudioVideo;Network;Video;Ephemeral-App;
     '';
 
+     ## Drawio
+    ".local/share/applications/drawio.desktop".text = ''
+      [Desktop Entry]
+      Name=Drawio ⚡
+      Comment=Desktop version of draw.io for creating diagrams
+      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#drawio; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=drawio
+      Terminal=false
+      Type=Application
+      Categories=Graphics;Ephemeral-App;
+    '';
+
     ## Gimp
     ".local/share/applications/gimp.desktop".text = ''
       [Desktop Entry]

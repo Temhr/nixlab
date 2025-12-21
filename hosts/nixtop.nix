@@ -137,7 +137,6 @@
     python3       # High-level dynamically-typed programming language
 
     qbittorrent   # Featureful free software BitTorrent client
-
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
