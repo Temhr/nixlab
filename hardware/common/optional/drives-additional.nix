@@ -7,6 +7,12 @@
               default = false;
             };
       };
+      mount-home1 = {
+          enable = lib.mkEnableOption {
+              description = "mounts home drive";
+              default = false;
+            };
+      };
       mount-shelf = {
           enable = lib.mkEnableOption {
               description = "mounts shelf drive in home directory";
