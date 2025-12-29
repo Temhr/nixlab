@@ -19,6 +19,7 @@
     ./nix.nix
     ./nixpkgs.nix
     ./open-ssh.nix
+    ./power-management.nix
     ./system.nix
     ./utilities.nix
   ];
