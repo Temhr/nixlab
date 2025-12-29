@@ -40,6 +40,12 @@
               fsType = "ext4";
             };
     })
+    (lib.mkIf config.mount-home1.enable {
+        fileSystems."/home1" =
+            { device = "/dev/disk/by-label/home";
+              fsType = "ext4";
+            };
+    })
     (lib.mkIf config.mount-shelf.enable {
         fileSystems."/data" =
             { device = "/dev/disk/by-label/data";

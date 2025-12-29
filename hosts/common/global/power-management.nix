@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, lib, ...}:
 
 {
   # Disable WD HDD power management (already have this)
