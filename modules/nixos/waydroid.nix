@@ -50,6 +50,13 @@ in
         default = false;
         description = "Automatically start Waydroid container on boot";
       };
+
+      # OPTIONAL: Install Google Play Services (default: false)
+      enableGapps = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Install Google Play Services and Google Play Store";
+      };
     };
   };
 
@@ -113,7 +120,10 @@ in
         # Initialize Waydroid if not already initialized
         if [ ! -f ${cfg.dataDir}/.initialized ]; then
           echo "Initializing Waydroid..."
-          ${cfg.package}/bin/waydroid init -f || true
+          ${if cfg.enableGapps
+            then "${cfg.package}/bin/waydroid init -s GAPPS -f || true"
+            else "${cfg.package}/bin/waydroid init -f || true"
+          }
           touch ${cfg.dataDir}/.initialized
         fi
       '';
@@ -167,6 +177,15 @@ services.waydroid-custom = {
 };
 
 
+Configuration with Google Play Services:
+-----------------------------------------
+services.waydroid-custom = {
+  enable = true;
+  enableGapps = true;  # Install Google Play Services
+  allowedUsers = [ "temhr" ];
+};
+
+
 Full configuration:
 -------------------
 services.waydroid-custom = {
@@ -174,6 +193,7 @@ services.waydroid-custom = {
   dataDir = "/data/waydroid";
   allowedUsers = [ "alice" "bob" ];
   autoStart = true;
+  enableGapps = true;
 };
 
 
@@ -226,6 +246,9 @@ View logs:
 Initialize manually:
   sudo waydroid init -f
 
+  # Or with Google Play Services
+  sudo waydroid init -s GAPPS -f
+
 Check container status:
   sudo waydroid status
 
@@ -235,7 +258,15 @@ Stop container:
 Reset Waydroid (nuclear option):
   sudo systemctl stop waydroid-container
   sudo rm -rf /var/lib/waydroid
+  sudo rm -f /var/lib/waydroid/.initialized
   sudo systemctl start waydroid-container
+
+
+Google Play Services:
+  - Set enableGapps = true before first initialization
+  - Cannot add GAPPS after initialization without reset
+  - Requires accepting Google's Terms of Service
+  - First launch: Sign in with Google account in Play Store
 
 
 Common issues:
