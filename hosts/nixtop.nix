@@ -77,6 +77,14 @@
 
   ## Self-hosted apps and services
 
+  services.waydroid-custom = {
+    enable = true;
+    dataDir = "/data/waydroid";
+    allowedUsers = [ "temhr" ];
+    autoStart = true;
+    enableGapps = true;
+  };
+
   services.grafana-custom = {
     enable = true;
     port = 3101;
