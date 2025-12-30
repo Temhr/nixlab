@@ -20,6 +20,14 @@ in
         description = "The Waydroid package to use";
       };
 
+      # OPTIONAL: Use nftables-compatible version (default: false, auto-detects)
+      # Set to true if you're on a newer kernel that only has nftables
+      useNftables = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Use nftables instead of iptables (for newer kernels)";
+      };
+
       # OPTIONAL: Data directory (default: /var/lib/waydroid)
       dataDir = lib.mkOption {
         type = lib.types.path;
@@ -82,6 +90,34 @@ in
 
     boot.kernel.sysctl = {
       "net.ipv4.ip_forward" = 1;
+    };
+
+    # ----------------------------------------------------------------------------
+    # NETWORKING SETUP - Configure firewall for Waydroid networking
+    # ----------------------------------------------------------------------------
+    # Allow IP forwarding (already set above in sysctl)
+    # Set FORWARD policy to ACCEPT for iptables/nftables
+    networking.firewall = {
+      # Trust the waydroid0 interface
+      trustedInterfaces = [ "waydroid0" ];
+
+      # Allow DNS and DHCP for Waydroid
+      allowedUDPPorts = [ 53 67 ];
+
+      # Enable packet forwarding
+      checkReversePath = false;
+
+      # Extra commands to ensure FORWARD chain accepts packets
+      extraCommands = ''
+        # Accept forwarding for waydroid0
+        iptables -A FORWARD -i waydroid0 -j ACCEPT
+        iptables -A FORWARD -o waydroid0 -j ACCEPT
+      '';
+
+      extraStopCommands = ''
+        iptables -D FORWARD -i waydroid0 -j ACCEPT 2>/dev/null || true
+        iptables -D FORWARD -o waydroid0 -j ACCEPT 2>/dev/null || true
+      '';
     };
 
     # ----------------------------------------------------------------------------
@@ -244,6 +280,15 @@ TROUBLESHOOTING
 Check service status:
   sudo systemctl status waydroid-container
 
+Check network status:
+  ip addr show waydroid0  # Should show waydroid0 interface
+  waydroid status         # Should show IP address
+
+  # Inside Waydroid
+  waydroid shell
+  ping 8.8.8.8           # Test connectivity
+  ping google.com        # Test DNS
+
 View logs:
   sudo journalctl -u waydroid-container -f
 
@@ -283,6 +328,19 @@ Common issues:
     → Module sets psi=1 automatically
     → Verify: cat /proc/pressure/cpu (should exist)
     → If still failing: sudo rm -rf /var/lib/waydroid && rebuild
+
+  - No network / Can't connect to internet:
+    → Check waydroid0 exists: ip addr show waydroid0
+    → Check IP forwarding: cat /proc/sys/net/ipv4/ip_forward (should be 1)
+    → Check FORWARD chain: sudo iptables -L FORWARD -v
+    → Module configures this automatically
+    → Manual fix: sudo iptables -P FORWARD ACCEPT
+    → Restart container: sudo systemctl restart waydroid-container
+
+  - DNS works but no connection (nftables issue):
+    → If on newer kernel (6.0+), may need nftables version
+    → Try: useNftables = true; in config
+    → Or use: virtualisation.waydroid.enable = true; (official module)
 
   - Session won't start: Container not running
     → Fix: sudo systemctl start waydroid-container
