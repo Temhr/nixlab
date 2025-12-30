@@ -76,6 +76,10 @@ in
     # ----------------------------------------------------------------------------
     # KERNEL PARAMETERS - Required for Waydroid
     # ----------------------------------------------------------------------------
+    boot.kernelParams = [
+      "psi=1"  # Enable Pressure Stall Information (fixes boot loops)
+    ];
+
     boot.kernel.sysctl = {
       "net.ipv4.ip_forward" = 1;
     };
@@ -274,11 +278,20 @@ Common issues:
     → Check: lsmod | grep binder
     → Fix: sudo modprobe binder_linux
 
+  - Boot loop / Container crashes repeatedly:
+    → Most common cause: PSI not enabled
+    → Module sets psi=1 automatically
+    → Verify: cat /proc/pressure/cpu (should exist)
+    → If still failing: sudo rm -rf /var/lib/waydroid && rebuild
+
   - Session won't start: Container not running
     → Fix: sudo systemctl start waydroid-container
 
   - Permission denied: User not in waydroid group
     → Fix: Add user to allowedUsers list
+
+  - For kernel 5.18+: May need ibt=off kernel parameter
+    → Add to boot.kernelParams in configuration.nix
 
 
 ================================================================================
