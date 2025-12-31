@@ -116,10 +116,10 @@ perform_backup() {
             ;;
     esac
 
-    echo "Converting symlinks..."
-    if ! convert_symlinks "$dest_dir" "$SOURCE_DIR"; then
-        echo "Warning: symlink conversion failed (non-fatal)"
-    fi
+    #echo "Converting symlinks..."
+    #if ! convert_symlinks "$dest_dir" "$SOURCE_DIR"; then
+    #    echo "Warning: symlink conversion failed (non-fatal)"
+    #fi
 
     echo "Backup completed to: $dest_dir"
     return 0
