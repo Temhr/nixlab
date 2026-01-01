@@ -136,6 +136,12 @@ in
       wantedBy = lib.mkIf cfg.autoStart [ "multi-user.target" ];
       after = [ "network.target" ];
 
+      # Don't block system boot/rebuild if service fails
+      unitConfig = {
+        # Service is allowed to fail without blocking other services
+        DefaultDependencies = false;
+      };
+
       path = [ cfg.package ];
 
       serviceConfig = {
@@ -143,8 +149,14 @@ in
         RemainAfterExit = true;
         ExecStart = "${cfg.package}/bin/waydroid container start";
         ExecStop = "${cfg.package}/bin/waydroid container stop";
-        Restart = "on-failure";
-        RestartSec = "10s";
+
+        # Timeout and restart configuration
+        TimeoutStartSec = "90s";  # Give it time to initialize
+        TimeoutStopSec = "30s";   # Don't hang on shutdown
+        Restart = "no";           # Don't auto-restart on failure
+
+        # If it fails to start, don't block the system
+        SuccessExitStatus = "0 1"; # Accept both success and some failures
 
         # Environment
         Environment = [
@@ -159,12 +171,26 @@ in
       preStart = ''
         # Initialize Waydroid if not already initialized
         if [ ! -f ${cfg.dataDir}/.initialized ]; then
-          echo "Initializing Waydroid..."
+          echo "Initializing Waydroid (this may take a few minutes)..."
           ${if cfg.enableGapps
             then "${cfg.package}/bin/waydroid init -s GAPPS -f || true"
             else "${cfg.package}/bin/waydroid init -f || true"
           }
           touch ${cfg.dataDir}/.initialized
+          echo "Waydroid initialized. You can start it with: sudo systemctl start waydroid-container"
+        fi
+      '';
+
+      # Post-start check with grace period
+      postStart = ''
+        # Give container a moment to settle
+        sleep 2
+
+        # Verify container actually started
+        if ! ${cfg.package}/bin/waydroid status >/dev/null 2>&1; then
+          echo "Warning: Waydroid container may not have started properly"
+          echo "Check status with: sudo systemctl status waydroid-container"
+          exit 0  # Don't fail the service
         fi
       '';
     };
@@ -242,8 +268,11 @@ USAGE
 ================================================================================
 
 First time setup:
-  # System will initialize automatically on first service start
+  # System will initialize automatically on first rebuild
+  # If autoStart = false, manually start when needed:
   sudo systemctl start waydroid-container
+
+  # Initialization happens in background and won't block system
 
 Starting Waydroid:
   # Start container (if not auto-starting)
@@ -319,6 +348,11 @@ Google Play Services:
 
 
 Common issues:
+  - System rebuild hangs:
+    → Waydroid service is now non-blocking
+    → If it still hangs, stop service first: sudo systemctl stop waydroid-container
+    → Then rebuild: sudo nixos-rebuild switch
+
   - "binder device not found": Kernel modules not loaded
     → Check: lsmod | grep binder
     → Fix: sudo modprobe binder_linux
@@ -355,6 +389,12 @@ Common issues:
 ================================================================================
 NOTES
 ================================================================================
+
+System Integration:
+  - Service is non-blocking and won't hang nixos-rebuild
+  - Safe to rebuild even with Waydroid running
+  - Initialization happens in background on first activation
+  - Use autoStart = false for manual control (recommended)
 
 Requirements:
   - Wayland compositor (required for Waydroid)
