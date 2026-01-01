@@ -81,7 +81,7 @@
     enable = true;
     dataDir = "/data/waydroid";
     allowedUsers = [ "temhr" ];
-    autoStart = true;
+    autoStart = false;
     enableGapps = true;
   };
 
