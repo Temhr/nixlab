@@ -1,6 +1,5 @@
 # ComfyUI overlay with CUDA support for P5000
 final: prev: {
-
   # Fix terminado test failure
   python311 = prev.python311.override {
     packageOverrides = pyfinal: pyprev: {

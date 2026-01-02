@@ -8,9 +8,10 @@
     let
       # Load each overlay module
       ollamaOverlay = import ./ollama-p5000.nix final prev;
+      open-webuiOverlay = import ./open-webui.nix final prev;
       comfyuiOverlay = import ./comfyui-p5000.nix final prev;
     in
-      ollamaOverlay // comfyuiOverlay;
+      ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
 
   # Stable nixpkgs overlay
   stable-packages = final: _prev: {
