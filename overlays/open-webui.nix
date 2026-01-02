@@ -7,18 +7,6 @@ final: prev: {
     '';
   });
 
-  # Fix terminado test failure
-  python311 = prev.python311.override {
-    packageOverrides = pyfinal: pyprev: {
-      terminado = pyprev.terminado.overridePythonAttrs (old: {
-        doCheck = false;  # Skip tests due to flaky test_max_terminals
-      });
-      einops = pyprev.einops.overridePythonAttrs (old: {
-        doCheck = false;  # Skip tests since terminado is broken
-      });
-    };
-  };
-
   # Fix duckdb-engine test failures and extract-msg version constraints
   python313 = prev.python313.override {
     packageOverrides = pyfinal: pyprev: {
