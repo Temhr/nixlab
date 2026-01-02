@@ -15,7 +15,6 @@ BACKUP_DESTINATIONS=(
 # Rsync options
 RSYNC_OPTS=(
     "-rva"
-    "--copy-links"
     "--delete"
     "--delete-before"
     "--force"
