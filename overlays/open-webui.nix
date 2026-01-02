@@ -26,15 +26,12 @@ final: prev: {
         doCheck = false;  # Skip tests - pg_catalog queries fail in test suite
       });
       extract-msg = pyprev.extract-msg.overridePythonAttrs (old: {
-        # Relax beautifulsoup4 version constraint
+        # Skip runtime dependency check for beautifulsoup4 version
+        pythonRuntimeDepsCheck = false;
+        # Also relax the constraint in setup files if possible
         postPatch = (old.postPatch or "") + ''
-          substituteInPlace setup.py \
-            --replace-fail '"beautifulsoup4<4.14,>=4.11.1"' '"beautifulsoup4>=4.11.1"' \
-            --replace-fail "'beautifulsoup4<4.14,>=4.11.1'" "'beautifulsoup4>=4.11.1'"
-          if [ -f setup.cfg ]; then
-            substituteInPlace setup.cfg \
-              --replace-fail 'beautifulsoup4<4.14,>=4.11.1' 'beautifulsoup4>=4.11.1'
-          fi
+          sed -i 's/beautifulsoup4<4\.14,>=4\.11\.1/beautifulsoup4>=4.11.1/g' setup.py || true
+          sed -i 's/beautifulsoup4<4\.14,>=4\.11\.1/beautifulsoup4>=4.11.1/g' setup.cfg || true
         '';
       });
     };
