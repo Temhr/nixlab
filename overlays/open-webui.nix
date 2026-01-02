@@ -26,13 +26,8 @@ final: prev: {
         doCheck = false;  # Skip tests - pg_catalog queries fail in test suite
       });
       extract-msg = pyprev.extract-msg.overridePythonAttrs (old: {
-        # Skip runtime dependency check for beautifulsoup4 version
-        pythonRuntimeDepsCheck = false;
-        # Also relax the constraint in setup files if possible
-        postPatch = (old.postPatch or "") + ''
-          sed -i 's/beautifulsoup4<4\.14,>=4\.11\.1/beautifulsoup4>=4.11.1/g' setup.py || true
-          sed -i 's/beautifulsoup4<4\.14,>=4\.11\.1/beautifulsoup4>=4.11.1/g' setup.cfg || true
-        '';
+        # Skip runtime dependency version check for beautifulsoup4
+        dontCheckRuntimeDeps = true;
       });
     };
   };
