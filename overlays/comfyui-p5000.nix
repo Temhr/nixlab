@@ -1,11 +1,5 @@
 # ComfyUI overlay with CUDA support for P5000
 final: prev: {
-  # Fix ctranslate2 compilation error (missing cstdint include)
-  ctranslate2 = prev.ctranslate2.overrideAttrs (oldAttrs: {
-    postPatch = (oldAttrs.postPatch or "") + ''
-      sed -i '1i#include <cstdint>' third_party/cxxopts/include/cxxopts.hpp
-    '';
-  });
 
   # Fix terminado test failure
   python311 = prev.python311.override {
@@ -15,15 +9,6 @@ final: prev: {
       });
       einops = pyprev.einops.overridePythonAttrs (old: {
         doCheck = false;  # Skip tests since terminado is broken
-      });
-    };
-  };
-
-  # Fix duckdb-engine test failures (pg_catalog compatibility issues)
-  python313 = prev.python313.override {
-    packageOverrides = pyfinal: pyprev: {
-      duckdb-engine = pyprev.duckdb-engine.overridePythonAttrs (old: {
-        doCheck = false;  # Skip tests - pg_catalog queries fail in test suite
       });
     };
   };
