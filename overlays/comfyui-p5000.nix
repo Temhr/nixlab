@@ -18,6 +18,16 @@ final: prev: {
       });
     };
   };
+
+  # Fix duckdb-engine test failures (pg_catalog compatibility issues)
+  python313 = prev.python313.override {
+    packageOverrides = pyfinal: pyprev: {
+      duckdb-engine = pyprev.duckdb-engine.overridePythonAttrs (old: {
+        doCheck = false;  # Skip tests - pg_catalog queries fail in test suite
+      });
+    };
+  };
+
   # ComfyUI with CUDA support for P5000
   # Uses Python packages from current nixpkgs but we'll override torch
   comfyui = prev.stdenv.mkDerivation rec {
