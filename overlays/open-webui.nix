@@ -25,6 +25,9 @@ final: prev: {
       duckdb-engine = pyprev.duckdb-engine.overridePythonAttrs (old: {
         doCheck = false;  # Skip tests - pg_catalog queries fail in test suite
       });
+      langchain-community = pyprev.langchain-community.overridePythonAttrs (old: {
+        doCheck = false;  # Skip tests - depends on duckdb-engine tests that fail
+      });
       extract-msg = pyprev.extract-msg.overridePythonAttrs (old: {
         # Skip runtime dependency version check for beautifulsoup4
         dontCheckRuntimeDeps = true;
