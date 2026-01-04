@@ -75,7 +75,7 @@
           "Comfyui - GPU" = {
             href = "http://192.168.0.200:8188";
             icon = "comfyui";
-            description = "Get up and running with large language models locally";
+            description = "Diffusion model GUI, api and backend with a graph/nodes interface";
             target = "_blank";
             server = "nixace";
             ping = "http://192.168.0.200:8188";
