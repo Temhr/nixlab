@@ -196,6 +196,30 @@
       Categories=Game;Ephemeral-App;
     '';
 
+    ## Wine-Wayland
+    ".local/share/applications/wine-wayland.desktop".text = ''
+      [Desktop Entry]
+      Name=Wine-Wayland ⚡
+      Comment=Open Source implementation of the Windows API on top of X, OpenGL, and Unix
+      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs#wine-wayland; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=wine-wayland
+      Terminal=false
+      Type=Application
+      Categories=Utilities;Ephemeral-App;
+    '';
+
+    ## Winetricks
+    ".local/share/applications/winetricks.desktop".text = ''
+      [Desktop Entry]
+      Name=Winetricks ⚡
+      Comment=Script to install DLLs needed to work around problems in Wine
+      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs#winetricks; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=winetricks
+      Terminal=false
+      Type=Application
+      Categories=Utilities;Ephemeral-App;
+    '';
+
     ## Zed Editor
     ".local/share/applications/zedEditor.desktop".text = ''
       [Desktop Entry]
