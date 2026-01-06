@@ -15,9 +15,10 @@ in
   };
 
   config = {
-    services.flatpak.enable = true; #Linux application sandboxing and distribution framework
+    #Linux application sandboxing and distribution framework
+    services.flatpak.enable = true;
 
-  #Adds Flathub repository as default
+    #Adds Flathub repository as default
     systemd.services.flatpak-repo = {
       wantedBy = [ "multi-user.target" ];
       path = [ pkgs.flatpak ];
@@ -25,10 +26,9 @@ in
         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       '';
       serviceConfig.Type = "oneshot";
-
-    # Wait for network to be available before running
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
+      # Wait for network to be available before running
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
     };
 
     systemd.services.flatpak-installer = {
