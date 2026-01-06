@@ -41,9 +41,6 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
       };
-    # Wait for network to be available before running
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
     };
 
     # Enable XDG portal for better desktop integration
