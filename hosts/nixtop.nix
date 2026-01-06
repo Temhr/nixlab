@@ -75,13 +75,7 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
   #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
-  # Define your Flatpak packages here
-  flatpakPackages = [
-    "com.usebottles.bottles"
-  ];
-
   ## Self-hosted apps and services
-
   services.waydroid-custom = {
     enable = true;
     dataDir = "/data/waydroid";
@@ -138,6 +132,11 @@
       };
     };
   };
+
+  # Define your Flatpak packages here
+  flatpakPackages = [
+    "com.usebottles.bottles"
+  ];
 
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
