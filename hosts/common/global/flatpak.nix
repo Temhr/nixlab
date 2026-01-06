@@ -1,15 +1,53 @@
-{ pkgs, ... }: {
-  services.flatpak.enable = true;  #Linux application sandboxing and distribution framework
+{ config, pkgs, lib, ... }:
+
+let
+  installCmd = lib.concatMapStringsSep "\n"
+    (pkg: "flatpak install --noninteractive flathub ${pkg}")
+    config.flatpakPackages;
+in
+{
+  options = {
+    flatpakPackages = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "List of Flatpak packages to install from Flathub";
+    };
+  };
+
+  config = {
+    services.flatpak.enable = true; #Linux application sandboxing and distribution framework
+
   #Adds Flathub repository as default
-  systemd.services.flatpak-repo = {
-    wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.flatpak ];
-    script = ''
-      flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    '';
+    systemd.services.flatpak-repo = {
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.flatpak ];
+      script = ''
+        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      '';
+      serviceConfig.Type = "oneshot";
 
     # Wait for network to be available before running
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    };
+
+    systemd.services.flatpak-installer = {
+      wantedBy = [ "multi-user.target" ];
+      after = [ "flatpak-repo.service" ];
+      wants = [ "flatpak-repo.service" ];
+      path = [ pkgs.flatpak ];
+      script = installCmd;
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+    # Wait for network to be available before running
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    };
+
+    # Enable XDG portal for better desktop integration
+    xdg.portal.enable = true;
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 }
