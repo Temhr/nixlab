@@ -12,23 +12,66 @@ BACKUP_DESTINATIONS=(
     "/mnt/mirk3"
 )
 
-# Rsync options
+# Rsync options (curated for your setup)
 RSYNC_OPTS=(
     "-rva"
+    "--numeric-ids"
+    "--xattrs"
+    "--acls"
+
+    # Safety
     "--delete"
-    "--delete-before"
-    "--force"
-    "--exclude=*cache*"
+    "--delete-delay"        # safer than --delete-before
+    "--partial"
+    "--inplace"
+
+    # Follow symlinks (needed for /data/shelf)
+    "-L"
+
+    # Copy target of broken symlinks
+    "--copy-unsafe-links"
+
+    # =========================
+    # Exclusions
+    # =========================
+
+    # Caches / temp
+    "--exclude=.cache/"
+    "--exclude=.var/"
     "--exclude=*Cache*"
-    "--exclude=*/.local*"
-    "--exclude=*.mozilla*"
-    "--exclude=*.steam*"
-    "--exclude=*.zen*"
-    "--exclude=*.Trash*"
-    "--exclude=*.nix-profile*"
-    "--exclude=*.nix-defexpr*"
-    "--exclude=*nixlab*"
+    "--exclude=*cache*"
+    "--exclude=.Trash*"
+
+    # Nix generated
+    "--exclude=.nix-profile"
+    "--exclude=.nix-defexpr"
     "--exclude=result"
+    "--exclude=nixlab"
+
+    # App junk
+    "--exclude=.steam/"
+    "--exclude=.steampath"
+    "--exclude=.steampid"
+    "--exclude=.android/"
+    "--exclude=.stfolder/"
+    "--exclude=.nv/"
+    "--exclude=.zen/"
+
+    # Lock files
+    "--exclude=SingletonLock"
+    "--exclude=SingletonSocket"
+    "--exclude=SingletonCookie"
+
+    # Things you *do* want
+    "--include=.ssh/***"
+    "--include=.pki/***"
+    "--include=.mozilla/***"
+    "--include=Calibre Library/***"
+    "--include=.bash_history"
+    "--include=.python_history"
+
+    # Exclude everything else not explicitly included
+    "--exclude=*"
 )
 
 # Function to convert symlinks to point within the backup directory
