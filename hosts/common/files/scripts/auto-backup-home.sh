@@ -12,43 +12,41 @@ BACKUP_DESTINATIONS=(
     "/mnt/mirk3"
 )
 
-# Rsync options (curated for your setup)
+# Rsync options
 RSYNC_OPTS=(
     "-rva"
+    "-L"                    # Follow symlinks (for /data/shelf)
     "--numeric-ids"
     "--xattrs"
     "--acls"
 
     # Safety
     "--delete"
-    "--delete-delay"        # safer than --delete-before
+    "--delete-delay"
     "--partial"
     "--inplace"
-
-    # Follow symlinks (needed for /data/shelf)
-    "-L"
 
     # Copy target of broken symlinks
     "--copy-unsafe-links"
 
     # =========================
-    # Exclusions
+    # Exclusions (be specific!)
     # =========================
 
     # Caches / temp
     "--exclude=.cache/"
     "--exclude=.var/"
-    "--exclude=*Cache*"
-    "--exclude=*cache*"
-    "--exclude=.Trash*"
+    "--exclude=*Cache*/"
+    "--exclude=*cache*/"
+    "--exclude=.Trash*/"
 
     # Nix generated
     "--exclude=.nix-profile"
     "--exclude=.nix-defexpr"
     "--exclude=result"
-    "--exclude=nixlab"
+    "--exclude=nixlab/"
 
-    # App junk
+    # App data you don't need
     "--exclude=.steam/"
     "--exclude=.steampath"
     "--exclude=.steampid"
@@ -57,21 +55,12 @@ RSYNC_OPTS=(
     "--exclude=.nv/"
     "--exclude=.zen/"
 
-    # Lock files
+    # Browser lock files
     "--exclude=SingletonLock"
     "--exclude=SingletonSocket"
     "--exclude=SingletonCookie"
 
-    # Things you *do* want
-    "--include=.ssh/***"
-    "--include=.pki/***"
-    "--include=.mozilla/***"
-    "--include=Calibre Library/***"
-    "--include=.bash_history"
-    "--include=.python_history"
-
-    # Exclude everything else not explicitly included
-    "--exclude=*"
+    # Don't exclude everything else - let rsync backup the rest!
 )
 
 # Function to convert symlinks to point within the backup directory
