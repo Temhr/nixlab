@@ -90,8 +90,8 @@ perform_backup() {
 
     # Perform rsync
     if [ -d "$dest_dir" ]; then
-        echo "Running rsync..."
-        /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/rsync \
+        echo "Running rsync with 1-hour timeout..."
+        timeout 3600 /run/current-system/sw/bin/rsync \
             "${RSYNC_OPTS[@]}" \
             "$SOURCE_DIR" \
             "$dest_dir"
@@ -108,6 +108,10 @@ perform_backup() {
             ;;
         23)
             echo "Rsync completed with warning (code 23: partial transfer), treating as success"
+            ;;
+        124)
+            echo "Error: rsync timed out after 1 hour"
+            return 1
             ;;
         *)
             echo "Error: rsync failed with code $rsync_status"
