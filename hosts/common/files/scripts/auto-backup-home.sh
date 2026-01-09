@@ -15,52 +15,41 @@ BACKUP_DESTINATIONS=(
 # Rsync options
 RSYNC_OPTS=(
     "-rva"
-    "-L"                    # Follow symlinks (for /data/shelf)
+    "-L"                    # Follow symlinks
     "--numeric-ids"
     "--xattrs"
     "--acls"
-
-    # Safety
     "--delete"
     "--delete-delay"
     "--partial"
     "--inplace"
-
-    # Copy target of broken symlinks
     "--copy-unsafe-links"
 
     # =========================
-    # Exclusions (be specific!)
+    # INCLUDE ONLY THESE
     # =========================
 
-    # Caches / temp
-    "--exclude=.cache/"
-    "--exclude=.var/"
-    "--exclude=*Cache*/"
-    "--exclude=*cache*/"
-    "--exclude=.Trash*/"
+    # Critical data
+    "--include=shelf/***"              # Your main data (follows symlink to /data/shelf)
+    "--include=.ssh/***"               # SSH keys
+    "--include=.pki/***"               # Certificates
+    "--include=Calibre Library/***"    # Ebooks
 
-    # Nix generated
-    "--exclude=.nix-profile"
-    "--exclude=.nix-defexpr"
-    "--exclude=result"
-    "--exclude=nixlab/"
+    # Shell history & config
+    "--include=.bash_history"
+    "--include=.python_history"
 
-    # App data you don't need
-    "--exclude=.steam/"
-    "--exclude=.steampath"
-    "--exclude=.steampid"
-    "--exclude=.android/"
-    "--exclude=.stfolder/"
-    "--exclude=.nv/"
-    "--exclude=.zen/"
+    # Personal scripts
+    "--include=bin/***"
 
-    # Browser lock files
-    "--exclude=SingletonLock"
-    "--exclude=SingletonSocket"
-    "--exclude=SingletonCookie"
+    # Optional: Browser data (only if no sync)
+    "--include=.mozilla/***"
 
-    # Don't exclude everything else - let rsync backup the rest!
+    # Optional: Keychain
+    "--include=.keychain/***"
+
+    # EXCLUDE EVERYTHING ELSE
+    "--exclude=*"
 )
 
 # Function to convert symlinks to point within the backup directory
