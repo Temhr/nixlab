@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Don’t exit globally on error — we’ll handle errors manually
+# Don't exit globally on error — we'll handle errors manually
 set -u  # undefined vars are still errors
 
 # Configuration
@@ -15,7 +15,6 @@ BACKUP_DESTINATIONS=(
 # Rsync options
 RSYNC_OPTS=(
     "-rva"
-    "-L"                    # Follow symlinks
     "--numeric-ids"
     "--xattrs"
     "--acls"
@@ -23,33 +22,50 @@ RSYNC_OPTS=(
     "--delete-delay"
     "--partial"
     "--inplace"
-    "--copy-unsafe-links"
+    "--copy-unsafe-links"  # Copy broken symlinks
 
     # =========================
     # INCLUDE ONLY THESE
     # =========================
 
-    # Critical data
-    "--include=shelf/***"              # Your main data (follows symlink to /data/shelf)
+    # These are symlinks pointing INTO shelf, copy them as symlinks
+    "--include=.config"              # symlink itself
+    "--include=Desktop"              # symlink itself
+    "--include=Documents"            # symlink itself
+    "--include=Downloads"            # symlink itself
+    "--include=Music"                # symlink itself
+    "--include=Pictures"             # symlink itself
+    "--include=Public"               # symlink itself
+    "--include=Templates"            # symlink itself
+    "--include=Videos"               # symlink itself
+    "--include=.local"               # symlink itself
+    "--include=repast4py-workspace"  # symlink itself
+
+    # Actual files/directories
     "--include=.ssh/***"               # SSH keys
     "--include=.pki/***"               # Certificates
     "--include=Calibre Library/***"    # Ebooks
+    "--include=.bash_history"          # Shell history
+    "--include=.python_history"        # Python history
+    "--include=.bash/***"              # Bash config
+    "--include=.keychain/***"          # Keychain
+    "--include=bin/***"                # Personal scripts
+    "--include=.mozilla/***"           # Firefox (optional)
 
-    # Shell history & config
-    "--include=.bash_history"
-    "--include=.python_history"
-
-    # Personal scripts
-    "--include=bin/***"
-
-    # Optional: Browser data (only if no sync)
-    "--include=.mozilla/***"
-
-    # Optional: Keychain
-    "--include=.keychain/***"
-
-    # EXCLUDE EVERYTHING ELSE
+    # EXCLUDE EVERYTHING ELSE (including shelf symlink)
     "--exclude=*"
+)
+
+# Rsync options for shelf directory (follow the symlink)
+RSYNC_SHELF_OPTS=(
+    "-rvaL"  # Follow symlinks for shelf
+    "--numeric-ids"
+    "--xattrs"
+    "--acls"
+    "--delete"
+    "--delete-delay"
+    "--partial"
+    "--inplace"
 )
 
 # Function to convert symlinks to point within the backup directory
@@ -109,9 +125,9 @@ perform_backup() {
         fi
     fi
 
-    # Perform rsync
+    # Perform rsync for home directory (excludes shelf)
     if [ -d "$dest_dir" ]; then
-        echo "Running rsync with 1-hour timeout..."
+        echo "Running rsync for home directory (excluding shelf)..."
         timeout 3600 /run/current-system/sw/bin/rsync \
             "${RSYNC_OPTS[@]}" \
             "$SOURCE_DIR" \
@@ -125,10 +141,10 @@ perform_backup() {
     # Interpret rsync status
     case $rsync_status in
         0)
-            echo "Rsync completed successfully"
+            echo "Home directory rsync completed successfully"
             ;;
         23)
-            echo "Rsync completed with warning (code 23: partial transfer), treating as success"
+            echo "Home directory rsync completed with warning (code 23: partial transfer), treating as success"
             ;;
         124)
             echo "Error: rsync timed out after 1 hour"
@@ -140,10 +156,43 @@ perform_backup() {
             ;;
     esac
 
-    #echo "Converting symlinks..."
-    #if ! convert_symlinks "$dest_dir" "$SOURCE_DIR"; then
-    #    echo "Warning: symlink conversion failed (non-fatal)"
-    #fi
+    # Backup shelf directory separately (following the symlink)
+    if [ -L "$SOURCE_DIR/shelf" ]; then
+        echo "Backing up shelf directory..."
+        local shelf_real_path=$(readlink -f "$SOURCE_DIR/shelf")
+
+        if [ -d "$shelf_real_path" ]; then
+            timeout 3600 /run/current-system/sw/bin/rsync \
+                "${RSYNC_SHELF_OPTS[@]}" \
+                "$shelf_real_path/" \
+                "$dest_dir/shelf/"
+            shelf_status=$?
+
+            case $shelf_status in
+                0)
+                    echo "Shelf directory rsync completed successfully"
+                    ;;
+                23)
+                    echo "Shelf directory rsync completed with warning (code 23), treating as success"
+                    ;;
+                124)
+                    echo "Error: shelf rsync timed out after 1 hour"
+                    return 1
+                    ;;
+                *)
+                    echo "Error: shelf rsync failed with code $shelf_status"
+                    return 1
+                    ;;
+            esac
+        else
+            echo "Warning: shelf symlink target not found: $shelf_real_path"
+        fi
+    fi
+
+    echo "Converting symlinks..."
+    if ! convert_symlinks "$dest_dir" "$SOURCE_DIR"; then
+        echo "Warning: symlink conversion failed (non-fatal)"
+    fi
 
     echo "Backup completed to: $dest_dir"
     return 0
