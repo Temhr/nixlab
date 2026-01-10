@@ -14,15 +14,36 @@ BACKUP_DESTINATIONS=(
 
 # Rsync options
 RSYNC_OPTS=(
-    "-rva"
-    "--numeric-ids"
-    "--xattrs"
-    "--acls"
-    "--delete"
-    "--delete-delay"
-    "--partial"
-    "--inplace"
-    "--copy-unsafe-links"  # Copy broken symlinks
+    "-rva"                 
+    # -r  = recursive (copy directories)
+    # -v  = verbose (show what's happening)
+    # -a  = archive mode: preserves permissions, timestamps, symlinks, devices, etc.
+    "--numeric-ids"        
+    # Preserve UID/GID numbers exactly (do NOT map usernames/group names between systems)
+    # Important for backups and restores across different machines
+    "--xattrs"            
+    # Preserve extended attributes (SELinux labels, capabilities, user.* metadata, etc.)
+    "--acls"              
+    # Preserve POSIX Access Control Lists (fine-grained permissions beyond chmod)
+    "--delete"            
+    # Delete files in destination that no longer exist in source
+    # Keeps destination as an exact mirror
+    "--delete-delay"      
+    # Perform deletions *after* transfer finishes
+    # Safer than immediate deletion (avoids half-synced states)
+    "--partial"           
+    # Keep partially transferred files if interrupted
+    # Allows resume instead of restarting large file transfers
+    "--inplace"           
+    # Write directly to destination file instead of temp file
+    # Saves disk space
+    # WARNING: breaks atomicity & snapshots (bad for ZFS/Btrfs backups)
+    "--copy-unsafe-links" 
+    # Follow symlinks that point *outside* the source tree
+    # Copies the *target file* instead of the symlink
+    # Useful to avoid broken backups
+    # WARNING: can pull in unexpected files
+
 
     # =========================
     # INCLUDE ONLY THESE
@@ -30,6 +51,7 @@ RSYNC_OPTS=(
 
     # These are symlinks pointing INTO shelf, copy them as symlinks
     "--include=.config"              # symlink itself
+    "--include=.local"               # symlink itself
     "--include=Desktop"              # symlink itself
     "--include=Documents"            # symlink itself
     "--include=Downloads"            # symlink itself
@@ -38,7 +60,6 @@ RSYNC_OPTS=(
     "--include=Public"               # symlink itself
     "--include=Templates"            # symlink itself
     "--include=Videos"               # symlink itself
-    "--include=.local"               # symlink itself
     "--include=repast4py-workspace"  # symlink itself
 
     # Actual files/directories
