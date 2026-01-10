@@ -21,7 +21,6 @@
     ../common/global
     ../common/optional
     ../../modules/home-manager
-    ./bash-files-symlink.nix
   ];
 
   # Add stuff for your user as you see fit:
