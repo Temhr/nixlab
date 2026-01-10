@@ -50,7 +50,7 @@ RSYNC_OPTS=(
     "--include=.bash/***"              # Bash config
     "--include=.keychain/***"          # Keychain
     "--include=bin/***"                # Personal scripts
-    "--include=.mozilla/***"           # Firefox (optional)
+    #"--include=.mozilla/***"           # Firefox (optional)
 
     # EXCLUDE EVERYTHING ELSE (including shelf symlink)
     "--exclude=*"
