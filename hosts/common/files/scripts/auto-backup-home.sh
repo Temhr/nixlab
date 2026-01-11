@@ -20,31 +20,31 @@ NFS_MOUNTS=(
 
 # Rsync options
 RSYNC_OPTS=(
-    "-rva"                 
+    "-rva"
     # -r  = recursive (copy directories)
     # -v  = verbose (show what's happening)
     # -a  = archive mode: preserves permissions, timestamps, symlinks, devices, etc.
-    "--numeric-ids"        
+    "--numeric-ids"
     # Preserve UID/GID numbers exactly (do NOT map usernames/group names between systems)
     # Important for backups and restores across different machines
-    "--xattrs"            
+    "--xattrs"
     # Preserve extended attributes (SELinux labels, capabilities, user.* metadata, etc.)
-    "--acls"              
+    "--acls"
     # Preserve POSIX Access Control Lists (fine-grained permissions beyond chmod)
-    "--delete"            
+    "--delete"
     # Delete files in destination that no longer exist in source
     # Keeps destination as an exact mirror
-    "--delete-delay"      
+    "--delete-delay"
     # Perform deletions *after* transfer finishes
     # Safer than immediate deletion (avoids half-synced states)
-    "--partial"           
+    "--partial"
     # Keep partially transferred files if interrupted
     # Allows resume instead of restarting large file transfers
-    "--inplace"           
+    "--inplace"
     # Write directly to destination file instead of temp file
     # Saves disk space
     # WARNING: breaks atomicity & snapshots (bad for ZFS/Btrfs backups)
-    "--copy-unsafe-links" 
+    "--copy-unsafe-links"
     # Follow symlinks that point *outside* the source tree
     # Copies the *target file* instead of the symlink
     # Useful to avoid broken backups
@@ -98,33 +98,61 @@ RSYNC_SHELF_OPTS=(
 # Function to check if a mount point is properly mounted
 is_mount_active() {
     local mount_point="$1"
-    
-    # Check if the path is actually a mount point
-    if ! mountpoint -q "$mount_point" 2>/dev/null; then
-        echo "  Not a mount point: $mount_point"
-        return 1
-    fi
-    
-    # Check if it's accessible (can list directory)
-    if ! timeout 5 ls "$mount_point" >/dev/null 2>&1; then
-        echo "  Mount point not accessible (timeout or permission error): $mount_point"
-        return 1
-    fi
-    
-    # For NFS mounts, verify it's actually NFS
-    if findmnt -n -o FSTYPE "$mount_point" 2>/dev/null | grep -q "nfs"; then
-        echo "  NFS mount verified as active: $mount_point"
-        return 0
+
+    echo "  Checking mount: $mount_point"
+
+    # Method 1: Check /proc/mounts for NFS or autofs (systemd automount)
+    # With systemd automount, the mount may show as 'autofs' until accessed,
+    # then become 'nfs' once triggered
+    if grep -q " ${mount_point} nfs" /proc/mounts 2>/dev/null; then
+        echo "  ✓ Found NFS mount in /proc/mounts"
+    elif grep -q " ${mount_point} autofs" /proc/mounts 2>/dev/null; then
+        echo "  ✓ Found autofs mount in /proc/mounts (systemd automount)"
+    elif grep -q " ${mount_point} " /proc/mounts 2>/dev/null; then
+        local mount_type=$(grep " ${mount_point} " /proc/mounts | awk '{print $3}' | head -1)
+        echo "  ✓ Found mount in /proc/mounts (type: $mount_type)"
     else
-        # If findmnt doesn't show NFS, check /proc/mounts
-        if grep -q "^[^ ]* $mount_point nfs" /proc/mounts 2>/dev/null; then
-            echo "  NFS mount verified as active: $mount_point"
-            return 0
-        else
-            echo "  Not mounted as NFS: $mount_point"
-            return 1
-        fi
+        echo "  ✗ Not found in /proc/mounts"
+        return 1
     fi
+
+    # Method 2: Check accessibility with timeout
+    # This will trigger the automount if it's an autofs mount
+    if timeout 5 ls "$mount_point" >/dev/null 2>&1; then
+        echo "  ✓ Directory is accessible"
+    else
+        echo "  ✗ Directory not accessible (timeout or error)"
+        return 1
+    fi
+
+    # Method 3: After accessing, verify it's actually NFS (or at least accessible)
+    # Check again after the ls command which may have triggered automount
+    if grep -q " ${mount_point} nfs" /proc/mounts 2>/dev/null; then
+        echo "  ✓ Confirmed NFS mount active"
+    elif grep -q " ${mount_point} autofs" /proc/mounts 2>/dev/null; then
+        echo "  ✓ Autofs mount present (systemd automount configured)"
+    fi
+
+    # Method 4: Try to get filesystem stats
+    if timeout 5 stat "$mount_point" >/dev/null 2>&1; then
+        echo "  ✓ Can stat directory"
+        local fs_type=$(stat -f -c %T "$mount_point" 2>/dev/null || echo "unknown")
+        echo "  Filesystem type: $fs_type"
+    else
+        echo "  ✗ Cannot stat directory"
+        return 1
+    fi
+
+    # Method 5: For more robust check, see if we can detect different device
+    local parent_dev=$(stat -c %d "$(dirname "$mount_point")" 2>/dev/null)
+    local mount_dev=$(stat -c %d "$mount_point" 2>/dev/null)
+
+    if [ -n "$parent_dev" ] && [ -n "$mount_dev" ] && [ "$parent_dev" != "$mount_dev" ]; then
+        echo "  ✓ Mount point has different device number than parent (confirmed mounted)"
+    fi
+
+    echo "  ✓ Mount verification passed for: $mount_point"
+    return 0
 }
 
 # Function to check if destination requires mount verification
@@ -271,44 +299,55 @@ perform_backup() {
 # Main execution
 main() {
     echo "Starting backup for hostname: $HOSTNAME"
+    echo "============================================"
 
     local success=1
 
     for dest in "${BACKUP_DESTINATIONS[@]}"; do
         echo ""
         echo "Checking destination: $dest"
-        
+        echo "--------------------------------------------"
+
         # Check if destination exists
         if [ ! -d "$dest" ]; then
-            echo "  Destination directory does not exist: $dest"
+            echo "  ✗ Destination directory does not exist: $dest"
             continue
         fi
-        
+        echo "  ✓ Destination directory exists"
+
         # Check if this destination requires mount verification
         if requires_mount_check "$dest"; then
             echo "  This is an NFS mount, verifying mount status..."
             if ! is_mount_active "$dest"; then
-                echo "  Skipping $dest - mount verification failed"
+                echo "  ✗ Skipping $dest - mount verification failed"
                 continue
             fi
         else
-            echo "  Local destination found: $dest"
+            echo "  Local destination (no mount check required)"
         fi
-        
+
+        echo ""
         # Attempt backup
         if perform_backup "$dest"; then
-            echo "Backup process completed successfully at $dest"
+            echo "============================================"
+            echo "✓ Backup process completed successfully at $dest"
+            echo "============================================"
             success=0
             break
         else
-            echo "Backup failed for $dest, trying next destination..."
+            echo "✗ Backup failed for $dest, trying next destination..."
         fi
     done
 
     if [ $success -ne 0 ]; then
         echo ""
-        echo "Error: All backup destinations failed"
-        echo "Checked: ${BACKUP_DESTINATIONS[*]}"
+        echo "============================================"
+        echo "✗ ERROR: All backup destinations failed"
+        echo "============================================"
+        echo "Checked destinations:"
+        for dest in "${BACKUP_DESTINATIONS[@]}"; do
+            echo "  - $dest"
+        done
         exit 1
     fi
 }
