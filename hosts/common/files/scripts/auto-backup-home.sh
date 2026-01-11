@@ -97,7 +97,6 @@ RSYNC_SHELF_OPTS=(
     # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
     "--exclude=*/.config/*"
     "--exclude=*/.local/state/*"
-    "--exclude=*/.pytorch-gpu-py311/*"
     "--exclude=*/share/Steam/*"
     "--exclude=*/repast4py-workspace/*"
 )
