@@ -93,6 +93,9 @@ RSYNC_SHELF_OPTS=(
     "--delete-delay"
     "--partial"
     "--inplace"
+
+    # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
+    "--exclude=*/BraveSoftware/*"
 )
 
 # Function to check if a mount point is properly mounted
