@@ -98,7 +98,7 @@ RSYNC_SHELF_OPTS=(
     "--exclude=*/.config/*"
     "--exclude=*/.local/state/*"
     "--exclude=*/.pytorch-gpu-py311/*"
-    "--exclude=*/steamapps/*"
+    "--exclude=*/share/Steam/*"
 )
 
 # Function to check if a mount point is properly mounted
