@@ -95,9 +95,7 @@ RSYNC_SHELF_OPTS=(
     "--inplace"
 
     # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
-    "--exclude=*/BraveSoftware/*"
-    "--exclude=*/Cache/*"
-    "--exclude=*/CachedData/*"
+    "--exclude=*/.config/*"
 )
 
 # Function to check if a mount point is properly mounted
