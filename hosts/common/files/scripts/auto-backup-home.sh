@@ -96,6 +96,7 @@ RSYNC_SHELF_OPTS=(
 
     # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
     "--exclude=*/.config/*"
+    "--exclude=*/.local/state/*"
 )
 
 # Function to check if a mount point is properly mounted
