@@ -99,6 +99,7 @@ RSYNC_SHELF_OPTS=(
     "--exclude=*/.local/state/*"
     "--exclude=*/share/Steam/*"
     "--exclude=*/repast4py-workspace/*"
+    "--exclude=*/Trash/*"
 )
 
 # Function to check if a mount point is properly mounted
