@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Don't exit globally on error — we'll handle errors manually
+# Don't exit globally on error – we'll handle errors manually
 set -u  # undefined vars are still errors
 
 # Configuration
@@ -8,6 +8,12 @@ HOSTNAME=$(/run/current-system/sw/bin/hostname)
 SOURCE_DIR="/home/temhr/"
 BACKUP_DESTINATIONS=(
     "/mirror"
+    "/mnt/mirk1"
+    "/mnt/mirk3"
+)
+
+# NFS mount points (destinations that require mount verification)
+NFS_MOUNTS=(
     "/mnt/mirk1"
     "/mnt/mirk3"
 )
@@ -88,6 +94,49 @@ RSYNC_SHELF_OPTS=(
     "--partial"
     "--inplace"
 )
+
+# Function to check if a mount point is properly mounted
+is_mount_active() {
+    local mount_point="$1"
+    
+    # Check if the path is actually a mount point
+    if ! mountpoint -q "$mount_point" 2>/dev/null; then
+        echo "  Not a mount point: $mount_point"
+        return 1
+    fi
+    
+    # Check if it's accessible (can list directory)
+    if ! timeout 5 ls "$mount_point" >/dev/null 2>&1; then
+        echo "  Mount point not accessible (timeout or permission error): $mount_point"
+        return 1
+    fi
+    
+    # For NFS mounts, verify it's actually NFS
+    if findmnt -n -o FSTYPE "$mount_point" 2>/dev/null | grep -q "nfs"; then
+        echo "  NFS mount verified as active: $mount_point"
+        return 0
+    else
+        # If findmnt doesn't show NFS, check /proc/mounts
+        if grep -q "^[^ ]* $mount_point nfs" /proc/mounts 2>/dev/null; then
+            echo "  NFS mount verified as active: $mount_point"
+            return 0
+        else
+            echo "  Not mounted as NFS: $mount_point"
+            return 1
+        fi
+    fi
+}
+
+# Function to check if destination requires mount verification
+requires_mount_check() {
+    local dest="$1"
+    for nfs_mount in "${NFS_MOUNTS[@]}"; do
+        if [[ "$dest" == "$nfs_mount" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
 
 # Function to convert symlinks to point within the backup directory
 convert_symlinks() {
@@ -226,21 +275,38 @@ main() {
     local success=1
 
     for dest in "${BACKUP_DESTINATIONS[@]}"; do
-        if [ -d "$dest" ]; then
-            echo "Found backup destination: $dest"
-            if perform_backup "$dest"; then
-                echo "Backup process completed successfully at $dest"
-                success=0
-                break
-            else
-                echo "Backup failed for $dest, trying next destination..."
+        echo ""
+        echo "Checking destination: $dest"
+        
+        # Check if destination exists
+        if [ ! -d "$dest" ]; then
+            echo "  Destination directory does not exist: $dest"
+            continue
+        fi
+        
+        # Check if this destination requires mount verification
+        if requires_mount_check "$dest"; then
+            echo "  This is an NFS mount, verifying mount status..."
+            if ! is_mount_active "$dest"; then
+                echo "  Skipping $dest - mount verification failed"
+                continue
             fi
         else
-            echo "Destination not found: $dest"
+            echo "  Local destination found: $dest"
+        fi
+        
+        # Attempt backup
+        if perform_backup "$dest"; then
+            echo "Backup process completed successfully at $dest"
+            success=0
+            break
+        else
+            echo "Backup failed for $dest, trying next destination..."
         fi
     done
 
     if [ $success -ne 0 ]; then
+        echo ""
         echo "Error: All backup destinations failed"
         echo "Checked: ${BACKUP_DESTINATIONS[*]}"
         exit 1
