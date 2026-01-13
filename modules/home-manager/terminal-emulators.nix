@@ -20,7 +20,10 @@
           home.packages = with pkgs; [ alacritty ];  #Cross-platform, GPU-accelerated terminal emulator
         })
         (lib.mkIf config.ghostty.enable {
-          home.packages = [ inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
+          home.packages = [
+            #inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
+            pkgs.ghostty
+          ];  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
         })
         (lib.mkIf config.kitty.enable {
           home.packages = with pkgs; [ kitty ];  #Modern, hackable, featureful, OpenGL based terminal emulator
