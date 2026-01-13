@@ -34,6 +34,8 @@ RSYNC_OPTS=(
     "--delete"
     # Delete files in destination that no longer exist in source
     # Keeps destination as an exact mirror
+    "--delete-excluded"
+    # delete files (from the destination) that are excluded by your filter rules
     "--delete-delay"
     # Perform deletions *after* transfer finishes
     # Safer than immediate deletion (avoids half-synced states)
@@ -90,6 +92,7 @@ RSYNC_SHELF_OPTS=(
     "--xattrs"
     "--acls"
     "--delete"
+    "--delete-excluded"
     "--delete-delay"
     "--partial"
     "--inplace"
