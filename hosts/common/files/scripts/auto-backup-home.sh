@@ -8,8 +8,8 @@ HOSTNAME=$(/run/current-system/sw/bin/hostname)
 SOURCE_DIR="/home/temhr/"
 BACKUP_DESTINATIONS=(
     "/mirror"
-    "/mnt/mirk3"
     "/mnt/mirk1"
+    "/mnt/mirk3"
 )
 
 # NFS mount points (destinations that require mount verification)
