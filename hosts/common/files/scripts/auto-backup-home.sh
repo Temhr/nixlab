@@ -82,7 +82,7 @@ RSYNC_OPTS=(
     #"--include=.mozilla/***"           # Firefox (optional)
 
     # EXPLICITLY PROTECT shelf from deletion (must come BEFORE --exclude=*)
-    "--exclude=shelf"
+    "--filter=protect shelf/"
     
     # EXCLUDE EVERYTHING ELSE (including shelf symlink)
     "--exclude=*"
