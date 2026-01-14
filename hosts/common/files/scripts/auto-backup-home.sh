@@ -270,7 +270,7 @@ perform_backup() {
         local shelf_real_path=$(readlink -f "$SOURCE_DIR/shelf")
 
         if [ -d "$shelf_real_path" ]; then
-            timeout 3600 /run/current-system/sw/bin/rsync \
+            timeout 7200 /run/current-system/sw/bin/rsync \
                 "${RSYNC_SHELF_OPTS[@]}" \
                 "$shelf_real_path/" \
                 "$dest_dir/shelf/"
