@@ -8,8 +8,8 @@ HOSTNAME=$(/run/current-system/sw/bin/hostname)
 SOURCE_DIR="/home/temhr/"
 BACKUP_DESTINATIONS=(
     "/mirror"
-    "/mnt/mirk3"
     "/mnt/mirk1"
+    "/mnt/mirk3"
 )
 
 # NFS mount points (destinations that require mount verification)
@@ -314,7 +314,8 @@ main() {
     echo "Starting backup for hostname: $HOSTNAME"
     echo "============================================"
 
-    local success=1
+    local any_success=0
+    local results=()
 
     for dest in "${BACKUP_DESTINATIONS[@]}"; do
         echo ""
@@ -324,6 +325,7 @@ main() {
         # Check if destination exists
         if [ ! -d "$dest" ]; then
             echo "  ✗ Destination directory does not exist: $dest"
+            results+=("$dest: SKIPPED (directory not found)")
             continue
         fi
         echo "  ✓ Destination directory exists"
@@ -333,6 +335,7 @@ main() {
             echo "  This is an NFS mount, verifying mount status..."
             if ! is_mount_active "$dest"; then
                 echo "  ✗ Skipping $dest - mount verification failed"
+                results+=("$dest: SKIPPED (mount verification failed)")
                 continue
             fi
         else
@@ -345,23 +348,31 @@ main() {
             echo "============================================"
             echo "✓ Backup process completed successfully at $dest"
             echo "============================================"
-            success=0
-            break
+            any_success=1
+            results+=("$dest: SUCCESS")
+            # REMOVED: break statement was here
         else
-            echo "✗ Backup failed for $dest, trying next destination..."
+            echo "✗ Backup failed for $dest"
+            results+=("$dest: FAILED")
         fi
     done
 
-    if [ $success -ne 0 ]; then
-        echo ""
-        echo "============================================"
+    # Summary report
+    echo ""
+    echo "============================================"
+    echo "BACKUP SUMMARY"
+    echo "============================================"
+    for result in "${results[@]}"; do
+        echo "  $result"
+    done
+    echo "============================================"
+
+    if [ $any_success -eq 0 ]; then
         echo "✗ ERROR: All backup destinations failed"
-        echo "============================================"
-        echo "Checked destinations:"
-        for dest in "${BACKUP_DESTINATIONS[@]}"; do
-            echo "  - $dest"
-        done
         exit 1
+    else
+        echo "✓ At least one backup destination succeeded"
+        exit 0
     fi
 }
 
