@@ -105,6 +105,7 @@ RSYNC_SHELF_OPTS=(
     "--exclude=*/.local/state/*"
     "--exclude=*/share/Steam/*"
     "--exclude=*/repast4py-workspace/*"
+    "--exclude=*/mesa-workspace/*"
     "--exclude=*/Trash/*"
 )
 
