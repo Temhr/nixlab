@@ -309,15 +309,39 @@ perform_backup() {
     return 0
 }
 
+# Function to shuffle array (Fisher-Yates shuffle)
+shuffle_array() {
+    local -n arr=$1
+    local i tmp size rand
+    size=${#arr[@]}
+    
+    for ((i=size-1; i>0; i--)); do
+        rand=$((RANDOM % (i+1)))
+        tmp="${arr[i]}"
+        arr[i]="${arr[rand]}"
+        arr[rand]="$tmp"
+    done
+}
+
 # Main execution
 main() {
     echo "Starting backup for hostname: $HOSTNAME"
     echo "============================================"
 
+    # Randomize backup destination order
+    local shuffled_destinations=("${BACKUP_DESTINATIONS[@]}")
+    shuffle_array shuffled_destinations
+    
+    echo "Backup order (randomized):"
+    for dest in "${shuffled_destinations[@]}"; do
+        echo "  - $dest"
+    done
+    echo ""
+
     local any_success=0
     local results=()
 
-    for dest in "${BACKUP_DESTINATIONS[@]}"; do
+    for dest in "${shuffled_destinations[@]}"; do  # Changed from BACKUP_DESTINATIONS
         echo ""
         echo "Checking destination: $dest"
         echo "--------------------------------------------"
@@ -350,7 +374,6 @@ main() {
             echo "============================================"
             any_success=1
             results+=("$dest: SUCCESS")
-            # REMOVED: break statement was here
         else
             echo "✗ Backup failed for $dest"
             results+=("$dest: FAILED")
