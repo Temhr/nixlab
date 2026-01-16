@@ -107,6 +107,7 @@ RSYNC_SHELF_OPTS=(
     "--exclude=*/repast4py-workspace/*"
     "--exclude=*/mesa-workspace/*"
     "--exclude=*/Trash/*"
+    "--exclude=*/waydroid/*"
 )
 
 # Function to check if a mount point is properly mounted
