@@ -144,7 +144,7 @@
         addresses = [ "dynamic" ];
       };
       "Pixel 3a XL" = {
-        id = "VZJIMGH-5ZGJ3SO-PHNSMDO-AVCCG7L-ZNCDDTW-3QTIWD7-IVO352T-A6P43AU";
+        id = "4CCPARZ-D55MZPY-OMRVLQL-YAQJFKY-5RZXAFQ-MZJ4VSC-E5ZS7VQ-VRCFGAY";
         addresses = [ "dynamic" ];
       };
     };
