@@ -289,7 +289,7 @@ perform_backup() {
                     echo "Shelf directory rsync completed with warning (code 23), treating as success"
                     ;;
                 124)
-                    echo "Error: shelf rsync timed out after 1 hour"
+                    echo "Error: shelf rsync timed out after 2 hours"
                     return 1
                     ;;
                 *)
