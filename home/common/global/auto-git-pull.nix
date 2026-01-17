@@ -45,6 +45,8 @@ in
       ExecStart = "${GitPullShellScript}";
       # The service type is "oneshot", meaning it runs the script once and exits.
       Type = "oneshot";
+      # Add PATH so ssh and other commands are available
+      Environment = "PATH=/run/current-system/sw/bin:/etc/profiles/per-user/%u/bin";
     };
   };
 }
