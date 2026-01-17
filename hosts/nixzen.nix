@@ -147,10 +147,6 @@
         id = "VZJIMGH-5ZGJ3SO-PHNSMDO-AVCCG7L-ZNCDDTW-3QTIWD7-IVO352T-A6P43AU";
         addresses = [ "dynamic" ];
       };
-      "Pixel 6 Pro" = {
-        id = "ONYBLUB-XOJUXRG-VQEOPRZ-THOAPKN-UU2MBOY-M4PGI4Y-4J5Q4LT-SHSDLAF";
-        addresses = [ "dynamic" ];
-      };
     };
     folders = {
       "mirror" = {
