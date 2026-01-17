@@ -103,13 +103,13 @@ RSYNC_SHELF_OPTS=(
     # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
     "--exclude=*/.config/*"
     "--exclude=*/.local/state/*"
+    "--exclude=*/share/applications/*"
+    "--exclude=*/share/plasma-manager/*"
     "--exclude=*/share/Steam/*"
     "--exclude=*/repast4py-workspace/*"
     "--exclude=*/mesa-workspace/*"
     "--exclude=*/Trash/*"
     "--exclude=*/waydroid/*"
-    "--exclude=*/share/applications/*"
-    "--exclude=*/plasma-manager/*"
 )
 
 # Function to check if a mount point is properly mounted
