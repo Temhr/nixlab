@@ -167,7 +167,7 @@
         path = "/mirror/phshare/docs";
         id = "Docs";
         label = "Docs";
-        devices = [ "Pixel XL" "Pixel 6 Pro"];
+        devices = [ "Pixel XL" "Pixel 3a XL" "Pixel 6 Pro"];
         type = "sendreceive";  # or "sendonly" or "receiveonly"
       };
     };
