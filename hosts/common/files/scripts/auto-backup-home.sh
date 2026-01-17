@@ -108,7 +108,8 @@ RSYNC_SHELF_OPTS=(
     "--exclude=*/mesa-workspace/*"
     "--exclude=*/Trash/*"
     "--exclude=*/waydroid/*"
-    "--exclude=*.desktop"
+    "--exclude=*/share/applications/*"
+    "--exclude=*/plasma-manager/*"
 )
 
 # Function to check if a mount point is properly mounted
