@@ -154,7 +154,7 @@
 
 
   services.grafana-custom = {
-    enable = true;
+    enable = false;
     port = 3101;
     bindIP = "0.0.0.0";
     openFirewall = true;
@@ -177,7 +177,7 @@
     };
   };
   services.loki-custom = {
-    enable = true;
+    enable = false;
     port = 3100;
     bindIP = "0.0.0.0";
     openFirewall = true;
@@ -185,7 +185,7 @@
     maintenance.enable = true;
   };
   services.prometheus-custom = {
-    enable = true;
+    enable = false;
     port = 9090;
     bindIP = "0.0.0.0";
     openFirewall = true;
