@@ -63,6 +63,13 @@
         "x86_64-darwin"
       ];
 
+      allOverlays = [
+        outputs.overlays.additions
+        outputs.overlays.modifications
+        outputs.overlays.unstable-packages
+        outputs.overlays.stable-packages
+      ];
+
       # Helper function to generate attributes for all supported systems
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
@@ -134,17 +141,9 @@
           };
           modules = commonModules ++ modules ++ [
             # Apply overlays to all hosts
-            {
-              nixpkgs.overlays = [
-                outputs.overlays.additions
-                outputs.overlays.modifications
-                outputs.overlays.stable-packages
-              ];
-            }
-
+            { nixpkgs.overlays = allOverlays; }
             # Set hostname automatically
             { networking.hostName = hostname; }
-
             # Host-specific configuration
             hostConfigPath
           ];
@@ -162,15 +161,8 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            config = {
-              allowUnfree = true;
-            };
-            overlays = [
-              # Import all your overlays
-              self.overlays.additions
-              self.overlays.modifications
-              self.overlays.stable-packages
-            ];
+            config = { allowUnfree = true; };
+            overlays = allOverlays;
           };
         in
         import ./shells { inherit pkgs; }
