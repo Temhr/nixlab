@@ -1,70 +1,53 @@
 {
   description = "Modular Nixlab Config";
 
-  # ============================================================================
-  # INPUT SOURCES
-  # ============================================================================
-  # Inputs are external dependencies that your flake uses.
-  # Think of them as "imports" from other projects.
+  # ==========================================================================
+  # INPUTS - External flake dependencies
+  # ==========================================================================
 
   inputs = {
-    # --- Core NixOS Package Collections ---
-    # nixpkgs: The main repository of Nix packages
-    # We're using the stable 25.11 release as our default
+    # Core NixOS package collections (stable 25.11 as default)
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-
-    # Additional channels for accessing different versions of packages:
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # --- User Environment Management ---
-    # home-manager: Manages user-specific packages and dotfiles
-    # The "follows" ensures it uses the same nixpkgs version we specified above
+    # User environment management
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # plasma-manager: Declarative KDE Plasma configuration
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
 
-    # --- System Management Tools ---
-    # disko: Declarative disk partitioning and formatting
+    # System management tools
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # impermanence: Helps manage ephemeral root filesystems
     impermanence = {
       url = "github:nix-community/impermanence";
     };
 
-    # --- Security ---
-    # sops-nix: Secrets management using Mozilla SOPS
+    # Security & secrets management
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # --- Hardware Support ---
-    # nixos-hardware: Pre-configured settings for specific hardware
+    # Hardware support
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
-    # --- Application-Specific Flakes ---
-    # Individual applications that provide their own flake
+    # Application-specific flakes
     ghostty = {
       url = "github:ghostty-org/ghostty";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
-    # --- Development Tools ---
-    # pre-commit-hooks: Automated code quality checks
+    # Development tools
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -121,7 +104,6 @@
       # OVERLAYS
       # ========================================================================
       # Overlays modify or add packages to nixpkgs.
-      # By collecting them here, we ensure consistency across all configurations.
 
       allOverlays = [
         outputs.overlays.additions          # Custom packages you've defined
@@ -172,24 +154,15 @@
       # Hosts inherit the defaultSystem unless specified otherwise.
 
       hosts = {
-        # Desktop workstation
         nixace = { };
-
-        # Server or specialized workstation
         nixsun = { };
-
-        # Laptop
         nixtop = { };
-
-        # Virtual machine (QEMU)
         nixvat = {
           # Host-specific modules only needed for this host
           modules = [
             "${nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
           ];
         };
-
-        # Another workstation
         nixzen = { };
       };
 
@@ -232,12 +205,8 @@
           # These can be accessed in any module via function parameters
           specialArgs = {
             inherit inputs outputs hostname;
-
-            # Removed: disko, impermanence (available via inputs)
-            # These are better accessed as inputs.disko, inputs.impermanence
-
+            # Removed: disko, impermanence (available via inputs: inputs.disko, inputs.impermanence)
             # flakePath provides the root directory of this flake
-            # Useful for importing files relative to the flake root
             flakePath = self;
           };
 
@@ -249,10 +218,8 @@
             ++ [
               # Apply our overlays to make custom/modified packages available
               { nixpkgs.overlays = allOverlays; }
-
               # Set the hostname for this system
               { networking.hostName = hostname; }
-
               # Import the host's main configuration file
               hostConfigPath
             ];
