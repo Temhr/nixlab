@@ -23,7 +23,7 @@
           home.packages = with pkgs; [ google-chrome ];  #Freeware web browser developed by Google
         })
         (lib.mkIf config.edge.enable {
-          home.packages = with pkgs; [ microsoft-edge ];  #The web browser from Microsoft
+          home.packages = with pkgs; [ unstable.microsoft-edge ];  #The web browser from Microsoft
         })
         (lib.mkIf config.zen.enable {
           home.packages = [ inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta ];  #
