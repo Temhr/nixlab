@@ -61,17 +61,17 @@
   # The @ inputs syntax captures all inputs into a single variable.
 
   outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    plasma-manager,
     disko,
-    impermanence,
-    sops-nix,
-    nixos-hardware,
     ghostty,
-    zen-browser,
+    home-manager,
+    impermanence,
+    nixpkgs,
+    nixos-hardware,
+    plasma-manager,
     pre-commit-hooks,
+    self,
+    sops-nix,
+    zen-browser,
     ...
   } @ inputs:
     let
