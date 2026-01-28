@@ -43,6 +43,30 @@ in
       };
     };
 
+    # Automatic Flatpak updates
+    systemd.services.flatpak-updater = {
+      description = "Update Flatpak packages";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      path = [ pkgs.flatpak ];
+      script = ''
+        flatpak update --noninteractive
+      '';
+      serviceConfig = {
+        Type = "oneshot";
+      };
+    };
+
+    systemd.timers.flatpak-updater = {
+      description = "Update Flatpak packages daily";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        RandomizedDelaySec = "1h";
+      };
+    };
+
     # Enable XDG portal for better desktop integration
     xdg.portal.enable = true;
     xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
