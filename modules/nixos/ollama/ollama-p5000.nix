@@ -143,7 +143,7 @@ in
     users.users.temhr.extraGroups = [ "open-webui" "ollama" ];
 
     # ----------------------------------------------------------------------------
-    # OLLAMA SERVICE - CPU-ONLY MODE
+    # OLLAMA SERVICE - GPU MODE
     # ----------------------------------------------------------------------------
     systemd.services.ollama = {
       description = "Ollama LLM Service (GPU - P5000)";
@@ -248,6 +248,9 @@ in
         OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
         WEBUI_AUTH = "True";
         DATA_DIR = cfg.webuiDataDir;
+        # Fix for backend requirement
+        HOST = cfg.webuiBindIP;
+        PORT = toString cfg.webuiPort;
       };
 
       serviceConfig = {
@@ -255,7 +258,8 @@ in
         User = "open-webui";
         Group = "open-webui";
         WorkingDirectory = cfg.webuiDataDir;
-        ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
+        # Correct way to start Open WebUI with backend
+        ExecStart = "${pkgs.open-webui}/bin/open-webui serve";
         Restart = "on-failure";
         RestartSec = "10s";
 
@@ -400,6 +404,7 @@ Check GPU is being used:
 
 View service logs:
   sudo journalctl -u ollama -f
+  sudo journalctl -u open-webui -f
 
 Test the API:
   curl http://localhost:11434/api/generate -d '{
