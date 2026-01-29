@@ -76,7 +76,7 @@
 
   ## Self-hosted apps and services
   services.ollama-p5000 = {
-    enable = false;
+    enable = true;
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
