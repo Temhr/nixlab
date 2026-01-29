@@ -9,6 +9,9 @@ final: prev: {
     # Change the name to force Nix to rebuild
     pname = "ollama-cuda-p5000";
     name = "ollama-cuda-p5000-${old.version}";
+
+    # Update the vendor hash to match the actual Go modules
+    vendorHash = "sha256-NM0vtue0MFrAJCjmpYJ/rPEDWBxWCzBrWDb0MVOhY+Q=";
   });
 
   # Use stable Ollama for better GPU compatibility
