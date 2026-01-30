@@ -248,9 +248,12 @@ in
         OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
         WEBUI_AUTH = "True";
         DATA_DIR = cfg.webuiDataDir;
-        # Fix for backend requirement
-        HOST = cfg.webuiBindIP;
-        PORT = toString cfg.webuiPort;
+        ENV = "prod";
+        # Force backend mode
+        WEBUI_SECRET_KEY = "secret-key-change-this";
+        # Point static dir to writable location
+        STATIC_DIR = "${cfg.webuiDataDir}/static";
+        FRONTEND_BUILD_DIR = "${pkgs.open-webui}/share/open-webui";
       };
 
       serviceConfig = {
@@ -258,10 +261,15 @@ in
         User = "open-webui";
         Group = "open-webui";
         WorkingDirectory = cfg.webuiDataDir;
-        # Correct way to start Open WebUI with backend
-        ExecStart = "${pkgs.open-webui}/bin/open-webui serve";
+        # Use the full serve command with explicit parameters
+        ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
         Restart = "on-failure";
         RestartSec = "10s";
+
+        # Ensure proper startup
+        TimeoutStartSec = "120s";
+        StandardOutput = "journal";
+        StandardError = "journal";
 
         # Security hardening
         NoNewPrivileges = true;
