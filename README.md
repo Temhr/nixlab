@@ -10,17 +10,17 @@ Nix implementation for my Linux laptops, desktops, and homelab servers. Adapted 
 <summary>List of common terms and their definitions <i>(click to expand)</i></summary>
 <p></p>
   
-- Nix Language: a domain-specific, declarative, pure, functional, lazy-evaluated, dynamically typed, language
-  - Nix values: data types that are immutable, can be whole **expressions** themselves, are only computed when needed, and type-error detected at evaluation
-- Nix Expressions: **Nix lang** code (functions) that describes how to build packages or configure systems
-  - Derivations: the backend build task; specifies all inputs, dependencies, and build steps of an **expression**
-- Nix Packages Collection (Nixpkgs): a large repository of **Nix expressions**
-- Nix Store: complex abstractions of immutable file system data (software packages, dependencies, etc.)
-- Nix Package Manager: a command-line toolset, with an atomic update model, that:
-  1) evaluates **expressions** into **derivations**
-  2) builds packages from **derivations** 
-  3) manages the **Nix Store** (handles dependencies, ensures reproducibility), where packages are kept
-- NixOS: Linux distro that has a system configuration entirely built with Nix
+- **Nix Language**: A domain-specific, declarative, pure, functional, lazily evaluated, dynamically typed programming language used to describe software builds and system configurations
+  - **Nix Values**: Immutable data types produced by Nix Expressions. Values can themselves be complete Expressions, are evaluated lazily (only when needed), and produce type errors at evaluation time
+  - **Nix Expressions**: Code written in NixLang that defines how to build Packages, assemble dependencies, or configure systems. Expressions evaluate to values and can be composed as functions
+  - **Derivations**: Low-level build instructions generated from Expressions. A Derivation precisely specifies all inputs, dependencies, environment variables, and build steps required to produce a build output
+- **Nix Package Manager**: a command-line toolset, with an atomic update model, that:
+  > 1. evaluates Expressions into Derivations
+  > 2. builds Packages from Derivations 
+  > 3. manages the Nix Store (including dependency tracking, garbage collection, and atomic upgrades/rollbacks)
+  - **Nix Packages Collection (Nixpkgs)**: A large, community-maintained repository of Expressions that define thousands of software Packages, libraries, development tools, and NixOS modules
+  - **Nix Store**: An immutable, content-addressed filesystem (typically /nix/store) that stores all build outputs, dependencies, and intermediate artifacts, ensuring isolation and reproducibility
+- **NixOS**: A Linux distro whose entire system configuration (Packages, services, users, kernel options, etc.) is defined declaratively using NixLang and built via the Nix Package Manager
 </details>
 
 # Nixlab Features
