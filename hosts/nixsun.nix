@@ -53,7 +53,7 @@
   #anki.enable = true;  #Spaced repetition flashcard program
 
   ## Gaming Packages
-  #steam.enable = true;  #Video game digital distribution service and storefront from Valve
+  steam.enable = true;  #Video game digital distribution service and storefront from Valve
 
   ## Productivity
   #calibre.enable = true;  #Comprehensive e-book software
