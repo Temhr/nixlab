@@ -1,7 +1,6 @@
 { pkgs, ... }: {
   # Create a custom service that checks if display-manager AND Wayland GUI are working
-  # This runs EARLY at boot and reboots the system if display-manager failed
-  # or if the display isn't actually showing anything
+  # This runs IMMEDIATELY after display-manager starts with a SHORT timeout
   # WAYLAND-ONLY VERSION with support for automatic login
   systemd.services.display-manager-startup-check = {
     
@@ -9,19 +8,17 @@
     description = "Check if display manager and Wayland GUI started successfully at boot";
     
     # When this service should run in the boot sequence
-    # "display-manager.service" = wait for display-manager to attempt starting
-    # NOTE: We do NOT wait for multi-user.target because that can take a while
-    # We want to check as soon as display-manager attempts to start
+    # ONLY wait for display-manager.service - nothing else
+    # This makes us run as early as possible
     after = [ "display-manager.service" ];
     
-    # This is CRITICAL: we want this check to be REQUIRED for multi-user.target
-    # If this service fails (triggers reboot), the system won't reach multi-user
-    # This ensures the check completes BEFORE/DURING the login process
-    before = [ "multi-user.target" ];
+    # Make this a REQUIRED dependency for display-manager to be considered "started"
+    # This is more aggressive than "before" - it blocks display-manager completion
+    requiredBy = [ "display-manager.service" ];
     
-    # Attach this service to multi-user.target
-    # This means it will run automatically during normal system startup
-    wantedBy = [ "multi-user.target" ];
+    # Attach this service to display-manager.target
+    # This ensures it runs in the display-manager phase, not later
+    wantedBy = [ "display-manager.target" ];
     
     serviceConfig = {
       # "oneshot" means this service runs once and exits
@@ -37,20 +34,24 @@
       # The actual command this service runs
       # This is a shell script that checks display-manager status AND Wayland GUI
       ExecStart = pkgs.writeShellScript "check-display-manager" ''
-        # Maximum time to wait for display-manager to become active (in seconds)
-        # 90 seconds should be enough - we want this to complete BEFORE/DURING login
-        # With automatic login, this might complete faster since login happens automatically
-        MAX_WAIT=90
+        # Maximum time to wait - MUCH SHORTER now
+        # We want this to complete quickly, before you can even login
+        # 30-45 seconds should be enough for display-manager to show SOMETHING
+        # If your system is slow, increase to 60, but not more
+        MAX_WAIT=45
         
         # How long to wait between each check (in seconds)
-        # We'll check every 3 seconds - more frequent since this is time-sensitive
-        CHECK_INTERVAL=3
+        # Check every 2 seconds for faster detection
+        CHECK_INTERVAL=2
         
         # Counter to track how long we've been waiting
         elapsed=0
         
-        echo "Checking display-manager startup for Wayland (timeout: $MAX_WAIT seconds)..."
-        echo "Note: System uses automatic login, checking for compositor and Plasma processes"
+        echo "EARLY CHECK: Verifying display-manager startup (timeout: $MAX_WAIT seconds)..."
+        
+        # Give display-manager a brief moment to initialize
+        # Don't check immediately - let it start up
+        sleep 5
         
         # Loop: check repeatedly until we confirm Wayland GUI is working or we timeout
         while [ $elapsed -lt $MAX_WAIT ]; do
@@ -60,74 +61,48 @@
           # This catches immediate crashes
           if systemctl is-failed --quiet display-manager.service; then
             # display-manager explicitly failed - reboot immediately
-            echo "Display manager FAILED at boot after $elapsed seconds"
+            echo "FAILURE: Display manager service failed after $elapsed seconds"
             logger -t display-manager-check "Display manager failed state detected, triggering reboot"
             systemctl reboot
             exit 1
           fi
           
           # SECOND CHECK: Is the display-manager service active?
-          # If yes, proceed to check if Wayland GUI is actually working
           if systemctl is-active --quiet display-manager.service; then
-            echo "Display manager service is active after $elapsed seconds, verifying Wayland GUI..."
             
-            # Give Wayland compositor a moment to initialize
-            # Wayland compositors can take a second to fully start up
-            sleep 2
-            
-            # CHECK FOR WAYLAND COMPONENTS:
-            # For KDE Plasma on Wayland with automatic login, we look for:
-            # 
-            # OPTION 1: Login screen scenario (no auto-login or auto-login not triggered yet)
-            #   - kwin_wayland (compositor)
-            #   - sddm-greeter (login screen UI)
-            #
-            # OPTION 2: Auto-login scenario (already logged in automatically)
-            #   - kwin_wayland (compositor - still running after login)
-            #   - plasmashell (the actual KDE Plasma desktop)
-            #   - No sddm-greeter (it exits after successful auto-login)
-            #
-            # We accept EITHER scenario as success
-            
+            # CHECK FOR WAYLAND COMPOSITOR
+            # KWin Wayland is the key - if this is running, the display system is working
             if pgrep -x kwin_wayland > /dev/null; then
-              echo "✓ KWin Wayland compositor is running"
+              echo "✓ KWin Wayland compositor found after $elapsed seconds"
               
-              # Check which scenario we're in:
+              # Now check if we can see EITHER login screen OR desktop
+              # We just need ONE of these to prove GUI is visible
               
-              # SCENARIO 1: Is SDDM greeter running? (login screen visible)
               if pgrep -x sddm-greeter > /dev/null; then
-                echo "✓ SDDM greeter (login screen) is running"
-                echo "SUCCESS: Login screen is visible after $elapsed seconds"
-                exit 0  # Exit successfully - login screen is showing!
-              
-              # SCENARIO 2: Is Plasma desktop running? (already logged in)
+                # Login screen is showing - perfect!
+                echo "✓ SDDM greeter detected - login screen is visible"
+                echo "SUCCESS: Display system working after $elapsed seconds"
+                exit 0
+                
               elif pgrep -x plasmashell > /dev/null; then
-                echo "✓ Plasmashell is running (automatic login successful)"
-                echo "SUCCESS: Plasma desktop loaded after $elapsed seconds"
-                exit 0  # Exit successfully - desktop is loaded via auto-login!
-              
+                # Desktop already loaded (auto-login) - perfect!
+                echo "✓ Plasmashell detected - desktop is loaded"
+                echo "SUCCESS: Display system working after $elapsed seconds (auto-login)"
+                exit 0
+                
               else
-                # KWin is running but neither greeter nor Plasma found yet
-                echo "✓ KWin running, waiting for greeter or Plasma to appear..."
-                # This is a transitional state - keep waiting
-                # Either sddm-greeter will appear, or Plasma will start (auto-login)
+                # KWin running but no UI yet - this is normal during startup
+                # Keep waiting - UI should appear soon
+                echo "KWin running, waiting for UI (greeter or Plasma)... ($elapsed seconds)"
               fi
               
             else
-              # Display-manager claims to be active but no Wayland compositor found
-              # This is the "black screen" scenario
-              echo "Display manager active but KWin Wayland not running yet (after $elapsed seconds)"
-              
-              # Check if SDDM process itself exists
-              # If SDDM exists but no compositor, it might be about to start one
-              if pgrep -x sddm > /dev/null; then
-                echo "SDDM process found, waiting for KWin compositor to start..."
-              fi
-              # Keep looping - compositor might be slow to start
+              # No compositor found - this is the "black screen" problem
+              echo "No KWin Wayland compositor detected ($elapsed seconds)"
             fi
           else
-            # display-manager service not active yet - still starting up
-            echo "Waiting for display-manager service to become active... ($elapsed seconds)"
+            # display-manager not active yet
+            echo "Waiting for display-manager service... ($elapsed seconds)"
           fi
           
           # Wait before next check
@@ -135,30 +110,89 @@
           elapsed=$((elapsed + CHECK_INTERVAL))
         done
         
-        # TIMEOUT: If we get here, we've waited MAX_WAIT seconds and either:
-        # - display-manager never became active, OR
-        # - display-manager is active but no Wayland compositor is running, OR
-        # - KWin is running but NEITHER greeter NOR Plasma appeared
-        # 
-        # This is the "black screen" scenario - service running but nothing visible
-        echo "TIMEOUT: Display manager/Wayland GUI did not start properly within $MAX_WAIT seconds"
+        # TIMEOUT: Something is wrong
+        echo "TIMEOUT: Display system did not start properly within $MAX_WAIT seconds"
+        echo "This check completed BEFORE you could login, so GUI is broken"
         
-        # Log what we found for debugging
-        # This helps figure out what went wrong
-        echo "Final state check:"
-        echo "  display-manager service: $(systemctl is-active display-manager.service)"
-        echo "  kwin_wayland process: $(pgrep -x kwin_wayland > /dev/null && echo 'running' || echo 'NOT FOUND')"
-        echo "  sddm-greeter process: $(pgrep -x sddm-greeter > /dev/null && echo 'running' || echo 'NOT FOUND')"
-        echo "  plasmashell process: $(pgrep -x plasmashell > /dev/null && echo 'running' || echo 'NOT FOUND')"
+        # Log final state for debugging
+        echo "Final state:"
+        echo "  display-manager: $(systemctl is-active display-manager.service 2>&1)"
+        echo "  kwin_wayland: $(pgrep -x kwin_wayland > /dev/null && echo 'YES' || echo 'NO')"
+        echo "  sddm-greeter: $(pgrep -x sddm-greeter > /dev/null && echo 'YES' || echo 'NO')"
+        echo "  plasmashell: $(pgrep -x plasmashell > /dev/null && echo 'YES' || echo 'NO')"
         
-        logger -t display-manager-check "Wayland GUI timeout after $MAX_WAIT seconds, triggering reboot"
+        logger -t display-manager-check "Display system timeout after $MAX_WAIT seconds, triggering reboot"
         
-        # Trigger reboot - something is wrong
+        # Trigger reboot
         systemctl reboot
         exit 1
       '';
     };
   };
+
+
+  systemd.services.display-manager-startup-check = {
+    description = "Check if display manager and Wayland GUI started successfully at boot";
+    
+    # Simple dependencies - just wait for display-manager
+    after = [ "display-manager.service" ];
+    wantedBy = [ "multi-user.target" ];
+    
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      
+      # Set a systemd-level timeout as a safety net
+      # If script takes longer than this, systemd kills it
+      TimeoutStartSec = "60s";
+      
+      ExecStart = pkgs.writeShellScript "check-display-manager" ''
+        set -x  # Enable debug output - will show each command as it runs
+        
+        echo "Starting display-manager check at $(date)"
+        
+        # Short timeout since we're checking early
+        MAX_WAIT=40
+        CHECK_INTERVAL=2
+        elapsed=0
+        
+        # Initial wait for display-manager to start
+        sleep 5
+        
+        while [ $elapsed -lt $MAX_WAIT ]; do
+          echo "Check iteration: $elapsed seconds elapsed"
+          
+          # Check for failure
+          if systemctl is-failed --quiet display-manager.service; then
+            echo "FAILED: display-manager service is in failed state"
+            logger -t dm-check "Display manager failed, rebooting"
+            systemctl reboot
+            exit 1
+          fi
+          
+          # Check if compositor is running
+          if pgrep -x kwin_wayland > /dev/null; then
+            echo "Found kwin_wayland"
+            
+            # Check for either greeter or plasma
+            if pgrep -x sddm-greeter > /dev/null || pgrep -x plasmashell > /dev/null; then
+              echo "SUCCESS: Found UI component after $elapsed seconds"
+              exit 0
+            fi
+          fi
+          
+          sleep $CHECK_INTERVAL
+          elapsed=$((elapsed + CHECK_INTERVAL))
+        done
+        
+        echo "TIMEOUT after $MAX_WAIT seconds"
+        logger -t dm-check "Display timeout, rebooting"
+        systemctl reboot
+        exit 1
+      '';
+    };
+  };
+
 }
 /*
 
