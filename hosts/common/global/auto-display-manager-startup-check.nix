@@ -1,135 +1,144 @@
 { pkgs, ... }: {
-  # Create a custom service that checks if display-manager AND the GUI are actually working
-  # This runs once at boot and reboots the system if display-manager failed
+  # Create a custom service that checks if display-manager AND Wayland GUI are working
+  # This runs EARLY at boot and reboots the system if display-manager failed
   # or if the display isn't actually showing anything
+  # WAYLAND-ONLY VERSION (no X11 checks)
   systemd.services.display-manager-startup-check = {
-
+    
     # Human-readable description shown in systemctl status
-    description = "Check if display manager and GUI started successfully at boot";
-
+    description = "Check if display manager and Wayland GUI started successfully at boot";
+    
     # When this service should run in the boot sequence
     # "display-manager.service" = wait for display-manager to attempt starting
-    # "multi-user.target" = wait for basic system to be ready
-    after = [ "display-manager.service" "multi-user.target" ];
-
+    # NOTE: We do NOT wait for multi-user.target because that can take a while
+    # We want to check as soon as display-manager attempts to start
+    after = [ "display-manager.service" ];
+    
+    # This is CRITICAL: we want this check to be REQUIRED for multi-user.target
+    # If this service fails (triggers reboot), the system won't reach multi-user
+    # This ensures the check completes BEFORE user login
+    before = [ "multi-user.target" ];
+    
     # Attach this service to multi-user.target
     # This means it will run automatically during normal system startup
     wantedBy = [ "multi-user.target" ];
-
+    
     serviceConfig = {
       # "oneshot" means this service runs once and exits
       # Unlike "simple" services that run continuously
       # Perfect for one-time startup checks
       Type = "oneshot";
-
+      
+      # RemainAfterExit means systemd considers this service "active" even after
+      # the script finishes successfully. This prevents it from running again.
+      # Once it succeeds, it stays in "active" state and won't re-run.
+      RemainAfterExit = true;
+      
       # The actual command this service runs
-      # This is a shell script that checks display-manager status AND actual GUI
+      # This is a shell script that checks display-manager status AND Wayland GUI
       ExecStart = pkgs.writeShellScript "check-display-manager" ''
         # Maximum time to wait for display-manager to become active (in seconds)
-        # 120 seconds = 2 minutes should be generous even for slow systems
-        # Adjust this value based on your hardware:
-        #   - Fast SSD system: 60 seconds might be enough
-        #   - Older HDD system: 180 seconds for extra safety
-        #   - Very slow system: 300 seconds (5 minutes)
-        MAX_WAIT=120
-
+        # 90 seconds should be enough - we want this to complete BEFORE user login
+        # If your system is very slow, increase this, but keep it under the time
+        # it takes you to login after seeing the login screen
+        MAX_WAIT=90
+        
         # How long to wait between each check (in seconds)
-        # We'll check every 5 seconds to see if display-manager is up
-        # Shorter interval = faster detection but more CPU cycles
-        CHECK_INTERVAL=5
-
+        # We'll check every 3 seconds - more frequent since this is time-sensitive
+        CHECK_INTERVAL=3
+        
         # Counter to track how long we've been waiting
         elapsed=0
-
-        echo "Waiting up to $MAX_WAIT seconds for display-manager to start..."
-
-        # Loop: check repeatedly until display-manager is active or we timeout
+        
+        echo "Checking display-manager startup for Wayland (timeout: $MAX_WAIT seconds)..."
+        
+        # Loop: check repeatedly until we confirm Wayland GUI is working or we timeout
         while [ $elapsed -lt $MAX_WAIT ]; do
-
+          
           # FIRST CHECK: Is the display-manager service in failed state?
           # "failed" state means it tried to start and crashed/errored
-          # This is different from "activating" (still starting up)
+          # This catches immediate crashes
           if systemctl is-failed --quiet display-manager.service; then
-            # display-manager explicitly failed - no point waiting longer
+            # display-manager explicitly failed - reboot immediately
             echo "Display manager FAILED at boot after $elapsed seconds"
             logger -t display-manager-check "Display manager failed state detected, triggering reboot"
             systemctl reboot
             exit 1
           fi
-
+          
           # SECOND CHECK: Is the display-manager service active?
-          # If yes, proceed to check if GUI is actually working
+          # If yes, proceed to check if Wayland GUI is actually working
           if systemctl is-active --quiet display-manager.service; then
-            echo "Display manager service is active, checking if GUI is actually working..."
-
-            # Give it a moment for the display to initialize
-            # Sometimes the service reports active before display is ready
-            sleep 3
-
-            # CHECK 1: Is there an X server or Wayland compositor running?
-            # These are the display servers that actually render the GUI
-            # X11 check: look for Xorg or X process
-            # Wayland check: look for a compositor (kwin_wayland for KDE)
-            if pgrep -x Xorg > /dev/null || pgrep -x X > /dev/null || \
-               pgrep -x kwin_wayland > /dev/null || pgrep -x kwin_x11 > /dev/null; then
-              echo "Display server detected (Xorg or Wayland compositor running)"
-
-              # CHECK 2: Is SDDM actually running?
-              # SDDM is the login manager for KDE
-              # If display-manager service is active but sddm isn't running,
-              # something is wrong
-              if pgrep -x sddm > /dev/null || pgrep -x sddm-greeter > /dev/null; then
-                echo "SDDM login manager is running"
-
-                # CHECK 3: Can we connect to the X display?
-                # This verifies the display is actually accessible
-                # DISPLAY=:0 is usually the first display
-                # xset q queries the X server - if this succeeds, display is working
-                if DISPLAY=:0 ${pkgs.xorg.xset}/bin/xset q &>/dev/null; then
-                  echo "X display is accessible and responding"
-                  echo "Display manager and GUI started successfully after $elapsed seconds"
-                  exit 0  # All checks passed! Exit with success
-                else
-                  echo "WARNING: X display not accessible, but processes are running (might be Wayland)"
-                  # For Wayland systems, we can't easily test the display
-                  # But if we got this far (sddm + compositor running), probably OK
-                  # Give it the benefit of the doubt
-                  echo "Display manager started successfully after $elapsed seconds (Wayland mode)"
-                  exit 0
-                fi
+            echo "Display manager service is active after $elapsed seconds, verifying Wayland GUI..."
+            
+            # Give Wayland compositor a moment to initialize
+            # Wayland compositors can take a second to fully start up
+            sleep 2
+            
+            # CHECK FOR WAYLAND COMPONENTS:
+            # For KDE Plasma on Wayland, we need to look for:
+            # 1. kwin_wayland - the KDE Wayland compositor (this renders everything)
+            # 2. sddm-greeter - the actual login screen UI
+            # 
+            # Note: SDDM itself (sddm process) manages the login, but sddm-greeter
+            # is what actually displays on screen. If greeter is running, you can see it.
+            
+            if pgrep -x kwin_wayland > /dev/null; then
+              echo "✓ KWin Wayland compositor is running"
+              
+              # Additional check: is the SDDM greeter running?
+              # The greeter is what you actually see (the login screen)
+              if pgrep -x sddm-greeter > /dev/null; then
+                echo "✓ SDDM greeter (login screen) is running"
+                echo "SUCCESS: Display manager and Wayland GUI started after $elapsed seconds"
+                echo "Login screen should be visible now"
+                exit 0  # Exit successfully - all checks passed!
               else
-                echo "WARNING: Display server running but SDDM process not found after $elapsed seconds"
-                # This is suspicious - display server without login manager
-                # But keep waiting in case SDDM is just slow to start
+                echo "✓ KWin is running but SDDM greeter not found yet"
+                # This might happen briefly during startup
+                # kwin_wayland starts before sddm-greeter appears
+                # Keep waiting - greeter should appear soon
               fi
+              
             else
-              echo "No display server detected yet after $elapsed seconds"
-              # No Xorg or Wayland compositor - definitely not ready
-              # Keep waiting
+              # Display-manager claims to be active but no Wayland compositor found
+              echo "Display manager active but KWin Wayland not running yet (after $elapsed seconds)"
+              
+              # Check if SDDM process itself exists
+              # If SDDM exists but no compositor, it might be about to start one
+              if pgrep -x sddm > /dev/null; then
+                echo "SDDM process found, waiting for compositor to start..."
+              fi
+              # Keep looping - compositor might be slow to start
             fi
           else
             # display-manager service not active yet - still starting up
-            echo "Display manager service not active yet after $elapsed seconds"
+            echo "Waiting for display-manager service to become active... ($elapsed seconds)"
           fi
-
-          # None of the success conditions met - wait longer
+          
+          # Wait before next check
           sleep $CHECK_INTERVAL
           elapsed=$((elapsed + CHECK_INTERVAL))
-
-          # Optional: print progress so you can see what's happening in logs
-          echo "Still waiting... ($elapsed/$MAX_WAIT seconds)"
         done
-
-        # If we get here, we've waited MAX_WAIT seconds and either:
-        # - display-manager never became active
-        # - display-manager is active but no GUI appeared
-        # - SDDM process not running despite display-manager being active
-        # All of these are abnormal - trigger reboot
-        echo "Display manager/GUI did not start properly within $MAX_WAIT seconds"
-        logger -t display-manager-check "Display manager/GUI timeout or failure after $MAX_WAIT seconds, triggering reboot"
-
-        # Trigger an immediate system reboot
-        # Something is seriously wrong
+        
+        # TIMEOUT: If we get here, we've waited MAX_WAIT seconds and either:
+        # - display-manager never became active, OR
+        # - display-manager is active but no Wayland compositor is running, OR
+        # - KWin is running but SDDM greeter never appeared
+        # 
+        # This is the "black screen" scenario - service running but nothing visible
+        # OR compositor running but no actual login screen displayed
+        echo "TIMEOUT: Display manager/Wayland GUI did not start properly within $MAX_WAIT seconds"
+        
+        # Log what we found for debugging
+        echo "Final state check:"
+        echo "  display-manager service: $(systemctl is-active display-manager.service)"
+        echo "  kwin_wayland process: $(pgrep -x kwin_wayland > /dev/null && echo 'running' || echo 'NOT FOUND')"
+        echo "  sddm-greeter process: $(pgrep -x sddm-greeter > /dev/null && echo 'running' || echo 'NOT FOUND')"
+        
+        logger -t display-manager-check "Wayland GUI timeout after $MAX_WAIT seconds, triggering reboot"
+        
+        # Trigger reboot - something is wrong
         systemctl reboot
         exit 1
       '';
