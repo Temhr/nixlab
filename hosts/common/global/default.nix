@@ -5,6 +5,7 @@
     ./users
     ./audio.nix
     ./auto-backup-home.nix
+    ./auto-display-manager-startup-check.nix
     ./auto-nix-gc.nix
     ./auto-nixos-upgrade.nix
     ./bluetooth.nix
