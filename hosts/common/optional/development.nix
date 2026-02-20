@@ -35,7 +35,7 @@
           ];
         })
         (lib.mkIf config.godot.enable {
-          environment.systemPackages = with pkgs; [ godot godot-export-templates-bin godotPackages.export-template ];  #Free and Open Source 2D and 3D game engine
+          environment.systemPackages = with pkgs; [ unstable.godot unstable.godot-export-templates-bin unstable.godotPackages.export-template ];  #Free and Open Source 2D and 3D game engine
         })
         (lib.mkIf config.vscode.enable {
             environment.systemPackages = with pkgs; [
