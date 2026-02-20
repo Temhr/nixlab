@@ -46,7 +46,7 @@
 
   ## Development
   blender.enable = true;    #3D Creation/Animation/Publishing System
-  #godot.enable = true;    #Free and Open Source 2D and 3D game engine
+  godot.enable = true;    #Free and Open Source 2D and 3D game engine
   #vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
 
   ## Education
