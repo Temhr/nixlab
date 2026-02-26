@@ -194,7 +194,7 @@
   };
 
   services.syncthing-custom = {
-    enable = true;
+    enable = false;
     user = "temhr";
     group = "users";
     guiPort = 8384;
