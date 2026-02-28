@@ -20,7 +20,6 @@
 
       extraCommands = ''
         iptables -A INPUT -s 192.168.0.0/24 -j ACCEPT
-        iptables -A OUTPUT -d 192.168.0.0/24 -j ACCEPT
       '';
     };
 }
