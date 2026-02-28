@@ -74,6 +74,7 @@
     wavemon                    # WiFi signal and quality monitor for terminals
 
     ## Disk & Partition Tools
+    kdePackages.kdeconnect-kde    # Multi-platform app that allows your devices to communicate
     kdePackages.partitionmanager  # GUI for managing partitions and filesystems
     usbimager                     # Very minimal GUI app that can write compressed disk images to USB drives
     gparted                       # Graphical disk partitioning tool
