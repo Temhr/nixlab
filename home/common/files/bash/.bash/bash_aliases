@@ -196,7 +196,7 @@ alias sctl='systemctl'
 ## Check video drivers in use
 alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
 ## List available and default GPU
-alias lsgpu='switcherooctl list'
+alias lsgpu='lspci | grep -i -E "vga|3d|display"'
 
 ## get top process eating memory
 alias mem5='ps auxf | sort -nr -k 4 | head -5'
