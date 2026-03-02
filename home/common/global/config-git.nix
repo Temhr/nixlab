@@ -2,7 +2,7 @@
 
   home.packages = with pkgs; [
     git
-    github-desktop  #GUI for managing Git and GitHub
+    unstable.github-desktop  #GUI for managing Git and GitHub
     git-credential-keepassxc  #Helper that allows Git (and shell scripts) to use KeePassXC as credential store
   ];
   programs.git.enable = true;  #Distributed version control system
