@@ -188,6 +188,10 @@ alias nixtop='ssh temhr@192.168.0.202'
 alias nixvat='ssh temhr@192.168.0.201'
 alias nixzen='ssh temhr@192.168.0.204'
 
+##ctl Shortcuts
+alias jctl='journalctl -u'
+alias sctl='systemctl'
+
 ## Check video drivers in use
 alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
 ## List available and default GPU
