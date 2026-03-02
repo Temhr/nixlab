@@ -11,7 +11,9 @@
     git                        # distributed version control system
     home-manager               # user environment manager for declarative configs
 
-    android-tools              #
+    ## Android Tools
+    android-tools                  # Android SDK platform tools
+    kdePackages.kdeconnect-kde     # Multi-platform app that allows your devices to communicate
 
     ## System Utilities
     appimage-run               # Run AppImage applications without extracting them
@@ -74,7 +76,6 @@
     wavemon                    # WiFi signal and quality monitor for terminals
 
     ## Disk & Partition Tools
-    kdePackages.kdeconnect-kde    # Multi-platform app that allows your devices to communicate
     kdePackages.partitionmanager  # GUI for managing partitions and filesystems
     usbimager                     # Very minimal GUI app that can write compressed disk images to USB drives
     gparted                       # Graphical disk partitioning tool
