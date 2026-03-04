@@ -57,7 +57,7 @@
 
   ## Productivity
   #calibre.enable = true;  #Comprehensive e-book software
-  #libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
+  libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
   #logseq.enable = true;  #Privacy-first, open-source platform for knowledge management and collaboration
 
   ## Media Packages
