@@ -2,7 +2,7 @@
 final: prev: {
   # Create ollama-cuda-p5000 with compute capability 6.1 support
   # Pass cudaArches directly as a build parameter
-  ollama-cuda-p5000 = (prev.ollama-cuda.override {
+  ollama-cuda-p5000 = (prev.unstable.ollama-cuda.override {
     # sm_61 is compute capability 6.1 for P5000
     cudaArches = [ "sm_61" "sm_75" "sm_80" "sm_86" "sm_89" "sm_90" ];
   }).overrideAttrs (old: {
@@ -11,7 +11,7 @@ final: prev: {
     name = "ollama-cuda-p5000-${old.version}";
 
     # Update the vendor hash to match the actual Go modules
-    vendorHash = "sha256-NM0vtue0MFrAJCjmpYJ/rPEDWBxWCzBrWDb0MVOhY+Q=";
+    vendorHash = "";
   });
 
   # Use stable Ollama for better GPU compatibility

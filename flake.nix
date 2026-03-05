@@ -106,10 +106,10 @@
       # Overlays modify or add packages to nixpkgs.
 
       allOverlays = [
-        outputs.overlays.additions          # Custom packages you've defined
-        outputs.overlays.modifications      # Modified versions of existing packages
-        outputs.overlays.unstable-packages  # Access to unstable channel packages
-        outputs.overlays.stable-packages    # Access to stable channel packages
+        outputs.overlays.unstable-packages  # 1. Access to unstable channel packages
+        outputs.overlays.stable-packages    # 2. Access to stable channel packages
+        outputs.overlays.additions          # 3. Custom packages you've defined
+        outputs.overlays.modifications      # 4. Modified versions of existing packages
       ];
 
       # ========================================================================

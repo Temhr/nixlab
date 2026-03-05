@@ -75,6 +75,9 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
+  #sudo systemctl restart ollama-models #Download Ollama Models
+  #sudo journalctl -u ollama-models -f  #journal
+  ##Remove models
   #systemctl cat ollama | grep ExecStart
   #sudo -u ollama OLLAMA_MODELS=/data/ollama/models /nix/store/h10qpb3ac91irs946dzissanbs2klz4a-ollama-cuda-p5000-0.12.11/bin/ollama rm [model]
   services.ollama-p5000 = {
@@ -82,7 +85,7 @@
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
-    ollamaBindIP = "127.0.0.1";  # Listen on all interfaces
+    ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
     webuiBindIP = "0.0.0.0";
     # Data directories
     ollamaDataDir = "/data/ollama";
@@ -91,7 +94,7 @@
     gpuDevice = 0;      # First GPU
     gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
     # Pre-download models
-    models = [ "gpt-oss:20b" "translategemma:27b" "glm-4.7-flash:q4_K_M" "qwen3-coder-next:q4_K_M" ];
+    models = [ "gpt-oss:20b" "translategemma:27b" "glm-4.7-flash:q4_K_M" "qwen3-coder-next:latest" ];
     openFirewall = true;
   };
 
