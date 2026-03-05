@@ -18,8 +18,8 @@
     networking.firewall = {
       enable = true;
 
-      extraCommands = ''
-        iptables -A INPUT -s 192.168.0.0/24 -j ACCEPT
+      extraInputRules = ''
+        ip saddr 192.168.0.0/24 accept
       '';
     };
 }
