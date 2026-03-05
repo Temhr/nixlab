@@ -75,12 +75,14 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
+  #systemctl cat ollama | grep ExecStart
+  #sudo -u ollama OLLAMA_MODELS=/data/ollama/models /nix/store/h10qpb3ac91irs946dzissanbs2klz4a-ollama-cuda-p5000-0.12.11/bin/ollama rm [model]
   services.ollama-p5000 = {
     enable = true;
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
-    ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
+    ollamaBindIP = "127.0.0.1";  # Listen on all interfaces
     webuiBindIP = "0.0.0.0";
     # Data directories
     ollamaDataDir = "/data/ollama";
