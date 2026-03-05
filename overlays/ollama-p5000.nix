@@ -11,7 +11,7 @@ final: prev: {
     name = "ollama-cuda-p5000-${old.version}";
 
     # Update the vendor hash to match the actual Go modules
-    vendorHash = "";
+    vendorHash = "sha256-Lc1Ktdqtv2VhJQssk8K1UOimeEjVNvDWePE9WkamCos=";
   });
 
   # Use stable Ollama for better GPU compatibility
