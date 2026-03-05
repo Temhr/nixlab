@@ -13,6 +13,15 @@
     in
       ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
 
+  # dedicated nixpkgs instance for ollama pinning
+  ollama-packages = final: _prev: {
+    ollamaPkgs = import inputs.nixpkgs-ollama {
+      system = final.stdenv.hostPlatform.system;
+      config.allowUnfree = true;
+      config.cudaSupport = true;
+    };
+  };
+
   # unStable nixpkgs overlay
   unstable-packages = final: _prev: {
     unstable = import inputs.nixpkgs-unstable {

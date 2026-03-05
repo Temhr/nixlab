@@ -11,6 +11,10 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # Ollama pin
+    # nix flake metadata nixpkgs-unstable | grep "Revision"
+    nixpkgs-ollama.url = "github:nixos/nixpkgs/80bdc1e5ce51f56b19791b52b2901187931f5353";
+
     # User environment management
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -108,8 +112,9 @@
       allOverlays = [
         outputs.overlays.unstable-packages  # 1. Access to unstable channel packages
         outputs.overlays.stable-packages    # 2. Access to stable channel packages
-        outputs.overlays.additions          # 3. Custom packages you've defined
-        outputs.overlays.modifications      # 4. Modified versions of existing packages
+        outputs.overlays.ollama-packages    # 3. Defines pkgs.ollamaPkgs for Ollama pinning
+        outputs.overlays.additions          # 4. Custom packages you've defined
+        outputs.overlays.modifications      # 5. Modified versions of existing packages - Can use prev.ollamaPkgs
       ];
 
       # ========================================================================
