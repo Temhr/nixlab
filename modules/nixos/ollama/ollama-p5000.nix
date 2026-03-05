@@ -223,7 +223,7 @@ in
         # Download each model
         ${lib.concatMapStringsSep "\n" (model: ''
           echo "Checking model: ${model}"
-          if ! ${cfg.package}/bin/ollama list | grep -q "^${model}"; then
+          if ! ${cfg.package}/bin/ollama list | grep -q "${model}"; then
             echo "Downloading model: ${model} (this may take a while...)"
             ${cfg.package}/bin/ollama pull ${model} || echo "Warning: Failed to download ${model}"
           else
