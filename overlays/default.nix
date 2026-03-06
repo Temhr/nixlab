@@ -9,7 +9,7 @@
       # Load each overlay module
       ollamaOverlay = import ./ollama-p5000.nix final prev;
       open-webuiOverlay = import ./open-webui.nix final prev;
-      comfyuiOverlay = import ./comfyui-p5000.nix final prev;
+      comfyuiOverlay = import ./comfyui-p5000.nix final prev inputs.comfyui-src;
     in
       ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
 

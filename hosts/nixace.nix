@@ -99,7 +99,7 @@
   };
 
   services.comfyui-p5000 = {
-    enable = false;
+    enable = true;
     # Network configuration
     port = 8188;
     bindIP = "0.0.0.0";  # Listen on all interfaces
