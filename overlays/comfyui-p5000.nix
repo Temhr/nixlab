@@ -1,6 +1,5 @@
 # ComfyUI overlay with CUDA support for P5000
-final: prev: comfyuiSrc:
-{
+final: prev: {
   # Fix terminado test failure
   python311 = prev.python311.override {
     packageOverrides = pyfinal: pyprev: {
@@ -17,8 +16,14 @@ final: prev: comfyuiSrc:
   # Uses Python packages from current nixpkgs but we'll override torch
   comfyui = prev.stdenv.mkDerivation rec {
     pname = "comfyui";
-    version = comfyuiSrc.shortRev or "pinned";  # uses the commit short hash
-    src = comfyuiSrc;                            # ← use flake input directly
+    version = "unstable-2024-11-30";
+    src = prev.fetchFromGitHub {
+      owner = "comfyanonymous";
+      repo = "ComfyUI";
+      # To get latest [rev]; blank out [sha256] then pick a commit hash here: https://github.com/Comfy-Org/ComfyUI/commits/master/
+      rev = "3b93d5d571cb3e018da65f822cd11b60202b11c2";
+      sha256 = "sha256-14cUWrv3ghxjW2IUxaggxdjixSVFpKvMImNwctaDzRU=";
+    };
     nativeBuildInputs = [ prev.makeWrapper prev.autoPatchelfHook ];
     buildInputs = with prev; [
       python311

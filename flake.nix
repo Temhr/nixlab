@@ -13,8 +13,8 @@
 
     # Version Pinned Apps
     # nix flake metadata nixpkgs-unstable | grep "Revision"
-    comfyui-src.url = "github:comfyanonymous/ComfyUI/master";
     nixpkgs-ollama.url = "github:nixos/nixpkgs/80bdc1e5ce51f56b19791b52b2901187931f5353";
+    # ComfyUI Pin is in nixlab/overlays/comfyui-p5000.nix
 
     # User environment management
     home-manager = {
