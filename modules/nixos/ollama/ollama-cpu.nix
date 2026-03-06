@@ -192,7 +192,7 @@ in
         # Download each model
         ${lib.concatMapStringsSep "\n" (model: ''
           echo "Checking model: ${model}"
-          if ! ${pkgs.ollama}/bin/ollama list | grep -q "^${model}"; then
+          if ! ${pkgs.ollama}/bin/ollama list | grep -q "${model}"; then
             echo "Downloading model: ${model} (this may take a while...)"
             ${pkgs.ollama}/bin/ollama pull ${model} || echo "Warning: Failed to download ${model}"
           else
