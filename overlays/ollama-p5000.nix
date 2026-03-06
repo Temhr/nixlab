@@ -10,7 +10,7 @@ final: prev: {
     pname = "ollama-cuda-p5000";
     name = "ollama-cuda-p5000-${old.version}";
 
-    # Update the vendor hash to match the actual Go modules
+    # Rebuild empty or outdated then update the vendor hash to match the actual Go modules given
     vendorHash = "sha256-Lc1Ktdqtv2VhJQssk8K1UOimeEjVNvDWePE9WkamCos=";
   });
 
