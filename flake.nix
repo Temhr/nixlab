@@ -11,7 +11,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # Ollama pin
+    # Ollama pinned version
     # nix flake metadata nixpkgs-unstable | grep "Revision"
     nixpkgs-ollama.url = "github:nixos/nixpkgs/80bdc1e5ce51f56b19791b52b2901187931f5353";
 
