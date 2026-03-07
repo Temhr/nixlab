@@ -5,6 +5,7 @@
   lib,
   config,
   pkgs,
+  flakePath,
   ...
 }: {
   # You can import other NixOS modules here
@@ -157,6 +158,12 @@
     ];
   };
 
+  services.bookstack-custom = {
+    enable             = true;
+    appURL             = "http://192.168.0.200:6875";
+    dbRootPasswordFile = config.sops.secrets.bookstack_db_root.path;
+    dbPasswordFile     = config.sops.secrets.bookstack_db_pass.path;
+  };
 
   services.grafana-custom = {
     enable = false;
@@ -226,6 +233,14 @@
 
   # Tells sops-nix where key lives
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+  sops.secrets.bookstack_db_root = {
+    sopsFile = ${flakePath}/secrets/bookstack.yaml;
+    format   = "dotenv";
+  };
+  sops.secrets.bookstack_db_pass = {
+    sopsFile = ${flakePath}/secrets/bookstack.yaml;
+    format   = "dotenv";
+  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";
