@@ -161,8 +161,8 @@
   services.bookstack-custom = {
     enable             = true;
     appURL             = "http://192.168.0.200:6875";
-    dbRootPasswordFile = config.sops.secrets.bookstack_db_root.path;
-    dbPasswordFile     = config.sops.secrets.bookstack_db_pass.path;
+    dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
+    dbPasswordFile     = config.sops.secrets.DB_PASS.path;
   };
 
   services.grafana-custom = {
@@ -233,10 +233,13 @@
 
   # Tells sops-nix where key lives
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-  sops.secrets.bookstack_db_root = {
+  sops.secrets.MYSQL_ROOT_PASSWORD = {
     sopsFile = flakePath + "/secrets/bookstack.yaml";
   };
-  sops.secrets.bookstack_db_pass = {
+  sops.secrets.MYSQL_PASSWORD = {
+    sopsFile = flakePath + "/secrets/bookstack.yaml";
+  };
+  sops.secrets.DB_PASS = {
     sopsFile = flakePath + "/secrets/bookstack.yaml";
   };
 
