@@ -237,7 +237,9 @@ in
         PUID        = "1000";
         PGID        = "1000";
         APP_URL     = cfg.appURL;
-        DB_HOST     = "127.0.0.1";
+        # 10.0.2.2 is the Podman/slirp4netns gateway — routes from inside the
+        # container back to the host where MariaDB (--network=host) is listening
+        DB_HOST     = "10.0.2.2";
         DB_PORT     = "3306";
         DB_USER     = "bookstack";
         DB_DATABASE = "bookstack";
@@ -306,7 +308,6 @@ in
 }
 
 /*
-
 ================================================================================
 USAGE EXAMPLES
 ================================================================================
