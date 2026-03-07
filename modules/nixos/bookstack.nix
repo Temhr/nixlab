@@ -89,6 +89,24 @@ in
         '';
       };
 
+      # REQUIRED (sops): Path to sops-decrypted file containing the APP_KEY
+      # BookStack uses this to encrypt sessions and other data — must never change
+      # after first setup or all existing sessions will be invalidated.
+      # File must contain:  APP_KEY=base64:yourbase64keyhere=
+      # Set via: sops.secrets.APP_KEY.path
+      appKeyFile = lib.mkOption {
+        type = lib.types.path;
+        example = "/run/secrets/APP_KEY";
+        description = ''
+          Path to a sops-decrypted file containing the BookStack APP_KEY.
+          Generate one with:
+            sudo podman run -it --rm --entrypoint /bin/bash \
+              lscr.io/linuxserver/bookstack:latest appkey
+          The file must contain a single line: APP_KEY=base64:...
+          Provide this via sops-nix: config.sops.secrets.APP_KEY.path
+        '';
+      };
+
       # OPTIONAL: Auto-open firewall ports (default: true)
       openFirewall = lib.mkOption {
         type = lib.types.bool;
@@ -212,9 +230,12 @@ in
         # DB_PASS is NOT set here — injected at runtime via environmentFiles
       };
 
-      # dbPasswordFile must also contain: DB_PASS=...
+      # Secrets injected at runtime — never stored in the Nix store
+      # dbPasswordFile contains: DB_PASS=...
+      # appKeyFile contains:     APP_KEY=...
       environmentFiles = [
         cfg.dbPasswordFile
+        cfg.appKeyFile
       ];
 
       volumes = [
@@ -269,6 +290,7 @@ in
 }
 
 /*
+
 ================================================================================
 USAGE EXAMPLES
 ================================================================================
@@ -278,8 +300,9 @@ Minimal (LAN access via IP):
 services.bookstack-custom = {
   enable             = true;
   appURL             = "http://192.168.1.50:6875";
-  dbRootPasswordFile = config.sops.secrets.bookstack_db_root.path;
-  dbPasswordFile     = config.sops.secrets.bookstack_db_pass.path;
+  dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
+  dbPasswordFile     = config.sops.secrets.DB_PASS.path;
+  appKeyFile         = config.sops.secrets.APP_KEY.path;
 };
 # Access at: http://192.168.1.50:6875
 # Default login: admin@admin.com / password  !! change immediately !!
@@ -292,8 +315,9 @@ services.bookstack-custom = {
   appURL             = "http://192.168.1.50:6875";
   dataDir            = "/data/bookstack";
   dataMountUnit      = "data.mount";   # systemd waits for /data before starting
-  dbRootPasswordFile = config.sops.secrets.bookstack_db_root.path;
-  dbPasswordFile     = config.sops.secrets.bookstack_db_pass.path;
+  dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
+  dbPasswordFile     = config.sops.secrets.DB_PASS.path;
+  appKeyFile         = config.sops.secrets.APP_KEY.path;
 };
 # Mount unit name = path with slashes replaced by dashes, drop the leading dash
 # /data           -> data.mount
@@ -330,8 +354,9 @@ services.bookstack-custom = {
   dataDir            = "/data/bookstack";
   domain             = "bookstack.home";  # Resolve via Pi-hole or router DNS
   enableSSL          = false;             # No Let's Encrypt for LAN-only domains
-  dbRootPasswordFile = config.sops.secrets.bookstack_db_root.path;
-  dbPasswordFile     = config.sops.secrets.bookstack_db_pass.path;
+  dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
+  dbPasswordFile     = config.sops.secrets.DB_PASS.path;
+  appKeyFile         = config.sops.secrets.APP_KEY.path;
   openFirewall       = true;
 };
 
