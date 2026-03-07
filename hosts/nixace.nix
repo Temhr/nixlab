@@ -224,6 +224,9 @@
 
   ];
 
+  # Tells sops-nix where key lives
+  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";
 }
