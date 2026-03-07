@@ -235,15 +235,9 @@
 
   # Tells sops-nix where key lives
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-  sops.secrets.MYSQL_ROOT_PASSWORD = {
-    sopsFile = flakePath + "/secrets/bookstack.yaml";
-  };
-  sops.secrets.MYSQL_PASSWORD = {
-    sopsFile = flakePath + "/secrets/bookstack.yaml";
-  };
-  sops.secrets.DB_PASS = {
-    sopsFile = flakePath + "/secrets/bookstack.yaml";
-  };
+  sops.secrets = lib.genAttrs
+    [ "MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY" ]  # append array if acessing more secrets this file
+    (_: { sopsFile = flakePath + "/secrets/bookstack.yaml"; });
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";
