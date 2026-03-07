@@ -1,18 +1,21 @@
-{lib, ...}: {
+{ lib, ... }:
+
+{
   i18n = {
-    ## Select internationalisation properties.
+    # Select internationalisation properties
     defaultLocale = lib.mkDefault "en_CA.UTF-8";
     extraLocaleSettings = {
-      LC_TIME = "en_SE.UTF-8";
+      LC_TIME = lib.mkDefault "en_SE.UTF-8";
     };
   };
 
   location.provider = "geoclue2";
-  ## Set your time zone.
+
+  # Set your time zone
   time.timeZone = lib.mkDefault "America/Toronto";
   services.timesyncd.enable = true;
 
-  ## Configure keymap in X11
+  # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
     variant = "";
