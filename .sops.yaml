@@ -1,0 +1,8 @@
+keys:
+  - &nixace age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332  # paste your public key here
+
+creation_rules:
+  - path_regex: secrets/bookstack\.yaml$
+    key_groups:
+      - age:
+        - *nixace
