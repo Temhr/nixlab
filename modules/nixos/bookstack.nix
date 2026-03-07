@@ -126,10 +126,27 @@ in
       "d ${cfg.dataDir}/db           0750 root root -"
     ];
 
-    # If dataDir lives on a separate drive, make tmpfiles-setup wait for it
-    systemd.services.systemd-tmpfiles-setup = lib.mkIf (cfg.dataMountUnit != null) {
-      after    = [ cfg.dataMountUnit ];
-      requires = [ cfg.dataMountUnit ];
+    # ----------------------------------------------------------------------------
+    # DIRECTORY INIT SERVICE - Ensures dataDir exists before containers start
+    # Uses a dedicated oneshot service so it correctly waits for the drive mount
+    # ----------------------------------------------------------------------------
+    systemd.services.bookstack-init-dirs = {
+      description   = "Create BookStack data directories";
+      wantedBy      = [ "multi-user.target" ];
+      before        = [ "podman-bookstack-db.service" "podman-bookstack.service" ];
+      after         = [ "local-fs.target" ]
+                      ++ lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
+      requires      = lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
+      serviceConfig = {
+        Type            = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        mkdir -p ${cfg.dataDir}
+        mkdir -p ${cfg.dataDir}/bookstack
+        mkdir -p ${cfg.dataDir}/db
+        chmod 750 ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
+      '';
     };
 
     # ----------------------------------------------------------------------------
@@ -170,10 +187,11 @@ in
       extraOptions = [ "--network=host" ];
     };
 
-    # Wait for the data drive mount before starting the DB container
-    systemd.services.podman-bookstack-db = lib.mkIf (cfg.dataMountUnit != null) {
-      after    = [ cfg.dataMountUnit ];
-      requires = [ cfg.dataMountUnit ];
+    # Wait for directories to be initialised before starting containers
+    systemd.services.podman-bookstack-db = {
+      after    = [ "bookstack-init-dirs.service" ]
+                 ++ lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
+      requires = [ "bookstack-init-dirs.service" ];
     };
 
     # ----------------------------------------------------------------------------
@@ -251,7 +269,6 @@ in
 }
 
 /*
-
 ================================================================================
 USAGE EXAMPLES
 ================================================================================
