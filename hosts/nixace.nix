@@ -235,11 +235,9 @@
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
   sops.secrets.bookstack_db_root = {
     sopsFile = flakePath + "/secrets/bookstack.yaml";
-    format   = "dotenv";
   };
   sops.secrets.bookstack_db_pass = {
     sopsFile = flakePath + "/secrets/bookstack.yaml";
-    format   = "dotenv";
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
