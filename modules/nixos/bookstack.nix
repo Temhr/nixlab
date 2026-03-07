@@ -255,6 +255,8 @@ in
         "${cfg.dataDir}/bookstack:/config"
       ];
 
+      # Port mapping works here because we do NOT use --network=host
+      # The DB container uses host networking; BookStack reaches it via 127.0.0.1
       ports = lib.optionals (cfg.domain == null) [
         "${cfg.bindIP}:${toString cfg.port}:80"
       ] ++ lib.optionals (cfg.domain != null) [
@@ -264,7 +266,8 @@ in
       # Ensures DB container starts first
       dependsOn = [ "bookstack-db" ];
 
-      extraOptions = [ "--network=host" ];
+      # No --network=host here — port mapping above handles external access
+      # BookStack reaches MariaDB (which uses host networking) via 127.0.0.1
     };
 
     # ----------------------------------------------------------------------------
@@ -303,6 +306,7 @@ in
 }
 
 /*
+
 ================================================================================
 USAGE EXAMPLES
 ================================================================================
