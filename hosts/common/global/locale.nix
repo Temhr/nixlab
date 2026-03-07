@@ -2,6 +2,9 @@
   i18n = {
     ## Select internationalisation properties.
     defaultLocale = lib.mkDefault "en_CA.UTF-8";
+    extraLocaleSettings = {
+      LC_TIME = "en_SE.UTF-8";
+    };
   };
 
   location.provider = "geoclue2";
