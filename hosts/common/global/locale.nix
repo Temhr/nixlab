@@ -5,7 +5,7 @@
     # Select internationalisation properties
     defaultLocale = lib.mkDefault "en_CA.UTF-8";
     extraLocaleSettings = {
-      LC_TIME = lib.mkDefault "en_SE.UTF-8";
+      LC_TIME = lib.mkDefault "en_DK.UTF-8";
     };
   };
 
