@@ -162,6 +162,7 @@
     enable             = true;
     appURL             = "http://192.168.0.200:6875";
     dataDir            = "/data/bookstack";
+    dataMountUnit      = "data.mount";
     dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
     dbPasswordFile     = config.sops.secrets.DB_PASS.path;
   };
