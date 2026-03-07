@@ -30,17 +30,6 @@
             statusStyle = "dot";
           };
         }
-        {
-          "BookStack" = {
-            href = "http://192.168.0.200:2665/";
-            icon = "bookstack";
-            description = "Self-hosted documentation and notes";
-            target = "_blank";
-            server = "nixace - Incus - HomeAssistant";
-            ping = "http://192.168.0.200:2665/";
-            statusStyle = "dot";
-          };
-        }
       ];
     }
 
@@ -128,6 +117,17 @@
             target = "_blank";
             server = "nixvat";
             ping = "http://192.168.0.201:3004";
+            statusStyle = "dot";
+          };
+        }
+        {
+          "BookStack" = {
+            href = "http://192.168.0.200:6875/";
+            icon = "bookstack";
+            description = "Self-hosted documentation and notes";
+            target = "_blank";
+            server = "nixace ";
+            ping = "http://192.168.0.200:6875/";
             statusStyle = "dot";
           };
         }
