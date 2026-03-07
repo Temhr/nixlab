@@ -165,6 +165,7 @@
     dataMountUnit      = "data.mount";
     dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
     dbPasswordFile     = config.sops.secrets.DB_PASS.path;
+    appKeyFile         = config.sops.secrets.APP_KEY.path;
   };
 
   services.grafana-custom = {
