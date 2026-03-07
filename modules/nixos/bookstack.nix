@@ -220,9 +220,35 @@ in
                  ++ lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
       requires = [ "bookstack-init-dirs.service" ];
       preStart = lib.mkBefore ''
+        # Write the runtime env file for the container
         echo "DB_PASS=$(cat ${cfg.dbPasswordFile})" >  /run/bookstack-app.env
         echo "APP_KEY=$(cat ${cfg.appKeyFile})"     >> /run/bookstack-app.env
         chmod 600 /run/bookstack-app.env
+
+        # Write /config/www/.env directly so BookStack reads real values.
+        # The container init script skips the template copy if this file exists.
+        mkdir -p ${cfg.dataDir}/bookstack/www
+        DB_PASS_VAL=$(cat ${cfg.dbPasswordFile})
+        APP_KEY_VAL=$(cat ${cfg.appKeyFile})
+        cat > ${cfg.dataDir}/bookstack/www/.env <<ENVEOF
+APP_KEY=$APP_KEY_VAL
+APP_URL=${cfg.appURL}
+DB_HOST=host.containers.internal
+DB_PORT=3306
+DB_DATABASE=bookstack
+DB_USERNAME=bookstack
+DB_PASSWORD=$DB_PASS_VAL
+STORAGE_TYPE=local
+MAIL_DRIVER=smtp
+MAIL_FROM_NAME="BookStack"
+MAIL_FROM=bookstack@example.com
+MAIL_HOST=localhost
+MAIL_PORT=587
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+ENVEOF
+        chmod 640 ${cfg.dataDir}/bookstack/www/.env
       '';
     };
 
@@ -308,7 +334,6 @@ in
 }
 
 /*
-
 ================================================================================
 USAGE EXAMPLES
 ================================================================================
