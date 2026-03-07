@@ -158,7 +158,9 @@
     ];
   };
 
-  networking.firewall.interfaces."podman0".allowedTCPPorts = [ 3306 ];
+  networking.firewall.extraInputRules = ''
+    ip saddr 10.88.0.0/16 tcp dport 3306 accept
+  '';
   services.bookstack-custom = {
     enable             = true;
     appURL             = "http://192.168.0.200:6875";
