@@ -31,7 +31,7 @@ in
       appURL = lib.mkOption {
         type = lib.types.str;
         default = "http://localhost:6875";
-        example = "http://192.168.0.50:6875";
+        example = "http://192.168.1.50:6875";
         description = "Full URL BookStack will use for links and assets (no trailing slash)";
       };
 
@@ -95,6 +95,19 @@ in
         default = true;
         description = "Open firewall ports for LAN access";
       };
+
+      # OPTIONAL: systemd mount unit that dataDir lives on (default: null)
+      # Set this if dataDir is on a separate drive so containers wait for it to mount.
+      # The unit name is the mount path with slashes replaced by dashes, minus the leading dash.
+      # Examples:
+      #   /data        -> "data.mount"
+      #   /mnt/storage -> "mnt-storage.mount"
+      dataMountUnit = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "data.mount";
+        description = "systemd mount unit for the drive that hosts dataDir. Containers will wait for it before starting.";
+      };
     };
   };
 
@@ -105,12 +118,19 @@ in
 
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create persistent data directories for containers
+    # Waits for the data drive to be mounted if dataMountUnit is set
     # ----------------------------------------------------------------------------
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir}              0750 root root -"
       "d ${cfg.dataDir}/bookstack    0750 root root -"
       "d ${cfg.dataDir}/db           0750 root root -"
     ];
+
+    # If dataDir lives on a separate drive, make tmpfiles-setup wait for it
+    systemd.services.systemd-tmpfiles-setup = lib.mkIf (cfg.dataMountUnit != null) {
+      after    = [ cfg.dataMountUnit ];
+      requires = [ cfg.dataMountUnit ];
+    };
 
     # ----------------------------------------------------------------------------
     # CONTAINER BACKEND - Enable Podman for rootless-friendly OCI containers
@@ -148,6 +168,12 @@ in
       ];
 
       extraOptions = [ "--network=host" ];
+    };
+
+    # Wait for the data drive mount before starting the DB container
+    systemd.services.podman-bookstack-db = lib.mkIf (cfg.dataMountUnit != null) {
+      after    = [ cfg.dataMountUnit ];
+      requires = [ cfg.dataMountUnit ];
     };
 
     # ----------------------------------------------------------------------------
@@ -225,6 +251,7 @@ in
 }
 
 /*
+
 ================================================================================
 USAGE EXAMPLES
 ================================================================================
@@ -239,6 +266,22 @@ services.bookstack-custom = {
 };
 # Access at: http://192.168.1.50:6875
 # Default login: admin@admin.com / password  !! change immediately !!
+
+
+With dataDir on a separate drive (/data):
+------------------------------------------
+services.bookstack-custom = {
+  enable             = true;
+  appURL             = "http://192.168.1.50:6875";
+  dataDir            = "/data/bookstack";
+  dataMountUnit      = "data.mount";   # systemd waits for /data before starting
+  dbRootPasswordFile = config.sops.secrets.bookstack_db_root.path;
+  dbPasswordFile     = config.sops.secrets.bookstack_db_pass.path;
+};
+# Mount unit name = path with slashes replaced by dashes, drop the leading dash
+# /data           -> data.mount
+# /mnt/storage    -> mnt-storage.mount
+# /mnt/data/books -> mnt-data-books.mount
 
 
 With mDNS .local hostname (no domain registration needed):
