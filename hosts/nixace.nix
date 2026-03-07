@@ -234,11 +234,11 @@
   # Tells sops-nix where key lives
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
   sops.secrets.bookstack_db_root = {
-    sopsFile = ${flakePath}/secrets/bookstack.yaml;
+    sopsFile = flakePath + "/secrets/bookstack.yaml";
     format   = "dotenv";
   };
   sops.secrets.bookstack_db_pass = {
-    sopsFile = ${flakePath}/secrets/bookstack.yaml;
+    sopsFile = flakePath + "/secrets/bookstack.yaml";
     format   = "dotenv";
   };
 
