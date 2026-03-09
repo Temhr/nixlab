@@ -94,7 +94,7 @@
       Name=Github Desktop ⚡ 🫨
       Comment=GUI for managing Git and GitHub
       Exec=bash -c "nix run nixpkgs-unstable#github-desktop & disown"
-      Icon=gimp
+      Icon=github-desktop
       Terminal=false
       Type=Application
       Categories=Development;Utilities;Ephemeral-App;
