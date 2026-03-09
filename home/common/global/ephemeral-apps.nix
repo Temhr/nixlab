@@ -9,7 +9,7 @@
       [Desktop Entry]
       Name=Audacity ⚡ 🫨
       Comment=Sound editor with graphical UI
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#audacity; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#audacity & disown"
       Icon=audacity
       Terminal=false
       Type=Application
@@ -19,9 +19,9 @@
      ## Blender
     ".local/share/applications/blender-cuda.desktop".text = ''
       [Desktop Entry]
-      Name=Blender CUDA ⚡
+      Name=Blender CUDA ⚡ 🫨
       Comment=3D Creation/Animation/Publishing System
-      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr '(import <nixpkgs> {}).blender.override {cudaSupport=true;}'; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure --expr '(import <nixpkgs-unstable> {}).blender.override {cudaSupport=true;}' & disown"
       Icon=blender
       Terminal=false
       Type=Application
@@ -33,7 +33,7 @@
       [Desktop Entry]
       Name=Darktable ⚡ 🫨
       Comment=Unstable - Virtual lighttable and darkroom
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#darktable; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#darktable & disown"
       Icon=darktable
       Terminal=false
       Type=Application
@@ -45,7 +45,7 @@
       [Desktop Entry]
       Name=DaVinci Resolve ⚡
       Comment=Professional video editing, color, effects and audio
-      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#davinci-resolve & disown"
       Icon=DaVinciResolve
       Terminal=false
       Type=Application
@@ -57,7 +57,7 @@
       [Desktop Entry]
       Name=Discord ⚡ 🫨
       Comment=All-in-one cross-platform voice and text chat for gamers
-      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#discord; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#discord & disown"
       Icon=discord
       Terminal=false
       Type=Application
@@ -69,7 +69,7 @@
       [Desktop Entry]
       Name=Drawio ⚡ 🫨
       Comment=Desktop version of draw.io for creating diagrams
-      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#drawio; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#drawio & disown"
       Icon=drawio
       Terminal=false
       Type=Application
@@ -77,11 +77,11 @@
     '';
 
     ## Godot
-    ".local/share/applications/gimp.desktop".text = ''
+    ".local/share/applications/godot.desktop".text = ''
       [Desktop Entry]
       Name=Godot ⚡ 🫨
       Comment=Free and Open Source 2D and 3D game engine
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#godot; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#godot & disown"
       Icon=godot
       Terminal=false
       Type=Application
@@ -93,7 +93,7 @@
       [Desktop Entry]
       Name=GIMP ⚡ 🫨
       Comment=GNU Image Manipulation Program
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#gimp3-with-plugins; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#gimp3-with-plugins & disown"
       Icon=gimp
       Terminal=false
       Type=Application
@@ -105,7 +105,7 @@
       [Desktop Entry]
       Name=Inkscape ⚡ 🫨
       Comment=Vector graphics editor
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#inkscape-with-extensions; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#inkscape-with-extensions & disown"
       Icon=inkscape
       Terminal=false
       Type=Application
@@ -117,7 +117,7 @@
       [Desktop Entry]
       Name=Kdenlive ⚡ 🫨
       Comment=Video editor based on MLT Framework
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#kdePackages.kdenlive; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#kdePackages.kdenlive & disown"
       Icon=kdenlive
       Terminal=false
       Type=Application
@@ -129,7 +129,7 @@
       [Desktop Entry]
       Name=Krita ⚡ 🫨
       Comment=Free and open source painting application
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#krita; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#krita & disown"
       Icon=krita
       Terminal=false
       Type=Application
@@ -139,9 +139,9 @@
     ## Lutris
     ".local/share/applications/lutris.desktop".text = ''
       [Desktop Entry]
-      Name=Lutris ⚡
+      Name=Lutris ⚡ 🫨
       Comment=Open Source gaming platform for GNU/Linux
-      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs#lutris; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#lutris & disown"
       Icon=lutris
       Terminal=false
       Type=Application
@@ -153,7 +153,7 @@
       [Desktop Entry]
       Name=Media Downloader ⚡ 🫨
       Comment=Qt/C++ GUI front end for yt-dlp
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#media-downloader; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#media-downloader & disown"
       Icon=media-downloader
       Terminal=false
       Type=Application
@@ -165,7 +165,7 @@
       [Desktop Entry]
       Name=Microsoft Edge ⚡ 🫨
       Comment=Web browser from Microsoft
-      Exec=ghostty -e bash -c "echo 'Launching...'; NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#microsoft-edge; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#microsoft-edge & disown"
       Icon=microsoft-edge
       Terminal=false
       Type=Application
@@ -177,7 +177,7 @@
       [Desktop Entry]
       Name=OBS Studio ⚡ 🫨
       Comment=Free and open source software for video recording and live streaming
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#obs-studio; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#obs-studio & disown"
       Icon=obs-studio
       Terminal=false
       Type=Application
@@ -189,7 +189,7 @@
       [Desktop Entry]
       Name=OpenShot ⚡ 🫨
       Comment=Free, open-source video editor
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#openshot-qt; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#openshot-qt & disown"
       Icon=openshot-qt
       Terminal=false
       Type=Application
@@ -201,7 +201,7 @@
       [Desktop Entry]
       Name=SuperTuxKart ⚡ 🫨
       Comment=A Free 3D kart racing game
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#superTuxKart; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#superTuxKart & disown"
       Icon=supertuxkart
       Terminal=false
       Type=Application
@@ -213,7 +213,7 @@
       [Desktop Entry]
       Name=Zed Editor ⚡ 🫨
       Comment=High-performance, multiplayer code editor from the creators of Atom and Tree-sitter
-      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#zed-editor-fhs; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Exec=bash -c "nix run nixpkgs-unstable#zed-editor-fhs & disown"
       Icon=zedEditor
       Terminal=false
       Type=Application
