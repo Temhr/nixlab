@@ -76,18 +76,6 @@
       Categories=Graphics;Ephemeral-App;
     '';
 
-    ## Godot
-    ".local/share/applications/godot.desktop".text = ''
-      [Desktop Entry]
-      Name=Godot ⚡ 🫨
-      Comment=Free and Open Source 2D and 3D game engine
-      Exec=bash -c "nix run nixpkgs-unstable#godot & disown"
-      Icon=godot
-      Terminal=false
-      Type=Application
-      Categories=Development;Ephemeral-App;
-    '';
-
     ## Gimp
     ".local/share/applications/gimp.desktop".text = ''
       [Desktop Entry]
@@ -98,6 +86,30 @@
       Terminal=false
       Type=Application
       Categories=Graphics;RasterGraphics;2DGraphics;Ephemeral-App;
+    '';
+
+    ## Github Desktop
+    ".local/share/applications/github-desktop.desktop".text = ''
+      [Desktop Entry]
+      Name=Github Desktop ⚡ 🫨
+      Comment=GUI for managing Git and GitHub
+      Exec=bash -c "nix run nixpkgs-unstable#github-desktop & disown"
+      Icon=gimp
+      Terminal=false
+      Type=Application
+      Categories=Development;Utilities;Ephemeral-App;
+    '';
+
+    ## Godot
+    ".local/share/applications/godot.desktop".text = ''
+      [Desktop Entry]
+      Name=Godot ⚡ 🫨
+      Comment=Free and Open Source 2D and 3D game engine
+      Exec=bash -c "nix run nixpkgs-unstable#godot & disown"
+      Icon=godot
+      Terminal=false
+      Type=Application
+      Categories=Development;Ephemeral-App;
     '';
 
     ## Inkscape
