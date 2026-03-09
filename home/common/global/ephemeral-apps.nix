@@ -76,6 +76,18 @@
       Categories=Graphics;Ephemeral-App;
     '';
 
+    ## Godot
+    ".local/share/applications/gimp.desktop".text = ''
+      [Desktop Entry]
+      Name=Godot ⚡ 🫨
+      Comment=Free and Open Source 2D and 3D game engine
+      Exec=ghostty -e bash -c "echo 'Launching...'; nix run nixpkgs-unstable#godot; echo; echo 'Terminal will close in 3 seconds (Press Enter to pause timer)...'; if timeout 3 bash -c 'read -r'; then echo 'Timer paused. Press Enter to close...'; read -r; fi"
+      Icon=godot
+      Terminal=false
+      Type=Application
+      Categories=Development;Ephemeral-App;
+    '';
+
     ## Gimp
     ".local/share/applications/gimp.desktop".text = ''
       [Desktop Entry]
