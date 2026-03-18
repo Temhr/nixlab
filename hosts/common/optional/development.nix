@@ -30,7 +30,7 @@
     config = lib.mkMerge [
         (lib.mkIf config.blender.enable {
           environment.systemPackages = with pkgs; [
-            unstable.blender   #3D Creation/Animation/Publishing System
+            blender   #3D Creation/Animation/Publishing System
             #(blender.override {cudaSupport=true;})   #Explicit CUDA support, but long compile time
           ];
         })
