@@ -1,9 +1,10 @@
-[
-    {
+
 # /var/lib/homepage/config/services.yaml
 # Homepage dashboard configuration
 # Docs: https://gethomepage.dev/en/configs/services/
 
+[
+    {
     # ──────────────────────────────────────────────
     # SECTION: Incus - HomeAssistant
     # ──────────────────────────────────────────────
@@ -150,6 +151,25 @@
             target = "_blank";
             server = "nixvat";
             ping = "http://192.168.0.201:3003";
+            statusStyle = "dot";
+          };
+        }
+      ];
+    }
+
+    {
+    # ──────────────────────────────────────────────
+    # SECTION: Godot Course
+    # ──────────────────────────────────────────────
+      "Godot Course" = [
+        {
+          "Classes - Engine Reference API" = {
+            href = "http://192.168.0.200:8000";
+            icon = "godot";
+            description = "Godot Engine Reference API - nixace";
+            target = "_blank";
+            server = "nixace";
+            ping = "http://192.168.0.200:8000";
             statusStyle = "dot";
           };
         }
