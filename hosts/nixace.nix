@@ -169,54 +169,9 @@
     appKeyFile = config.sops.secrets.APP_KEY.path;
   };
 
-  services.grafana-custom = {
-    enable = false;
-    port = 3101;
-    bindIP = "0.0.0.0";
-    openFirewall = true;
-    dataDir = "/data/grafana";
-    # Enable maintenance dashboard
-    dashboards = {
-      # System maintenance dashboard
-      maintenance = {
-        path = ../modules/nixos/grafana/dashboards/maintenance-checklist.json;
-        folder = "maintenance";
-        editable = true;
-      };
-
-      # Node exporter system overview
-      system-overview = {
-        path = ../modules/nixos/grafana/dashboards/system-overview.json;
-        folder = "maintenance";
-        editable = true;
-      };
-    };
-  };
-  services.loki-custom = {
-    enable = false;
-    port = 3100;
-    bindIP = "0.0.0.0";
-    openFirewall = true;
-    dataDir = "/data/loki";
-    maintenance.enable = true;
-  };
-  services.prometheus-custom = {
-    enable = false;
-    port = 9090;
-    bindIP = "0.0.0.0";
-    openFirewall = true;
-    dataDir = "/data/prometheus";
-    # Enable maintenance monitoring
-    maintenance = {
-      enable = true;
-      exporters = {
-        systemd = true; # Service status monitoring
-        smartctl = {
-          enable = true;
-        };
-      };
-    };
-  };
+  services.grafana-custom.enable = false;
+  services.loki-custom.enable = false;
+  services.prometheus-custom.enable = false;
 
   # Define your Flatpak packages here
   flatpakPackages = [
@@ -226,11 +181,6 @@
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
-    ## Godot Dev Tools
-    gcc14 #GNU Compiler Collection, version 14.1.0 (wrapper script)
-    pkg-config #Tool that allows packages to find out information about other packages (wrapper script)
-    scons #Improved, cross-platform substitute for Make
-    python3 #High-level dynamically-typed programming language
   ];
 
   # Tells sops-nix where key lives

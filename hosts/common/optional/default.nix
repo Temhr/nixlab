@@ -8,6 +8,7 @@
     ./graphical-shells.nix
     ./ignore-lid.nix
     ./media.nix
+    ./observability.nix
     ./productivity.nix
     ./virtualizations.nix
   ];
