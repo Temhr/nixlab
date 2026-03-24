@@ -97,23 +97,24 @@ Each file under `flake/parts/` owns a slice of the flake's outputs:
 
 ```
 nixlab/
-│
 ├── flake.nix                  # Thin root — delegates entirely to flake/parts/
 ├── flake.lock                 # Version-pinned input revisions
-├── flake/
-│   └── parts/                 # flake-parts orchestration modules
+├── flake/                     # flake-parts orchestration modules
+│   └── parts/
 ├── hardware/                  # Machine-level hardware configurations
-│   ├── common/
+│   ├── common/                # Shared expressions
 │   │   ├── global/            # Applied to all machines unconditionally
-│   │   └── optional/          # Selectable per host
+│   │   └── optional/          # Selectable hardware modules
 │   └── *.nix                  # Per-device configs (from nixos-generate-config)
+│
 ├── hosts/                     # System-level NixOS configurations
-│   ├── common/
+│   ├── common/                # Shared expressions
 │   │   ├── global/            # Applied to all hosts unconditionally
 │   │   └── optional/          # Selectable features (imported by host manifests)
 │   └── *.nix                  # Per-host feature manifests
+│
 ├── home/                      # User-level Home Manager configurations
-│   ├── common/
+│   ├── common/                # Shared expressions
 │   │   ├── files/             # Managed dotfiles and scripts
 │   │   ├── global/            # Applied to all users unconditionally
 │   │   └── optional/          # Selectable user features
