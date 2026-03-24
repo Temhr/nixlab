@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{lib, ...}: {
   # All three services default to disabled.
   # Enable per-host by setting enable = true in the host file.
 
