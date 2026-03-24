@@ -83,7 +83,7 @@ RSYNC_OPTS=(
 
     # EXPLICITLY PROTECT shelf from deletion (must come BEFORE --exclude=*)
     "--filter=protect shelf/"
-    
+
     # EXCLUDE EVERYTHING ELSE (including shelf symlink)
     "--exclude=*"
 )
@@ -318,7 +318,7 @@ shuffle_array() {
     local -n arr=$1
     local i tmp size rand
     size=${#arr[@]}
-    
+
     for ((i=size-1; i>0; i--)); do
         rand=$((RANDOM % (i+1)))
         tmp="${arr[i]}"
@@ -335,7 +335,7 @@ main() {
     # Randomize backup destination order
     local shuffled_destinations=("${BACKUP_DESTINATIONS[@]}")
     shuffle_array shuffled_destinations
-    
+
     echo "Backup order (randomized):"
     for dest in "${shuffled_destinations[@]}"; do
         echo "  - $dest"

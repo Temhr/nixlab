@@ -1,9 +1,10 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.homeassistant-custom;
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  cfg = config.services.homeassistant-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -56,14 +57,14 @@ in
       extraComponents = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
-        example = [ "met" "esphome" "mqtt" ];
+        example = ["met" "esphome" "mqtt"];
         description = "List of Home Assistant integration components to enable";
       };
 
       # OPTIONAL: Extra Python packages for custom integrations (default: none)
       extraPackages = lib.mkOption {
         type = lib.types.functionTo (lib.types.listOf lib.types.package);
-        default = ps: [];
+        default = _: [];
         example = lib.literalExpression "ps: with ps; [ numpy pandas ]";
         description = "Extra Python packages to make available to Home Assistant";
       };
@@ -103,7 +104,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # HOME ASSISTANT SERVICE - Configure the built-in NixOS Home Assistant module
     # ----------------------------------------------------------------------------
@@ -122,16 +122,18 @@ in
         default_config = {};
 
         # HTTP server configuration
-        http = {
-          # IP address to listen on
-          server_host = cfg.bindIP;
-          # Port to listen on
-          server_port = cfg.port;
-        } // lib.optionalAttrs (cfg.domain != null) {
-          # If using reverse proxy, trust forwarded headers
-          use_x_forwarded_for = true;
-          trusted_proxies = [ "127.0.0.1" ];
-        };
+        http =
+          {
+            # IP address to listen on
+            server_host = cfg.bindIP;
+            # Port to listen on
+            server_port = cfg.port;
+          }
+          // lib.optionalAttrs (cfg.domain != null) {
+            # If using reverse proxy, trust forwarded headers
+            use_x_forwarded_for = true;
+            trusted_proxies = ["127.0.0.1"];
+          };
 
         # Home location and preferences
         homeassistant = {
@@ -162,7 +164,7 @@ in
       "d ${cfg.dataDir} 0770 hass hass -"
     ];
 
-    users.users.temhr.extraGroups = [ "hass" ];
+    users.users.temhr.extraGroups = ["hass"];
 
     # ----------------------------------------------------------------------------
     # NGINX REVERSE PROXY - Only configured if domain is set
@@ -200,13 +202,12 @@ in
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Always open the Home Assistant port
-      [ cfg.port ]
+      [cfg.port]
       # Also open HTTP (80) and HTTPS (443) if using domain
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -333,5 +334,5 @@ Check configuration:
 
 Access via local network:
   http://192.168.x.x:8123
-
 */
+

@@ -1,8 +1,6 @@
-{ pkgs, ... }:
-let
-  BackupHomeShellScript = pkgs.writeShellScript "auto-backup-home" ( builtins.readFile ../files/scripts/auto-backup-home.sh );
-in
-{
+{pkgs, ...}: let
+  BackupHomeShellScript = pkgs.writeShellScript "auto-backup-home" (builtins.readFile ../files/scripts/auto-backup-home.sh);
+in {
   systemd.services.backup-home = {
     description = "Nightly Home directory backup";
     serviceConfig = {
@@ -10,7 +8,7 @@ in
       Type = "oneshot";
       User = "root";
     };
-    path = [ pkgs.rsync "/root"];
+    path = [pkgs.rsync "/root"];
     startAt = "03:30:00";
   };
 }

@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.glance-custom;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.glance-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -72,7 +74,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -91,15 +92,15 @@ in
     };
 
     users.groups.glance = {};
-    users.users.temhr.extraGroups = [ "glance" ];
+    users.users.temhr.extraGroups = ["glance"];
 
     # ----------------------------------------------------------------------------
     # GLANCE SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
     systemd.services.glance = {
       description = "Glance Dashboard";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
       serviceConfig = {
         Type = "simple";
@@ -117,42 +118,42 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
       };
 
       # Ensure config file exists with proper permissions
       # Port and bind address are configured in the YAML file
       preStart = ''
-        # Create default config if it doesn't exist
-        if [ ! -f ${cfg.dataDir}/glance.yml ]; then
-          cat > ${cfg.dataDir}/glance.yml << EOF
-server:
-  port: ${toString cfg.port}
-  host: "${cfg.bindIP}"
+                # Create default config if it doesn't exist
+                if [ ! -f ${cfg.dataDir}/glance.yml ]; then
+                  cat > ${cfg.dataDir}/glance.yml << EOF
+        server:
+          port: ${toString cfg.port}
+          host: "${cfg.bindIP}"
 
-pages:
-  - name: Home
-    columns:
-      - size: small
-        widgets:
-          - type: clock
-            hour-format: 24h
+        pages:
+          - name: Home
+            columns:
+              - size: small
+                widgets:
+                  - type: clock
+                    hour-format: 24h
 
-          - type: calendar
+                  - type: calendar
 
-      - size: full
-        widgets:
-          - type: rss
-            limit: 10
-            collapse-after: 3
-            cache: 3h
-            feeds:
-              - url: https://news.ycombinator.com/rss
-                title: Hacker News
-EOF
-          chown glance:glance ${cfg.dataDir}/glance.yml
-          chmod 660 ${cfg.dataDir}/glance.yml
-        fi
+              - size: full
+                widgets:
+                  - type: rss
+                    limit: 10
+                    collapse-after: 3
+                    cache: 3h
+                    feeds:
+                      - url: https://news.ycombinator.com/rss
+                        title: Hacker News
+        EOF
+                  chown glance:glance ${cfg.dataDir}/glance.yml
+                  chmod 660 ${cfg.dataDir}/glance.yml
+                fi
       '';
     };
 
@@ -184,13 +185,12 @@ EOF
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Open Glance port if not using reverse proxy
-      lib.optionals (cfg.domain == null) [ cfg.port ]
+      lib.optionals (cfg.domain == null) [cfg.port]
       # Open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -271,5 +271,5 @@ Edit configuration:
 
 Config syntax errors:
   ${pkgs.glance}/bin/glance --config /var/lib/glance/glance.yml --check
-
 */
+

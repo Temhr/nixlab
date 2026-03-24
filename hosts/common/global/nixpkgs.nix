@@ -1,4 +1,4 @@
-{ outputs, ... }: {
+{outputs, ...}: {
   nixpkgs = {
     # You can add overlays here
     overlays = [
@@ -6,7 +6,6 @@
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.stable-packages
-
 
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default

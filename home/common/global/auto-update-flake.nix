@@ -1,10 +1,10 @@
-{ pkgs, ... }:  # Import the package set (pkgs) and any other module arguments.
+{pkgs, ...}:
+# Import the package set (pkgs) and any other module arguments.
 let
   flakeAutoUpdate = pkgs.writeShellScript "flakeAutoUpdate" (
     builtins.readFile ../files/scripts/auto-update-flake.sh
   );
-in
-{
+in {
   # Define a systemd user timer named `flake-auto-update`.
   systemd.user.timers.flake-auto-update = {
     Unit = {
@@ -12,7 +12,7 @@ in
     };
     Timer = {
       # Run daily at times
-      OnCalendar = [ "23:40" ];
+      OnCalendar = ["23:40"];
       # Add randomization delay of up to # hours
       RandomizedDelaySec = "1h";
       # Make the timer persistent across reboots
@@ -22,7 +22,7 @@ in
     Install = {
       # This makes the timer automatically start when the user session starts.
       # It "wants" the timer to be part of `timers.target`, which is like a group of timers.
-      WantedBy = [ "timers.target" ];
+      WantedBy = ["timers.target"];
     };
   };
 
@@ -42,7 +42,6 @@ in
     };
   };
 }
-
 # Commands to check status:
 # systemctl --user status flake-auto-update.timer
 # systemctl --user status flake-auto-update.service
@@ -52,3 +51,4 @@ in
 #
 # To manually trigger the service:
 # systemctl --user start flake-auto-update.service
+

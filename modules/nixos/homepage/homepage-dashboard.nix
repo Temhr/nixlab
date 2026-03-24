@@ -1,15 +1,18 @@
-{ config, lib, pkgs, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.services.homepage-custom;
 
   # Import the services configuration from services.nix
   servicesConfig = import ./services.nix;
   # Convert services to JSON file (will be converted to YAML in preStart)
-  servicesJsonFile = builtins.toFile "services.json"
+  servicesJsonFile =
+    builtins.toFile "services.json"
     (builtins.toJSON servicesConfig);
-in
-{
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -69,8 +72,8 @@ in
       # Homepage validates the Host header for security
       allowedHosts = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        default = [ "*" ];
-        example = [ "localhost" "127.0.0.1" "home.example.com" "192.168.1.100" ];
+        default = ["*"];
+        example = ["localhost" "127.0.0.1" "home.example.com" "192.168.1.100"];
         description = "List of allowed hostnames/IPs (use [\"*\"] to allow all)";
       };
 
@@ -87,7 +90,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # USER SETUP - Create dedicated system user for Homepage
     # ----------------------------------------------------------------------------
@@ -95,12 +97,12 @@ in
       isSystemUser = true;
       group = "homepage";
       home = cfg.dataDir;
-      extraGroups = [ "users" ];
+      extraGroups = ["users"];
     };
 
     users.groups.homepage = {};
 
-    users.users.temhr.extraGroups = [ "homepage" ];
+    users.users.temhr.extraGroups = ["homepage"];
 
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
@@ -114,8 +116,8 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.homepage = {
       description = "Homepage Dashboard";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "local-fs.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target" "local-fs.target"];
 
       # Environment variables for Homepage configuration
       environment = {
@@ -165,10 +167,16 @@ in
         NoNewPrivileges = true;
         PrivateTmp = true;
         # Temporarily disable ProtectSystem to test
-        ProtectSystem = if lib.hasPrefix "/home/" cfg.dataDir then "false" else "strict";
+        ProtectSystem =
+          if lib.hasPrefix "/home/" cfg.dataDir
+          then "false"
+          else "strict";
         # Disable ProtectHome entirely when dataDir is in /home (required for access)
-        ProtectHome = if lib.hasPrefix "/home/" cfg.dataDir then false else true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ProtectHome =
+          if lib.hasPrefix "/home/" cfg.dataDir
+          then false
+          else true;
+        ReadWritePaths = [cfg.dataDir];
       };
     };
 
@@ -204,13 +212,12 @@ in
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Open Homepage port if not using reverse proxy or binding to non-localhost
-      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [ cfg.port ]
+      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
       # Open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -324,3 +331,4 @@ Service fails with home directory:
   The fix automatically disables ProtectHome when dataDir is in /home/
   Make sure the homepage user has proper permissions to the directory
 */
+

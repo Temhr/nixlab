@@ -1,22 +1,22 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.bookstack-custom;
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  cfg = config.services.bookstack-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
   options = {
     services.bookstack-custom = {
-
       # REQUIRED: Enable the service
       enable = lib.mkEnableOption "BookStack wiki service";
 
       # OPTIONAL: Port BookStack listens on from the host (default: 6875)
       # This is the port you access in the browser, e.g. http://192.168.1.x:6875
       port = lib.mkOption {
-        type    = lib.types.port;
+        type = lib.types.port;
         default = 6875;
         description = "Host port to expose BookStack on";
       };
@@ -24,7 +24,7 @@ in
       # OPTIONAL: IP to bind to (default: 0.0.0.0 = all interfaces)
       # Use 0.0.0.0 for LAN access. Use 127.0.0.1 to restrict to localhost only.
       bindIP = lib.mkOption {
-        type    = lib.types.str;
+        type = lib.types.str;
         default = "0.0.0.0";
         description = "IP address to bind to (use 0.0.0.0 for LAN access)";
       };
@@ -37,7 +37,7 @@ in
       #   http://bookstack.local        (with Avahi mDNS)
       #   http://bookstack.home         (with Pi-hole or router DNS)
       appURL = lib.mkOption {
-        type    = lib.types.str;
+        type = lib.types.str;
         default = "http://localhost:6875";
         example = "http://192.168.1.50:6875";
         description = "Full URL BookStack is accessed at (no trailing slash). Must match browser address exactly.";
@@ -48,7 +48,7 @@ in
       # No domain registrar needed for LAN — use a Pi-hole, router DNS, or .local mDNS name.
       # When using a domain, set appURL to match, e.g. appURL = "http://bookstack.home"
       domain = lib.mkOption {
-        type    = lib.types.nullOr lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = null;
         example = "bookstack.home";
         description = "Domain name for nginx reverse proxy (optional)";
@@ -57,7 +57,7 @@ in
       # OPTIONAL: Enable HTTPS via Let's Encrypt (default: false)
       # Only works with publicly resolvable domains. Do not enable for LAN-only domains.
       enableSSL = lib.mkOption {
-        type    = lib.types.bool;
+        type = lib.types.bool;
         default = false;
         description = "Enable HTTPS with Let's Encrypt (requires a publicly resolvable domain)";
       };
@@ -65,7 +65,7 @@ in
       # OPTIONAL: Directory for all persistent data — BookStack files and the database.
       # If this is on a separate drive, also set dataMountUnit below.
       dataDir = lib.mkOption {
-        type    = lib.types.path;
+        type = lib.types.path;
         default = "/var/lib/bookstack";
         example = "/data/bookstack";
         description = "Directory for BookStack and MariaDB persistent storage";
@@ -81,7 +81,7 @@ in
       #   /mnt/storage    ->  mnt-storage.mount
       #   /mnt/data/wiki  ->  mnt-data-wiki.mount
       dataMountUnit = lib.mkOption {
-        type    = lib.types.nullOr lib.types.str;
+        type = lib.types.nullOr lib.types.str;
         default = null;
         example = "data.mount";
         description = "systemd mount unit for the drive hosting dataDir. Containers wait for it before starting.";
@@ -93,7 +93,7 @@ in
       # In your secrets YAML file this key should be named: MYSQL_ROOT_PASSWORD
       # In configuration.nix:  dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
       dbRootPasswordFile = lib.mkOption {
-        type    = lib.types.path;
+        type = lib.types.path;
         example = "/run/secrets/MYSQL_ROOT_PASSWORD";
         description = ''
           Path to sops-decrypted MariaDB root password (bare value, no KEY= prefix).
@@ -108,7 +108,7 @@ in
       # In your secrets YAML file this key should be named: MYSQL_PASSWORD
       # In configuration.nix:  dbPasswordFile = config.sops.secrets.MYSQL_PASSWORD.path;
       dbPasswordFile = lib.mkOption {
-        type    = lib.types.path;
+        type = lib.types.path;
         example = "/run/secrets/MYSQL_PASSWORD";
         description = ''
           Path to sops-decrypted BookStack DB user password (bare value, no KEY= prefix).
@@ -127,7 +127,7 @@ in
       # WARNING: Never change this after first setup — doing so invalidates all sessions.
       # In configuration.nix:  appKeyFile = config.sops.secrets.APP_KEY.path;
       appKeyFile = lib.mkOption {
-        type    = lib.types.path;
+        type = lib.types.path;
         example = "/run/secrets/APP_KEY";
         description = ''
           Path to sops-decrypted BookStack APP_KEY (bare value, no KEY= prefix).
@@ -141,11 +141,10 @@ in
       # Opens the BookStack port when accessed directly, or ports 80/443 when
       # using the nginx reverse proxy. Disable if you manage firewall rules manually.
       openFirewall = lib.mkOption {
-        type    = lib.types.bool;
+        type = lib.types.bool;
         default = true;
         description = "Automatically open firewall ports for BookStack";
       };
-
     };
   };
 
@@ -153,7 +152,6 @@ in
   # CONFIG - What is created when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # --------------------------------------------------------------------------
     # DIRECTORY INIT SERVICE
     # A dedicated oneshot service creates the data directories before the
@@ -161,14 +159,15 @@ in
     # correctly wait for a separate drive mount (dataMountUnit) if needed.
     # --------------------------------------------------------------------------
     systemd.services.bookstack-init-dirs = {
-      description   = "Create BookStack data directories";
-      wantedBy      = [ "multi-user.target" ];
-      before        = [ "podman-bookstack-db.service" "podman-bookstack.service" ];
-      after         = [ "local-fs.target" ]
-                      ++ lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
-      requires      = lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
+      description = "Create BookStack data directories";
+      wantedBy = ["multi-user.target"];
+      before = ["podman-bookstack-db.service" "podman-bookstack.service"];
+      after =
+        ["local-fs.target"]
+        ++ lib.optionals (cfg.dataMountUnit != null) [cfg.dataMountUnit];
+      requires = lib.optionals (cfg.dataMountUnit != null) [cfg.dataMountUnit];
       serviceConfig = {
-        Type            = "oneshot";
+        Type = "oneshot";
         RemainAfterExit = true;
       };
       script = ''
@@ -182,7 +181,7 @@ in
     # CONTAINER BACKEND - Podman
     # --------------------------------------------------------------------------
     virtualisation.podman = {
-      enable       = true;
+      enable = true;
       dockerCompat = true;
     };
 
@@ -199,24 +198,25 @@ in
       image = "lscr.io/linuxserver/mariadb:latest";
 
       environment = {
-        PUID           = "1000";
-        PGID           = "1000";
+        PUID = "1000";
+        PGID = "1000";
         MYSQL_DATABASE = "bookstack";
-        MYSQL_USER     = "bookstack";
+        MYSQL_USER = "bookstack";
         # Passwords injected via /run/bookstack-db.env — not hardcoded here
       };
 
-      environmentFiles = [ /run/bookstack-db.env ];
+      environmentFiles = [/run/bookstack-db.env];
 
-      volumes = [ "${cfg.dataDir}/db:/config" ];
+      volumes = ["${cfg.dataDir}/db:/config"];
 
-      extraOptions = [ "--network=host" ];
+      extraOptions = ["--network=host"];
     };
 
     systemd.services.podman-bookstack-db = {
-      after    = [ "bookstack-init-dirs.service" ]
-                 ++ lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
-      requires = [ "bookstack-init-dirs.service" ];
+      after =
+        ["bookstack-init-dirs.service"]
+        ++ lib.optionals (cfg.dataMountUnit != null) [cfg.dataMountUnit];
+      requires = ["bookstack-init-dirs.service"];
       # Build the env file from bare sops secret values before the container starts
       preStart = lib.mkBefore ''
         echo "MYSQL_ROOT_PASSWORD=$(cat ${cfg.dbRootPasswordFile})" >  /run/bookstack-db.env
@@ -241,72 +241,75 @@ in
       image = "lscr.io/linuxserver/bookstack:latest";
 
       environment = {
-        PUID        = "1000";
-        PGID        = "1000";
+        PUID = "1000";
+        PGID = "1000";
         # These env vars are used by the container's DB connectivity health check.
         # The actual BookStack config is written to .env by the preStart script.
-        APP_URL     = cfg.appURL;
-        DB_HOST     = "host.containers.internal";
-        DB_PORT     = "3306";
-        DB_USER     = "bookstack";
+        APP_URL = cfg.appURL;
+        DB_HOST = "host.containers.internal";
+        DB_PORT = "3306";
+        DB_USER = "bookstack";
         DB_DATABASE = "bookstack";
         APP_DEFAULT_DARK_MODE = "true";
       };
 
       # /run/bookstack-app.env is generated by the preStart script below
-      environmentFiles = [ /run/bookstack-app.env ];
+      environmentFiles = [/run/bookstack-app.env];
 
-      volumes = [ "${cfg.dataDir}/bookstack:/config" ];
+      volumes = ["${cfg.dataDir}/bookstack:/config"];
 
       # Bridge networking — port mapping works, BookStack reaches DB via host gateway
-      ports = lib.optionals (cfg.domain == null) [
-        "${cfg.bindIP}:${toString cfg.port}:80"
-      ] ++ lib.optionals (cfg.domain != null) [
-        "127.0.0.1:${toString cfg.port}:80"
-      ];
+      ports =
+        lib.optionals (cfg.domain == null) [
+          "${cfg.bindIP}:${toString cfg.port}:80"
+        ]
+        ++ lib.optionals (cfg.domain != null) [
+          "127.0.0.1:${toString cfg.port}:80"
+        ];
 
-      dependsOn = [ "bookstack-db" ];
+      dependsOn = ["bookstack-db"];
     };
 
     systemd.services.podman-bookstack = {
-      after    = [ "bookstack-init-dirs.service" ]
-                 ++ lib.optionals (cfg.dataMountUnit != null) [ cfg.dataMountUnit ];
-      requires = [ "bookstack-init-dirs.service" ];
+      after =
+        ["bookstack-init-dirs.service"]
+        ++ lib.optionals (cfg.dataMountUnit != null) [cfg.dataMountUnit];
+      requires = ["bookstack-init-dirs.service"];
       preStart = lib.mkBefore ''
-        # Read bare secret values
-        DB_PASS_VAL=$(cat ${cfg.dbPasswordFile})
-        APP_KEY_VAL=$(cat ${cfg.appKeyFile})
+                # Read bare secret values
+                DB_PASS_VAL=$(cat ${cfg.dbPasswordFile})
+                APP_KEY_VAL=$(cat ${cfg.appKeyFile})
 
-        # Write container env file (DB_PASS and APP_KEY in KEY=value format)
-        echo "DB_PASS=$DB_PASS_VAL" >  /run/bookstack-app.env
-        echo "APP_KEY=$APP_KEY_VAL" >> /run/bookstack-app.env
-        chmod 600 /run/bookstack-app.env
+                # Write container env file (DB_PASS and APP_KEY in KEY=value format)
+                echo "DB_PASS=$DB_PASS_VAL" >  /run/bookstack-app.env
+                echo "APP_KEY=$APP_KEY_VAL" >> /run/bookstack-app.env
+                chmod 600 /run/bookstack-app.env
 
-        # Write the BookStack .env config file before the container starts.
-        # BookStack reads ALL configuration from this file — env vars alone are
-        # not sufficient. The container init script skips copying the default
-        # template if this file already exists, so we write it here on every
-        # start to ensure it always reflects current secrets and settings.
-        mkdir -p ${cfg.dataDir}/bookstack/www
-        cat > ${cfg.dataDir}/bookstack/www/.env <<ENVEOF
-APP_KEY=$APP_KEY_VAL
-APP_URL=${cfg.appURL}
-DB_HOST=host.containers.internal
-DB_PORT=3306
-DB_DATABASE=bookstack
-DB_USERNAME=bookstack
-DB_PASSWORD=$DB_PASS_VAL
-STORAGE_TYPE=local
-MAIL_DRIVER=smtp
-MAIL_FROM_NAME="BookStack"
-MAIL_FROM=bookstack@example.com
-MAIL_HOST=localhost
-MAIL_PORT=587
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-ENVEOF
-        chmod 640 ${cfg.dataDir}/bookstack/www/.env
+                # Write the BookStack .env config file before the container starts.
+                # BookStack reads ALL configuration from this file — env vars alone are
+                # not sufficient. The container init script skips copying the default
+                # template if this file already exists, so we write it here on every
+                # start to ensure it always reflects current secrets and settings.
+                mkdir -p ${cfg.dataDir}/bookstack/www
+                cat > ${cfg.dataDir}/bookstack/www/.env <<ENVEOF
+        APP_KEY=$APP_KEY_VAL
+        APP_URL=${cfg.appURL}
+        DB_HOST=host.containers.internal
+        DB_PORT=3306
+        DB_DATABASE=bookstack
+        DB_USERNAME=bookstack
+        DB_PASSWORD=$DB_PASS_VAL
+        STORAGE_TYPE=local
+        MAIL_DRIVER=smtp
+        MAIL_FROM_NAME="BookStack"
+        MAIL_FROM=bookstack@example.com
+        MAIL_HOST=localhost
+        MAIL_PORT=587
+        MAIL_USERNAME=null
+        MAIL_PASSWORD=null
+        MAIL_ENCRYPTION=null
+        ENVEOF
+                chmod 640 ${cfg.dataDir}/bookstack/www/.env
       '';
     };
 
@@ -317,10 +320,10 @@ ENVEOF
 
     services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
       ${cfg.domain} = {
-        forceSSL   = cfg.enableSSL;
+        forceSSL = cfg.enableSSL;
         enableACME = cfg.enableSSL;
         locations."/" = {
-          proxyPass      = "http://127.0.0.1:${toString cfg.port}";
+          proxyPass = "http://127.0.0.1:${toString cfg.port}";
           proxyWebsockets = true;
           extraConfig = ''
             proxy_set_header Host $host;
@@ -339,8 +342,8 @@ ENVEOF
     # BookStack container can reach MariaDB on the host via host.containers.internal.
     # --------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      lib.optionals (cfg.domain == null) [ cfg.port ]
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      lib.optionals (cfg.domain == null) [cfg.port]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
 
     # Allow the BookStack container (Podman bridge 10.88.0.0/16) to reach MariaDB
@@ -349,10 +352,8 @@ ENVEOF
     networking.firewall.extraInputRules = ''
       ip saddr 10.88.0.0/16 tcp dport 3306 accept
     '';
-
   };
 }
-
 /*
 ================================================================================
 SECRETS FILE SETUP
@@ -521,5 +522,5 @@ Secrets not available / permission denied:
 nftables build error with firewall.interfaces."podman+":
   - The podman+ wildcard does not work with nftables.
   - This module uses extraInputRules instead, which is nftables-compatible.
-
 */
+

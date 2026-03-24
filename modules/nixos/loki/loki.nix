@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.loki-custom;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.loki-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -104,21 +106,23 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0750 loki loki -"
-      "d ${cfg.dataDir}/chunks 0750 loki loki -"
-      "d ${cfg.dataDir}/index 0750 loki loki -"
-      "d ${cfg.dataDir}/wal 0750 loki loki -"
-    ] ++ lib.optionals cfg.enableAlloy [
-      "d /var/lib/alloy 0750 alloy alloy -"
-      "d /var/lib/alloy/data 0750 alloy alloy -"
-    ] ++ lib.optionals cfg.maintenance.enable [
-      "f ${cfg.maintenance.logPath} 0666 root root - -"
-    ];
+    systemd.tmpfiles.rules =
+      [
+        "d ${cfg.dataDir} 0750 loki loki -"
+        "d ${cfg.dataDir}/chunks 0750 loki loki -"
+        "d ${cfg.dataDir}/index 0750 loki loki -"
+        "d ${cfg.dataDir}/wal 0750 loki loki -"
+      ]
+      ++ lib.optionals cfg.enableAlloy [
+        "d /var/lib/alloy 0750 alloy alloy -"
+        "d /var/lib/alloy/data 0750 alloy alloy -"
+      ]
+      ++ lib.optionals cfg.maintenance.enable [
+        "f ${cfg.maintenance.logPath} 0666 root root - -"
+      ];
 
     # ----------------------------------------------------------------------------
     # USER SETUP - Create dedicated system users
@@ -136,20 +140,20 @@ in
       isSystemUser = true;
       group = "alloy";
       description = "Grafana Alloy service user";
-      extraGroups = [ "systemd-journal" ];
+      extraGroups = ["systemd-journal"];
     };
 
     users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
-    users.users.temhr.extraGroups = [ "loki" "alloy" ];
+    users.users.temhr.extraGroups = ["loki" "alloy"];
 
     # ----------------------------------------------------------------------------
     # LOKI SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
     systemd.services.loki = {
       description = "Loki Log Aggregation System";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
       serviceConfig = {
         Type = "simple";
@@ -164,7 +168,7 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
       };
 
       preStart = let
@@ -206,16 +210,18 @@ in
           };
 
           schema_config = {
-            configs = [{
-              from = "2023-01-01";
-              store = "tsdb";
-              object_store = "filesystem";
-              schema = "v13";
-              index = {
-                prefix = "index_";
-                period = "24h";
-              };
-            }];
+            configs = [
+              {
+                from = "2023-01-01";
+                store = "tsdb";
+                object_store = "filesystem";
+                schema = "v13";
+                index = {
+                  prefix = "index_";
+                  period = "24h";
+                };
+              }
+            ];
           };
 
           limits_config = {
@@ -249,11 +255,11 @@ in
           };
         };
 
-        jsonFile = builtins.toFile "loki.json"
+        jsonFile =
+          builtins.toFile "loki.json"
           (builtins.toJSON lokiConfig);
 
         yamlTmp = "${cfg.dataDir}/loki.yaml.tmp";
-
       in ''
         ${pkgs.remarshal}/bin/remarshal \
           -i ${jsonFile} \
@@ -273,8 +279,8 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.alloy = lib.mkIf cfg.enableAlloy {
       description = "Grafana Alloy Telemetry Collector";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "loki.service" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target" "loki.service"];
 
       serviceConfig = {
         Type = "simple";
@@ -289,7 +295,7 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ "/var/lib/alloy" ];
+        ReadWritePaths = ["/var/lib/alloy"];
       };
 
       preStart = let
@@ -408,7 +414,6 @@ in
 
         # Write config to file using writeText to avoid shell escaping issues
         configFile = pkgs.writeText "alloy-config.alloy" alloyConfig;
-
       in ''
         # Copy Alloy configuration
         install -m 640 -o alloy -g alloy ${configFile} /var/lib/alloy/config.alloy
@@ -450,8 +455,8 @@ in
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      lib.optionals (cfg.domain == null) [ cfg.port ]
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      lib.optionals (cfg.domain == null) [cfg.port]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
 
     # ----------------------------------------------------------------------------
@@ -466,7 +471,6 @@ in
     ];
   };
 }
-
 /*
 ================================================================================
 GRAFANA ALLOY MIGRATION NOTES
@@ -766,5 +770,5 @@ SECURITY BEST PRACTICES
 7. Secure log file permissions
 8. Use TLS for remote Alloy instances
 9. Backup configuration files
-
 */
+

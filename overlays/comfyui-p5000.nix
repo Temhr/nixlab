@@ -1,13 +1,13 @@
 # ComfyUI overlay with CUDA support for P5000
-final: prev: {
+_: prev: {
   # Fix terminado test failure
   python311 = prev.python311.override {
-    packageOverrides = pyfinal: pyprev: {
-      terminado = pyprev.terminado.overridePythonAttrs (old: {
-        doCheck = false;  # Skip tests due to flaky test_max_terminals
+    packageOverrides = _: pyprev: {
+      terminado = pyprev.terminado.overridePythonAttrs (_: {
+        doCheck = false; # Skip tests due to flaky test_max_terminals
       });
-      einops = pyprev.einops.overridePythonAttrs (old: {
-        doCheck = false;  # Skip tests since terminado is broken
+      einops = pyprev.einops.overridePythonAttrs (_: {
+        doCheck = false; # Skip tests since terminado is broken
       });
     };
   };
@@ -24,7 +24,7 @@ final: prev: {
       rev = "3b93d5d571cb3e018da65f822cd11b60202b11c2";
       sha256 = "sha256-14cUWrv3ghxjW2IUxaggxdjixSVFpKvMImNwctaDzRU=";
     };
-    nativeBuildInputs = [ prev.makeWrapper prev.autoPatchelfHook ];
+    nativeBuildInputs = [prev.makeWrapper prev.autoPatchelfHook];
     buildInputs = with prev; [
       python311
       stdenv.cc.cc.lib
@@ -51,22 +51,22 @@ final: prev: {
     dontBuild = true;
     dontConfigure = true;
     installPhase = ''
-      mkdir -p $out/share/comfyui
-      cp -r . $out/share/comfyui/
-      # Create a requirements file for runtime installation
-      cat > $out/share/comfyui/requirements-torch.txt <<EOF
---extra-index-url https://download.pytorch.org/whl/cu118
-torch==2.2.2
-torchvision==0.17.2
-torchaudio==2.2.2
-kornia
-EOF
-      mkdir -p $out/bin
-      makeWrapper ${prev.python311}/bin/python $out/bin/comfyui \
-        --add-flags "$out/share/comfyui/main.py" \
-        --prefix PYTHONPATH : "${prev.python311.pkgs.makePythonPath propagatedBuildInputs}" \
-        --prefix LD_LIBRARY_PATH : "${prev.lib.makeLibraryPath [ prev.stdenv.cc.cc.lib ]}" \
-        --chdir "$out/share/comfyui"
+            mkdir -p $out/share/comfyui
+            cp -r . $out/share/comfyui/
+            # Create a requirements file for runtime installation
+            cat > $out/share/comfyui/requirements-torch.txt <<EOF
+      --extra-index-url https://download.pytorch.org/whl/cu118
+      torch==2.2.2
+      torchvision==0.17.2
+      torchaudio==2.2.2
+      kornia
+      EOF
+            mkdir -p $out/bin
+            makeWrapper ${prev.python311}/bin/python $out/bin/comfyui \
+              --add-flags "$out/share/comfyui/main.py" \
+              --prefix PYTHONPATH : "${prev.python311.pkgs.makePythonPath propagatedBuildInputs}" \
+              --prefix LD_LIBRARY_PATH : "${prev.lib.makeLibraryPath [prev.stdenv.cc.cc.lib]}" \
+              --chdir "$out/share/comfyui"
     '';
     meta = with prev.lib; {
       description = "A powerful and modular stable diffusion GUI and backend";

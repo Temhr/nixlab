@@ -1,9 +1,7 @@
 # This is your system's configuration file. Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
 {
-  inputs,
-  outputs,
-  lib,
   config,
+  lib,
   pkgs,
   flakePath,
   ...
@@ -40,38 +38,38 @@
   services.printing.enable = true;
 
   ## Enable automatic login for the user.
-  services.displayManager.autoLogin.user =  "temhr";
+  services.displayManager.autoLogin.user = "temhr";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
 
   ## Development
-  blender.enable = true;    #3D Creation/Animation/Publishing System
-  godot.enable = true;    #Free and Open Source 2D and 3D game engine
+  blender.enable = true; #3D Creation/Animation/Publishing System
+  godot.enable = true; #Free and Open Source 2D and 3D game engine
   vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
 
   ## Education
-  anki.enable = true;  #Spaced repetition flashcard program
+  anki.enable = true; #Spaced repetition flashcard program
 
   ## Gaming Packages
-  steam.enable = true;  #Video game digital distribution service and storefront from Valve
+  steam.enable = true; #Video game digital distribution service and storefront from Valve
 
   ## Productivity
   #calibre.enable = true;  #Comprehensive e-book software
-  libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
-  logseq.enable = true;  #Privacy-first, open-source platform for knowledge management and collaboration
+  libreoffice.enable = true; #Comprehensive, professional-quality productivity suite
+  logseq.enable = true; #Privacy-first, open-source platform for knowledge management and collaboration
 
   ## Media Packages
-  obs.enable = true;  #Free and open source software for video recording and live streaming
-  spotify.enable = true;  #Play music from the Spotify music service
-  vlc.enable = true;  #Cross-platform media player and streaming server
+  obs.enable = true; #Free and open source software for video recording and live streaming
+  spotify.enable = true; #Play music from the Spotify music service
+  vlc.enable = true; #Cross-platform media player and streaming server
 
   ## Virtualizations
   #bottles.enable = true;    #Easy-to-use wineprefix manager
   #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
-  incus.enable = true;   #Powerful system container and virtual machine manager
+  incus.enable = true; #Powerful system container and virtual machine manager
   #podman.enable = true;    #A program for managing pods, containers and container images
-  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  quickemu.enable = true; #Quickly create and run optimised Windows, macOS and Linux virtual machines
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
@@ -86,16 +84,16 @@
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
-    ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
+    ollamaBindIP = "0.0.0.0"; # Listen on all interfaces
     webuiBindIP = "0.0.0.0";
     # Data directories
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
     # GPU configuration
-    gpuDevice = 0;      # First GPU
-    gpuLayers = -1;     # Offload all layers to GPU (-1 = auto)
+    gpuDevice = 0; # First GPU
+    gpuLayers = -1; # Offload all layers to GPU (-1 = auto)
     # Pre-download models
-    models = [ "gpt-oss:20b" "translategemma:27b" "glm-4.7-flash:q4_K_M" "qwen3-coder-next:q4_K_M" ];
+    models = ["gpt-oss:20b" "translategemma:27b" "glm-4.7-flash:q4_K_M" "qwen3-coder-next:q4_K_M"];
     openFirewall = true;
   };
 
@@ -103,11 +101,11 @@
     enable = true;
     # Network configuration
     port = 8188;
-    bindIP = "0.0.0.0";  # Listen on all interfaces
+    bindIP = "0.0.0.0"; # Listen on all interfaces
     # Data directory (models, outputs, inputs)
     dataDir = "/data/comfyui";
     # GPU configuration
-    gpuDevice = 0;      # First GPU
+    gpuDevice = 0; # First GPU
     openFirewall = true;
   };
   services.comfyui-extensions = {
@@ -162,13 +160,13 @@
     ip saddr 10.88.0.0/16 tcp dport 3306 accept
   '';
   services.bookstack-custom = {
-    enable             = true;
-    appURL             = "http://192.168.0.200:6875";
-    dataDir            = "/data/bookstack";
-    dataMountUnit      = "data.mount";
+    enable = true;
+    appURL = "http://192.168.0.200:6875";
+    dataDir = "/data/bookstack";
+    dataMountUnit = "data.mount";
     dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
-    dbPasswordFile     = config.sops.secrets.DB_PASS.path;
-    appKeyFile         = config.sops.secrets.APP_KEY.path;
+    dbPasswordFile = config.sops.secrets.DB_PASS.path;
+    appKeyFile = config.sops.secrets.APP_KEY.path;
   };
 
   services.grafana-custom = {
@@ -212,7 +210,7 @@
     maintenance = {
       enable = true;
       exporters = {
-        systemd = true;  # Service status monitoring
+        systemd = true; # Service status monitoring
         smartctl = {
           enable = true;
         };
@@ -228,20 +226,20 @@
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
-
     ## Godot Dev Tools
-    gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
-    pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
-    scons  #Improved, cross-platform substitute for Make
-    python3  #High-level dynamically-typed programming language
-
+    gcc14 #GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkg-config #Tool that allows packages to find out information about other packages (wrapper script)
+    scons #Improved, cross-platform substitute for Make
+    python3 #High-level dynamically-typed programming language
   ];
 
   # Tells sops-nix where key lives
   sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-  sops.secrets = lib.genAttrs
-    [ "MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY" ]  # append array if acessing more secrets this file
-    (_: { sopsFile = flakePath + "/secrets/bookstack.yaml"; });
+  sops.secrets =
+    lib.genAttrs
+    ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"] # append array if acessing more secrets this file
+    
+    (_: {sopsFile = flakePath + "/secrets/bookstack.yaml";});
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";

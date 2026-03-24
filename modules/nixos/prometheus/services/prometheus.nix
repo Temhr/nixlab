@@ -1,23 +1,27 @@
 # ============================================================================
 # FILE: prometheus/services/prometheus.nix
 # ============================================================================
-{ config, lib, pkgs }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+}: let
   cfg = config.services.prometheus-custom;
-  scrapeConfigs = import ../scrape-configs.nix { inherit config lib; };
+  scrapeConfigs = import ../scrape-configs.nix {inherit config lib;};
 
   # Alert rules
   alertRulesConfig = import ../alerts.nix;
-  maintenanceAlertRules = if cfg.maintenance.enable
+  maintenanceAlertRules =
+    if cfg.maintenance.enable
     then import ../maintenance-alerts.nix
-    else { groups = []; };
+    else {groups = [];};
 
   combinedAlertRules = {
     groups = alertRulesConfig.groups ++ maintenanceAlertRules.groups;
   };
 
-  alertRulesJsonFile = builtins.toFile "alerts.json"
+  alertRulesJsonFile =
+    builtins.toFile "alerts.json"
     (builtins.toJSON combinedAlertRules);
 
   # Prometheus configuration
@@ -25,24 +29,31 @@ let
     global = {
       scrape_interval = "15s";
       evaluation_interval = "15s";
-      external_labels = { monitor = "prometheus"; };
+      external_labels = {monitor = "prometheus";};
     };
 
     alerting = {
-      alertmanagers = [{
-        static_configs = [{ targets = []; }];
-      }];
+      alertmanagers = [
+        {
+          static_configs = [{targets = [];}];
+        }
+      ];
     };
 
-    rule_files = [ "${cfg.dataDir}/rules/*.yml" ];
+    rule_files = ["${cfg.dataDir}/rules/*.yml"];
     scrape_configs = scrapeConfigs.all;
   };
 
-  prometheusJsonFile = builtins.toFile "prometheus.json"
+  prometheusJsonFile =
+    builtins.toFile "prometheus.json"
     (builtins.toJSON prometheusConfig);
 
   # Config installer helper
-  mkConfigInstaller = { jsonFile, yamlPath, mode ? "660" }: ''
+  mkConfigInstaller = {
+    jsonFile,
+    yamlPath,
+    mode ? "660",
+  }: ''
     ${pkgs.remarshal}/bin/remarshal \
       -i ${jsonFile} \
       -o ${yamlPath}.tmp \
@@ -70,11 +81,10 @@ let
     mkdir -p ${cfg.dataDir}/data
     chown prometheus:prometheus ${cfg.dataDir}/data
   '';
-in
-{
+in {
   description = "Prometheus Monitoring System";
-  wantedBy = [ "multi-user.target" ];
-  after = [ "network.target" ];
+  wantedBy = ["multi-user.target"];
+  after = ["network.target"];
 
   serviceConfig = {
     Type = "simple";
@@ -98,7 +108,7 @@ in
     PrivateTmp = true;
     ProtectSystem = "strict";
     ProtectHome = true;
-    ReadWritePaths = [ cfg.dataDir ];
+    ReadWritePaths = [cfg.dataDir];
   };
 
   preStart = preStartScript;

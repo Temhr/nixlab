@@ -1,12 +1,5 @@
 # This is your system's configuration file. Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
-{
-  inputs,
-  outputs,
-  lib,
-  config,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   # You can import other NixOS modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
@@ -33,7 +26,7 @@
   services.printing.enable = true;
 
   ## Enable automatic login for the user.
-  services.displayManager.autoLogin.user =  "temhr";
+  services.displayManager.autoLogin.user = "temhr";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
@@ -45,32 +38,32 @@
   };
 
   ## Development
-  blender.enable = true;    #3D Creation/Animation/Publishing System
-  godot.enable = true;    #Free and Open Source 2D and 3D game engine
+  blender.enable = true; #3D Creation/Animation/Publishing System
+  godot.enable = true; #Free and Open Source 2D and 3D game engine
   vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
 
   ## Education
-  anki.enable = true;  #Spaced repetition flashcard program
+  anki.enable = true; #Spaced repetition flashcard program
 
   ## Gaming Packages
-  steam.enable = true;  #Video game digital distribution service and storefront from Valve
+  steam.enable = true; #Video game digital distribution service and storefront from Valve
 
   ## Productivity
   #calibre.enable = true;  #Comprehensive e-book software
-  libreoffice.enable = true;  #Comprehensive, professional-quality productivity suite
-  logseq.enable = true;  #Privacy-first, open-source platform for knowledge management and collaboration
+  libreoffice.enable = true; #Comprehensive, professional-quality productivity suite
+  logseq.enable = true; #Privacy-first, open-source platform for knowledge management and collaboration
 
   ## Media Packages
-  obs.enable = true;  #Free and open source software for video recording and live streaming
-  spotify.enable = true;  #Play music from the Spotify music service
-  vlc.enable = true;  #Cross-platform media player and streaming server
+  obs.enable = true; #Free and open source software for video recording and live streaming
+  spotify.enable = true; #Play music from the Spotify music service
+  vlc.enable = true; #Cross-platform media player and streaming server
 
   ## Virtualizations
   #bottles.enable = true;    #Easy-to-use wineprefix manager
   #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
   #incus.enable = true;   #Powerful system container and virtual machine manager
   #podman.enable = true;    #A program for managing pods, containers and container images
-  quickemu.enable = true;    #Quickly create and run optimised Windows, macOS and Linux virtual machines
+  quickemu.enable = true; #Quickly create and run optimised Windows, macOS and Linux virtual machines
   #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
   #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
@@ -79,7 +72,7 @@
   services.waydroid-custom = {
     enable = true;
     dataDir = "/data/waydroid";
-    allowedUsers = [ "temhr" ];
+    allowedUsers = ["temhr"];
     autoStart = false;
     enableGapps = true;
   };
@@ -125,7 +118,7 @@
     maintenance = {
       enable = true;
       exporters = {
-        systemd = true;  # Service status monitoring
+        systemd = true; # Service status monitoring
         smartctl = {
           enable = true;
         };
@@ -141,14 +134,13 @@
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
-
     ## Godot Dev Tools
-    gcc14         # GNU Compiler Collection, version 14.1.0 (wrapper script)
-    pkg-config    # Tool that allows packages to find out information about other packages (wrapper script)
-    scons         # Improved, cross-platform substitute for Make
-    python3       # High-level dynamically-typed programming language
+    gcc14 # GNU Compiler Collection, version 14.1.0 (wrapper script)
+    pkg-config # Tool that allows packages to find out information about other packages (wrapper script)
+    scons # Improved, cross-platform substitute for Make
+    python3 # High-level dynamically-typed programming language
 
-    qbittorrent   # Featureful free software BitTorrent client
+    qbittorrent # Featureful free software BitTorrent client
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

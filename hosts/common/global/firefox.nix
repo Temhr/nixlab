@@ -1,28 +1,30 @@
-{ ... }: {
+{...}: {
   programs.firefox = {
     enable = true;
-    languagePacks = [ "en-CA" ];
-    /* ---- POLICIES ---- */
+    languagePacks = ["en-CA"];
+    /*
+    ---- POLICIES ----
+    */
     # Check about:policies#documentation for options.
     policies = {
-      DisableAccounts = true;  #Disable account-based services, including sync
-      DisableFirefoxAccounts = true;  #Disable account-based services, including sync
-      DisableFirefoxScreenshots = true;  #Disable the Firefox Screenshots feature
-      DisableFirefoxStudies = true;  #Prevent Firefox from running studies
-      DisablePocket = true;  #saves webpages to Pocket
+      DisableAccounts = true; #Disable account-based services, including sync
+      DisableFirefoxAccounts = true; #Disable account-based services, including sync
+      DisableFirefoxScreenshots = true; #Disable the Firefox Screenshots feature
+      DisableFirefoxStudies = true; #Prevent Firefox from running studies
+      DisablePocket = true; #saves webpages to Pocket
       DisableTelemetry = true; #Turn off Telemetry.
       DisplayBookmarksToolbar = "always"; # alternatives: "always" or "newtab"
       DisplayMenuBar = "default-on"; # alternatives: "always", "never" or "default-off"
       DontCheckDefaultBrowser = true;
       #Enable or disable Content Blocking and optionally lock it
       EnableTrackingProtection = {
-        Value= true;  #true, tracking protection is enabled by default in regular and private browsing
-          Locked = true;
-        Cryptomining = true;  #true, cryptomining scripts on websites are blocked
-        Fingerprinting = true;  #true, fingerprinting scripts on websites are blocked
+        Value = true; #true, tracking protection is enabled by default in regular and private browsing
+        Locked = true;
+        Cryptomining = true; #true, cryptomining scripts on websites are blocked
+        Fingerprinting = true; #true, fingerprinting scripts on websites are blocked
       };
-      OverrideFirstRunPage = "";  #blank if you want to disable the first run page
-      OverridePostUpdatePage = "";  #blank if you want to disable the post-update page
+      OverrideFirstRunPage = ""; #blank if you want to disable the first run page
+      OverridePostUpdatePage = ""; #blank if you want to disable the post-update page
       RequestedLocales = "en-CA";
       SearchBar = "unified"; # alternative: "separate"
 
@@ -32,7 +34,9 @@
         Snippets = false;
       };
 
-      /* ---- EXTENSIONS ---- */
+      /*
+      ---- EXTENSIONS ----
+      */
       # Check about:support for extension/add-on ID strings.
       # Valid strings for installation_mode are "allowed", "blocked",
       # "force_installed" and "normal_installed".
@@ -105,17 +109,47 @@
       # Preferences for Canadian English and privacy
       Preferences = {
         # Canadian English localization
-        "intl.accept_languages" = { Value = "en-CA, en"; Status = "locked"; };
-        "intl.locale.requested" = { Value = "en-CA"; Status = "locked"; };
-        "spellchecker.dictionary" = { Value = "en-CA"; Status = "locked"; };
-        "browser.search.region" = { Value = "CA"; Status = "locked"; };
-        "browser.search.countryCode" = { Value = "CA"; Status = "locked"; };
-        "distribution.searchplugins.defaultLocale" = { Value = "en-CA"; Status = "locked"; };
+        "intl.accept_languages" = {
+          Value = "en-CA, en";
+          Status = "locked";
+        };
+        "intl.locale.requested" = {
+          Value = "en-CA";
+          Status = "locked";
+        };
+        "spellchecker.dictionary" = {
+          Value = "en-CA";
+          Status = "locked";
+        };
+        "browser.search.region" = {
+          Value = "CA";
+          Status = "locked";
+        };
+        "browser.search.countryCode" = {
+          Value = "CA";
+          Status = "locked";
+        };
+        "distribution.searchplugins.defaultLocale" = {
+          Value = "en-CA";
+          Status = "locked";
+        };
         # Privacy settings
-        "dom.security.https_only_mode" = { Value = true; Status = "locked"; };
-        "privacy.donottrackheader.enabled" = { Value = true; Status = "locked"; };
-        "privacy.trackingprotection.enabled" = { Value = true; Status = "locked"; };
-        "privacy.trackingprotection.socialtracking.enabled" = { Value = true; Status = "locked"; };
+        "dom.security.https_only_mode" = {
+          Value = true;
+          Status = "locked";
+        };
+        "privacy.donottrackheader.enabled" = {
+          Value = true;
+          Status = "locked";
+        };
+        "privacy.trackingprotection.enabled" = {
+          Value = true;
+          Status = "locked";
+        };
+        "privacy.trackingprotection.socialtracking.enabled" = {
+          Value = true;
+          Status = "locked";
+        };
       };
     };
   };

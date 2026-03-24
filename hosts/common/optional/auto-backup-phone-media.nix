@@ -1,6 +1,4 @@
-{ config, pkgs, ... }:
-
-let
+{pkgs, ...}: let
   photoMoveScript = pkgs.writeShellScriptBin "backup-phone-media" ''
     set -euo pipefail
 
@@ -48,7 +46,7 @@ in {
 
   systemd.timers.backup-phone-media = {
     description = "Nightly photo move at 03:15";
-    wantedBy = [ "timers.target" ];
+    wantedBy = ["timers.target"];
     timerConfig = {
       OnCalendar = "03:15";
       Persistent = true;

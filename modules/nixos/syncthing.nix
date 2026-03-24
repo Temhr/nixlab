@@ -1,9 +1,10 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.syncthing-custom;
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  cfg = config.services.syncthing-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -108,7 +109,7 @@ in
             };
             addresses = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              default = [ "dynamic" ];
+              default = ["dynamic"];
               description = "List of addresses (use 'dynamic' for auto-discovery)";
             };
             introducer = lib.mkOption {
@@ -159,7 +160,7 @@ in
               description = "List of device names to share this folder with";
             };
             type = lib.mkOption {
-              type = lib.types.enum [ "sendreceive" "sendonly" "receiveonly" ];
+              type = lib.types.enum ["sendreceive" "sendonly" "receiveonly"];
               default = "sendreceive";
               description = "Folder type: sendreceive, sendonly, or receiveonly";
             };
@@ -217,7 +218,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # USER SETUP - Create Syncthing user if using default
     # ----------------------------------------------------------------------------
@@ -225,7 +225,10 @@ in
       syncthing = {
         isSystemUser = true;
         group = cfg.group;
-        home = if cfg.dataDir != null then cfg.dataDir else "/var/lib/syncthing";
+        home =
+          if cfg.dataDir != null
+          then cfg.dataDir
+          else "/var/lib/syncthing";
         createHome = true;
         description = "Syncthing daemon user";
       };
@@ -246,11 +249,15 @@ in
       group = cfg.group;
 
       # Data directory (main working directory)
-      dataDir = if cfg.dataDir != null
-                then cfg.dataDir
-                else (if cfg.user == "syncthing"
-                      then "/var/lib/syncthing"
-                      else "/home/${cfg.user}/.config/syncthing");
+      dataDir =
+        if cfg.dataDir != null
+        then cfg.dataDir
+        else
+          (
+            if cfg.user == "syncthing"
+            then "/var/lib/syncthing"
+            else "/home/${cfg.user}/.config/syncthing"
+          );
 
       # Config directory (where config.xml is stored)
       # If not specified, uses dataDir/.config/syncthing
@@ -282,20 +289,27 @@ in
         };
 
         # Configure devices if specified
-        devices = lib.mapAttrs (name: device: {
-          id = device.id;
-          addresses = device.addresses;
-          introducer = device.introducer;
-        }) cfg.devices;
+        devices =
+          lib.mapAttrs (_: device: {
+            id = device.id;
+            addresses = device.addresses;
+            introducer = device.introducer;
+          })
+          cfg.devices;
 
         # Configure folders if specified
-        folders = lib.mapAttrs (name: folder: {
-          path = folder.path;
-          id = folder.id;
-          label = if folder.label != "" then folder.label else name;
-          devices = folder.devices;
-          type = folder.type;
-        }) cfg.folders;
+        folders =
+          lib.mapAttrs (name: folder: {
+            path = folder.path;
+            id = folder.id;
+            label =
+              if folder.label != ""
+              then folder.label
+              else name;
+            devices = folder.devices;
+            type = folder.type;
+          })
+          cfg.folders;
       };
     };
 
@@ -336,13 +350,12 @@ in
     # Open GUI port if binding to non-localhost
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Open GUI port if not localhost-only
-      lib.optionals (cfg.guiAddress != "127.0.0.1") [ cfg.guiPort ]
+      lib.optionals (cfg.guiAddress != "127.0.0.1") [cfg.guiPort]
       # Also open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
   };
 }
-
 /*
 ================================================================================
 DECLARATIVE VS GUI CONFIGURATION
@@ -724,5 +737,5 @@ iOS:
   Add device ID from your server
   Accept connection on server's web GUI
   Share folders
-
 */
+

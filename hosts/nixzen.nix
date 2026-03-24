@@ -1,12 +1,5 @@
 # This is your system's configuration file. Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
-{
-  inputs,
-  outputs,
-  lib,
-  config,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   # You can import other NixOS modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/nixos):
@@ -40,7 +33,7 @@
   services.printing.enable = true;
 
   ## Enable automatic login for the user.
-  services.displayManager.autoLogin.user =  "guest";
+  services.displayManager.autoLogin.user = "guest";
 
   ## Graphical Shells ("none" "gnome" "plasma6")
   gShells.DE = "plasma6";
@@ -117,7 +110,7 @@
     maintenance = {
       enable = true;
       exporters = {
-        systemd = true;  # Service status monitoring
+        systemd = true; # Service status monitoring
         smartctl = {
           enable = true;
         };
@@ -136,16 +129,16 @@
     devices = {
       "nixvat" = {
         id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP";
-        addresses = [ "dynamic" ];
+        addresses = ["dynamic"];
         introducer = false;
       };
       "Pixel XL" = {
         id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4";
-        addresses = [ "dynamic" ];
+        addresses = ["dynamic"];
       };
       "Pixel 3a XL" = {
         id = "4CCPARZ-D55MZPY-OMRVLQL-YAQJFKY-5RZXAFQ-MZJ4VSC-E5ZS7VQ-VRCFGAY";
-        addresses = [ "dynamic" ];
+        addresses = ["dynamic"];
       };
     };
     folders = {
@@ -153,22 +146,22 @@
         path = "/mirror";
         id = "mirror";
         label = "mirror";
-        devices = [ "nixvat" ];
-        type = "sendreceive";  # or "sendonly" or "receiveonly"
+        devices = ["nixvat"];
+        type = "sendreceive"; # or "sendonly" or "receiveonly"
       };
       "Phone media" = {
         path = "/mirror/phshare/photos";
         id = "Phone media";
         label = "Phone media";
-        devices = [ "Pixel XL" "Pixel 3a XL"];
-        type = "sendreceive";  # or "sendonly" or "receiveonly"
+        devices = ["Pixel XL" "Pixel 3a XL"];
+        type = "sendreceive"; # or "sendonly" or "receiveonly"
       };
       "Docs" = {
         path = "/mirror/phshare/docs";
         id = "Docs";
         label = "Docs";
-        devices = [ "Pixel XL" "Pixel 3a XL"];
-        type = "sendreceive";  # or "sendonly" or "receiveonly"
+        devices = ["Pixel XL" "Pixel 3a XL"];
+        type = "sendreceive"; # or "sendonly" or "receiveonly"
       };
     };
   };
@@ -181,13 +174,11 @@
   ## List packages installed in system profile. To search, run:
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
-
     ## Godot Dev Tools
     #gcc14  #GNU Compiler Collection, version 14.1.0 (wrapper script)
     #pkg-config  #Tool that allows packages to find out information about other packages (wrapper script)
     #scons  #Improved, cross-platform substitute for Make
     #python3  #High-level dynamically-typed programming language
-
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

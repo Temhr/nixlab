@@ -1,8 +1,6 @@
-{ ... }: {
-
+{...}: {
   programs.fastfetch.enable = true;
   programs.fastfetch.settings = {
-
     display = {
       size = {
         binaryPrefix = "si";
@@ -30,15 +28,15 @@
       "theme"
       "terminal"
       {
-          "type" = "cpu";
-          "showPeCoreCount" = true;
-          "temp" = true;
+        "type" = "cpu";
+        "showPeCoreCount" = true;
+        "temp" = true;
       }
       "cpuusage"
       {
-          "type" = "gpu";
-          "driverSpecific" = true;
-          "temp" = true;
+        "type" = "gpu";
+        "driverSpecific" = true;
+        "temp" = true;
       }
       "memory"
       "physicalmemory"
@@ -47,12 +45,12 @@
       "btrfs"
       "zpool"
       {
-          "type" = "battery";
-          "temp" = true;
+        "type" = "battery";
+        "temp" = true;
       }
       "poweradapter"
       {
-          "type" = "localip";
+        "type" = "localip";
       }
       "datetime"
       {

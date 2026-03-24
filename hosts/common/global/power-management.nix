@@ -1,11 +1,9 @@
-{ config, pkgs, lib, ...}:
-
-{
+{pkgs, ...}: {
   # Disable WD HDD power management (already have this)
   systemd.services.disable-hdd-apm = {
     description = "Disable APM on data drive";
-    wantedBy = [ "multi-user.target" ];
-    before = [ "local-fs.target" ];
+    wantedBy = ["multi-user.target"];
+    before = ["local-fs.target"];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.hdparm}/bin/hdparm -B 255 -S 0 /dev/disk/by-label/data";
@@ -13,10 +11,10 @@
     };
   };
 
-  boot.kernelParams = [ "ahci.mobile_lpm_policy=1" ];
+  boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
 
   # Reduce writes to SD card - cache in RAM
-  fileSystems."/home".options = [ "relatime" "noatime" ];
+  fileSystems."/home".options = ["relatime" "noatime"];
 
   # Move browser cache to tmpfs
   systemd.tmpfiles.rules = [

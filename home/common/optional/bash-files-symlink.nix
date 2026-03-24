@@ -1,4 +1,8 @@
-{ config, flakePath, lib, ... }: {
+{
+  flakePath,
+  lib,
+  ...
+}: {
   home.file = {
     # Root level bash files - using relative paths from flake root
     ".bash_profile".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash_profile";
@@ -25,7 +29,7 @@
     # History settings
     historySize = 50000;
     historyFileSize = 100000;
-    historyControl = [ "ignoredups" "ignorespace" "erasedups" ];
+    historyControl = ["ignoredups" "ignorespace" "erasedups"];
 
     # This will be appended to the Home Manager generated .bashrc
     # You can remove this if your .bashrc file already handles sourcing
