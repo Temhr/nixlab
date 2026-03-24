@@ -11,6 +11,9 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # flake-parts for dendretic pattern
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     # Version Pinned Apps (March 5-6th).
     # nix flake metadata nixpkgs-unstable | grep "Revision"
     nixpkgs-ollama.url = "github:nixos/nixpkgs/80bdc1e5ce51f56b19791b52b2901187931f5353";
@@ -67,6 +70,7 @@
 
   outputs = {
     disko,
+    flake-parts,
     ghostty,
     home-manager,
     impermanence,
