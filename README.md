@@ -100,47 +100,34 @@ nixlab/
 │
 ├── flake.nix                  # Thin root — delegates entirely to flake/parts/
 ├── flake.lock                 # Version-pinned input revisions
-│
 ├── flake/
 │   └── parts/                 # flake-parts orchestration modules
-│
 ├── hardware/                  # Machine-level hardware configurations
 │   ├── common/
 │   │   ├── global/            # Applied to all machines unconditionally
 │   │   └── optional/          # Selectable per host
 │   └── *.nix                  # Per-device configs (from nixos-generate-config)
-│
 ├── hosts/                     # System-level NixOS configurations
 │   ├── common/
 │   │   ├── global/            # Applied to all hosts unconditionally
 │   │   └── optional/          # Selectable features (imported by host manifests)
 │   └── *.nix                  # Per-host feature manifests
-│
 ├── home/                      # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/             # Managed dotfiles and scripts
 │   │   ├── global/            # Applied to all users unconditionally
 │   │   └── optional/          # Selectable user features
 │   └── <user>/                # Per-user, per-host overrides
-│
 ├── modules/                   # Reusable encapsulated modules (exported as flake outputs)
 │   ├── nixos/                 # System-level service and application modules
 │   └── home-manager/          # User-level modules
-│
 ├── overlays/                  # nixpkgs modifications and pinned channel overlays
-│
 ├── pkgs/                      # Custom package definitions
-│
 ├── shells/                    # Isolated development environments
-│
 ├── lib/                       # Helper Nix code and configuration templates
-│
 ├── secrets/                   # sops-encrypted secret files
-│
 ├── cachix/                    # Cachix binary cache declarations
-│
 ├── bin/                       # Utility shell scripts
-│
 └── .sops.yaml                 # sops age key configuration
 ```
 
