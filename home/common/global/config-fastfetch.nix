@@ -14,19 +14,18 @@
       "host"
       "os"
       "kernel"
-      "initsystem"
+      {
+        "type" = "command";
+        "key" = "OS Age";
+        "text" = "birth_install=$(stat -c %W /); current=$(date +%s); days_difference=$(( (current - birth_install) / 86400 )); echo $days_difference days";
+      }
       "uptime"
-      "loadavg"
-      "processes"
       "packages"
       "shell"
-      "editor"
-      "display"
-      "lm"
-      "de"
-      "wm"
-      "theme"
       "terminal"
+      "editor"
+      "loadavg"
+      "processes"
       {
         "type" = "cpu";
         "showPeCoreCount" = true;
