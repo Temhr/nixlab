@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.grafana-custom;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.grafana-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -148,19 +150,21 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0750 grafana grafana -"
-      "d ${cfg.dataDir}/data 0750 grafana grafana -"
-      "d ${cfg.dataDir}/logs 0750 grafana grafana -"
-      "d ${cfg.dataDir}/plugins 0750 grafana grafana -"
-      "d ${cfg.dataDir}/dashboards 0755 grafana grafana -"
-    ] ++ lib.flatten (lib.mapAttrsToList (name: dashboard: [
-      "d ${cfg.dataDir}/dashboards/${name} 0755 grafana grafana -"
-    ]) cfg.dashboards);
+    systemd.tmpfiles.rules =
+      [
+        "d ${cfg.dataDir} 0750 grafana grafana -"
+        "d ${cfg.dataDir}/data 0750 grafana grafana -"
+        "d ${cfg.dataDir}/logs 0750 grafana grafana -"
+        "d ${cfg.dataDir}/plugins 0750 grafana grafana -"
+        "d ${cfg.dataDir}/dashboards 0755 grafana grafana -"
+      ]
+      ++ lib.flatten (lib.mapAttrsToList (name: _: [
+          "d ${cfg.dataDir}/dashboards/${name} 0755 grafana grafana -"
+        ])
+        cfg.dashboards);
 
     # ----------------------------------------------------------------------------
     # USER SETUP - Create dedicated system user for Grafana
@@ -174,15 +178,15 @@ in
 
     users.groups.grafana = {};
 
-    users.users.temhr.extraGroups = [ "grafana" ];
+    users.users.temhr.extraGroups = ["grafana"];
 
     # ----------------------------------------------------------------------------
     # GRAFANA SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
     systemd.services.grafana = {
       description = "Grafana Monitoring and Visualization Platform";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
       environment = {
         GF_PATHS_DATA = "${cfg.dataDir}/data";
@@ -191,9 +195,17 @@ in
         GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
         GF_SERVER_HTTP_PORT = toString cfg.port;
         GF_SERVER_HTTP_ADDR = cfg.bindIP;
-        GF_SERVER_DOMAIN = if cfg.domain != null then cfg.domain else "localhost";
-        GF_SERVER_ROOT_URL = if cfg.domain != null
-          then "${if cfg.enableSSL then "https" else "http"}://${cfg.domain}/"
+        GF_SERVER_DOMAIN =
+          if cfg.domain != null
+          then cfg.domain
+          else "localhost";
+        GF_SERVER_ROOT_URL =
+          if cfg.domain != null
+          then "${
+            if cfg.enableSSL
+            then "https"
+            else "http"
+          }://${cfg.domain}/"
           else "http://localhost:${toString cfg.port}/";
         GF_SECURITY_ADMIN_PASSWORD = cfg.adminPassword;
         GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
@@ -214,84 +226,95 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
       };
 
       preStart = ''
-        # Create minimal config if it doesn't exist
-        if [ ! -f ${cfg.dataDir}/grafana.ini ]; then
-          cat > ${cfg.dataDir}/grafana.ini << EOF
-# Grafana Configuration
-[paths]
-data = ${cfg.dataDir}/data
-logs = ${cfg.dataDir}/logs
-plugins = ${cfg.dataDir}/plugins
-provisioning = ${cfg.dataDir}/provisioning
+                # Create minimal config if it doesn't exist
+                if [ ! -f ${cfg.dataDir}/grafana.ini ]; then
+                  cat > ${cfg.dataDir}/grafana.ini << EOF
+        # Grafana Configuration
+        [paths]
+        data = ${cfg.dataDir}/data
+        logs = ${cfg.dataDir}/logs
+        plugins = ${cfg.dataDir}/plugins
+        provisioning = ${cfg.dataDir}/provisioning
 
-[server]
-http_port = ${toString cfg.port}
-http_addr = ${cfg.bindIP}
-domain = ${if cfg.domain != null then cfg.domain else "localhost"}
-root_url = ${if cfg.domain != null
-  then "${if cfg.enableSSL then "https" else "http"}://${cfg.domain}/"
-  else "http://localhost:${toString cfg.port}/"}
+        [server]
+        http_port = ${toString cfg.port}
+        http_addr = ${cfg.bindIP}
+        domain = ${
+          if cfg.domain != null
+          then cfg.domain
+          else "localhost"
+        }
+        root_url = ${
+          if cfg.domain != null
+          then "${
+            if cfg.enableSSL
+            then "https"
+            else "http"
+          }://${cfg.domain}/"
+          else "http://localhost:${toString cfg.port}/"
+        }
 
-[database]
-type = sqlite3
-path = ${cfg.dataDir}/data/grafana.db
+        [database]
+        type = sqlite3
+        path = ${cfg.dataDir}/data/grafana.db
 
-[security]
-admin_password = ${cfg.adminPassword}
+        [security]
+        admin_password = ${cfg.adminPassword}
 
-[auth.anonymous]
-enabled = ${lib.boolToString cfg.allowAnonymous}
-org_role = Viewer
+        [auth.anonymous]
+        enabled = ${lib.boolToString cfg.allowAnonymous}
+        org_role = Viewer
 
-[log]
-mode = console file
-level = info
-EOF
-          chown grafana:grafana ${cfg.dataDir}/grafana.ini
-          chmod 660 ${cfg.dataDir}/grafana.ini
-        fi
+        [log]
+        mode = console file
+        level = info
+        EOF
+                  chown grafana:grafana ${cfg.dataDir}/grafana.ini
+                  chmod 660 ${cfg.dataDir}/grafana.ini
+                fi
 
-        # Set up provisioning directories
-        mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
-        chown -R grafana:grafana ${cfg.dataDir}/provisioning
+                # Set up provisioning directories
+                mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
+                chown -R grafana:grafana ${cfg.dataDir}/provisioning
 
-        # ┌─────────────────────────────────────────────────────────┐
-        # │ PROVISION ALL DASHBOARDS                                │
-        # └─────────────────────────────────────────────────────────┘
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
-          # Setup dashboard: ${name}
-          mkdir -p ${cfg.dataDir}/dashboards/${name}
-          chown grafana:grafana ${cfg.dataDir}/dashboards/${name}
+                # ┌─────────────────────────────────────────────────────────┐
+                # │ PROVISION ALL DASHBOARDS                                │
+                # └─────────────────────────────────────────────────────────┘
+                ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
+                      # Setup dashboard: ${name}
+                      mkdir -p ${cfg.dataDir}/dashboards/${name}
+                      chown grafana:grafana ${cfg.dataDir}/dashboards/${name}
 
-          # Copy dashboard JSON if it exists
-          if [ -f ${dashboard.path} ]; then
-            install -m 644 -o grafana -g grafana ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
-          else
-            echo "Warning: Dashboard file not found: ${dashboard.path}"
-          fi
+                      # Copy dashboard JSON if it exists
+                      if [ -f ${dashboard.path} ]; then
+                        install -m 644 -o grafana -g grafana ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
+                      else
+                        echo "Warning: Dashboard file not found: ${dashboard.path}"
+                      fi
 
-          # Create dashboard provisioning config
-          cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
-apiVersion: 1
+                      # Create dashboard provisioning config
+                      cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
+            apiVersion: 1
 
-providers:
-  - name: '${name}'
-    orgId: 1
-    folder: '${dashboard.folder}'
-    type: file
-    disableDeletion: false
-    updateIntervalSeconds: ${toString dashboard.updateInterval}
-    allowUiUpdates: ${lib.boolToString dashboard.editable}
-    options:
-      path: ${cfg.dataDir}/dashboards/${name}
-      foldersFromFilesStructure: false
-DASHEOF
-          chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
-        '') cfg.dashboards)}
+            providers:
+              - name: '${name}'
+                orgId: 1
+                folder: '${dashboard.folder}'
+                type: file
+                disableDeletion: false
+                updateIntervalSeconds: ${toString dashboard.updateInterval}
+                allowUiUpdates: ${lib.boolToString dashboard.editable}
+                options:
+                  path: ${cfg.dataDir}/dashboards/${name}
+                  foldersFromFilesStructure: false
+            DASHEOF
+                      chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
+          '')
+          cfg.dashboards)}
       '';
     };
 
@@ -300,12 +323,13 @@ DASHEOF
     # └─────────────────────────────────────────────────────────┘
     system.activationScripts.grafana-dashboards = lib.mkIf (cfg.dashboards != {}) ''
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
-        if [ -f ${dashboard.path} ]; then
-          mkdir -p ${cfg.dataDir}/dashboards/${name}
-          install -m 644 ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
-          chown -R grafana:grafana ${cfg.dataDir}/dashboards/${name}
-        fi
-      '') cfg.dashboards)}
+          if [ -f ${dashboard.path} ]; then
+            mkdir -p ${cfg.dataDir}/dashboards/${name}
+            install -m 644 ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
+            chown -R grafana:grafana ${cfg.dataDir}/dashboards/${name}
+          fi
+        '')
+        cfg.dashboards)}
     '';
 
     # ----------------------------------------------------------------------------
@@ -340,12 +364,11 @@ DASHEOF
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      lib.optionals (cfg.domain == null) [ cfg.port ]
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      lib.optionals (cfg.domain == null) [cfg.port]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
   };
 }
-
 /*
 ================================================================================
 MULTIPLE DASHBOARDS USAGE
@@ -640,3 +663,4 @@ Permission errors:
   sudo chown -R grafana:grafana /var/lib/grafana/dashboards/
   sudo chmod -R 755 /var/lib/grafana/dashboards/
 */
+

@@ -13,27 +13,27 @@
 # │   └── prometheus.nix       # Main prometheus service definition
 # └── extras/
 #     └── nginx.nix            # Nginx reverse proxy config
-
 # ============================================================================
 # FILE: prometheus/default.nix (main entry point)
 # ============================================================================
-{ config, lib, pkgs, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.services.prometheus-custom;
 
   # Import all submodules - pass pkgs to options
-  options = import ./options.nix { inherit lib pkgs; };
-  prometheusConfig = import ./config.nix { inherit config lib pkgs; };
-in
-{
+  options = import ./options.nix {inherit lib pkgs;};
+  prometheusConfig = import ./config.nix {inherit config lib pkgs;};
+in {
   # Import options from separate file
   options.services.prometheus-custom = options;
 
   # Import configuration from separate file
   config = lib.mkIf cfg.enable prometheusConfig;
 }
-
 # ============================================================================
 # USAGE in configuration.nix:
 # ============================================================================
@@ -48,3 +48,4 @@ in
 #     enable = true;
 #     # ... options
 #   };
+

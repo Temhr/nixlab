@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.gotosocial-custom;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.gotosocial-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -79,7 +81,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -100,15 +101,15 @@ in
 
     users.groups.gotosocial = {};
 
-    users.users.temhr.extraGroups = [ "gotosocial" ];
+    users.users.temhr.extraGroups = ["gotosocial"];
 
     # ----------------------------------------------------------------------------
     # GOTOSOCIAL SERVICE - Configure the systemd service
     # ----------------------------------------------------------------------------
     systemd.services.gotosocial = {
       description = "GoToSocial Federated Social Media Server";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
       serviceConfig = {
         Type = "simple";
@@ -125,55 +126,59 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
       };
 
       # Ensure config file exists with proper permissions
       preStart = ''
-        # Create default config if it doesn't exist
-        if [ ! -f ${cfg.dataDir}/config.yaml ]; then
-          cat > ${cfg.dataDir}/config.yaml << EOF
-# GoToSocial Configuration
-# See: https://docs.gotosocial.org/en/latest/configuration/
+                # Create default config if it doesn't exist
+                if [ ! -f ${cfg.dataDir}/config.yaml ]; then
+                  cat > ${cfg.dataDir}/config.yaml << EOF
+        # GoToSocial Configuration
+        # See: https://docs.gotosocial.org/en/latest/configuration/
 
-# Network configuration
-host: "${cfg.domain}"
-account-domain: "${cfg.accountDomain}"
-protocol: "${if cfg.enableSSL then "https" else "http"}"
-bind-address: "${cfg.bindIP}"
-port: ${toString cfg.port}
+        # Network configuration
+        host: "${cfg.domain}"
+        account-domain: "${cfg.accountDomain}"
+        protocol: "${
+          if cfg.enableSSL
+          then "https"
+          else "http"
+        }"
+        bind-address: "${cfg.bindIP}"
+        port: ${toString cfg.port}
 
-# Database (SQLite by default)
-db-type: "sqlite"
-db-address: "${cfg.dataDir}/gotosocial.db"
+        # Database (SQLite by default)
+        db-type: "sqlite"
+        db-address: "${cfg.dataDir}/gotosocial.db"
 
-# Storage
-storage-backend: "local"
-storage-local-base-path: "${cfg.dataDir}/storage"
+        # Storage
+        storage-backend: "local"
+        storage-local-base-path: "${cfg.dataDir}/storage"
 
-# Media settings
-media-image-max-size: 10485760  # 10MB
-media-video-max-size: 41943040  # 40MB
+        # Media settings
+        media-image-max-size: 10485760  # 10MB
+        media-video-max-size: 41943040  # 40MB
 
-# Instance settings
-instance-languages:
-  - en
+        # Instance settings
+        instance-languages:
+          - en
 
-# Accounts
-accounts-registration-open: false
-accounts-approval-required: true
-accounts-reason-required: true
+        # Accounts
+        accounts-registration-open: false
+        accounts-approval-required: true
+        accounts-reason-required: true
 
-# Advanced settings
-advanced-cookies-samesite: "lax"
-advanced-rate-limit-requests: 300
+        # Advanced settings
+        advanced-cookies-samesite: "lax"
+        advanced-rate-limit-requests: 300
 
-# Logging
-log-level: "info"
-EOF
-          chown gotosocial:gotosocial ${cfg.dataDir}/config.yaml
-          chmod 660 ${cfg.dataDir}/config.yaml
-        fi
+        # Logging
+        log-level: "info"
+        EOF
+                  chown gotosocial:gotosocial ${cfg.dataDir}/config.yaml
+                  chmod 660 ${cfg.dataDir}/config.yaml
+                fi
       '';
     };
 
@@ -211,10 +216,9 @@ EOF
     # ----------------------------------------------------------------------------
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ 80 443 ];
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [80 443];
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -324,5 +328,5 @@ Important notes:
   - Account domain affects how usernames appear
   - Federation requires HTTPS (enableSSL = true)
   - Allow outbound HTTPS connections in firewall
-
 */
+

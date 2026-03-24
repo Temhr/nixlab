@@ -1,12 +1,12 @@
 # ============================================================================
 # FILE: prometheus/extras/nginx.nix
 # ============================================================================
-{ config, lib }:
-
-let
-  cfg = config.services.prometheus-custom;
-in
 {
+  config,
+  lib,
+}: let
+  cfg = config.services.prometheus-custom;
+in {
   enable = lib.mkIf (cfg.domain != null) true;
 
   virtualHosts = lib.mkIf (cfg.domain != null) {

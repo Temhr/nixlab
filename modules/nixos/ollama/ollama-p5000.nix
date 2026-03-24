@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.ollama-p5000;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.ollama-p5000;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -78,8 +80,8 @@ in
       # OPTIONAL: Models to download on first start
       models = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        default = [ ];
-        example = [ "llama2" "mistral" "codellama" ];
+        default = [];
+        example = ["llama2" "mistral" "codellama"];
         description = "List of models to pull on service start";
       };
 
@@ -111,7 +113,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -140,24 +141,26 @@ in
     users.groups.open-webui = {};
 
     # Allow current user to access ollama and open-webui data
-    users.users.temhr.extraGroups = [ "open-webui" "ollama" ];
+    users.users.temhr.extraGroups = ["open-webui" "ollama"];
 
     # ----------------------------------------------------------------------------
     # OLLAMA SERVICE - GPU MODE
     # ----------------------------------------------------------------------------
     systemd.services.ollama = {
       description = "Ollama LLM Service (GPU - P5000)";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
-      environment = {
-        OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
-        OLLAMA_MODELS = "${cfg.ollamaDataDir}/models";
-        CUDA_VISIBLE_DEVICES = toString cfg.gpuDevice;
-        OLLAMA_NUM_GPU = "1";
-      } // lib.optionalAttrs (cfg.gpuLayers != -1) {
-        OLLAMA_GPU_LAYERS = toString cfg.gpuLayers;
-      };
+      environment =
+        {
+          OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+          OLLAMA_MODELS = "${cfg.ollamaDataDir}/models";
+          CUDA_VISIBLE_DEVICES = toString cfg.gpuDevice;
+          OLLAMA_NUM_GPU = "1";
+        }
+        // lib.optionalAttrs (cfg.gpuLayers != -1) {
+          OLLAMA_GPU_LAYERS = toString cfg.gpuLayers;
+        };
 
       serviceConfig = {
         Type = "simple";
@@ -184,18 +187,18 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.ollamaDataDir ];
+        ReadWritePaths = [cfg.ollamaDataDir];
       };
     };
 
     # ----------------------------------------------------------------------------
     # MODEL DOWNLOADER - Separate one-shot service for downloading models
     # ----------------------------------------------------------------------------
-    systemd.services.ollama-models = lib.mkIf (cfg.models != [ ]) {
+    systemd.services.ollama-models = lib.mkIf (cfg.models != []) {
       description = "Download Ollama Models";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "ollama.service" ];
-      requires = [ "ollama.service" ];
+      wantedBy = ["multi-user.target"];
+      after = ["ollama.service"];
+      requires = ["ollama.service"];
 
       environment = {
         OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
@@ -222,14 +225,15 @@ in
 
         # Download each model
         ${lib.concatMapStringsSep "\n" (model: ''
-          echo "Checking model: ${model}"
-          if ! ${cfg.package}/bin/ollama list | grep -q "${model}"; then
-            echo "Downloading model: ${model} (this may take a while...)"
-            ${cfg.package}/bin/ollama pull ${model} || echo "Warning: Failed to download ${model}"
-          else
-            echo "Model ${model} already exists, skipping"
-          fi
-        '') cfg.models}
+            echo "Checking model: ${model}"
+            if ! ${cfg.package}/bin/ollama list | grep -q "${model}"; then
+              echo "Downloading model: ${model} (this may take a while...)"
+              ${cfg.package}/bin/ollama pull ${model} || echo "Warning: Failed to download ${model}"
+            else
+              echo "Model ${model} already exists, skipping"
+            fi
+          '')
+          cfg.models}
 
         echo "Model setup complete"
       '';
@@ -240,9 +244,9 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.open-webui = {
       description = "Open WebUI for Ollama";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "ollama.service" ];
-      requires = [ "ollama.service" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target" "ollama.service"];
+      requires = ["ollama.service"];
 
       environment = {
         OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
@@ -276,7 +280,7 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.webuiDataDir ];
+        ReadWritePaths = [cfg.webuiDataDir];
       };
     };
 
@@ -318,8 +322,8 @@ in
     # FIREWALL - Open necessary ports if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      lib.optionals (cfg.domain == null) [ cfg.ollamaPort cfg.webuiPort ]
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      lib.optionals (cfg.domain == null) [cfg.ollamaPort cfg.webuiPort]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
 
     # Include CUDA toolkit in system packages
@@ -328,7 +332,6 @@ in
     ];
   };
 }
-
 /*
 ================================================================================
 OLLAMA P5000 MODULE - GPU-ACCELERATED INFERENCE
@@ -433,5 +436,5 @@ CREDITS
 -------
 Solution based on the cudaArches override pattern documented in the
 NixOS ollama package.nix (line 18).
-
 */
+

@@ -1,9 +1,10 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.wikijs-custom;
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  cfg = config.services.wikijs-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -90,7 +91,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # USER SETUP - Create dedicated system user for Glance
     # ----------------------------------------------------------------------------
@@ -103,23 +103,24 @@ in
 
     users.groups.wiki-js = {};
 
-    users.users.temhr.extraGroups = [ "postgres" "wiki-js" ];
+    users.users.temhr.extraGroups = ["postgres" "wiki-js"];
 
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      # Create main data directory owned by wiki-js user
-      "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
-    ]
-    # Create custom uploads directory if specified
-    ++ lib.optionals (cfg.uploadsPath != null) [
-      "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
-    ]
-    # Create backup directory if specified (owned by postgres user)
-    ++ lib.optionals (cfg.backupPath != null) [
-      "d ${cfg.backupPath} 0770 postgres postgres -"
-    ];
+    systemd.tmpfiles.rules =
+      [
+        # Create main data directory owned by wiki-js user
+        "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
+      ]
+      # Create custom uploads directory if specified
+      ++ lib.optionals (cfg.uploadsPath != null) [
+        "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
+      ]
+      # Create backup directory if specified (owned by postgres user)
+      ++ lib.optionals (cfg.backupPath != null) [
+        "d ${cfg.backupPath} 0770 postgres postgres -"
+      ];
 
     # ----------------------------------------------------------------------------
     # DATABASE SETUP - Wiki.js requires PostgreSQL
@@ -127,12 +128,14 @@ in
     services.postgresql = {
       enable = true;
       # Create the 'wiki-js' database automatically
-      ensureDatabases = [ "wiki-js" ];
+      ensureDatabases = ["wiki-js"];
       # Create 'wiki-js' user with ownership of the database
-      ensureUsers = [{
-        name = "wiki-js";
-        ensureDBOwnership = true;
-      }];
+      ensureUsers = [
+        {
+          name = "wiki-js";
+          ensureDBOwnership = true;
+        }
+      ];
     };
 
     # ----------------------------------------------------------------------------
@@ -143,7 +146,8 @@ in
 
       # Override state directory name if using custom path
       # This tells the module to use a different base directory
-      stateDirectoryName = lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
+      stateDirectoryName =
+        lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
         (baseNameOf cfg.dataDir);
 
       # Wiki.js application settings
@@ -155,14 +159,14 @@ in
         # Database configuration (PostgreSQL via Unix socket)
         db = {
           type = "postgres";
-          host = "/run/postgresql";  # Unix socket connection
+          host = "/run/postgresql"; # Unix socket connection
           db = "wiki-js";
           user = "wiki-js";
         };
 
         # Logging and high-availability settings
         logLevel = "info";
-        ha = false;  # High availability mode disabled (single instance)
+        ha = false; # High availability mode disabled (single instance)
       };
     };
 
@@ -171,8 +175,8 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.wiki-js = {
       # Ensure PostgreSQL is running before Wiki.js starts
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
+      requires = ["postgresql.service"];
+      after = ["postgresql.service"];
 
       # Custom preStart script for uploads directory (only if custom path specified)
       preStart = lib.mkIf (cfg.uploadsPath != null) (lib.mkAfter ''
@@ -236,9 +240,9 @@ in
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Open Wiki.js port if not using reverse proxy or binding to non-localhost
-      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [ cfg.port ]
+      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
       # Open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
 
     # ----------------------------------------------------------------------------
@@ -247,7 +251,7 @@ in
     services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
       enable = true;
       # Backup the wiki-js database
-      databases = [ "wiki-js" ];
+      databases = ["wiki-js"];
       # Store backups in specified location
       location = cfg.backupPath;
       # Schedule (e.g., "daily", "weekly", or specific time "02:30")
@@ -257,7 +261,6 @@ in
     };
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -577,5 +580,5 @@ Analytics:
   - Google Analytics
   - Matomo
   - Fathom
-
 */
+

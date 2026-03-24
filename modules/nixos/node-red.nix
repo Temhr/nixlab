@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.nodered-service;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.nodered-service;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -65,7 +67,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -85,7 +86,7 @@ in
 
     users.groups.node-red = {};
 
-    users.users.temhr.extraGroups = [ "node-red" ];
+    users.users.temhr.extraGroups = ["node-red"];
 
     # ----------------------------------------------------------------------------
     # NODE-RED SERVICE - Configure the systemd service
@@ -93,12 +94,12 @@ in
     systemd.services.node-red = {
       description = "Node-RED Flow-based Programming";
       # Start automatically on boot
-      wantedBy = [ "multi-user.target" ];
+      wantedBy = ["multi-user.target"];
       # Start after network is available
-      after = [ "network.target" ];
+      after = ["network.target"];
 
       # Make Node.js available to the service
-      path = with pkgs; [ nodejs ];
+      path = with pkgs; [nodejs];
 
       serviceConfig = {
         Type = "simple";
@@ -112,11 +113,11 @@ in
         RestartSec = "10s";
 
         # Security hardening
-        NoNewPrivileges = true;      # Prevent privilege escalation
-        PrivateTmp = true;            # Use private /tmp directory
-        ProtectSystem = "strict";     # Make most of filesystem read-only
-        ProtectHome = true;           # Make /home inaccessible
-        ReadWritePaths = [ cfg.dataDir ];  # Only allow writes to data directory
+        NoNewPrivileges = true; # Prevent privilege escalation
+        PrivateTmp = true; # Use private /tmp directory
+        ProtectSystem = "strict"; # Make most of filesystem read-only
+        ProtectHome = true; # Make /home inaccessible
+        ReadWritePaths = [cfg.dataDir]; # Only allow writes to data directory
       };
     };
 
@@ -158,13 +159,12 @@ in
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
       # Always open the Node-RED port
-      [ cfg.port ]
+      [cfg.port]
       # Also open HTTP (80) and HTTPS (443) if using domain
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -308,5 +308,5 @@ Reset to defaults (WARNING: deletes all flows):
   sudo systemctl stop node-red
   sudo rm -rf /var/lib/node-red/*
   sudo systemctl start node-red
-
 */
+

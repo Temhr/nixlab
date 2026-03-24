@@ -30,13 +30,13 @@ MODE="cpu"  # Default mode is CPU-only
 # Loop through all command line arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
-    --cpu) 
+    --cpu)
       MODE="cpu"   # Explicitly request CPU-only PyTorch
       ;;
-    --gpu) 
+    --gpu)
       MODE="gpu"   # Request GPU-enabled PyTorch (requires CUDA)
       ;;
-    *) 
+    *)
       # Unknown argument - print error and exit
       echo "Unknown option: $1"
       echo "Usage: $0 [--cpu|--gpu]"
@@ -235,7 +235,7 @@ echo "🌀 Testing with example model..."
 
 if [ -d ~/repast4py/examples/zombies ]; then
   cd ~/repast4py/examples/zombies
-  
+
   if [ -f zombies.py ]; then
     # Run zombies example with 2 MPI processes
     # timeout: Kill after 30 seconds if it hangs

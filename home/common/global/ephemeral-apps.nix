@@ -1,9 +1,7 @@
-{ config, lib, pkgs, ... }: {
-
-## One-time use applications downloaded into store and discarded afterward
+{...}: {
+  ## One-time use applications downloaded into store and discarded afterward
 
   home.file = {
-
     ## Audacity
     ".local/share/applications/audacity.desktop".text = ''
       [Desktop Entry]
@@ -16,7 +14,7 @@
       Categories=AudioVideo;Audio;AudioVideoEditing;Ephemeral-App;
     '';
 
-     ## Blender
+    ## Blender
     ".local/share/applications/blender-cuda.desktop".text = ''
       [Desktop Entry]
       Name=Blender CUDA ⚡ 🫨
@@ -28,7 +26,8 @@
       Categories=Graphics;3DGraphics;Ephemeral-App;
     '';
 
-    /* ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
+    /*
+       ## darktable - doesn't work properly because dependency libsoup-2.74.3 is a security risk
     ".local/share/applications/darktable.desktop".text = ''
       [Desktop Entry]
       Name=Darktable ⚡ 🫨
@@ -38,9 +37,10 @@
       Terminal=false
       Type=Application
       Categories=Graphics;Photography;RasterGraphics;Ephemeral-App;
-    ''; */
+    '';
+    */
 
-     ## Davinci Resolve
+    ## Davinci Resolve
     ".local/share/applications/davinci-resolve.desktop".text = ''
       [Desktop Entry]
       Name=DaVinci Resolve ⚡
@@ -52,7 +52,7 @@
       Categories=AudioVideo;Video;AudioVideoEditing;Ephemeral-App;
     '';
 
-     ## discord
+    ## discord
     ".local/share/applications/discord.desktop".text = ''
       [Desktop Entry]
       Name=Discord ⚡ 🫨
@@ -64,7 +64,7 @@
       Categories=AudioVideo;Network;Video;Ephemeral-App;
     '';
 
-     ## Drawio
+    ## Drawio
     ".local/share/applications/drawio.desktop".text = ''
       [Desktop Entry]
       Name=Drawio ⚡ 🫨
@@ -231,6 +231,5 @@
       Type=Application
       Categories=Development;Utilities;Ephemeral-App;
     '';
-
   };
 }

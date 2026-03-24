@@ -1,24 +1,19 @@
-{ pkgs, ... }:
-
+{pkgs, ...}:
 pkgs.mkShell {
   name = "web-dev";
 
   buildInputs = with pkgs; [
     # Node.js ecosystem
     nodejs
-    npm
-    yarn
-    pnpm
+    nodePackages.npm
+    nodePackages.yarn
+    nodePackages.pnpm
 
     # Development tools
-    typescript
+    nodePackages.typescript
     nodePackages.typescript-language-server
     nodePackages.prettier
     nodePackages.eslint
-
-    # Build tools
-    webpack
-    vite
 
     # Browsers for testing
     chromium
@@ -34,6 +29,6 @@ pkgs.mkShell {
     echo "  - typescript: TypeScript compiler"
     echo "  - prettier: Code formatter"
     echo "  - eslint: Linter"
-    echo "  - webpack/vite: Build tools"
+    echo "  - webpack/vite: install per-project via npm"
   '';
 }

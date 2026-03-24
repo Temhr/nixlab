@@ -1,7 +1,7 @@
 # This is a Nix module that sets up a systemd user service + timer
 # to automatically run a git pull every hour.
-
-{ pkgs, ... }:  # Import the package set (pkgs) and any other module arguments.
+{pkgs, ...}:
+# Import the package set (pkgs) and any other module arguments.
 let
   # Define a shell script using Nix's `writeShellScript`.
   # This creates an executable script named "auto-git-pull" in the Nix store,
@@ -9,8 +9,7 @@ let
   GitPullShellScript = pkgs.writeShellScript "auto-git-pull" (
     builtins.readFile ../files/scripts/auto-git-pull.sh
   );
-in
-{
+in {
   # Define a systemd user timer named `git-pull`.
   systemd.user.timers.git-pull = {
     Unit = {
@@ -29,7 +28,7 @@ in
     Install = {
       # This makes the timer automatically start when the user session starts.
       # It "wants" the timer to be part of `timers.target`, which is like a group of timers.
-      WantedBy = [ "timers.target" ];
+      WantedBy = ["timers.target"];
     };
   };
 
@@ -50,6 +49,6 @@ in
     };
   };
 }
-
 #below to check status of .timer or .service
 #systemctl --user status git-pull.timer
+

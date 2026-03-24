@@ -1,11 +1,11 @@
-{ config, ... }: {
+{config, ...}: {
   # This setups a SSH server. Very important if you're setting up a headless system.
   # Feel free to remove if you don't need it.
   services.openssh = {
     enable = true;
-    ports = [ 22 ];
+    ports = [22];
     settings = {
-      PasswordAuthentication = false;  # Opinionated: use keys only
+      PasswordAuthentication = false; # Opinionated: use keys only
       AllowUsers = null; # "null" Allows all users by default. Can be [ "user1" "user2" ]
       UseDns = true;
       X11Forwarding = false;

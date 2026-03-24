@@ -1,10 +1,12 @@
-{ config, lib, pkgs, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.services.comfyui-p5000;
   modelsCfg = config.services.comfyui-models;
-in
-{
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -60,7 +62,7 @@ in
               description = "Download URL";
             };
             type = lib.mkOption {
-              type = lib.types.enum [ "checkpoint" "vae" "lora" "controlnet" "upscale" "clip" ];
+              type = lib.types.enum ["checkpoint" "vae" "lora" "controlnet" "upscale" "clip"];
               default = "checkpoint";
               description = "Model type (determines storage directory)";
             };
@@ -89,7 +91,6 @@ in
   # CONFIG - What happens when model downloader is enabled
   # ============================================================================
   config = lib.mkIf (cfg.enable && modelsCfg.enable) {
-
     # ----------------------------------------------------------------------------
     # MODEL DIRECTORIES - Create subdirectories for different model types
     # ----------------------------------------------------------------------------
@@ -109,9 +110,9 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-models-download = {
       description = "Download ComfyUI Models";
-      wantedBy = [ "comfyui.service" ];
-      before = [ "comfyui.service" ];
-      after = [ "comfyui-pytorch-setup.service" ];
+      wantedBy = ["comfyui.service"];
+      before = ["comfyui.service"];
+      after = ["comfyui-pytorch-setup.service"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -122,10 +123,10 @@ in
         # Models can be large, allow plenty of time
         TimeoutStartSec = "infinity";
         # Allow writing to data directory
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
       };
 
-      path = [ pkgs.curl pkgs.wget pkgs.coreutils ];
+      path = [pkgs.curl pkgs.wget pkgs.coreutils];
 
       script = ''
         set -e
@@ -225,33 +226,34 @@ in
 
         # Download custom models
         ${lib.concatMapStringsSep "\n" (model: ''
-          echo "Downloading custom model: ${model.name}..."
+            echo "Downloading custom model: ${model.name}..."
 
-          # Determine output directory based on type
-          case "${model.type}" in
-            checkpoint) OUT_DIR="$MODELS_DIR/checkpoints" ;;
-            vae) OUT_DIR="$MODELS_DIR/vae" ;;
-            lora) OUT_DIR="$MODELS_DIR/loras" ;;
-            controlnet) OUT_DIR="$MODELS_DIR/controlnet" ;;
-            upscale) OUT_DIR="$MODELS_DIR/upscale_models" ;;
-            clip) OUT_DIR="$MODELS_DIR/clip" ;;
-            *) OUT_DIR="$MODELS_DIR/checkpoints" ;;
-          esac
+            # Determine output directory based on type
+            case "${model.type}" in
+              checkpoint) OUT_DIR="$MODELS_DIR/checkpoints" ;;
+              vae) OUT_DIR="$MODELS_DIR/vae" ;;
+              lora) OUT_DIR="$MODELS_DIR/loras" ;;
+              controlnet) OUT_DIR="$MODELS_DIR/controlnet" ;;
+              upscale) OUT_DIR="$MODELS_DIR/upscale_models" ;;
+              clip) OUT_DIR="$MODELS_DIR/clip" ;;
+              *) OUT_DIR="$MODELS_DIR/checkpoints" ;;
+            esac
 
-          download_model "${model.url}" "$OUT_DIR/${model.name}" || echo "Warning: Failed to download ${model.name}"
+            download_model "${model.url}" "$OUT_DIR/${model.name}" || echo "Warning: Failed to download ${model.name}"
 
-          ${lib.optionalString (model.sha256 != null) ''
-            # Verify SHA256 if provided
-            if [ -f "$OUT_DIR/${model.name}" ]; then
-              echo "Verifying checksum for ${model.name}..."
-              echo "${model.sha256}  $OUT_DIR/${model.name}" | ${pkgs.coreutils}/bin/sha256sum -c - || {
-                echo "ERROR: Checksum mismatch for ${model.name}!"
-                rm "$OUT_DIR/${model.name}"
-                exit 1
-              }
-            fi
-          ''}
-        '') modelsCfg.customModels}
+            ${lib.optionalString (model.sha256 != null) ''
+              # Verify SHA256 if provided
+              if [ -f "$OUT_DIR/${model.name}" ]; then
+                echo "Verifying checksum for ${model.name}..."
+                echo "${model.sha256}  $OUT_DIR/${model.name}" | ${pkgs.coreutils}/bin/sha256sum -c - || {
+                  echo "ERROR: Checksum mismatch for ${model.name}!"
+                  rm "$OUT_DIR/${model.name}"
+                  exit 1
+                }
+              fi
+            ''}
+          '')
+          modelsCfg.customModels}
 
         echo "Model downloads complete!"
         echo ""
@@ -269,8 +271,8 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-model-config = {
       description = "Create ComfyUI model paths configuration";
-      wantedBy = [ "comfyui.service" ];
-      before = [ "comfyui.service" ];
+      wantedBy = ["comfyui.service"];
+      before = ["comfyui.service"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -280,25 +282,24 @@ in
       };
 
       script = ''
-        cat > ${cfg.dataDir}/extra_model_paths.yaml <<'EOF'
-comfyui:
-  base_path: ${cfg.dataDir}/
-  checkpoints: models/checkpoints/
-  vae: models/vae/
-  loras: models/loras/
-  controlnet: models/controlnet/
-  upscale_models: models/upscale_models/
-  embeddings: models/embeddings/
-  clip: models/clip/
-  clip_vision: models/clip_vision/
-EOF
-        chmod 644 ${cfg.dataDir}/extra_model_paths.yaml
-        echo "Created extra_model_paths.yaml"
+                cat > ${cfg.dataDir}/extra_model_paths.yaml <<'EOF'
+        comfyui:
+          base_path: ${cfg.dataDir}/
+          checkpoints: models/checkpoints/
+          vae: models/vae/
+          loras: models/loras/
+          controlnet: models/controlnet/
+          upscale_models: models/upscale_models/
+          embeddings: models/embeddings/
+          clip: models/clip/
+          clip_vision: models/clip_vision/
+        EOF
+                chmod 644 ${cfg.dataDir}/extra_model_paths.yaml
+                echo "Created extra_model_paths.yaml"
       '';
     };
   };
 }
-
 /*
 ================================================================================
 COMFYUI MODELS MODULE - AUTOMATIC MODEL DOWNLOADING
@@ -460,3 +461,4 @@ PERFORMANCE TIPS
 4. Try different samplers for speed/quality tradeoff
 5. Use LoRA models for fine-tuning without full model retraining
 */
+

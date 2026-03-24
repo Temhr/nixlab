@@ -1,320 +1,318 @@
-
 # /var/lib/homepage/config/services.yaml
 # Homepage dashboard configuration
 # Docs: https://gethomepage.dev/en/configs/services/
-
 [
-    {
+  {
     # ──────────────────────────────────────────────
     # SECTION: Incus - HomeAssistant
     # ──────────────────────────────────────────────
-      "Incus Server" = [
-        {
-          "Home Assistant" = {
-            href = "http://192.168.0.200:8123";
-            icon = "home-assistant";
-            description = "Central home automation hub";
-            target = "_blank";
-            server = "nixace - Incus - HomeAssistant";
-            ping = "http://192.168.0.200:8123";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Node-RED" = {
-            href = "http://192.168.0.200:1880";
-            icon = "nodered";
-            description = "Visual automation and flow-based logic editor";
-            target = "_blank";
-            server = "nixace - Incus - HomeAssistant";
-            ping = "http://192.168.0.200:1880";
-            statusStyle = "dot";
-          };
-        }
-      ];
-    }
+    "Incus Server" = [
+      {
+        "Home Assistant" = {
+          href = "http://192.168.0.200:8123";
+          icon = "home-assistant";
+          description = "Central home automation hub";
+          target = "_blank";
+          server = "nixace - Incus - HomeAssistant";
+          ping = "http://192.168.0.200:8123";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Node-RED" = {
+          href = "http://192.168.0.200:1880";
+          icon = "nodered";
+          description = "Visual automation and flow-based logic editor";
+          target = "_blank";
+          server = "nixace - Incus - HomeAssistant";
+          ping = "http://192.168.0.200:1880";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
 
-    {
+  {
     # ──────────────────────────────────────────────
     # SECTION: Generative AI
     # ──────────────────────────────────────────────
-      "Generative AI" = [
-        {
-          "Ollama - CPU" = {
-            href = "http://192.168.0.201:3006";
-            icon = "ollama";
-            description = "Get up and running with large language models locally";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3006";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Ollama - GPU" = {
-            href = "http://192.168.0.200:3007";
-            icon = "ollama";
-            description = "Get up and running with large language models locally";
-            target = "_blank";
-            server = "nixace";
-            ping = "http://192.168.0.200:3000";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Comfyui - GPU" = {
-            href = "http://192.168.0.200:8188";
-            icon = "comfyui";
-            description = "Diffusion model GUI, api and backend with a graph/nodes interface";
-            target = "_blank";
-            server = "nixace";
-            ping = "http://192.168.0.200:8188";
-            statusStyle = "dot";
-          };
-        }
-      ];
-    }
+    "Generative AI" = [
+      {
+        "Ollama - CPU" = {
+          href = "http://192.168.0.201:3006";
+          icon = "ollama";
+          description = "Get up and running with large language models locally";
+          target = "_blank";
+          server = "nixvat";
+          ping = "http://192.168.0.201:3006";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Ollama - GPU" = {
+          href = "http://192.168.0.200:3007";
+          icon = "ollama";
+          description = "Get up and running with large language models locally";
+          target = "_blank";
+          server = "nixace";
+          ping = "http://192.168.0.200:3000";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Comfyui - GPU" = {
+          href = "http://192.168.0.200:8188";
+          icon = "comfyui";
+          description = "Diffusion model GUI, api and backend with a graph/nodes interface";
+          target = "_blank";
+          server = "nixace";
+          ping = "http://192.168.0.200:8188";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
 
-    {
+  {
     # ──────────────────────────────────────────────
     # SECTION: Sync and Storage
     # ──────────────────────────────────────────────
-      "Sync and Storage" = [
-        {
-          "Syncthing nixvat" = {
-            href = "http://192.168.0.201:8384";
-            icon = "syncthing";
-            description = "Main sync node - Peer-to-peer file synchronization";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:8384";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Syncthing nixzen" = {
-            href = "http://192.168.0.204:8384";
-            icon = "syncthing";
-            description = "Secondary sync node - Peer-to-peer file synchronization";
-            target = "_blank";
-            server = "nixzen";
-            ping = "http://192.168.0.204:8384";
-            statusStyle = "dot";
-          };
-        }
-      ];
-    }
+    "Sync and Storage" = [
+      {
+        "Syncthing nixvat" = {
+          href = "http://192.168.0.201:8384";
+          icon = "syncthing";
+          description = "Main sync node - Peer-to-peer file synchronization";
+          target = "_blank";
+          server = "nixvat";
+          ping = "http://192.168.0.201:8384";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Syncthing nixzen" = {
+          href = "http://192.168.0.204:8384";
+          icon = "syncthing";
+          description = "Secondary sync node - Peer-to-peer file synchronization";
+          target = "_blank";
+          server = "nixzen";
+          ping = "http://192.168.0.204:8384";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
 
-    {
+  {
     # ──────────────────────────────────────────────
     # SECTION: System & Web Services
     # ──────────────────────────────────────────────
-      "System & Web Services" = [
-        {
-          "Glance" = {
-            href = "http://192.168.0.201:3004";
-            icon = "gauge";
-            description = "Lightweight system overview dashboard";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3004";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "BookStack" = {
-            href = "http://192.168.0.200:6875/";
-            icon = "bookstack";
-            description = "Self-hosted documentation and notes";
-            target = "_blank";
-            server = "nixace ";
-            ping = "http://192.168.0.200:6875/";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Wiki.js" = {
-            href = "http://192.168.0.201:3001";
-            icon = "wikijs";
-            description = "Structured and collaborative wiki platform";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3001";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Zola" = {
-            href = "http://192.168.0.201:3003";
-            icon = "zola";
-            description = "Static site generator for personal or project pages";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3003";
-            statusStyle = "dot";
-          };
-        }
-      ];
-    }
+    "System & Web Services" = [
+      {
+        "Glance" = {
+          href = "http://192.168.0.201:3004";
+          icon = "gauge";
+          description = "Lightweight system overview dashboard";
+          target = "_blank";
+          server = "nixvat";
+          ping = "http://192.168.0.201:3004";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "BookStack" = {
+          href = "http://192.168.0.200:6875/";
+          icon = "bookstack";
+          description = "Self-hosted documentation and notes";
+          target = "_blank";
+          server = "nixace ";
+          ping = "http://192.168.0.200:6875/";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Wiki.js" = {
+          href = "http://192.168.0.201:3001";
+          icon = "wikijs";
+          description = "Structured and collaborative wiki platform";
+          target = "_blank";
+          server = "nixvat";
+          ping = "http://192.168.0.201:3001";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Zola" = {
+          href = "http://192.168.0.201:3003";
+          icon = "zola";
+          description = "Static site generator for personal or project pages";
+          target = "_blank";
+          server = "nixvat";
+          ping = "http://192.168.0.201:3003";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
 
-    {
+  {
     # ──────────────────────────────────────────────
     # SECTION: Godot Course
     # ──────────────────────────────────────────────
-      "Godot Course" = [
-        {
-          "Classes - Engine Reference API" = {
-            href = "http://192.168.0.200:8000";
-            icon = "godot";
-            description = "Godot Engine Reference API - nixace";
-            target = "_blank";
-            server = "nixace";
-            ping = "http://192.168.0.200:8000";
-            statusStyle = "dot";
-          };
-        }
-      ];
-    }
+    "Godot Course" = [
+      {
+        "Classes - Engine Reference API" = {
+          href = "http://192.168.0.200:8000";
+          icon = "godot";
+          description = "Godot Engine Reference API - nixace";
+          target = "_blank";
+          server = "nixace";
+          ping = "http://192.168.0.200:8000";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
 
-    {
+  {
     # ──────────────────────────────────────────────
     # SECTION: Monitoring & Logs
     # ──────────────────────────────────────────────
-      "Monitoring & Logs - Grafana" = [
-        {
-          "Grafana" = {
-            href = "http://192.168.0.200:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards - nixace";
-            target = "_blank";
-            server = "nixace";
-            ping = "http://192.168.0.200:3101";
-            statusStyle = "dot";
+    "Monitoring & Logs - Grafana" = [
+      {
+        "Grafana" = {
+          href = "http://192.168.0.200:3101";
+          icon = "grafana";
+          description = "Metrics visualization and dashboards - nixace";
+          target = "_blank";
+          server = "nixace";
+          ping = "http://192.168.0.200:3101";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Grafana" = {
+          href = "http://192.168.0.203:3101";
+          icon = "grafana";
+          description = "Metrics visualization and dashboards - nixsun";
+          target = "_blank";
+          server = "nixsun";
+          ping = "http://192.168.0.203:3101";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Grafana" = {
+          href = "http://192.168.0.202:3101";
+          icon = "grafana";
+          description = "Metrics visualization and dashboards - nixtop";
+          target = "_blank";
+          server = "nixtop";
+          ping = "http://192.168.0.202:3101";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Grafana" = {
+          href = "http://192.168.0.201:3101";
+          icon = "grafana";
+          description = "Metrics visualization and dashboards - nixvat";
+          target = "_blank";
+          server = "nixvat";
+          ping = "http://192.168.0.201:3101";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Grafana" = {
+          href = "http://192.168.0.204:3101";
+          icon = "grafana";
+          description = "Metrics visualization and dashboards - nixzen";
+          target = "_blank";
+          server = "nixzen";
+          ping = "http://192.168.0.204:3101";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
+  {
+    "Monitoring & Logs - Prometheus" = [
+      {
+        "Prometheus" = {
+          href = "http://192.168.0.200:9090";
+          icon = "prometheus";
+          description = "Metrics collection and monitoring - nixace";
+          target = "_blank";
+          widget = {
+            type = "prometheus";
+            url = "http://192.168.0.200:9090";
           };
-        }
-        {
-          "Grafana" = {
-            href = "http://192.168.0.203:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards - nixsun";
-            target = "_blank";
-            server = "nixsun";
-            ping = "http://192.168.0.203:3101";
-            statusStyle = "dot";
+          server = "nixace";
+          ping = "http://192.168.0.200:9090";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Prometheus" = {
+          href = "http://192.168.0.203:9090";
+          icon = "prometheus";
+          description = "Metrics collection and monitoring - nixsun";
+          target = "_blank";
+          widget = {
+            type = "prometheus";
+            url = "http://192.168.0.203:9090";
           };
-        }
-        {
-          "Grafana" = {
-            href = "http://192.168.0.202:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards - nixtop";
-            target = "_blank";
-            server = "nixtop";
-            ping = "http://192.168.0.202:3101";
-            statusStyle = "dot";
+          server = "nixsun";
+          ping = "http://192.168.0.203:9090";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Prometheus" = {
+          href = "http://192.168.0.202:9090";
+          icon = "prometheus";
+          description = "Metrics collection and monitoring - nixtop";
+          target = "_blank";
+          widget = {
+            type = "prometheus";
+            url = "http://192.168.0.202:9090";
           };
-        }
-        {
-          "Grafana" = {
-            href = "http://192.168.0.201:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards - nixvat";
-            target = "_blank";
-            server = "nixvat";
-            ping = "http://192.168.0.201:3101";
-            statusStyle = "dot";
+          server = "nixtop";
+          ping = "http://192.168.0.202:9090";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Prometheus" = {
+          href = "http://192.168.0.201:9090";
+          icon = "prometheus";
+          description = "Metrics collection and monitoring - nixvat";
+          target = "_blank";
+          widget = {
+            type = "prometheus";
+            url = "http://192.168.0.201:9090";
           };
-        }
-        {
-          "Grafana" = {
-            href = "http://192.168.0.204:3101";
-            icon = "grafana";
-            description = "Metrics visualization and dashboards - nixzen";
-            target = "_blank";
-            server = "nixzen";
-            ping = "http://192.168.0.204:3101";
-            statusStyle = "dot";
+          server = "nixvat";
+          ping = "http://192.168.0.201:9090";
+          statusStyle = "dot";
+        };
+      }
+      {
+        "Prometheus" = {
+          href = "http://192.168.0.204:9090";
+          icon = "prometheus";
+          description = "Metrics collection and monitoring - nixzen";
+          target = "_blank";
+          widget = {
+            type = "prometheus";
+            url = "http://192.168.0.204:9090";
           };
-        }
-      ];
-    }
-    {
-      "Monitoring & Logs - Prometheus" = [
-        {
-          "Prometheus" = {
-            href = "http://192.168.0.200:9090";
-            icon = "prometheus";
-            description = "Metrics collection and monitoring - nixace";
-            target = "_blank";
-            widget = {
-              type = "prometheus";
-              url = "http://192.168.0.200:9090";
-            };
-            server = "nixace";
-            ping = "http://192.168.0.200:9090";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Prometheus" = {
-            href = "http://192.168.0.203:9090";
-            icon = "prometheus";
-            description = "Metrics collection and monitoring - nixsun";
-            target = "_blank";
-            widget = {
-              type = "prometheus";
-              url = "http://192.168.0.203:9090";
-            };
-            server = "nixsun";
-            ping = "http://192.168.0.203:9090";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Prometheus" = {
-            href = "http://192.168.0.202:9090";
-            icon = "prometheus";
-            description = "Metrics collection and monitoring - nixtop";
-            target = "_blank";
-            widget = {
-              type = "prometheus";
-              url = "http://192.168.0.202:9090";
-            };
-            server = "nixtop";
-            ping = "http://192.168.0.202:9090";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Prometheus" = {
-            href = "http://192.168.0.201:9090";
-            icon = "prometheus";
-            description = "Metrics collection and monitoring - nixvat";
-            target = "_blank";
-            widget = {
-              type = "prometheus";
-              url = "http://192.168.0.201:9090";
-            };
-            server = "nixvat";
-            ping = "http://192.168.0.201:9090";
-            statusStyle = "dot";
-          };
-        }
-        {
-          "Prometheus" = {
-            href = "http://192.168.0.204:9090";
-            icon = "prometheus";
-            description = "Metrics collection and monitoring - nixzen";
-            target = "_blank";
-            widget = {
-              type = "prometheus";
-              url = "http://192.168.0.204:9090";
-            };
-            server = "nixzen";
-            ping = "http://192.168.0.204:9090";
-            statusStyle = "dot";
-          };
-        }
-      ];
-    }
+          server = "nixzen";
+          ping = "http://192.168.0.204:9090";
+          statusStyle = "dot";
+        };
+      }
+    ];
+  }
 ]

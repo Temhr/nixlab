@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.comfyui-p5000;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.comfyui-p5000;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -69,7 +71,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
     # ----------------------------------------------------------------------------
@@ -94,16 +95,16 @@ in
     users.groups.comfyui = {};
 
     # Allow current user to access comfyui data
-    users.users.temhr.extraGroups = [ "comfyui" ];
+    users.users.temhr.extraGroups = ["comfyui"];
 
     # ----------------------------------------------------------------------------
     # COMFYUI PATCH - Fix PyTorch 2.2 compatibility
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-patch = {
       description = "Patch ComfyUI for PyTorch 2.2 compatibility";
-      wantedBy = [ "comfyui.service" ];
-      before = [ "comfyui.service" ];
-      after = [ "comfyui-pytorch-setup.service" ];
+      wantedBy = ["comfyui.service"];
+      before = ["comfyui.service"];
+      after = ["comfyui-pytorch-setup.service"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -153,8 +154,8 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-pytorch-setup = {
       description = "Install PyTorch 2.2 for ComfyUI (P5000 support)";
-      wantedBy = [ "comfyui.service" ];
-      before = [ "comfyui.service" ];
+      wantedBy = ["comfyui.service"];
+      before = ["comfyui.service"];
 
       environment = {
         LD_LIBRARY_PATH = lib.makeLibraryPath [
@@ -172,7 +173,7 @@ in
         WorkingDirectory = cfg.dataDir;
       };
 
-      path = [ pkgs.python311 ];
+      path = [pkgs.python311];
 
       script = ''
         set -e
@@ -244,9 +245,9 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.comfyui = {
       description = "ComfyUI Stable Diffusion Service (GPU - P5000)";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service" ];
-      requires = [ "comfyui-pytorch-setup.service" "comfyui-patch.service" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service"];
+      requires = ["comfyui-pytorch-setup.service" "comfyui-patch.service"];
       # Wait for setup to complete
       unitConfig = {
         ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
@@ -303,7 +304,7 @@ in
         PrivateTmp = true;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ cfg.dataDir ];
+        ReadWritePaths = [cfg.dataDir];
 
         # Allow access to GPU and driver
         PrivateDevices = false;
@@ -339,8 +340,8 @@ in
     # FIREWALL - Open necessary port if requested
     # ----------------------------------------------------------------------------
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      lib.optionals (cfg.domain == null) [ cfg.port ]
-      ++ lib.optionals (cfg.domain != null) [ 80 443 ]
+      lib.optionals (cfg.domain == null) [cfg.port]
+      ++ lib.optionals (cfg.domain != null) [80 443]
     );
 
     # Include CUDA toolkit in system packages
@@ -350,7 +351,6 @@ in
     ];
   };
 }
-
 /*
 ================================================================================
 COMFYUI P5000 MODULE - GPU-ACCELERATED STABLE DIFFUSION
@@ -461,3 +461,4 @@ CREDITS
 Module structure based on the ollama-p5000.nix pattern.
 ComfyUI: https://github.com/comfyanonymous/ComfyUI
 */
+

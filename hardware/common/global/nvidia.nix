@@ -1,5 +1,4 @@
-{ config, lib, pkgs, ... }: {
-
+{pkgs, ...}: {
   imports = [
   ];
 
@@ -13,12 +12,11 @@
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"];
 
-  boot.blacklistedKernelModules = [ "nouveau" ];
+  boot.blacklistedKernelModules = ["nouveau"];
 
   # Below command lists GPU and their drivers
   # $ lspci -k | grep VGA -A3
   hardware.nvidia = {
-
     # Modesetting is required.
     modesetting.enable = true;
 
@@ -58,7 +56,7 @@
     };
   };
   environment.systemPackages = with pkgs; [
-    vulkan-tools  #Khronos official Vulkan Tools and Utilities
-    stable.cudaPackages.cudatoolkit  #A wrapper substituting the deprecated runfile-based CUDA installation
+    vulkan-tools #Khronos official Vulkan Tools and Utilities
+    stable.cudaPackages.cudatoolkit #A wrapper substituting the deprecated runfile-based CUDA installation
   ];
 }

@@ -1,6 +1,9 @@
 # ignore-lid.nix
-{ config, lib, pkgs, ... }:
-let
+{
+  config,
+  lib,
+  ...
+}: let
   cfg = config.services.ignoreLid;
 in {
   options.services.ignoreLid = {

@@ -1,14 +1,6 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
-{
-  inputs,
-  outputs,
-  lib,
-  config,
-  pkgs,
-  self,
-  ...
-}: {
+{pkgs, ...}: {
   # You can import other home-manager modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
@@ -36,13 +28,12 @@
     ];
   };
 
-
   # Let home Manager install and manage itself.
   programs.home-manager.enable = true;
 
   # Git Config
-  programs.git.enable = true;  #Distributed version control system
-  programs.git.settings.user.name  = "Temhr";
+  programs.git.enable = true; #Distributed version control system
+  programs.git.settings.user.name = "Temhr";
   programs.git.settings.user.email = "9110264+Temhr@users.noreply.github.com";
 
   # Extra Browsers
@@ -53,7 +44,7 @@
 
   ## Extra Terminal Emulators
   #alacritty.enable = true;  #Cross-platform, GPU-accelerated terminal emulator
-  ghostty.enable = true;  #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
+  ghostty.enable = true; #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
   #kitty.enable = true;  #Modern, hackable, featureful, OpenGL based terminal emulator
   #konsole.enable = true;  #Terminal emulator by KDE
 

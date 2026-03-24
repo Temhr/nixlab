@@ -1,9 +1,10 @@
 # ============================================================================
 # FILE: prometheus/options.nix
 # ============================================================================
-{ lib, pkgs }:
-
 {
+  lib,
+  pkgs,
+}: {
   enable = lib.mkEnableOption "Prometheus monitoring system";
 
   port = lib.mkOption {
@@ -84,18 +85,18 @@
         httpTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
-          example = [ "https://example.com" ];
+          example = ["https://example.com"];
           description = "HTTP targets to monitor";
         };
         icmpTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = [ "8.8.8.8" "1.1.1.1" ];
+          default = ["8.8.8.8" "1.1.1.1"];
           description = "ICMP targets to ping";
         };
         sslTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
-          example = [ "https://example.com" ];
+          example = ["https://example.com"];
           description = "SSL certificate targets to monitor";
         };
       };
@@ -109,7 +110,7 @@
         devices = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
-          example = [ "/dev/sda" "/dev/nvme0n1" ];
+          example = ["/dev/sda" "/dev/nvme0n1"];
           description = "Disk devices to monitor";
         };
       };
@@ -134,7 +135,7 @@
     };
   };
 }
-
 # NOTE: Maintenance options are defined inline in options.nix above
 # If you wanted to split them further, you could create:
 # prometheus/options/maintenance.nix and import it in options.nix
+

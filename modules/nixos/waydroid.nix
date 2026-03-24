@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
-
-let
-  cfg = config.services.waydroid-custom;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.services.waydroid-custom;
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -48,7 +50,7 @@ in
       allowedUsers = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
-        example = [ "alice" "bob" ];
+        example = ["alice" "bob"];
         description = "Users allowed to access Waydroid (empty = all users)";
       };
 
@@ -72,7 +74,6 @@ in
   # CONFIG - What happens when the service is enabled
   # ============================================================================
   config = lib.mkIf cfg.enable {
-
     # ----------------------------------------------------------------------------
     # KERNEL MODULES - Enable required kernel modules
     # ----------------------------------------------------------------------------
@@ -85,7 +86,7 @@ in
     # KERNEL PARAMETERS - Required for Waydroid
     # ----------------------------------------------------------------------------
     boot.kernelParams = [
-      "psi=1"  # Enable Pressure Stall Information (fixes boot loops)
+      "psi=1" # Enable Pressure Stall Information (fixes boot loops)
     ];
 
     boot.kernel.sysctl = {
@@ -99,10 +100,10 @@ in
     # Set FORWARD policy to ACCEPT for iptables/nftables
     networking.firewall = {
       # Trust the waydroid0 interface
-      trustedInterfaces = [ "waydroid0" ];
+      trustedInterfaces = ["waydroid0"];
 
       # Allow DNS and DHCP for Waydroid
-      allowedUDPPorts = [ 53 67 ];
+      allowedUDPPorts = [53 67];
 
       # Enable packet forwarding
       checkReversePath = false;
@@ -133,10 +134,10 @@ in
     # ----------------------------------------------------------------------------
     systemd.services.waydroid-container = {
       description = "Waydroid Android Container";
-      wantedBy = lib.mkIf cfg.autoStart [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = lib.mkIf cfg.autoStart ["multi-user.target"];
+      after = ["network.target"];
 
-      path = [ cfg.package ];
+      path = [cfg.package];
 
       serviceConfig = {
         Type = "oneshot";
@@ -160,10 +161,11 @@ in
         # Initialize Waydroid if not already initialized
         if [ ! -f ${cfg.dataDir}/.initialized ]; then
           echo "Initializing Waydroid..."
-          ${if cfg.enableGapps
-            then "${cfg.package}/bin/waydroid init -s GAPPS -f || true"
-            else "${cfg.package}/bin/waydroid init -f || true"
-          }
+          ${
+          if cfg.enableGapps
+          then "${cfg.package}/bin/waydroid init -s GAPPS -f || true"
+          else "${cfg.package}/bin/waydroid init -f || true"
+        }
           touch ${cfg.dataDir}/.initialized
         fi
       '';
@@ -176,17 +178,18 @@ in
 
     users.users = lib.mkIf (cfg.allowedUsers != []) (
       lib.listToAttrs (map (user: {
-        name = user;
-        value = {
-          extraGroups = [ "waydroid" ];
-        };
-      }) cfg.allowedUsers)
+          name = user;
+          value = {
+            extraGroups = ["waydroid"];
+          };
+        })
+        cfg.allowedUsers)
     );
 
     # ----------------------------------------------------------------------------
     # ENVIRONMENT - Make Waydroid available system-wide
     # ----------------------------------------------------------------------------
-    environment.systemPackages = [ cfg.package ];
+    environment.systemPackages = [cfg.package];
 
     # ----------------------------------------------------------------------------
     # VIRTUALISATION - Enable LXC for container support
@@ -194,7 +197,6 @@ in
     virtualisation.lxc.enable = true;
   };
 }
-
 /*
 ================================================================================
 USAGE EXAMPLE
@@ -389,5 +391,5 @@ Images:
   - Downloaded automatically on first init
   - Stored in imagesDir
   - Can be updated with: sudo waydroid upgrade
-
 */
+

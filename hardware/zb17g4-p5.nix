@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   imports = [
     ./common/global
     ./common/optional
@@ -14,5 +14,4 @@
   #mount-mirror.enable = true; #mounts mirror drive
   mount-mirk1.enable = true; #mounts mirk1 nfs
   mount-mirk3.enable = true; #mounts mirk3 nfs
-
 }

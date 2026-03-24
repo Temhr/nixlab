@@ -1,10 +1,12 @@
-{ config, lib, pkgs, ... }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.services.comfyui-p5000;
   extensionsCfg = config.services.comfyui-extensions;
-in
-{
+in {
   # ============================================================================
   # OPTIONS - Define what can be configured
   # ============================================================================
@@ -77,16 +79,15 @@ in
   # CONFIG - What happens when extensions are enabled
   # ============================================================================
   config = lib.mkIf (cfg.enable && extensionsCfg.enable) {
-
     # ----------------------------------------------------------------------------
     # CUSTOM NODES INSTALLER - One-shot service to install extensions
     # ----------------------------------------------------------------------------
     systemd.services.comfyui-extensions-setup = {
       description = "Install ComfyUI Extensions and Custom Nodes";
-      wantedBy = [ "comfyui.service" ];
-      before = [ "comfyui.service" ];
-      after = [ "comfyui-pytorch-setup.service" ];
-      requires = [ "comfyui-pytorch-setup.service" ];
+      wantedBy = ["comfyui.service"];
+      before = ["comfyui.service"];
+      after = ["comfyui-pytorch-setup.service"];
+      requires = ["comfyui-pytorch-setup.service"];
 
       serviceConfig = {
         Type = "oneshot";
@@ -96,7 +97,7 @@ in
         WorkingDirectory = cfg.dataDir;
       };
 
-      path = [ pkgs.git pkgs.python311 ];
+      path = [pkgs.git pkgs.python311];
 
       script = ''
         set -e
@@ -186,28 +187,29 @@ in
 
         # Install user-specified custom nodes
         ${lib.concatMapStringsSep "\n" (node: ''
-          echo "Installing custom node: ${node.name}..."
-          if [ ! -d "$CUSTOM_NODES_DIR/${node.name}" ]; then
-            ${pkgs.git}/bin/git clone ${node.url} "$CUSTOM_NODES_DIR/${node.name}"
-            cd "$CUSTOM_NODES_DIR/${node.name}"
-            ${pkgs.git}/bin/git checkout ${node.rev} || echo "Warning: Failed to checkout ${node.rev}"
-          else
-            echo "Custom node ${node.name} already installed"
-          fi
+            echo "Installing custom node: ${node.name}..."
+            if [ ! -d "$CUSTOM_NODES_DIR/${node.name}" ]; then
+              ${pkgs.git}/bin/git clone ${node.url} "$CUSTOM_NODES_DIR/${node.name}"
+              cd "$CUSTOM_NODES_DIR/${node.name}"
+              ${pkgs.git}/bin/git checkout ${node.rev} || echo "Warning: Failed to checkout ${node.rev}"
+            else
+              echo "Custom node ${node.name} already installed"
+            fi
 
-          # Install requirements if they exist
-          if [ -f "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" ]; then
-            echo "Installing dependencies for ${node.name}..."
-            $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" || echo "Warning: Some dependencies for ${node.name} failed to install"
-          fi
+            # Install requirements if they exist
+            if [ -f "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" ]; then
+              echo "Installing dependencies for ${node.name}..."
+              $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" || echo "Warning: Some dependencies for ${node.name} failed to install"
+            fi
 
-          # Run install script if it exists
-          if [ -f "$CUSTOM_NODES_DIR/${node.name}/install.py" ]; then
-            echo "Running install script for ${node.name}..."
-            cd "$CUSTOM_NODES_DIR/${node.name}"
-            $VENV_DIR/bin/python install.py || echo "Warning: Install script for ${node.name} failed"
-          fi
-        '') extensionsCfg.customNodes}
+            # Run install script if it exists
+            if [ -f "$CUSTOM_NODES_DIR/${node.name}/install.py" ]; then
+              echo "Running install script for ${node.name}..."
+              cd "$CUSTOM_NODES_DIR/${node.name}"
+              $VENV_DIR/bin/python install.py || echo "Warning: Install script for ${node.name} failed"
+            fi
+          '')
+          extensionsCfg.customNodes}
 
         echo "ComfyUI extensions installation complete!"
         echo "Installed extensions will be available in: $CUSTOM_NODES_DIR"
@@ -224,8 +226,8 @@ in
       };
 
       # Ensure extensions are installed before starting
-      after = [ "comfyui-extensions-setup.service" ];
-      requires = [ "comfyui-extensions-setup.service" ];
+      after = ["comfyui-extensions-setup.service"];
+      requires = ["comfyui-extensions-setup.service"];
     };
 
     # ----------------------------------------------------------------------------
@@ -238,7 +240,6 @@ in
     ];
   };
 }
-
 /*
 ================================================================================
 COMFYUI EXTENSIONS MODULE - CUSTOM NODES AND ADDONS
@@ -376,3 +377,4 @@ NOTES
 - Failed dependency installations don't block the service
 - ComfyUI-Manager can install additional nodes at runtime
 */
+

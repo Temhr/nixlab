@@ -1,9 +1,11 @@
 # ============================================================================
 # FILE: prometheus/exporters/maintenance.nix
 # ============================================================================
-{ config, lib, pkgs }:
-
-let
+{
+  config,
+  lib,
+  pkgs,
+}: let
   cfg = config.services.prometheus-custom;
 
   blackboxConfig = pkgs.writeText "blackbox.yml" ''
@@ -52,8 +54,7 @@ let
       sleep 300
     done
   '';
-in
-{
+in {
   # Exporter configurations for services.prometheus.exporters
   exporters = {
     systemd = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.systemd) {
@@ -76,29 +77,31 @@ in
 
   # Additional systemd services
   services = {
-    prometheus-smartctl-exporter = lib.mkIf
+    prometheus-smartctl-exporter =
+      lib.mkIf
       (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
-      serviceConfig = {
-        AmbientCapabilities = [ "CAP_SYS_RAWIO" ];
-        CapabilityBoundingSet = [ "CAP_SYS_RAWIO" ];
-        DeviceAllow = [ "/dev/sd* r" "/dev/nvme* r" ];
-        PrivateDevices = lib.mkForce false;
+        serviceConfig = {
+          AmbientCapabilities = ["CAP_SYS_RAWIO"];
+          CapabilityBoundingSet = ["CAP_SYS_RAWIO"];
+          DeviceAllow = ["/dev/sd* r" "/dev/nvme* r"];
+          PrivateDevices = lib.mkForce false;
+        };
       };
-    };
 
-    backup-status-exporter = lib.mkIf
+    backup-status-exporter =
+      lib.mkIf
       (cfg.maintenance.enable && cfg.maintenance.exporters.backup.enable) {
-      description = "Backup Status Exporter";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      serviceConfig = {
-        Type = "simple";
-        User = "prometheus";
-        Group = "prometheus";
-        Restart = "always";
-        RestartSec = "10s";
-        ExecStart = mkBackupExporterScript;
+        description = "Backup Status Exporter";
+        wantedBy = ["multi-user.target"];
+        after = ["network.target"];
+        serviceConfig = {
+          Type = "simple";
+          User = "prometheus";
+          Group = "prometheus";
+          Restart = "always";
+          RestartSec = "10s";
+          ExecStart = mkBackupExporterScript;
+        };
       };
-    };
   };
 }
