@@ -26,7 +26,7 @@
     (lib.mkIf config.ghostty.enable {
       home.packages = [
         #inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
-        pkgs.ghostty
+        pkgs.unstable.ghostty
       ]; #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
     })
     (lib.mkIf config.kitty.enable {
