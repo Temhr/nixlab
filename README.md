@@ -114,7 +114,7 @@ nixlab/
 │   └── *.nix                  # Per-host feature manifests
 │
 ├── home/                      # User-level Home Manager configurations
-│   ├── common/                # Shared expressions
+│   ├── common/                # Shared expressions and files
 │   │   ├── files/             # Managed dotfiles and scripts
 │   │   ├── global/            # Applied to all users unconditionally
 │   │   └── optional/          # Selectable user features
