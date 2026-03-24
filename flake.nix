@@ -11,7 +11,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    # flake-parts for dendretic pattern
+    # flake-parts for dendritic pattern
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     # Version Pinned Apps (March 5-6th).
