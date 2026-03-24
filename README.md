@@ -102,19 +102,17 @@ nixlab/
 ├── flake/                     # flake-parts orchestration modules
 │   └── parts/
 ├── hardware/                  # Machine-level hardware configurations
-│   ├── common/                # Shared expressions
+│   ├── common/                # Shared expressions & files
 │   │   ├── global/            # Applied to all machines unconditionally
 │   │   └── optional/          # Selectable hardware modules
 │   └── *.nix                  # Per-device configs (from nixos-generate-config)
-│
 ├── hosts/                     # System-level NixOS configurations
-│   ├── common/                # Shared expressions
+│   ├── common/
 │   │   ├── global/            # Applied to all hosts unconditionally
 │   │   └── optional/          # Selectable features (imported by host manifests)
 │   └── *.nix                  # Per-host feature manifests
-│
 ├── home/                      # User-level Home Manager configurations
-│   ├── common/                # Shared expressions and files
+│   ├── common/
 │   │   ├── files/             # Managed dotfiles and scripts
 │   │   ├── global/            # Applied to all users unconditionally
 │   │   └── optional/          # Selectable user features
