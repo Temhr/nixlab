@@ -60,7 +60,7 @@
         specialArgs = {
           inherit inputs hostname;
           outputs = self; # keep backwards compat for any host files
-          flakePath = self; # nixace uses this for sops secret paths
+          flakePath = self; # paths from flake/root
         };
         modules =
           commonModules
