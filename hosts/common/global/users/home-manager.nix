@@ -1,16 +1,12 @@
 {
-  flakePath,
-  inputs,
-  outputs,
+  self,
   config,
   ...
 }: {
-  imports = [
-    # Import home-manager's NixOS module
-    inputs.home-manager.nixosModules.home-manager
-  ];
-  home-manager = {
-    extraSpecialArgs = {inherit inputs outputs flakePath;};
-    users.temhr = import (flakePath + "/home/temhr/${config.networking.hostName}.nix");
-  };
+  home-manager.users.temhr =
+    self.homeModules.
+      "temhr-${config.networking.hostName}";
+  # Pure name lookup. No path construction.
+  # e.g. resolves to
+  # self.homeModules.temhr-nixsun
 }

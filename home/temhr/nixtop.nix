@@ -1,18 +1,15 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
-{pkgs, ...}: {
-  # You can import other home-manager modules here
+{
+  self,
+  pkgs,
+  ...
+}: {
   imports = [
-    # If you want to use modules your own flake exports (from modules/home-manager):
-    # outputs.homeModules.example
-
-    # Or modules exported from other flakes (such as nix-colors):
-    # inputs.nix-colors.homeModules.default
-
-    # You can also split up your configuration and import pieces of it here:
-    ../common/global
-    ../common/optional
-    ../../modules/home-manager
+    self.homeModules.home-common-global
+    self.homeModules.home-common-optional
+    self.homeModules.browsers
+    self.homeModules.terminal-emulators
   ];
 
   # Add stuff for your user as you see fit:
