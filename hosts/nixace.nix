@@ -147,7 +147,16 @@
     appKeyFile = config.sops.secrets.APP_KEY.path;
   };
 
-  services.grafana-custom.enable = false;
+  # Dashboard paths removed entirely.
+  # Module supplies its own defaults.
+  services.grafana-custom = {
+    enable = false;
+    port = 3101;
+    bindIP = "0.0.0.0";
+    openFirewall = true;
+    dataDir = "/data/grafana";
+    # dashboards uses module defaults
+  };
   services.loki-custom.enable = false;
   services.prometheus-custom.enable = false;
 
@@ -160,14 +169,6 @@
   ## $ nix search wget
   environment.systemPackages = with pkgs; [
   ];
-
-  # Tells sops-nix where key lives
-  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-  sops.secrets =
-    lib.genAttrs
-    ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"] # append array if acessing more secrets this file
-    
-    (_: {sopsFile = flakePath + "/secrets/bookstack.yaml";});
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.11";

@@ -54,6 +54,9 @@ in {
       };
     };
 
+    # Module — owns its own secrets path
+    secrets-bookstack = import ../../hosts/common/optional/secrets-bookstack.nix;
+
     # Hardware — common layers
     hw-common-global = import ../../hardware/common/global;
     hw-common-optional = import ../../hardware/common/optional;
@@ -118,6 +121,7 @@ in {
         self.nixosModules.cachix
         self.nixosModules.services
         self.nixosModules.nixace
+        self.nixosModules.secrets-bookstack
       ];
     };
     nixsun = mkHost {
@@ -130,6 +134,7 @@ in {
         self.nixosModules.cachix
         self.nixosModules.services
         self.nixosModules.nixsun
+        self.nixosModules.secrets-bookstack
       ];
     };
     nixtop = mkHost {
@@ -142,6 +147,7 @@ in {
         self.nixosModules.cachix
         self.nixosModules.services
         self.nixosModules.nixtop
+        self.nixosModules.secrets-bookstack
       ];
     };
     nixvat = mkHost {
@@ -154,6 +160,7 @@ in {
         self.nixosModules.cachix
         self.nixosModules.services
         self.nixosModules.nixvat
+        self.nixosModules.secrets-bookstack
       ];
     };
     nixzen = mkHost {
@@ -166,6 +173,7 @@ in {
         self.nixosModules.cachix
         self.nixosModules.services
         self.nixosModules.nixzen
+        self.nixosModules.secrets-bookstack
       ];
     };
   };

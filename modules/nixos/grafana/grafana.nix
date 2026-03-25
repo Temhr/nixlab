@@ -113,7 +113,20 @@ in {
             };
           };
         });
-        default = {};
+        # Module owns its own default dashboards.
+        # ./dashboards/ is relative to this file.
+        default = {
+          maintenance = {
+            path = ./dashboards/maintenance-checklist.json;
+            folder = "maintenance";
+            editable = true;
+          };
+          system-overview = {
+            path = ./dashboards/system-overview.json;
+            folder = "maintenance";
+            editable = true;
+          };
+        };
         description = ''
           Dashboards to provision. Each dashboard needs a unique name.
           Example:
