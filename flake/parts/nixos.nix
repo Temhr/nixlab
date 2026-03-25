@@ -17,7 +17,6 @@
   # Injected into every host. Host files never declare these.
   commonModules = [
     inputs.sops-nix.nixosModules.sops
-    inputs.disko.nixosModules.disko
     self.nixosModules.home-manager-config
     {nixpkgs.overlays = allOverlays;}
   ];
