@@ -110,7 +110,6 @@ Each file under `flake/parts/` owns a slice of the flake's outputs:
 nixlab/
 ├── flake.nix                  # Thin root — delegates to flake/parts/ via import-tree
 ├── flake.lock                 # Version-pinned input revisions
-│
 ├── flake/
 │   └── parts/                 # flake-parts orchestration (auto-discovered by import-tree)
 │       ├── overlays.nix       # Overlays + nixosModules registry + homeModules registry
@@ -118,13 +117,11 @@ nixlab/
 │       ├── devshells.nix      # All development shell environments
 │       ├── checks.nix         # Pre-commit hooks (alejandra, deadnix, merge-conflict check)
 │       └── nixos.nix          # NixOS module registry + all nixosConfigurations
-│
 ├── hardware/                  # Machine-level hardware configurations
 │   ├── common/
 │   │   ├── global/            # Applied to all machines unconditionally
 │   │   └── optional/          # Selectable hardware modules (GPU drivers, extra drives)
 │   └── *.nix                  # Per-device generated configs (nixos-generate-config)
-│
 ├── hosts/                     # System-level NixOS configurations
 │   ├── common/
 │   │   ├── global/            # Applied to all hosts unconditionally
@@ -134,7 +131,6 @@ nixlab/
 │   │                          # (development, education, games, media, observability,
 │   │                          #  productivity, virtualisation, graphical shells...)
 │   └── *.nix                  # Per-host feature manifests (no imports block — registry handles wiring)
-│
 ├── home/                      # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/             # Managed dotfiles and scripts (bash config, themes)
@@ -150,23 +146,16 @@ nixlab/
 │   │                          #  home-assistant, homepage, loki, node-red, ollama,
 │   │                          #  prometheus, syncthing, waydroid, wiki-js, zola)
 │   └── home-manager/          # User-level modules (browsers, terminal emulators)
-│
 ├── overlays/                  # nixpkgs modifications and pinned channel overlays
 │                              # Exposes: pkgs.unstable, pkgs.stable, pkgs.ollamaPkgs
 │                              # Includes: ollama-p5000, comfyui-p5000, open-webui fixes
-│
 ├── pkgs/                      # Custom package definitions
-│
 ├── shells/                    # Isolated development environments
 │                              # (default, mesa, python, repast4py, rust, security, web, minimal)
-│
 ├── secrets/                   # sops-encrypted secret files
-│
 ├── cachix/                    # Cachix binary cache declarations
 │                              # (cuda-maintainers, ghostty, nix-community)
-│
 ├── bin/                       # Utility shell scripts
-│
 └── .sops.yaml                 # sops age key configuration
 ```
 
