@@ -1,4 +1,8 @@
-{ self, pkgs, ... }: {
+{
+  self,
+  pkgs,
+  ...
+}: {
   imports = [
     self.homeModules.home-common-global
     self.homeModules.home-common-optional
