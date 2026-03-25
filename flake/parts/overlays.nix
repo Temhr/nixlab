@@ -1,4 +1,4 @@
-{inputs, ...}: {
+{inputs, self, ...}: {
   flake.overlays = import ../../overlays {inherit inputs;};
   flake.nixosModules = {
     nixlab = import ../../modules/nixos;
