@@ -39,7 +39,7 @@ Modular NixOS configuration for Linux laptops, desktops, and homelab servers. Ad
 
 # Architecture
 
-nixlab uses **flake-parts** as its orchestration layer, structured around the **Dendritic Pattern**.
+nixlab uses **flake-parts** as its orchestration layer, structured around the **Dendritic Pattern**, with all module wiring done through a named registry rather than filesystem paths.
 
 <details>
 <summary>Design overview <i>(click to expand)</i></summary>
@@ -47,21 +47,17 @@ nixlab uses **flake-parts** as its orchestration layer, structured around the **
 
 ## flake-parts
 
-[flake-parts](https://github.com/hercules-ci/flake-parts) is a NixOS community library that structures flake outputs as composable modules called **parts**. Instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes. The `flake.nix` root becomes a thin entry point:
+[flake-parts](https://github.com/hercules-ci/flake-parts) is a NixOS community library that structures flake outputs as composable modules called **parts**. Instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes. The `flake.nix` root is a thin entry point that delegates entirely to `flake/parts/` via [import-tree](https://github.com/vic/import-tree), which auto-discovers all part files:
 
 ```nix
 outputs = inputs @ { flake-parts, ... }:
   flake-parts.lib.mkFlake { inherit inputs; } {
-    systems = [ "x86_64-linux" ... ];
-    imports = [
-      ./flake/parts/overlays.nix
-      ./flake/parts/packages.nix
-      ./flake/parts/devshells.nix
-      ./flake/parts/checks.nix
-      ./flake/parts/nixos.nix
-    ];
+    systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+    imports = [ (inputs.import-tree ./flake/parts) ];
   };
 ```
+
+Adding a new part file under `flake/parts/` requires no changes to `flake.nix` — import-tree discovers it automatically.
 
 Inside parts, `perSystem` replaces `forAllSystems` and is called automatically for each supported system. Architecture-independent outputs (nixosConfigurations, overlays, modules) use the `flake.` namespace.
 
@@ -73,9 +69,24 @@ The key shift is in the **axis of composition**: instead of asking _"what does t
 
 In practice:
 - Shared behaviour lives in `*/common/global/` (universal) or `*/common/optional/` (selectable)
-- Host files express selections: `steam.enable = true`, `incus.enable = true`
-- Adding a new host means writing a short manifest pointing at existing feature modules
+- Host files express feature selections: `steam.enable = true`, `incus.enable = true`
+- Adding a new host means writing a short manifest and registering it — no knowledge of filesystem layout required
 - Changing a feature happens in one place and propagates to every host that selects it
+
+## Module registry
+
+All modules are registered by stable name in `flake/parts/nixos.nix` and `flake/parts/overlays.nix`. Host and home files reference modules by name via `self.nixosModules.*` and `self.homeModules.*` rather than by filesystem path. Files can be freely moved or renamed without breaking any configuration — the name is the contract, not the path.
+
+```nix
+# hosts wire by name, not path
+nixace = mkHost { modules = [
+  self.nixosModules.hw-zb17g4-p5
+  self.nixosModules.hosts-global
+  self.nixosModules.hosts-optional
+  self.nixosModules.services
+  self.nixosModules.nixace
+]; };
+```
 
 ## Part files
 
@@ -83,11 +94,11 @@ Each file under `flake/parts/` owns a slice of the flake's outputs:
 
 | Part file | Responsibility | Output namespace |
 |---|---|---|
-| `overlays.nix` | Package modifications and channel switching | `flake.` |
-| `packages.nix` | Custom packages and formatter | `perSystem` |
+| `overlays.nix` | Package overlays, nixosModules registry, homeModules registry | `flake.` |
+| `packages.nix` | Custom packages and formatter (`alejandra`) | `perSystem` |
 | `devshells.nix` | Isolated development environments | `perSystem` |
 | `checks.nix` | Pre-commit hooks and build validation | `perSystem` |
-| `nixos.nix` | All NixOS host configurations | `flake.` |
+| `nixos.nix` | NixOS module registry and all host configurations | `flake.` |
 
 </details>
 
@@ -97,36 +108,65 @@ Each file under `flake/parts/` owns a slice of the flake's outputs:
 
 ```
 nixlab/
-├── flake.nix                  # Thin root — delegates entirely to flake/parts/
+├── flake.nix                  # Thin root — delegates to flake/parts/ via import-tree
 ├── flake.lock                 # Version-pinned input revisions
-├── flake/                     # flake-parts orchestration modules
-│   └── parts/
+│
+├── flake/
+│   └── parts/                 # flake-parts orchestration (auto-discovered by import-tree)
+│       ├── overlays.nix       # Overlays + nixosModules registry + homeModules registry
+│       ├── packages.nix       # Custom packages + alejandra formatter
+│       ├── devshells.nix      # All development shell environments
+│       ├── checks.nix         # Pre-commit hooks (alejandra, deadnix, merge-conflict check)
+│       └── nixos.nix          # NixOS module registry + all nixosConfigurations
+│
 ├── hardware/                  # Machine-level hardware configurations
-│   ├── common/                # Shared expressions & files
+│   ├── common/
 │   │   ├── global/            # Applied to all machines unconditionally
-│   │   └── optional/          # Selectable hardware modules
-│   └── *.nix                  # Per-device configs (from nixos-generate-config)
+│   │   └── optional/          # Selectable hardware modules (GPU drivers, extra drives)
+│   └── *.nix                  # Per-device generated configs (nixos-generate-config)
+│
 ├── hosts/                     # System-level NixOS configurations
 │   ├── common/
 │   │   ├── global/            # Applied to all hosts unconditionally
-│   │   └── optional/          # Selectable features (imported by host manifests)
-│   └── *.nix                  # Per-host feature manifests
+│   │   │                      # (audio, bluetooth, boot, display, locale, network,
+│   │   │                      #  nix settings, ssh, power management, users...)
+│   │   └── optional/          # Selectable feature modules
+│   │                          # (development, education, games, media, observability,
+│   │                          #  productivity, virtualisation, graphical shells...)
+│   └── *.nix                  # Per-host feature manifests (no imports block — registry handles wiring)
+│
 ├── home/                      # User-level Home Manager configurations
 │   ├── common/
-│   │   ├── files/             # Managed dotfiles and scripts
+│   │   ├── files/             # Managed dotfiles and scripts (bash config, themes)
 │   │   ├── global/            # Applied to all users unconditionally
-│   │   └── optional/          # Selectable user features
-│   └── <user>/                # Per-user, per-host overrides
-├── modules/                   # Reusable encapsulated modules (exported as flake outputs)
+│   │   │                      # (git, fastfetch, folders, virt-manager, utilities...)
+│   │   └── optional/          # Selectable user features (bash symlinks...)
+│   └── temhr/                 # Per-user, per-host configurations
+│       └── *.nix              # One file per host — user feature selections only
+│
+├── modules/                   # Reusable encapsulated modules (exported via flake registry)
 │   ├── nixos/                 # System-level service and application modules
-│   └── home-manager/          # User-level modules
+│   │                          # (bookstack, comfyui, glance, gotosocial, grafana,
+│   │                          #  home-assistant, homepage, loki, node-red, ollama,
+│   │                          #  prometheus, syncthing, waydroid, wiki-js, zola)
+│   └── home-manager/          # User-level modules (browsers, terminal emulators)
+│
 ├── overlays/                  # nixpkgs modifications and pinned channel overlays
+│                              # Exposes: pkgs.unstable, pkgs.stable, pkgs.ollamaPkgs
+│                              # Includes: ollama-p5000, comfyui-p5000, open-webui fixes
+│
 ├── pkgs/                      # Custom package definitions
+│
 ├── shells/                    # Isolated development environments
-├── lib/                       # Helper Nix code and configuration templates
+│                              # (default, mesa, python, repast4py, rust, security, web, minimal)
+│
 ├── secrets/                   # sops-encrypted secret files
+│
 ├── cachix/                    # Cachix binary cache declarations
+│                              # (cuda-maintainers, ghostty, nix-community)
+│
 ├── bin/                       # Utility shell scripts
+│
 └── .sops.yaml                 # sops age key configuration
 ```
 
@@ -194,10 +234,14 @@ nix flake show /home/temhr/nixlab
 
 ## Adding a new host
 
-1. Add the hostname to the `hosts` attrset in `flake/parts/nixos.nix`
-2. Run `nixos-generate-config` on the new machine, save result to `hardware/<model>.nix`
-3. Create `hosts/<hostname>.nix` — import hardware config, select optional features
-4. Create `home/<user>/<hostname>.nix` — user-level config for the new host
-5. Run `nix flake check` to validate, then deploy: `sudo nixos-rebuild switch --flake .#<hostname>`
+1. Create `hosts/<hostname>.nix` — feature selections only, no imports block, no hostname declaration
+2. Create `home/temhr/<hostname>.nix` — user config using `self.homeModules.*` imports
+3. Generate hardware config: `nixos-generate-config`, save to `hardware/<model>.nix`
+4. Register in `flake/parts/nixos.nix`:
+   - Add `hw-<model>` and `<hostname>` entries to `flake.nixosModules`
+   - Add `<hostname>` to `flake.nixosConfigurations` listing which named modules it composes
+5. Register in `flake/parts/overlays.nix`:
+   - Add `temhr-<hostname>` to `flake.homeModules`
+6. Run `nix flake check` to validate, then deploy: `sudo nixos-rebuild switch --flake .#<hostname>`
 
 </details>
