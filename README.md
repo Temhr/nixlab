@@ -126,7 +126,7 @@ nixlab/
 │   ├── common/
 │   │   ├── global/            # Applied to all hosts unconditionally
 │   │   └── optional/          # Selectable feature modules
-│   └── *.nix                  # Per-host feature manifests (no imports block — registry handles wiring)
+│   └── *.nix                  # Per-host feature manifests (no imports, registry handles it)
 ├── home/                      # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/             # Managed dotfiles and scripts (bash config, themes)
@@ -142,7 +142,7 @@ nixlab/
 ├── pkgs/                      # Custom package definitions
 ├── shells/                    # Isolated development environments
 ├── secrets/                   # sops-encrypted secret files
-├── cachix/                    # Cachix binary cache declarations (cuda-maintainers, nix-community, ...)
+├── cachix/                    # Cachix binary cache declarations
 ├── bin/                       # Utility shell scripts
 └── .sops.yaml                 # sops age key configuration
 ```
