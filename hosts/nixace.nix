@@ -71,7 +71,7 @@
     gpuDevice = 0; # First GPU
     gpuLayers = -1; # Offload all layers to GPU (-1 = auto)
     # Pre-download models
-    models = ["gpt-oss:20b" "translategemma:27b" "glm-4.7-flash:q4_K_M" "qwen3-coder-next:q4_K_M""qwen3.5:35b"]
+    models = ["gpt-oss:20b" "translategemma:27b" "glm-4.7-flash:q4_K_M" "qwen3-coder-next:q4_K_M" "qwen3.5:35b"];
     openFirewall = true;
   };
 
