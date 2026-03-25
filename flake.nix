@@ -13,6 +13,8 @@
 
     # flake-parts for dendritic pattern
     flake-parts.url = "github:hercules-ci/flake-parts";
+    # import-tree recursively discovers every .nix file
+    import-tree.url = "github:vic/import-tree";
 
     # Version Pinned Apps (March 5-6th).
     # nix flake metadata nixpkgs-unstable | grep "Revision"
@@ -66,11 +68,7 @@
         "x86_64-darwin"
       ];
       imports = [
-        ./flake/parts/overlays.nix
-        ./flake/parts/packages.nix
-        ./flake/parts/devshells.nix
-        ./flake/parts/checks.nix
-        ./flake/parts/nixos.nix
+        (inputs.import-tree ./flake/parts)
       ];
     };
 }
