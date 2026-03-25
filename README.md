@@ -124,37 +124,25 @@ nixlab/
 │   └── *.nix                  # Per-device generated configs (nixos-generate-config)
 ├── hosts/                     # System-level NixOS configurations
 │   ├── common/
-│   │   ├── global/            # Applied to all hosts unconditionally
-│   │   │                      # (audio, bluetooth, boot, display, locale, network,
-│   │   │                      #  nix settings, ssh, power management, users...)
-│   │   └── optional/          # Selectable feature modules
-│   │                          # (development, education, games, media, observability,
-│   │                          #  productivity, virtualisation, graphical shells...)
+│   │   ├── global/            # Applied to all hosts unconditionally (audio, bluetooth, boot, ...)
+│   │   └── optional/          # Selectable feature modules (development, education, games, ...)
 │   └── *.nix                  # Per-host feature manifests (no imports block — registry handles wiring)
 ├── home/                      # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/             # Managed dotfiles and scripts (bash config, themes)
-│   │   ├── global/            # Applied to all users unconditionally
-│   │   │                      # (git, fastfetch, folders, virt-manager, utilities...)
+│   │   ├── global/            # Applied to all users unconditionally (git, fastfetch, folders, ...)
 │   │   └── optional/          # Selectable user features (bash symlinks...)
 │   └── temhr/                 # Per-user, per-host configurations
 │       └── *.nix              # One file per host — user feature selections only
 │
 ├── modules/                   # Reusable encapsulated modules (exported via flake registry)
-│   ├── nixos/                 # System-level service and application modules
-│   │                          # (bookstack, comfyui, glance, gotosocial, grafana,
-│   │                          #  home-assistant, homepage, loki, node-red, ollama,
-│   │                          #  prometheus, syncthing, waydroid, wiki-js, zola)
+│   ├── nixos/                 # System-level service and application modules bookstack, comfyui, glance, ...)
 │   └── home-manager/          # User-level modules (browsers, terminal emulators)
-├── overlays/                  # nixpkgs modifications and pinned channel overlays
-│                              # Exposes: pkgs.unstable, pkgs.stable, pkgs.ollamaPkgs
-│                              # Includes: ollama-p5000, comfyui-p5000, open-webui fixes
+├── overlays/                  # nixpkgs modifications and pinned channel overlays (Exposes: pkgs.unstable, ...)
 ├── pkgs/                      # Custom package definitions
 ├── shells/                    # Isolated development environments
-│                              # (default, mesa, python, repast4py, rust, security, web, minimal)
 ├── secrets/                   # sops-encrypted secret files
-├── cachix/                    # Cachix binary cache declarations
-│                              # (cuda-maintainers, ghostty, nix-community)
+├── cachix/                    # Cachix binary cache declarations (cuda-maintainers, nix-community, ...)
 ├── bin/                       # Utility shell scripts
 └── .sops.yaml                 # sops age key configuration
 ```
