@@ -14,12 +14,12 @@
       "host"
       "os"
       "kernel"
+      "uptime"
       {
         "type" = "command";
         "key" = "OS Age";
         "text" = "birth_install=$(stat -c %W /); current=$(date +%s); days_difference=$(( (current - birth_install) / 86400 )); echo $days_difference days";
       }
-      "uptime"
       "packages"
       "shell"
       "terminal"
