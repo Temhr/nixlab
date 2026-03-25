@@ -124,21 +124,21 @@ nixlab/
 │   └── *.nix                  # Per-device generated configs (nixos-generate-config)
 ├── hosts/                     # System-level NixOS configurations
 │   ├── common/
-│   │   ├── global/            # Applied to all hosts unconditionally (audio, bluetooth, boot, ...)
-│   │   └── optional/          # Selectable feature modules (development, education, games, ...)
+│   │   ├── global/            # Applied to all hosts unconditionally
+│   │   └── optional/          # Selectable feature modules
 │   └── *.nix                  # Per-host feature manifests (no imports block — registry handles wiring)
 ├── home/                      # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/             # Managed dotfiles and scripts (bash config, themes)
-│   │   ├── global/            # Applied to all users unconditionally (git, fastfetch, folders, ...)
+│   │   ├── global/            # Applied to all users unconditionally
 │   │   └── optional/          # Selectable user features (bash symlinks...)
 │   └── temhr/                 # Per-user, per-host configurations
 │       └── *.nix              # One file per host — user feature selections only
 │
 ├── modules/                   # Reusable encapsulated modules (exported via flake registry)
-│   ├── nixos/                 # System-level service and application modules bookstack, comfyui, glance, ...)
+│   ├── nixos/                 # System-level service and application modules
 │   └── home-manager/          # User-level modules (browsers, terminal emulators)
-├── overlays/                  # nixpkgs modifications and pinned channel overlays (Exposes: pkgs.unstable, ...)
+├── overlays/                  # nixpkgs modifications and pinned channel overlays 
 ├── pkgs/                      # Custom package definitions
 ├── shells/                    # Isolated development environments
 ├── secrets/                   # sops-encrypted secret files
