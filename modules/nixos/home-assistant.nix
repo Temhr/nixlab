@@ -164,7 +164,7 @@ in {
       "d ${cfg.dataDir} 0770 hass hass -"
     ];
 
-    users.users.temhr.extraGroups = ["hass"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["hass"];
 
     # ----------------------------------------------------------------------------
     # NGINX REVERSE PROXY - Only configured if domain is set

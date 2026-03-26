@@ -8,5 +8,5 @@
       "${config.nixlab.mainUser}-${config.networking.hostName}";
   # Pure name lookup. No path construction.
   # e.g. resolves to
-  # self.homeModules.temhr-nixsun
+  # self.homeModules.<user>-<host>
 }

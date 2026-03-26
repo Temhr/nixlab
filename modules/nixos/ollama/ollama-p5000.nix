@@ -141,7 +141,7 @@ in {
     users.groups.open-webui = {};
 
     # Allow current user to access ollama and open-webui data
-    users.users.temhr.extraGroups = ["open-webui" "ollama"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["open-webui" "ollama"];
 
     # ----------------------------------------------------------------------------
     # OLLAMA SERVICE - GPU MODE

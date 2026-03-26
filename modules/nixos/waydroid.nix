@@ -216,7 +216,7 @@ Basic configuration with users:
 --------------------------------
 services.waydroid-custom = {
   enable = true;
-  allowedUsers = [ "temhr" ];
+  allowedUsers = [ "<user>" ];
   autoStart = false;  # Keep false to avoid rebuild hangs
 };
 
@@ -226,7 +226,7 @@ Configuration with Google Play Services:
 services.waydroid-custom = {
   enable = true;
   enableGapps = true;  # Install Google Play Services
-  allowedUsers = [ "temhr" ];
+  allowedUsers = [ "<user>" ];
 };
 
 

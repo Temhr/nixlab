@@ -103,7 +103,7 @@ in {
 
     users.groups.wiki-js = {};
 
-    users.users.temhr.extraGroups = ["postgres" "wiki-js"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["postgres" "wiki-js"];
 
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions

@@ -92,7 +92,7 @@ in {
     };
 
     users.groups.zola = {};
-    users.users.temhr.extraGroups = ["zola"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["zola"];
 
     # Initialize a Zola site if not already initialized
     system.activationScripts.initZolaSite = {

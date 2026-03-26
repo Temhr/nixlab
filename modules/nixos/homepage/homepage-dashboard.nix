@@ -102,7 +102,7 @@ in {
 
     users.groups.homepage = {};
 
-    users.users.temhr.extraGroups = ["homepage"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["homepage"];
 
     # ----------------------------------------------------------------------------
     # DIRECTORY SETUP - Create necessary directories with proper permissions
@@ -245,7 +245,7 @@ Configuration with home directory:
 -----------------------------------
 services.homepage-custom = {
   enable = true;
-  dataDir = "/home/temhr/shelf/data/homepage";
+  dataDir = "~/shelf/data/homepage";
 };
 # ProtectHome will automatically be disabled for home directory paths
 

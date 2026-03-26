@@ -92,7 +92,7 @@ in {
     };
 
     users.groups.glance = {};
-    users.users.temhr.extraGroups = ["glance"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["glance"];
 
     # ----------------------------------------------------------------------------
     # GLANCE SERVICE - Configure the systemd service

@@ -70,7 +70,7 @@
       };
 
       # Add your user to incus-admin group
-      users.users."temhr".extraGroups = ["incus-admin"];
+      users.users.${config.nixlab.mainUser}.extraGroups = ["incus-admin"];
 
       # Enable IP forwarding for Incus
       boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
@@ -138,7 +138,7 @@
       #Allows libvirtd to take advantage of OVMF when creating new QEMU VMs with UEFI boot
       virtualisation.libvirtd.qemu.ovmf.enable = true; #For UEFI boot of Home Assistant OS guest image
       virtualisation.spiceUSBRedirection.enable = true;
-      users.users."temhr".extraGroups = ["libvirtd"];
+      users.users."${config.nixlab.mainUser}".extraGroups = ["libvirtd"];
     })
     (lib.mkIf config.waydroid.enable {
       #environment.systemPackages = [ pkgs.home-assistant ];  #Quickly create and run optimised Windows, macOS and Linux virtual machines

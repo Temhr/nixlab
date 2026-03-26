@@ -36,7 +36,7 @@ in {
   };
 
   users.groups.prometheus = {};
-  users.users.temhr.extraGroups = ["prometheus"];
+  users.users.${config.nixlab.mainUser}.extraGroups = ["prometheus"];
 
   # Import service configurations
   systemd.services =

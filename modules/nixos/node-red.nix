@@ -86,7 +86,7 @@ in {
 
     users.groups.node-red = {};
 
-    users.users.temhr.extraGroups = ["node-red"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["node-red"];
 
     # ----------------------------------------------------------------------------
     # NODE-RED SERVICE - Configure the systemd service

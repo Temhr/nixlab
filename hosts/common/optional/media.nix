@@ -46,7 +46,7 @@
       boot.kernelModules = ["v4l2loopback"];
 
       # Ensure your user is in the video group
-      users.users."temhr" = {
+      users.users.${config.nixlab.mainUser} = {
         extraGroups = ["video"];
       };
     })

@@ -145,7 +145,7 @@ in {
 
     users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
-    users.users.temhr.extraGroups = ["loki" "alloy"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["loki" "alloy"];
 
     # ----------------------------------------------------------------------------
     # LOKI SERVICE - Configure the systemd service

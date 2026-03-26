@@ -95,7 +95,7 @@ in {
     users.groups.comfyui = {};
 
     # Allow current user to access comfyui data
-    users.users.temhr.extraGroups = ["comfyui"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["comfyui"];
 
     # ----------------------------------------------------------------------------
     # COMFYUI PATCH - Fix PyTorch 2.2 compatibility

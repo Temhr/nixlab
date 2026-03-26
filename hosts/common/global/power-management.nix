@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   # Disable WD HDD power management (already have this)
   systemd.services.disable-hdd-apm = {
     description = "Disable APM on data drive";
@@ -18,8 +22,8 @@
 
   # Move browser cache to tmpfs
   systemd.tmpfiles.rules = [
-    "L+ /home/temhr/.cache - - - - /tmp/user-cache"
-    "d /tmp/user-cache 0700 temhr users -"
+    "L+ /home/${config.nixlab.mainUser}/.cache - - - - /tmp/user-cache"
+    "d /tmp/user-cache 0700 ${config.nixlab.mainUser} users -"
   ];
 
   # Increase RAM cache for filesystem

@@ -191,7 +191,7 @@ in {
 
     users.groups.grafana = {};
 
-    users.users.temhr.extraGroups = ["grafana"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["grafana"];
 
     # ----------------------------------------------------------------------------
     # GRAFANA SERVICE - Configure the systemd service

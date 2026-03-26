@@ -101,7 +101,7 @@ in {
 
     users.groups.gotosocial = {};
 
-    users.users.temhr.extraGroups = ["gotosocial"];
+    users.users.${config.nixlab.mainUser}.extraGroups = ["gotosocial"];
 
     # ----------------------------------------------------------------------------
     # GOTOSOCIAL SERVICE - Configure the systemd service
