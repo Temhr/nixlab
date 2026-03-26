@@ -1,223 +1,225 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.zola-custom;
-in {
-  # ============================================================================
-  # OPTIONS - Define what can be configured
-  # ============================================================================
-  options = {
-    services.zola-custom = {
-      # REQUIRED: Enable the service
-      enable = lib.mkEnableOption "Zola static site server";
+{...}: {
+  flake.nixosModules.zola-custom = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.zola-custom;
+  in {
+    # ============================================================================
+    # OPTIONS - Define what can be configured
+    # ============================================================================
+    options = {
+      services.zola-custom = {
+        # REQUIRED: Enable the service
+        enable = lib.mkEnableOption "Zola static site server";
 
-      # OPTIONAL: Port to listen on (default: 3003)
-      port = lib.mkOption {
-        type = lib.types.port;
-        default = 3003;
-        description = "Port for Zola to serve on";
-      };
+        # OPTIONAL: Port to listen on (default: 3003)
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 3003;
+          description = "Port for Zola to serve on";
+        };
 
-      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-      # Use "0.0.0.0" for access from other devices
-      bindIP = lib.mkOption {
-        type = lib.types.str;
-        default = "127.0.0.1";
-        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
-      };
+        # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+        # Use "0.0.0.0" for access from other devices
+        bindIP = lib.mkOption {
+          type = lib.types.str;
+          default = "127.0.0.1";
+          description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
+        };
 
-      # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
-      domain = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        example = "blog.example.com";
-        description = "Domain name for nginx reverse proxy (optional)";
-      };
+        # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
+        domain = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "blog.example.com";
+          description = "Domain name for nginx reverse proxy (optional)";
+        };
 
-      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
-      # Only works if domain is set
-      enableSSL = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable HTTPS with Let's Encrypt (requires domain)";
-      };
+        # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
+        # Only works if domain is set
+        enableSSL = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable HTTPS with Let's Encrypt (requires domain)";
+        };
 
-      # REQUIRED: Path to your Zola site directory
-      # This should contain config.toml and content/
-      siteDir = lib.mkOption {
-        type = lib.types.path;
-        example = "/var/www/my-blog";
-        description = "Path to Zola site directory (must contain config.toml)";
-      };
+        # REQUIRED: Path to your Zola site directory
+        # This should contain config.toml and content/
+        siteDir = lib.mkOption {
+          type = lib.types.path;
+          example = "/var/www/my-blog";
+          description = "Path to Zola site directory (must contain config.toml)";
+        };
 
-      # OPTIONAL: Zola package to use (default: pkgs.zola)
-      package = lib.mkOption {
-        type = lib.types.package;
-        default = pkgs.zola;
-        defaultText = lib.literalExpression "pkgs.zola";
-        description = "The Zola package to use";
-      };
+        # OPTIONAL: Zola package to use (default: pkgs.zola)
+        package = lib.mkOption {
+          type = lib.types.package;
+          default = pkgs.zola;
+          defaultText = lib.literalExpression "pkgs.zola";
+          description = "The Zola package to use";
+        };
 
-      # OPTIONAL: Auto-rebuild site on changes (default: true)
-      # When enabled, watches for file changes and rebuilds automatically
-      watchMode = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Enable watch mode to rebuild on file changes";
-      };
+        # OPTIONAL: Auto-rebuild site on changes (default: true)
+        # When enabled, watches for file changes and rebuilds automatically
+        watchMode = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Enable watch mode to rebuild on file changes";
+        };
 
-      # OPTIONAL: Auto-open firewall ports (default: false)
-      openFirewall = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Open firewall ports";
-      };
-    };
-  };
-
-  # ============================================================================
-  # CONFIG - What happens when the service is enabled
-  # ============================================================================
-  config = lib.mkIf cfg.enable {
-    # ----------------------------------------------------------------------------
-    # USER SETUP - Create dedicated system user for Zola
-    # ----------------------------------------------------------------------------
-    users.users.zola = {
-      isSystemUser = true;
-      group = "zola";
-      description = "Zola static site server user";
-    };
-
-    users.groups.zola = {};
-    users.users.${config.nixlab.mainUser}.extraGroups = ["zola"];
-
-    # Initialize a Zola site if not already initialized
-    system.activationScripts.initZolaSite = {
-      text = ''
-                SITE_DIR="${cfg.siteDir}"
-
-                # Create site directory structure if config.toml doesn't exist
-                if [ ! -f "$SITE_DIR/config.toml" ]; then
-                  echo "Initializing Zola site at $SITE_DIR..."
-
-                  # Create base directories
-                  mkdir -p "$SITE_DIR"/{content,templates,static}
-
-                  # Create config.toml
-                  cat > "$SITE_DIR/config.toml" << 'EOF'
-        base_url = "http://localhost:${toString cfg.port}"
-        title = "My Blog"
-        compile_sass = true
-        build_search_index = false
-
-        [markdown]
-        highlight_code = true
-        EOF
-
-                  # Create default content index
-                  cat > "$SITE_DIR/content/_index.md" << 'EOF'
-        +++
-        title = "Home"
-        +++
-
-        # Welcome!
-
-        This is my Zola site.
-        EOF
-
-                  # Create default template
-                  cat > "$SITE_DIR/templates/index.html" << 'EOF'
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>{{ config.title }}</title>
-        </head>
-        <body>
-            <h1>{{ section.title }}</h1>
-            {{ section.content | safe }}
-        </body>
-        </html>
-        EOF
-
-                  # Set proper ownership and permissions
-                  chown -R zola:zola "$SITE_DIR"
-                  chmod -R 775 "$SITE_DIR"
-
-                  echo "Zola site initialized successfully at $SITE_DIR"
-                fi
-      '';
-    };
-
-    # ----------------------------------------------------------------------------
-    # ZOLA SERVICE - Configure the systemd service
-    # ----------------------------------------------------------------------------
-    systemd.services.zola = {
-      description = "Zola Static Site Server";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target"];
-
-      # Validate site directory before starting (can be disabled for debugging)
-      # preStart = ''
-      #   if [ ! -f ${cfg.siteDir}/config.toml ]; then
-      #     echo "ERROR: Zola site not found at ${cfg.siteDir}"
-      #     echo "Please create a Zola site first: zola init ${cfg.siteDir}"
-      #     exit 1
-      #   fi
-      # '';
-
-      serviceConfig = {
-        Type = "simple";
-        User = "zola";
-        Group = "zola";
-        WorkingDirectory = cfg.siteDir;
-        # Start Zola server with watch mode or static serve
-        ExecStart =
-          if cfg.watchMode
-          then "${cfg.package}/bin/zola serve --interface ${cfg.bindIP} --port ${toString cfg.port} --base-url http://${cfg.bindIP}:${toString cfg.port}"
-          else "${cfg.package}/bin/zola serve --interface ${cfg.bindIP} --port ${toString cfg.port} --base-url http://${cfg.bindIP}:${toString cfg.port} --watch-only";
-        Restart = "on-failure";
-        RestartSec = "10s";
-
-        # Allow read-write access to site directory
-        ReadWritePaths = [cfg.siteDir];
-      };
-    };
-
-    # ----------------------------------------------------------------------------
-    # NGINX REVERSE PROXY - Only configured if domain is set
-    # ----------------------------------------------------------------------------
-    services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-
-    services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-      ${cfg.domain} = {
-        forceSSL = cfg.enableSSL;
-        enableACME = cfg.enableSSL;
-
-        locations."/" = {
-          proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          '';
+        # OPTIONAL: Auto-open firewall ports (default: false)
+        openFirewall = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Open firewall ports";
         };
       };
     };
 
-    # ----------------------------------------------------------------------------
-    # FIREWALL - Open necessary ports if requested
-    # ----------------------------------------------------------------------------
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open Zola port if not using reverse proxy or binding to non-localhost
-      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
-      # Open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [80 443]
-    );
+    # ============================================================================
+    # CONFIG - What happens when the service is enabled
+    # ============================================================================
+    config = lib.mkIf cfg.enable {
+      # ----------------------------------------------------------------------------
+      # USER SETUP - Create dedicated system user for Zola
+      # ----------------------------------------------------------------------------
+      users.users.zola = {
+        isSystemUser = true;
+        group = "zola";
+        description = "Zola static site server user";
+      };
+
+      users.groups.zola = {};
+      users.users.${config.nixlab.mainUser}.extraGroups = ["zola"];
+
+      # Initialize a Zola site if not already initialized
+      system.activationScripts.initZolaSite = {
+        text = ''
+                  SITE_DIR="${cfg.siteDir}"
+
+                  # Create site directory structure if config.toml doesn't exist
+                  if [ ! -f "$SITE_DIR/config.toml" ]; then
+                    echo "Initializing Zola site at $SITE_DIR..."
+
+                    # Create base directories
+                    mkdir -p "$SITE_DIR"/{content,templates,static}
+
+                    # Create config.toml
+                    cat > "$SITE_DIR/config.toml" << 'EOF'
+          base_url = "http://localhost:${toString cfg.port}"
+          title = "My Blog"
+          compile_sass = true
+          build_search_index = false
+
+          [markdown]
+          highlight_code = true
+          EOF
+
+                    # Create default content index
+                    cat > "$SITE_DIR/content/_index.md" << 'EOF'
+          +++
+          title = "Home"
+          +++
+
+          # Welcome!
+
+          This is my Zola site.
+          EOF
+
+                    # Create default template
+                    cat > "$SITE_DIR/templates/index.html" << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <title>{{ config.title }}</title>
+          </head>
+          <body>
+              <h1>{{ section.title }}</h1>
+              {{ section.content | safe }}
+          </body>
+          </html>
+          EOF
+
+                    # Set proper ownership and permissions
+                    chown -R zola:zola "$SITE_DIR"
+                    chmod -R 775 "$SITE_DIR"
+
+                    echo "Zola site initialized successfully at $SITE_DIR"
+                  fi
+        '';
+      };
+
+      # ----------------------------------------------------------------------------
+      # ZOLA SERVICE - Configure the systemd service
+      # ----------------------------------------------------------------------------
+      systemd.services.zola = {
+        description = "Zola Static Site Server";
+        wantedBy = ["multi-user.target"];
+        after = ["network.target"];
+
+        # Validate site directory before starting (can be disabled for debugging)
+        # preStart = ''
+        #   if [ ! -f ${cfg.siteDir}/config.toml ]; then
+        #     echo "ERROR: Zola site not found at ${cfg.siteDir}"
+        #     echo "Please create a Zola site first: zola init ${cfg.siteDir}"
+        #     exit 1
+        #   fi
+        # '';
+
+        serviceConfig = {
+          Type = "simple";
+          User = "zola";
+          Group = "zola";
+          WorkingDirectory = cfg.siteDir;
+          # Start Zola server with watch mode or static serve
+          ExecStart =
+            if cfg.watchMode
+            then "${cfg.package}/bin/zola serve --interface ${cfg.bindIP} --port ${toString cfg.port} --base-url http://${cfg.bindIP}:${toString cfg.port}"
+            else "${cfg.package}/bin/zola serve --interface ${cfg.bindIP} --port ${toString cfg.port} --base-url http://${cfg.bindIP}:${toString cfg.port} --watch-only";
+          Restart = "on-failure";
+          RestartSec = "10s";
+
+          # Allow read-write access to site directory
+          ReadWritePaths = [cfg.siteDir];
+        };
+      };
+
+      # ----------------------------------------------------------------------------
+      # NGINX REVERSE PROXY - Only configured if domain is set
+      # ----------------------------------------------------------------------------
+      services.nginx.enable = lib.mkIf (cfg.domain != null) true;
+
+      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
+        ${cfg.domain} = {
+          forceSSL = cfg.enableSSL;
+          enableACME = cfg.enableSSL;
+
+          locations."/" = {
+            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+            '';
+          };
+        };
+      };
+
+      # ----------------------------------------------------------------------------
+      # FIREWALL - Open necessary ports if requested
+      # ----------------------------------------------------------------------------
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
+        # Open Zola port if not using reverse proxy or binding to non-localhost
+        lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
+        # Open HTTP/HTTPS if using reverse proxy
+        ++ lib.optionals (cfg.domain != null) [80 443]
+      );
+    };
   };
 }
 /*

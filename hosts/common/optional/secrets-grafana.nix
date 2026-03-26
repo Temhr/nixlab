@@ -9,7 +9,7 @@
     description = "Path to the sops-encrypted grafana secrets file";
   };
 
-  config = lib.mkIf config.services.grafana-custom.enable {
+  config = {
     sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
     sops.secrets.GF_SECURITY_ADMIN_PASSWORD = {

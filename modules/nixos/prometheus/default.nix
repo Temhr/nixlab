@@ -3,36 +3,39 @@
 # ============================================================================
 # prometheus/
 # ├── default.nix              # Main module (imports everything)
-# ├── options.nix              # All module options (includes maintenance)
-# ├── config.nix               # Main config assembly
-# ├── scrape-configs.nix       # Scrape job builders
-# ├── exporters/
-# │   ├── node.nix             # Node exporter config
-# │   └── maintenance.nix      # All maintenance exporters
-# ├── services/
-# │   └── prometheus.nix       # Main prometheus service definition
-# └── extras/
-#     └── nginx.nix            # Nginx reverse proxy config
+# └── _internals/
+#     ├── options.nix              # All module options (includes maintenance)
+#     ├── config.nix               # Main config assembly
+#     ├── scrape-configs.nix       # Scrape job builders
+#     ├── exporters/
+#     │   ├── node.nix             # Node exporter config
+#     │   └── maintenance.nix      # All maintenance exporters
+#     ├── services/
+#     │   └── prometheus.nix       # Main prometheus service definition
+#     └── extras/
+#         └── nginx.nix            # Nginx reverse proxy config
 # ============================================================================
 # FILE: prometheus/default.nix (main entry point)
 # ============================================================================
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.prometheus-custom;
+{...}: {
+  flake.nixosModules.prometheus-custom = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.prometheus-custom;
 
-  # Import all submodules - pass pkgs to options
-  options = import ./options.nix {inherit lib pkgs;};
-  prometheusConfig = import ./config.nix {inherit config lib pkgs;};
-in {
-  # Import options from separate file
-  options.services.prometheus-custom = options;
+    # Import all submodules - pass pkgs to options
+    options = import ./_internals/options.nix {inherit lib pkgs;};
+    prometheusConfig = import ./_internals/config.nix {inherit config lib pkgs;};
+  in {
+    # Import options from separate file
+    options.services.prometheus-custom = options;
 
-  # Import configuration from separate file
-  config = lib.mkIf cfg.enable prometheusConfig;
+    # Import configuration from separate file
+    config = lib.mkIf cfg.enable prometheusConfig;
+  };
 }
 # ============================================================================
 # USAGE in configuration.nix:

@@ -1,200 +1,202 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.waydroid-custom;
-in {
-  # ============================================================================
-  # OPTIONS - Define what can be configured
-  # ============================================================================
-  options = {
-    services.waydroid-custom = {
-      # REQUIRED: Enable the service
-      enable = lib.mkEnableOption "Waydroid Android container service";
+{...}: {
+  flake.nixosModules.waydroid-custom = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.waydroid-custom;
+  in {
+    # ============================================================================
+    # OPTIONS - Define what can be configured
+    # ============================================================================
+    options = {
+      services.waydroid-custom = {
+        # REQUIRED: Enable the service
+        enable = lib.mkEnableOption "Waydroid Android container service";
 
-      # OPTIONAL: Waydroid package to use (default: pkgs.waydroid)
-      package = lib.mkOption {
-        type = lib.types.package;
-        default = pkgs.waydroid;
-        defaultText = lib.literalExpression "pkgs.waydroid";
-        description = "The Waydroid package to use";
-      };
+        # OPTIONAL: Waydroid package to use (default: pkgs.waydroid)
+        package = lib.mkOption {
+          type = lib.types.package;
+          default = pkgs.waydroid;
+          defaultText = lib.literalExpression "pkgs.waydroid";
+          description = "The Waydroid package to use";
+        };
 
-      # OPTIONAL: Use nftables-compatible version (default: false, auto-detects)
-      # Set to true if you're on a newer kernel that only has nftables
-      useNftables = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Use nftables instead of iptables (for newer kernels)";
-      };
+        # OPTIONAL: Use nftables-compatible version (default: false, auto-detects)
+        # Set to true if you're on a newer kernel that only has nftables
+        useNftables = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Use nftables instead of iptables (for newer kernels)";
+        };
 
-      # OPTIONAL: Data directory (default: /var/lib/waydroid)
-      dataDir = lib.mkOption {
-        type = lib.types.path;
-        default = "/var/lib/waydroid";
-        example = "/data/waydroid";
-        description = "Directory for Waydroid data and images";
-      };
+        # OPTIONAL: Data directory (default: /var/lib/waydroid)
+        dataDir = lib.mkOption {
+          type = lib.types.path;
+          default = "/var/lib/waydroid";
+          example = "/data/waydroid";
+          description = "Directory for Waydroid data and images";
+        };
 
-      # OPTIONAL: Android images directory (default: /var/lib/waydroid/images)
-      imagesDir = lib.mkOption {
-        type = lib.types.path;
-        default = "${cfg.dataDir}/images";
-        defaultText = lib.literalExpression ''"''${config.services.waydroid-custom.dataDir}/images"'';
-        description = "Directory for Android system images";
-      };
+        # OPTIONAL: Android images directory (default: /var/lib/waydroid/images)
+        imagesDir = lib.mkOption {
+          type = lib.types.path;
+          default = "${cfg.dataDir}/images";
+          defaultText = lib.literalExpression ''"''${config.services.waydroid-custom.dataDir}/images"'';
+          description = "Directory for Android system images";
+        };
 
-      # OPTIONAL: Users allowed to use Waydroid (default: [])
-      allowedUsers = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [];
-        example = ["alice" "bob"];
-        description = "Users allowed to access Waydroid (empty = all users)";
-      };
+        # OPTIONAL: Users allowed to use Waydroid (default: [])
+        allowedUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice" "bob"];
+          description = "Users allowed to access Waydroid (empty = all users)";
+        };
 
-      # OPTIONAL: Auto-start container on boot (default: false)
-      autoStart = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Automatically start Waydroid container on boot";
-      };
+        # OPTIONAL: Auto-start container on boot (default: false)
+        autoStart = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Automatically start Waydroid container on boot";
+        };
 
-      # OPTIONAL: Install Google Play Services (default: false)
-      enableGapps = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Install Google Play Services and Google Play Store";
+        # OPTIONAL: Install Google Play Services (default: false)
+        enableGapps = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Install Google Play Services and Google Play Store";
+        };
       };
     };
-  };
 
-  # ============================================================================
-  # CONFIG - What happens when the service is enabled
-  # ============================================================================
-  config = lib.mkIf cfg.enable {
-    # ----------------------------------------------------------------------------
-    # KERNEL MODULES - Enable required kernel modules
-    # ----------------------------------------------------------------------------
-    boot.kernelModules = [
-      "binder_linux"
-      "ashmem_linux"
-    ];
+    # ============================================================================
+    # CONFIG - What happens when the service is enabled
+    # ============================================================================
+    config = lib.mkIf cfg.enable {
+      # ----------------------------------------------------------------------------
+      # KERNEL MODULES - Enable required kernel modules
+      # ----------------------------------------------------------------------------
+      boot.kernelModules = [
+        "binder_linux"
+        "ashmem_linux"
+      ];
 
-    # ----------------------------------------------------------------------------
-    # KERNEL PARAMETERS - Required for Waydroid
-    # ----------------------------------------------------------------------------
-    boot.kernelParams = [
-      "psi=1" # Enable Pressure Stall Information (fixes boot loops)
-    ];
+      # ----------------------------------------------------------------------------
+      # KERNEL PARAMETERS - Required for Waydroid
+      # ----------------------------------------------------------------------------
+      boot.kernelParams = [
+        "psi=1" # Enable Pressure Stall Information (fixes boot loops)
+      ];
 
-    boot.kernel.sysctl = {
-      "net.ipv4.ip_forward" = 1;
-    };
-
-    # ----------------------------------------------------------------------------
-    # NETWORKING SETUP - Configure firewall for Waydroid networking
-    # ----------------------------------------------------------------------------
-    # Allow IP forwarding (already set above in sysctl)
-    # Set FORWARD policy to ACCEPT for iptables/nftables
-    networking.firewall = {
-      # Trust the waydroid0 interface
-      trustedInterfaces = ["waydroid0"];
-
-      # Allow DNS and DHCP for Waydroid
-      allowedUDPPorts = [53 67];
-
-      # Enable packet forwarding
-      checkReversePath = false;
-
-      # Extra commands to ensure FORWARD chain accepts packets
-      extraCommands = ''
-        # Accept forwarding for waydroid0
-        iptables -A FORWARD -i waydroid0 -j ACCEPT
-        iptables -A FORWARD -o waydroid0 -j ACCEPT
-      '';
-
-      extraStopCommands = ''
-        iptables -D FORWARD -i waydroid0 -j ACCEPT 2>/dev/null || true
-        iptables -D FORWARD -o waydroid0 -j ACCEPT 2>/dev/null || true
-      '';
-    };
-
-    # ----------------------------------------------------------------------------
-    # DIRECTORY SETUP - Create necessary directories with proper permissions
-    # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0755 root root -"
-      "d ${cfg.imagesDir} 0755 root root -"
-    ];
-
-    # ----------------------------------------------------------------------------
-    # WAYDROID CONTAINER SERVICE - Main container management service
-    # ----------------------------------------------------------------------------
-    systemd.services.waydroid-container = {
-      description = "Waydroid Android Container";
-      wantedBy = lib.mkIf cfg.autoStart ["multi-user.target"];
-      after = ["network.target"];
-
-      path = [cfg.package];
-
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = "${cfg.package}/bin/waydroid container start";
-        ExecStop = "${cfg.package}/bin/waydroid container stop";
-        Restart = "on-failure";
-        RestartSec = "10s";
-
-        # Environment
-        Environment = [
-          "WAYDROID_DIR=${cfg.dataDir}"
-        ];
-
-        # Security
-        PrivateTmp = true;
+      boot.kernel.sysctl = {
+        "net.ipv4.ip_forward" = 1;
       };
 
-      # Initialize Waydroid on first run
-      preStart = ''
-        # Initialize Waydroid if not already initialized
-        if [ ! -f ${cfg.dataDir}/.initialized ]; then
-          echo "Initializing Waydroid..."
-          ${
-          if cfg.enableGapps
-          then "${cfg.package}/bin/waydroid init -s GAPPS -f || true"
-          else "${cfg.package}/bin/waydroid init -f || true"
-        }
-          touch ${cfg.dataDir}/.initialized
-        fi
-      '';
+      # ----------------------------------------------------------------------------
+      # NETWORKING SETUP - Configure firewall for Waydroid networking
+      # ----------------------------------------------------------------------------
+      # Allow IP forwarding (already set above in sysctl)
+      # Set FORWARD policy to ACCEPT for iptables/nftables
+      networking.firewall = {
+        # Trust the waydroid0 interface
+        trustedInterfaces = ["waydroid0"];
+
+        # Allow DNS and DHCP for Waydroid
+        allowedUDPPorts = [53 67];
+
+        # Enable packet forwarding
+        checkReversePath = false;
+
+        # Extra commands to ensure FORWARD chain accepts packets
+        extraCommands = ''
+          # Accept forwarding for waydroid0
+          iptables -A FORWARD -i waydroid0 -j ACCEPT
+          iptables -A FORWARD -o waydroid0 -j ACCEPT
+        '';
+
+        extraStopCommands = ''
+          iptables -D FORWARD -i waydroid0 -j ACCEPT 2>/dev/null || true
+          iptables -D FORWARD -o waydroid0 -j ACCEPT 2>/dev/null || true
+        '';
+      };
+
+      # ----------------------------------------------------------------------------
+      # DIRECTORY SETUP - Create necessary directories with proper permissions
+      # ----------------------------------------------------------------------------
+      systemd.tmpfiles.rules = [
+        "d ${cfg.dataDir} 0755 root root -"
+        "d ${cfg.imagesDir} 0755 root root -"
+      ];
+
+      # ----------------------------------------------------------------------------
+      # WAYDROID CONTAINER SERVICE - Main container management service
+      # ----------------------------------------------------------------------------
+      systemd.services.waydroid-container = {
+        description = "Waydroid Android Container";
+        wantedBy = lib.mkIf cfg.autoStart ["multi-user.target"];
+        after = ["network.target"];
+
+        path = [cfg.package];
+
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${cfg.package}/bin/waydroid container start";
+          ExecStop = "${cfg.package}/bin/waydroid container stop";
+          Restart = "on-failure";
+          RestartSec = "10s";
+
+          # Environment
+          Environment = [
+            "WAYDROID_DIR=${cfg.dataDir}"
+          ];
+
+          # Security
+          PrivateTmp = true;
+        };
+
+        # Initialize Waydroid on first run
+        preStart = ''
+          # Initialize Waydroid if not already initialized
+          if [ ! -f ${cfg.dataDir}/.initialized ]; then
+            echo "Initializing Waydroid..."
+            ${
+            if cfg.enableGapps
+            then "${cfg.package}/bin/waydroid init -s GAPPS -f || true"
+            else "${cfg.package}/bin/waydroid init -f || true"
+          }
+            touch ${cfg.dataDir}/.initialized
+          fi
+        '';
+      };
+
+      # ----------------------------------------------------------------------------
+      # USER PERMISSIONS - Add users to waydroid group if specified
+      # ----------------------------------------------------------------------------
+      users.groups.waydroid = {};
+
+      users.users = lib.mkIf (cfg.allowedUsers != []) (
+        lib.listToAttrs (map (user: {
+            name = user;
+            value = {
+              extraGroups = ["waydroid"];
+            };
+          })
+          cfg.allowedUsers)
+      );
+
+      # ----------------------------------------------------------------------------
+      # ENVIRONMENT - Make Waydroid available system-wide
+      # ----------------------------------------------------------------------------
+      environment.systemPackages = [cfg.package];
+
+      # ----------------------------------------------------------------------------
+      # VIRTUALISATION - Enable LXC for container support
+      # ----------------------------------------------------------------------------
+      virtualisation.lxc.enable = true;
     };
-
-    # ----------------------------------------------------------------------------
-    # USER PERMISSIONS - Add users to waydroid group if specified
-    # ----------------------------------------------------------------------------
-    users.groups.waydroid = {};
-
-    users.users = lib.mkIf (cfg.allowedUsers != []) (
-      lib.listToAttrs (map (user: {
-          name = user;
-          value = {
-            extraGroups = ["waydroid"];
-          };
-        })
-        cfg.allowedUsers)
-    );
-
-    # ----------------------------------------------------------------------------
-    # ENVIRONMENT - Make Waydroid available system-wide
-    # ----------------------------------------------------------------------------
-    environment.systemPackages = [cfg.package];
-
-    # ----------------------------------------------------------------------------
-    # VIRTUALISATION - Enable LXC for container support
-    # ----------------------------------------------------------------------------
-    virtualisation.lxc.enable = true;
   };
 }
 /*

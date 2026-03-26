@@ -1,263 +1,265 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  cfg = config.services.wikijs-custom;
-in {
-  # ============================================================================
-  # OPTIONS - Define what can be configured
-  # ============================================================================
-  options = {
-    services.wikijs-custom = {
-      # REQUIRED: Enable the service
-      enable = lib.mkEnableOption "Wiki.js service";
+{...}: {
+  flake.nixosModules.wiki-js-custom = {
+    config,
+    lib,
+    ...
+  }: let
+    cfg = config.services.wikijs-custom;
+  in {
+    # ============================================================================
+    # OPTIONS - Define what can be configured
+    # ============================================================================
+    options = {
+      services.wikijs-custom = {
+        # REQUIRED: Enable the service
+        enable = lib.mkEnableOption "Wiki.js service";
 
-      # OPTIONAL: Port to listen on (default: 3001)
-      port = lib.mkOption {
-        type = lib.types.port;
-        default = 3001;
-        description = "Port for Wiki.js to listen on";
-      };
-
-      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-      # Use "0.0.0.0" for access from other devices
-      bindIP = lib.mkOption {
-        type = lib.types.str;
-        default = "127.0.0.1";
-        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
-      };
-
-      # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
-      domain = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        example = "wiki.example.com";
-        description = "Domain name for nginx reverse proxy (optional)";
-      };
-
-      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
-      # Only works if domain is set
-      enableSSL = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Enable HTTPS with Let's Encrypt (requires domain)";
-      };
-
-      # OPTIONAL: Where to store Wiki.js data (default: /var/lib/wiki-js)
-      dataDir = lib.mkOption {
-        type = lib.types.path;
-        default = "/var/lib/wiki-js";
-        example = "/data/wiki-js";
-        description = "Directory for Wiki.js data and configuration";
-      };
-
-      # OPTIONAL: Custom path for uploaded files (default: null = under dataDir)
-      # Useful for storing uploads on a separate mount/drive
-      uploadsPath = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        example = "/mnt/storage/wiki-uploads";
-        description = "Path where uploaded files will be stored (null uses default under dataDir)";
-      };
-
-      # OPTIONAL: Path for PostgreSQL backups (default: null = no backups)
-      backupPath = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        example = "/backup/wiki-js";
-        description = "Path for automatic PostgreSQL backups (null disables backups)";
-      };
-
-      # OPTIONAL: Backup schedule (default: daily)
-      # Uses systemd timer format (e.g., "daily", "weekly", "02:30")
-      backupSchedule = lib.mkOption {
-        type = lib.types.str;
-        default = "daily";
-        example = "02:00";
-        description = "Backup schedule (systemd time format)";
-      };
-
-      # OPTIONAL: Auto-open firewall ports (default: true)
-      openFirewall = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Open firewall ports for HTTP/HTTPS";
-      };
-    };
-  };
-
-  # ============================================================================
-  # CONFIG - What happens when the service is enabled
-  # ============================================================================
-  config = lib.mkIf cfg.enable {
-    # ----------------------------------------------------------------------------
-    # USER SETUP - Create dedicated system user for Glance
-    # ----------------------------------------------------------------------------
-    users.users.wiki-js = {
-      isSystemUser = true;
-      group = "wiki-js";
-      home = cfg.dataDir;
-      description = "wiki-js user";
-    };
-
-    users.groups.wiki-js = {};
-
-    users.users.${config.nixlab.mainUser}.extraGroups = ["postgres" "wiki-js"];
-
-    # ----------------------------------------------------------------------------
-    # DIRECTORY SETUP - Create necessary directories with proper permissions
-    # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules =
-      [
-        # Create main data directory owned by wiki-js user
-        "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
-      ]
-      # Create custom uploads directory if specified
-      ++ lib.optionals (cfg.uploadsPath != null) [
-        "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
-      ]
-      # Create backup directory if specified (owned by postgres user)
-      ++ lib.optionals (cfg.backupPath != null) [
-        "d ${cfg.backupPath} 0770 postgres postgres -"
-      ];
-
-    # ----------------------------------------------------------------------------
-    # DATABASE SETUP - Wiki.js requires PostgreSQL
-    # ----------------------------------------------------------------------------
-    services.postgresql = {
-      enable = true;
-      # Create the 'wiki-js' database automatically
-      ensureDatabases = ["wiki-js"];
-      # Create 'wiki-js' user with ownership of the database
-      ensureUsers = [
-        {
-          name = "wiki-js";
-          ensureDBOwnership = true;
-        }
-      ];
-    };
-
-    # ----------------------------------------------------------------------------
-    # WIKI.JS SERVICE - Configure the built-in NixOS Wiki.js module
-    # ----------------------------------------------------------------------------
-    services.wiki-js = {
-      enable = true;
-
-      # Override state directory name if using custom path
-      # This tells the module to use a different base directory
-      stateDirectoryName =
-        lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
-        (baseNameOf cfg.dataDir);
-
-      # Wiki.js application settings
-      settings = {
-        # Network configuration
-        port = cfg.port;
-        bindIP = cfg.bindIP;
-
-        # Database configuration (PostgreSQL via Unix socket)
-        db = {
-          type = "postgres";
-          host = "/run/postgresql"; # Unix socket connection
-          db = "wiki-js";
-          user = "wiki-js";
+        # OPTIONAL: Port to listen on (default: 3001)
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 3001;
+          description = "Port for Wiki.js to listen on";
         };
 
-        # Logging and high-availability settings
-        logLevel = "info";
-        ha = false; # High availability mode disabled (single instance)
-      };
-    };
-
-    # ----------------------------------------------------------------------------
-    # SERVICE CUSTOMIZATION - Additional systemd service configuration
-    # ----------------------------------------------------------------------------
-    systemd.services.wiki-js = {
-      # Ensure PostgreSQL is running before Wiki.js starts
-      requires = ["postgresql.service"];
-      after = ["postgresql.service"];
-
-      # Custom preStart script for uploads directory (only if custom path specified)
-      preStart = lib.mkIf (cfg.uploadsPath != null) (lib.mkAfter ''
-        # Ensure uploads directory exists
-        mkdir -p ${cfg.uploadsPath}
-
-        # Create symlink from default location to custom uploads path
-        if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
-          rm -rf "${cfg.dataDir}/data/uploads"
-          ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
-        fi
-
-        # Ensure proper ownership
-        chown -R wiki-js:wiki-js ${cfg.uploadsPath}
-      '');
-
-      serviceConfig = {
-        # Restart on failure
-        Restart = "on-failure";
-        RestartSec = "10s";
-      };
-    };
-
-    # ----------------------------------------------------------------------------
-    # NGINX REVERSE PROXY - Only configured if domain is set
-    # ----------------------------------------------------------------------------
-    services.nginx = lib.mkIf (cfg.domain != null) {
-      enable = true;
-      # Enable recommended security and performance settings
-      recommendedProxySettings = true;
-      recommendedTlsSettings = true;
-      recommendedOptimisation = true;
-      recommendedGzipSettings = true;
-
-      virtualHosts.${cfg.domain} = {
-        # Proxy all requests to Wiki.js
-        locations."/" = {
-          proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
-          # Enable WebSocket support (required for real-time collaboration)
-          proxyWebsockets = true;
-          extraConfig = ''
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-
-            # Increase upload size limit for file attachments
-            client_max_body_size 50M;
-          '';
+        # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+        # Use "0.0.0.0" for access from other devices
+        bindIP = lib.mkOption {
+          type = lib.types.str;
+          default = "127.0.0.1";
+          description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
         };
 
-        # Force HTTPS if SSL is enabled
-        forceSSL = cfg.enableSSL;
-        # Get automatic SSL certificate from Let's Encrypt
-        enableACME = cfg.enableSSL;
+        # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
+        domain = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "wiki.example.com";
+          description = "Domain name for nginx reverse proxy (optional)";
+        };
+
+        # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
+        # Only works if domain is set
+        enableSSL = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable HTTPS with Let's Encrypt (requires domain)";
+        };
+
+        # OPTIONAL: Where to store Wiki.js data (default: /var/lib/wiki-js)
+        dataDir = lib.mkOption {
+          type = lib.types.path;
+          default = "/var/lib/wiki-js";
+          example = "/data/wiki-js";
+          description = "Directory for Wiki.js data and configuration";
+        };
+
+        # OPTIONAL: Custom path for uploaded files (default: null = under dataDir)
+        # Useful for storing uploads on a separate mount/drive
+        uploadsPath = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/mnt/storage/wiki-uploads";
+          description = "Path where uploaded files will be stored (null uses default under dataDir)";
+        };
+
+        # OPTIONAL: Path for PostgreSQL backups (default: null = no backups)
+        backupPath = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/backup/wiki-js";
+          description = "Path for automatic PostgreSQL backups (null disables backups)";
+        };
+
+        # OPTIONAL: Backup schedule (default: daily)
+        # Uses systemd timer format (e.g., "daily", "weekly", "02:30")
+        backupSchedule = lib.mkOption {
+          type = lib.types.str;
+          default = "daily";
+          example = "02:00";
+          description = "Backup schedule (systemd time format)";
+        };
+
+        # OPTIONAL: Auto-open firewall ports (default: true)
+        openFirewall = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Open firewall ports for HTTP/HTTPS";
+        };
       };
     };
 
-    # ----------------------------------------------------------------------------
-    # FIREWALL - Open necessary ports if requested
-    # ----------------------------------------------------------------------------
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-      # Open Wiki.js port if not using reverse proxy or binding to non-localhost
-      lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
-      # Open HTTP/HTTPS if using reverse proxy
-      ++ lib.optionals (cfg.domain != null) [80 443]
-    );
+    # ============================================================================
+    # CONFIG - What happens when the service is enabled
+    # ============================================================================
+    config = lib.mkIf cfg.enable {
+      # ----------------------------------------------------------------------------
+      # USER SETUP - Create dedicated system user for Glance
+      # ----------------------------------------------------------------------------
+      users.users.wiki-js = {
+        isSystemUser = true;
+        group = "wiki-js";
+        home = cfg.dataDir;
+        description = "wiki-js user";
+      };
 
-    # ----------------------------------------------------------------------------
-    # AUTOMATIC BACKUPS - PostgreSQL database backups (optional)
-    # ----------------------------------------------------------------------------
-    services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
-      enable = true;
-      # Backup the wiki-js database
-      databases = ["wiki-js"];
-      # Store backups in specified location
-      location = cfg.backupPath;
-      # Schedule (e.g., "daily", "weekly", or specific time "02:30")
-      startAt = cfg.backupSchedule;
-      # Compress backups with zstd (good compression + speed)
-      compression = "zstd";
+      users.groups.wiki-js = {};
+
+      users.users.${config.nixlab.mainUser}.extraGroups = ["postgres" "wiki-js"];
+
+      # ----------------------------------------------------------------------------
+      # DIRECTORY SETUP - Create necessary directories with proper permissions
+      # ----------------------------------------------------------------------------
+      systemd.tmpfiles.rules =
+        [
+          # Create main data directory owned by wiki-js user
+          "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
+        ]
+        # Create custom uploads directory if specified
+        ++ lib.optionals (cfg.uploadsPath != null) [
+          "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
+        ]
+        # Create backup directory if specified (owned by postgres user)
+        ++ lib.optionals (cfg.backupPath != null) [
+          "d ${cfg.backupPath} 0770 postgres postgres -"
+        ];
+
+      # ----------------------------------------------------------------------------
+      # DATABASE SETUP - Wiki.js requires PostgreSQL
+      # ----------------------------------------------------------------------------
+      services.postgresql = {
+        enable = true;
+        # Create the 'wiki-js' database automatically
+        ensureDatabases = ["wiki-js"];
+        # Create 'wiki-js' user with ownership of the database
+        ensureUsers = [
+          {
+            name = "wiki-js";
+            ensureDBOwnership = true;
+          }
+        ];
+      };
+
+      # ----------------------------------------------------------------------------
+      # WIKI.JS SERVICE - Configure the built-in NixOS Wiki.js module
+      # ----------------------------------------------------------------------------
+      services.wiki-js = {
+        enable = true;
+
+        # Override state directory name if using custom path
+        # This tells the module to use a different base directory
+        stateDirectoryName =
+          lib.mkIf (cfg.dataDir != "/var/lib/wiki-js")
+          (baseNameOf cfg.dataDir);
+
+        # Wiki.js application settings
+        settings = {
+          # Network configuration
+          port = cfg.port;
+          bindIP = cfg.bindIP;
+
+          # Database configuration (PostgreSQL via Unix socket)
+          db = {
+            type = "postgres";
+            host = "/run/postgresql"; # Unix socket connection
+            db = "wiki-js";
+            user = "wiki-js";
+          };
+
+          # Logging and high-availability settings
+          logLevel = "info";
+          ha = false; # High availability mode disabled (single instance)
+        };
+      };
+
+      # ----------------------------------------------------------------------------
+      # SERVICE CUSTOMIZATION - Additional systemd service configuration
+      # ----------------------------------------------------------------------------
+      systemd.services.wiki-js = {
+        # Ensure PostgreSQL is running before Wiki.js starts
+        requires = ["postgresql.service"];
+        after = ["postgresql.service"];
+
+        # Custom preStart script for uploads directory (only if custom path specified)
+        preStart = lib.mkIf (cfg.uploadsPath != null) (lib.mkAfter ''
+          # Ensure uploads directory exists
+          mkdir -p ${cfg.uploadsPath}
+
+          # Create symlink from default location to custom uploads path
+          if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
+            rm -rf "${cfg.dataDir}/data/uploads"
+            ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
+          fi
+
+          # Ensure proper ownership
+          chown -R wiki-js:wiki-js ${cfg.uploadsPath}
+        '');
+
+        serviceConfig = {
+          # Restart on failure
+          Restart = "on-failure";
+          RestartSec = "10s";
+        };
+      };
+
+      # ----------------------------------------------------------------------------
+      # NGINX REVERSE PROXY - Only configured if domain is set
+      # ----------------------------------------------------------------------------
+      services.nginx = lib.mkIf (cfg.domain != null) {
+        enable = true;
+        # Enable recommended security and performance settings
+        recommendedProxySettings = true;
+        recommendedTlsSettings = true;
+        recommendedOptimisation = true;
+        recommendedGzipSettings = true;
+
+        virtualHosts.${cfg.domain} = {
+          # Proxy all requests to Wiki.js
+          locations."/" = {
+            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            # Enable WebSocket support (required for real-time collaboration)
+            proxyWebsockets = true;
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+
+              # Increase upload size limit for file attachments
+              client_max_body_size 50M;
+            '';
+          };
+
+          # Force HTTPS if SSL is enabled
+          forceSSL = cfg.enableSSL;
+          # Get automatic SSL certificate from Let's Encrypt
+          enableACME = cfg.enableSSL;
+        };
+      };
+
+      # ----------------------------------------------------------------------------
+      # FIREWALL - Open necessary ports if requested
+      # ----------------------------------------------------------------------------
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
+        # Open Wiki.js port if not using reverse proxy or binding to non-localhost
+        lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
+        # Open HTTP/HTTPS if using reverse proxy
+        ++ lib.optionals (cfg.domain != null) [80 443]
+      );
+
+      # ----------------------------------------------------------------------------
+      # AUTOMATIC BACKUPS - PostgreSQL database backups (optional)
+      # ----------------------------------------------------------------------------
+      services.postgresqlBackup = lib.mkIf (cfg.backupPath != null) {
+        enable = true;
+        # Backup the wiki-js database
+        databases = ["wiki-js"];
+        # Store backups in specified location
+        location = cfg.backupPath;
+        # Schedule (e.g., "daily", "weekly", or specific time "02:30")
+        startAt = cfg.backupSchedule;
+        # Compress backups with zstd (good compression + speed)
+        compression = "zstd";
+      };
     };
   };
 }

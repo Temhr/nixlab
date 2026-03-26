@@ -9,8 +9,9 @@
     description = "Path to sops-encrypted bookstack secrets";
   };
 
-  config = lib.mkIf config.services.bookstack-custom.enable {
+  config = {
     sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
     sops.secrets =
       lib.genAttrs
       ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"]

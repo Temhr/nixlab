@@ -1,243 +1,245 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.comfyui-p5000;
-  extensionsCfg = config.services.comfyui-extensions;
-in {
-  # ============================================================================
-  # OPTIONS - Define what can be configured
-  # ============================================================================
-  options = {
-    services.comfyui-extensions = {
-      # REQUIRED: Enable ComfyUI extensions/custom nodes
-      enable = lib.mkEnableOption "ComfyUI Extensions and Custom Nodes";
+{...}: {
+  flake.nixosModules.comfyui-extensions = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.comfyui-p5000;
+    extensionsCfg = config.services.comfyui-extensions;
+  in {
+    # ============================================================================
+    # OPTIONS - Define what can be configured
+    # ============================================================================
+    options = {
+      services.comfyui-extensions = {
+        # REQUIRED: Enable ComfyUI extensions/custom nodes
+        enable = lib.mkEnableOption "ComfyUI Extensions and Custom Nodes";
 
-      # OPTIONAL: Install ComfyUI-Manager (highly recommended)
-      enableManager = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Install ComfyUI-Manager for easy custom node management";
-      };
+        # OPTIONAL: Install ComfyUI-Manager (highly recommended)
+        enableManager = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Install ComfyUI-Manager for easy custom node management";
+        };
 
-      # OPTIONAL: Install ControlNet models and nodes
-      enableControlNet = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Install ControlNet custom nodes";
-      };
+        # OPTIONAL: Install ControlNet models and nodes
+        enableControlNet = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Install ControlNet custom nodes";
+        };
 
-      # OPTIONAL: Install image processing nodes
-      enableImageProcessing = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Install common image processing custom nodes";
-      };
+        # OPTIONAL: Install image processing nodes
+        enableImageProcessing = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Install common image processing custom nodes";
+        };
 
-      # OPTIONAL: Install video processing nodes
-      enableVideoProcessing = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Install video processing custom nodes (requires more dependencies)";
-      };
+        # OPTIONAL: Install video processing nodes
+        enableVideoProcessing = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Install video processing custom nodes (requires more dependencies)";
+        };
 
-      # OPTIONAL: Custom nodes to install from git repos
-      customNodes = lib.mkOption {
-        type = lib.types.listOf (lib.types.submodule {
-          options = {
-            name = lib.mkOption {
-              type = lib.types.str;
-              description = "Name of the custom node";
+        # OPTIONAL: Custom nodes to install from git repos
+        customNodes = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.str;
+                description = "Name of the custom node";
+              };
+              url = lib.mkOption {
+                type = lib.types.str;
+                description = "Git repository URL";
+              };
+              rev = lib.mkOption {
+                type = lib.types.str;
+                default = "main";
+                description = "Git revision (branch, tag, or commit)";
+              };
             };
-            url = lib.mkOption {
-              type = lib.types.str;
-              description = "Git repository URL";
-            };
-            rev = lib.mkOption {
-              type = lib.types.str;
-              default = "main";
-              description = "Git revision (branch, tag, or commit)";
-            };
-          };
-        });
-        default = [];
-        example = [
-          {
-            name = "ComfyUI-Impact-Pack";
-            url = "https://github.com/ltdrdata/ComfyUI-Impact-Pack";
-            rev = "main";
-          }
-        ];
-        description = "List of custom nodes to install from git repositories";
+          });
+          default = [];
+          example = [
+            {
+              name = "ComfyUI-Impact-Pack";
+              url = "https://github.com/ltdrdata/ComfyUI-Impact-Pack";
+              rev = "main";
+            }
+          ];
+          description = "List of custom nodes to install from git repositories";
+        };
       };
     };
-  };
 
-  # ============================================================================
-  # CONFIG - What happens when extensions are enabled
-  # ============================================================================
-  config = lib.mkIf (cfg.enable && extensionsCfg.enable) {
-    # ----------------------------------------------------------------------------
-    # CUSTOM NODES INSTALLER - One-shot service to install extensions
-    # ----------------------------------------------------------------------------
-    systemd.services.comfyui-extensions-setup = {
-      description = "Install ComfyUI Extensions and Custom Nodes";
-      wantedBy = ["comfyui.service"];
-      before = ["comfyui.service"];
-      after = ["comfyui-pytorch-setup.service"];
-      requires = ["comfyui-pytorch-setup.service"];
+    # ============================================================================
+    # CONFIG - What happens when extensions are enabled
+    # ============================================================================
+    config = lib.mkIf (cfg.enable && extensionsCfg.enable) {
+      # ----------------------------------------------------------------------------
+      # CUSTOM NODES INSTALLER - One-shot service to install extensions
+      # ----------------------------------------------------------------------------
+      systemd.services.comfyui-extensions-setup = {
+        description = "Install ComfyUI Extensions and Custom Nodes";
+        wantedBy = ["comfyui.service"];
+        before = ["comfyui.service"];
+        after = ["comfyui-pytorch-setup.service"];
+        requires = ["comfyui-pytorch-setup.service"];
 
-      serviceConfig = {
-        Type = "oneshot";
-        User = "comfyui";
-        Group = "comfyui";
-        RemainAfterExit = true;
-        WorkingDirectory = cfg.dataDir;
-      };
+        serviceConfig = {
+          Type = "oneshot";
+          User = "comfyui";
+          Group = "comfyui";
+          RemainAfterExit = true;
+          WorkingDirectory = cfg.dataDir;
+        };
 
-      path = [pkgs.git pkgs.python311];
+        path = [pkgs.git pkgs.python311];
 
-      script = ''
-        set -e
-        CUSTOM_NODES_DIR="${cfg.dataDir}/custom_nodes"
-        VENV_DIR="${cfg.dataDir}/venv"
+        script = ''
+          set -e
+          CUSTOM_NODES_DIR="${cfg.dataDir}/custom_nodes"
+          VENV_DIR="${cfg.dataDir}/venv"
 
-        # Create custom_nodes directory if it doesn't exist
-        mkdir -p "$CUSTOM_NODES_DIR"
+          # Create custom_nodes directory if it doesn't exist
+          mkdir -p "$CUSTOM_NODES_DIR"
 
-        # Install GitPython for ComfyUI-Manager
-        echo "Installing GitPython for Manager..."
-        $VENV_DIR/bin/pip install --no-cache-dir GitPython || echo "Warning: Failed to install GitPython"
+          # Install GitPython for ComfyUI-Manager
+          echo "Installing GitPython for Manager..."
+          $VENV_DIR/bin/pip install --no-cache-dir GitPython || echo "Warning: Failed to install GitPython"
 
-        echo "Installing ComfyUI extensions..."
+          echo "Installing ComfyUI extensions..."
 
-        ${lib.optionalString extensionsCfg.enableManager ''
-          # Install ComfyUI-Manager
-          echo "Installing ComfyUI-Manager..."
-          if [ ! -d "$CUSTOM_NODES_DIR/ComfyUI-Manager" ]; then
-            ${pkgs.git}/bin/git clone https://github.com/ltdrdata/ComfyUI-Manager.git "$CUSTOM_NODES_DIR/ComfyUI-Manager"
-          else
-            echo "ComfyUI-Manager already installed, updating..."
-            cd "$CUSTOM_NODES_DIR/ComfyUI-Manager"
-            ${pkgs.git}/bin/git pull || echo "Warning: Failed to update ComfyUI-Manager"
-          fi
-
-          # Install Manager dependencies
-          if [ -f "$CUSTOM_NODES_DIR/ComfyUI-Manager/requirements.txt" ]; then
-            $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/ComfyUI-Manager/requirements.txt" || echo "Warning: Some Manager dependencies failed to install"
-          fi
-        ''}
-
-        ${lib.optionalString extensionsCfg.enableControlNet ''
-          # Install ControlNet Preprocessors
-          echo "Installing ControlNet Preprocessors..."
-          if [ ! -d "$CUSTOM_NODES_DIR/comfyui_controlnet_aux" ]; then
-            ${pkgs.git}/bin/git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git "$CUSTOM_NODES_DIR/comfyui_controlnet_aux"
-          else
-            echo "ControlNet Preprocessors already installed"
-          fi
-
-          # Install dependencies
-          if [ -f "$CUSTOM_NODES_DIR/comfyui_controlnet_aux/requirements.txt" ]; then
-            $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/comfyui_controlnet_aux/requirements.txt" || echo "Warning: Some ControlNet dependencies failed to install"
-          fi
-        ''}
-
-        ${lib.optionalString extensionsCfg.enableImageProcessing ''
-          # Install ComfyUI-Image-Filters (common image processing nodes)
-          echo "Installing Image Processing nodes..."
-          if [ ! -d "$CUSTOM_NODES_DIR/ComfyUI-Custom-Scripts" ]; then
-            ${pkgs.git}/bin/git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git "$CUSTOM_NODES_DIR/ComfyUI-Custom-Scripts"
-          else
-            echo "Image Processing nodes already installed"
-          fi
-
-          # Install WAS Node Suite (popular utilities)
-          if [ ! -d "$CUSTOM_NODES_DIR/was-node-suite-comfyui" ]; then
-            ${pkgs.git}/bin/git clone https://github.com/WASasquatch/was-node-suite-comfyui.git "$CUSTOM_NODES_DIR/was-node-suite-comfyui"
-          else
-            echo "WAS Node Suite already installed"
-          fi
-
-          # Install dependencies
-          for req in "$CUSTOM_NODES_DIR"/*/requirements.txt; do
-            if [ -f "$req" ]; then
-              echo "Installing dependencies from $req"
-              $VENV_DIR/bin/pip install -r "$req" || echo "Warning: Some dependencies from $req failed to install"
-            fi
-          done
-        ''}
-
-        ${lib.optionalString extensionsCfg.enableVideoProcessing ''
-          # Install ComfyUI-VideoHelperSuite
-          echo "Installing Video Processing nodes..."
-          if [ ! -d "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite" ]; then
-            ${pkgs.git}/bin/git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite"
-          else
-            echo "Video Processing nodes already installed"
-          fi
-
-          # Install dependencies
-          if [ -f "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite/requirements.txt" ]; then
-            $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite/requirements.txt" || echo "Warning: Some video dependencies failed to install"
-          fi
-        ''}
-
-        # Install user-specified custom nodes
-        ${lib.concatMapStringsSep "\n" (node: ''
-            echo "Installing custom node: ${node.name}..."
-            if [ ! -d "$CUSTOM_NODES_DIR/${node.name}" ]; then
-              ${pkgs.git}/bin/git clone ${node.url} "$CUSTOM_NODES_DIR/${node.name}"
-              cd "$CUSTOM_NODES_DIR/${node.name}"
-              ${pkgs.git}/bin/git checkout ${node.rev} || echo "Warning: Failed to checkout ${node.rev}"
+          ${lib.optionalString extensionsCfg.enableManager ''
+            # Install ComfyUI-Manager
+            echo "Installing ComfyUI-Manager..."
+            if [ ! -d "$CUSTOM_NODES_DIR/ComfyUI-Manager" ]; then
+              ${pkgs.git}/bin/git clone https://github.com/ltdrdata/ComfyUI-Manager.git "$CUSTOM_NODES_DIR/ComfyUI-Manager"
             else
-              echo "Custom node ${node.name} already installed"
+              echo "ComfyUI-Manager already installed, updating..."
+              cd "$CUSTOM_NODES_DIR/ComfyUI-Manager"
+              ${pkgs.git}/bin/git pull || echo "Warning: Failed to update ComfyUI-Manager"
             fi
 
-            # Install requirements if they exist
-            if [ -f "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" ]; then
-              echo "Installing dependencies for ${node.name}..."
-              $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" || echo "Warning: Some dependencies for ${node.name} failed to install"
+            # Install Manager dependencies
+            if [ -f "$CUSTOM_NODES_DIR/ComfyUI-Manager/requirements.txt" ]; then
+              $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/ComfyUI-Manager/requirements.txt" || echo "Warning: Some Manager dependencies failed to install"
+            fi
+          ''}
+
+          ${lib.optionalString extensionsCfg.enableControlNet ''
+            # Install ControlNet Preprocessors
+            echo "Installing ControlNet Preprocessors..."
+            if [ ! -d "$CUSTOM_NODES_DIR/comfyui_controlnet_aux" ]; then
+              ${pkgs.git}/bin/git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git "$CUSTOM_NODES_DIR/comfyui_controlnet_aux"
+            else
+              echo "ControlNet Preprocessors already installed"
             fi
 
-            # Run install script if it exists
-            if [ -f "$CUSTOM_NODES_DIR/${node.name}/install.py" ]; then
-              echo "Running install script for ${node.name}..."
-              cd "$CUSTOM_NODES_DIR/${node.name}"
-              $VENV_DIR/bin/python install.py || echo "Warning: Install script for ${node.name} failed"
+            # Install dependencies
+            if [ -f "$CUSTOM_NODES_DIR/comfyui_controlnet_aux/requirements.txt" ]; then
+              $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/comfyui_controlnet_aux/requirements.txt" || echo "Warning: Some ControlNet dependencies failed to install"
             fi
-          '')
-          extensionsCfg.customNodes}
+          ''}
 
-        echo "ComfyUI extensions installation complete!"
-        echo "Installed extensions will be available in: $CUSTOM_NODES_DIR"
-      '';
-    };
+          ${lib.optionalString extensionsCfg.enableImageProcessing ''
+            # Install ComfyUI-Image-Filters (common image processing nodes)
+            echo "Installing Image Processing nodes..."
+            if [ ! -d "$CUSTOM_NODES_DIR/ComfyUI-Custom-Scripts" ]; then
+              ${pkgs.git}/bin/git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git "$CUSTOM_NODES_DIR/ComfyUI-Custom-Scripts"
+            else
+              echo "Image Processing nodes already installed"
+            fi
 
-    # ----------------------------------------------------------------------------
-    # UPDATE SERVICE CONFIG - Point ComfyUI to custom nodes directory
-    # ----------------------------------------------------------------------------
-    systemd.services.comfyui = {
-      environment = {
-        # Tell ComfyUI where to find custom nodes
-        COMFYUI_CUSTOM_NODES_PATH = "${cfg.dataDir}/custom_nodes";
+            # Install WAS Node Suite (popular utilities)
+            if [ ! -d "$CUSTOM_NODES_DIR/was-node-suite-comfyui" ]; then
+              ${pkgs.git}/bin/git clone https://github.com/WASasquatch/was-node-suite-comfyui.git "$CUSTOM_NODES_DIR/was-node-suite-comfyui"
+            else
+              echo "WAS Node Suite already installed"
+            fi
+
+            # Install dependencies
+            for req in "$CUSTOM_NODES_DIR"/*/requirements.txt; do
+              if [ -f "$req" ]; then
+                echo "Installing dependencies from $req"
+                $VENV_DIR/bin/pip install -r "$req" || echo "Warning: Some dependencies from $req failed to install"
+              fi
+            done
+          ''}
+
+          ${lib.optionalString extensionsCfg.enableVideoProcessing ''
+            # Install ComfyUI-VideoHelperSuite
+            echo "Installing Video Processing nodes..."
+            if [ ! -d "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite" ]; then
+              ${pkgs.git}/bin/git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite"
+            else
+              echo "Video Processing nodes already installed"
+            fi
+
+            # Install dependencies
+            if [ -f "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite/requirements.txt" ]; then
+              $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/ComfyUI-VideoHelperSuite/requirements.txt" || echo "Warning: Some video dependencies failed to install"
+            fi
+          ''}
+
+          # Install user-specified custom nodes
+          ${lib.concatMapStringsSep "\n" (node: ''
+              echo "Installing custom node: ${node.name}..."
+              if [ ! -d "$CUSTOM_NODES_DIR/${node.name}" ]; then
+                ${pkgs.git}/bin/git clone ${node.url} "$CUSTOM_NODES_DIR/${node.name}"
+                cd "$CUSTOM_NODES_DIR/${node.name}"
+                ${pkgs.git}/bin/git checkout ${node.rev} || echo "Warning: Failed to checkout ${node.rev}"
+              else
+                echo "Custom node ${node.name} already installed"
+              fi
+
+              # Install requirements if they exist
+              if [ -f "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" ]; then
+                echo "Installing dependencies for ${node.name}..."
+                $VENV_DIR/bin/pip install -r "$CUSTOM_NODES_DIR/${node.name}/requirements.txt" || echo "Warning: Some dependencies for ${node.name} failed to install"
+              fi
+
+              # Run install script if it exists
+              if [ -f "$CUSTOM_NODES_DIR/${node.name}/install.py" ]; then
+                echo "Running install script for ${node.name}..."
+                cd "$CUSTOM_NODES_DIR/${node.name}"
+                $VENV_DIR/bin/python install.py || echo "Warning: Install script for ${node.name} failed"
+              fi
+            '')
+            extensionsCfg.customNodes}
+
+          echo "ComfyUI extensions installation complete!"
+          echo "Installed extensions will be available in: $CUSTOM_NODES_DIR"
+        '';
       };
 
-      # Ensure extensions are installed before starting
-      after = ["comfyui-extensions-setup.service"];
-      requires = ["comfyui-extensions-setup.service"];
-    };
+      # ----------------------------------------------------------------------------
+      # UPDATE SERVICE CONFIG - Point ComfyUI to custom nodes directory
+      # ----------------------------------------------------------------------------
+      systemd.services.comfyui = {
+        environment = {
+          # Tell ComfyUI where to find custom nodes
+          COMFYUI_CUSTOM_NODES_PATH = "${cfg.dataDir}/custom_nodes";
+        };
 
-    # ----------------------------------------------------------------------------
-    # CREATE SYMLINK - Link custom nodes to ComfyUI directory
-    # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir}/custom_nodes 0770 comfyui comfyui -"
-      # Create symlink from ComfyUI installation to custom nodes directory
-      "L+ ${pkgs.comfyui}/share/comfyui/custom_nodes - - - - ${cfg.dataDir}/custom_nodes"
-    ];
+        # Ensure extensions are installed before starting
+        after = ["comfyui-extensions-setup.service"];
+        requires = ["comfyui-extensions-setup.service"];
+      };
+
+      # ----------------------------------------------------------------------------
+      # CREATE SYMLINK - Link custom nodes to ComfyUI directory
+      # ----------------------------------------------------------------------------
+      systemd.tmpfiles.rules = [
+        "d ${cfg.dataDir}/custom_nodes 0770 comfyui comfyui -"
+        # Create symlink from ComfyUI installation to custom nodes directory
+        "L+ ${pkgs.comfyui}/share/comfyui/custom_nodes - - - - ${cfg.dataDir}/custom_nodes"
+      ];
+    };
   };
 }
 /*

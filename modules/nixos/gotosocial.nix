@@ -1,222 +1,224 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.gotosocial-custom;
-in {
-  # ============================================================================
-  # OPTIONS - Define what can be configured
-  # ============================================================================
-  options = {
-    services.gotosocial-custom = {
-      # REQUIRED: Enable the service
-      enable = lib.mkEnableOption "GoToSocial federated social media server";
+{...}: {
+  flake.nixosModules.gotosocial-custom = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.gotosocial-custom;
+  in {
+    # ============================================================================
+    # OPTIONS - Define what can be configured
+    # ============================================================================
+    options = {
+      services.gotosocial-custom = {
+        # REQUIRED: Enable the service
+        enable = lib.mkEnableOption "GoToSocial federated social media server";
 
-      # OPTIONAL: Port to listen on (default: 3005)
-      port = lib.mkOption {
-        type = lib.types.port;
-        default = 3005;
-        description = "Port for GoToSocial to listen on";
-      };
+        # OPTIONAL: Port to listen on (default: 3005)
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 3005;
+          description = "Port for GoToSocial to listen on";
+        };
 
-      # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-      # GoToSocial is typically accessed through reverse proxy
-      bindIP = lib.mkOption {
-        type = lib.types.str;
-        default = "127.0.0.1";
-        description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
-      };
+        # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+        # GoToSocial is typically accessed through reverse proxy
+        bindIP = lib.mkOption {
+          type = lib.types.str;
+          default = "127.0.0.1";
+          description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
+        };
 
-      # REQUIRED: Domain for your instance
-      domain = lib.mkOption {
-        type = lib.types.str;
-        example = "social.example.com";
-        description = "Domain name for your GoToSocial instance";
-      };
+        # REQUIRED: Domain for your instance
+        domain = lib.mkOption {
+          type = lib.types.str;
+          example = "social.example.com";
+          description = "Domain name for your GoToSocial instance";
+        };
 
-      # OPTIONAL: Account domain (default: same as domain)
-      accountDomain = lib.mkOption {
-        type = lib.types.str;
-        default = cfg.domain;
-        defaultText = lib.literalExpression "config.services.gotosocial-custom.domain";
-        example = "example.com";
-        description = "Domain to use in account names (e.g., @user@example.com)";
-      };
+        # OPTIONAL: Account domain (default: same as domain)
+        accountDomain = lib.mkOption {
+          type = lib.types.str;
+          default = cfg.domain;
+          defaultText = lib.literalExpression "config.services.gotosocial-custom.domain";
+          example = "example.com";
+          description = "Domain to use in account names (e.g., @user@example.com)";
+        };
 
-      # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: true)
-      enableSSL = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Enable HTTPS with Let's Encrypt";
-      };
+        # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: true)
+        enableSSL = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Enable HTTPS with Let's Encrypt";
+        };
 
-      # OPTIONAL: Where to store GoToSocial data (default: /var/lib/gotosocial)
-      dataDir = lib.mkOption {
-        type = lib.types.path;
-        default = "/var/lib/gotosocial";
-        example = "/data/gotosocial";
-        description = "Directory for GoToSocial data and configuration";
-      };
+        # OPTIONAL: Where to store GoToSocial data (default: /var/lib/gotosocial)
+        dataDir = lib.mkOption {
+          type = lib.types.path;
+          default = "/var/lib/gotosocial";
+          example = "/data/gotosocial";
+          description = "Directory for GoToSocial data and configuration";
+        };
 
-      # OPTIONAL: GoToSocial package to use (default: pkgs.gotosocial)
-      package = lib.mkOption {
-        type = lib.types.package;
-        default = pkgs.gotosocial;
-        defaultText = lib.literalExpression "pkgs.gotosocial";
-        description = "The GoToSocial package to use";
-      };
+        # OPTIONAL: GoToSocial package to use (default: pkgs.gotosocial)
+        package = lib.mkOption {
+          type = lib.types.package;
+          default = pkgs.gotosocial;
+          defaultText = lib.literalExpression "pkgs.gotosocial";
+          description = "The GoToSocial package to use";
+        };
 
-      # OPTIONAL: Auto-open firewall ports (default: true)
-      openFirewall = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Open firewall ports for HTTP/HTTPS";
+        # OPTIONAL: Auto-open firewall ports (default: true)
+        openFirewall = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Open firewall ports for HTTP/HTTPS";
+        };
       };
     };
-  };
 
-  # ============================================================================
-  # CONFIG - What happens when the service is enabled
-  # ============================================================================
-  config = lib.mkIf cfg.enable {
-    # ----------------------------------------------------------------------------
-    # DIRECTORY SETUP - Create necessary directories with proper permissions
-    # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir} 0770 gotosocial gotosocial -"
-      "d ${cfg.dataDir}/storage 0770 gotosocial gotosocial -"
-    ];
+    # ============================================================================
+    # CONFIG - What happens when the service is enabled
+    # ============================================================================
+    config = lib.mkIf cfg.enable {
+      # ----------------------------------------------------------------------------
+      # DIRECTORY SETUP - Create necessary directories with proper permissions
+      # ----------------------------------------------------------------------------
+      systemd.tmpfiles.rules = [
+        "d ${cfg.dataDir} 0770 gotosocial gotosocial -"
+        "d ${cfg.dataDir}/storage 0770 gotosocial gotosocial -"
+      ];
 
-    # ----------------------------------------------------------------------------
-    # USER SETUP - Create dedicated system user for GoToSocial
-    # ----------------------------------------------------------------------------
-    users.users.gotosocial = {
-      isSystemUser = true;
-      group = "gotosocial";
-      home = cfg.dataDir;
-      description = "GoToSocial server user";
-    };
-
-    users.groups.gotosocial = {};
-
-    users.users.${config.nixlab.mainUser}.extraGroups = ["gotosocial"];
-
-    # ----------------------------------------------------------------------------
-    # GOTOSOCIAL SERVICE - Configure the systemd service
-    # ----------------------------------------------------------------------------
-    systemd.services.gotosocial = {
-      description = "GoToSocial Federated Social Media Server";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target"];
-
-      serviceConfig = {
-        Type = "simple";
-        User = "gotosocial";
-        Group = "gotosocial";
-        WorkingDirectory = cfg.dataDir;
-        # GoToSocial reads config from config.yaml in current directory
-        ExecStart = "${cfg.package}/bin/gotosocial --config-path ${cfg.dataDir}/config.yaml server start";
-        Restart = "on-failure";
-        RestartSec = "10s";
-
-        # Security hardening
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        ReadWritePaths = [cfg.dataDir];
+      # ----------------------------------------------------------------------------
+      # USER SETUP - Create dedicated system user for GoToSocial
+      # ----------------------------------------------------------------------------
+      users.users.gotosocial = {
+        isSystemUser = true;
+        group = "gotosocial";
+        home = cfg.dataDir;
+        description = "GoToSocial server user";
       };
 
-      # Ensure config file exists with proper permissions
-      preStart = ''
-                # Create default config if it doesn't exist
-                if [ ! -f ${cfg.dataDir}/config.yaml ]; then
-                  cat > ${cfg.dataDir}/config.yaml << EOF
-        # GoToSocial Configuration
-        # See: https://docs.gotosocial.org/en/latest/configuration/
+      users.groups.gotosocial = {};
 
-        # Network configuration
-        host: "${cfg.domain}"
-        account-domain: "${cfg.accountDomain}"
-        protocol: "${
-          if cfg.enableSSL
-          then "https"
-          else "http"
-        }"
-        bind-address: "${cfg.bindIP}"
-        port: ${toString cfg.port}
+      users.users.${config.nixlab.mainUser}.extraGroups = ["gotosocial"];
 
-        # Database (SQLite by default)
-        db-type: "sqlite"
-        db-address: "${cfg.dataDir}/gotosocial.db"
+      # ----------------------------------------------------------------------------
+      # GOTOSOCIAL SERVICE - Configure the systemd service
+      # ----------------------------------------------------------------------------
+      systemd.services.gotosocial = {
+        description = "GoToSocial Federated Social Media Server";
+        wantedBy = ["multi-user.target"];
+        after = ["network.target"];
 
-        # Storage
-        storage-backend: "local"
-        storage-local-base-path: "${cfg.dataDir}/storage"
+        serviceConfig = {
+          Type = "simple";
+          User = "gotosocial";
+          Group = "gotosocial";
+          WorkingDirectory = cfg.dataDir;
+          # GoToSocial reads config from config.yaml in current directory
+          ExecStart = "${cfg.package}/bin/gotosocial --config-path ${cfg.dataDir}/config.yaml server start";
+          Restart = "on-failure";
+          RestartSec = "10s";
 
-        # Media settings
-        media-image-max-size: 10485760  # 10MB
-        media-video-max-size: 41943040  # 40MB
+          # Security hardening
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          ReadWritePaths = [cfg.dataDir];
+        };
 
-        # Instance settings
-        instance-languages:
-          - en
+        # Ensure config file exists with proper permissions
+        preStart = ''
+                  # Create default config if it doesn't exist
+                  if [ ! -f ${cfg.dataDir}/config.yaml ]; then
+                    cat > ${cfg.dataDir}/config.yaml << EOF
+          # GoToSocial Configuration
+          # See: https://docs.gotosocial.org/en/latest/configuration/
 
-        # Accounts
-        accounts-registration-open: false
-        accounts-approval-required: true
-        accounts-reason-required: true
+          # Network configuration
+          host: "${cfg.domain}"
+          account-domain: "${cfg.accountDomain}"
+          protocol: "${
+            if cfg.enableSSL
+            then "https"
+            else "http"
+          }"
+          bind-address: "${cfg.bindIP}"
+          port: ${toString cfg.port}
 
-        # Advanced settings
-        advanced-cookies-samesite: "lax"
-        advanced-rate-limit-requests: 300
+          # Database (SQLite by default)
+          db-type: "sqlite"
+          db-address: "${cfg.dataDir}/gotosocial.db"
 
-        # Logging
-        log-level: "info"
-        EOF
-                  chown gotosocial:gotosocial ${cfg.dataDir}/config.yaml
-                  chmod 660 ${cfg.dataDir}/config.yaml
-                fi
-      '';
-    };
+          # Storage
+          storage-backend: "local"
+          storage-local-base-path: "${cfg.dataDir}/storage"
 
-    # ----------------------------------------------------------------------------
-    # NGINX REVERSE PROXY - Required for GoToSocial
-    # ----------------------------------------------------------------------------
-    services.nginx.enable = true;
+          # Media settings
+          media-image-max-size: 10485760  # 10MB
+          media-video-max-size: 41943040  # 40MB
 
-    services.nginx.virtualHosts.${cfg.domain} = {
-      forceSSL = cfg.enableSSL;
-      enableACME = cfg.enableSSL;
+          # Instance settings
+          instance-languages:
+            - en
 
-      locations."/" = {
-        proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
-        proxyWebsockets = true;
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
+          # Accounts
+          accounts-registration-open: false
+          accounts-approval-required: true
+          accounts-reason-required: true
 
-          # Required for GoToSocial
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
+          # Advanced settings
+          advanced-cookies-samesite: "lax"
+          advanced-rate-limit-requests: 300
 
-          # Timeouts for large media uploads
-          client_max_body_size 40M;
-          proxy_read_timeout 300;
-          proxy_connect_timeout 300;
-          proxy_send_timeout 300;
+          # Logging
+          log-level: "info"
+          EOF
+                    chown gotosocial:gotosocial ${cfg.dataDir}/config.yaml
+                    chmod 660 ${cfg.dataDir}/config.yaml
+                  fi
         '';
       };
-    };
 
-    # ----------------------------------------------------------------------------
-    # FIREWALL - Open necessary ports if requested
-    # ----------------------------------------------------------------------------
-    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [80 443];
+      # ----------------------------------------------------------------------------
+      # NGINX REVERSE PROXY - Required for GoToSocial
+      # ----------------------------------------------------------------------------
+      services.nginx.enable = true;
+
+      services.nginx.virtualHosts.${cfg.domain} = {
+        forceSSL = cfg.enableSSL;
+        enableACME = cfg.enableSSL;
+
+        locations."/" = {
+          proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+          proxyWebsockets = true;
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # Required for GoToSocial
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            # Timeouts for large media uploads
+            client_max_body_size 40M;
+            proxy_read_timeout 300;
+            proxy_connect_timeout 300;
+            proxy_send_timeout 300;
+          '';
+        };
+      };
+
+      # ----------------------------------------------------------------------------
+      # FIREWALL - Open necessary ports if requested
+      # ----------------------------------------------------------------------------
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [80 443];
+    };
   };
 }
 /*
@@ -254,21 +256,21 @@ INITIAL SETUP
 After first start, create an admin account:
 
 1. Create admin user:
-   sudo -u gotosocial ${pkgs.gotosocial}/bin/gotosocial \
-     --config-path /var/lib/gotosocial/config.yaml \
-     admin account create \
-     --username admin \
-     --email admin@example.com \
-     --password 'YourSecurePassword'
+  sudo -u gotosocial ${pkgs.gotosocial}/bin/gotosocial \
+    --config-path /var/lib/gotosocial/config.yaml \
+    admin account create \
+    --username admin \
+    --email admin@example.com \
+    --password 'YourSecurePassword'
 
 2. Promote to admin:
-   sudo -u gotosocial ${pkgs.gotosocial}/bin/gotosocial \
-     --config-path /var/lib/gotosocial/config.yaml \
-     admin account promote --username admin
+  sudo -u gotosocial ${pkgs.gotosocial}/bin/gotosocial \
+    --config-path /var/lib/gotosocial/config.yaml \
+    admin account promote --username admin
 
 3. Open registration (optional):
-   Edit config.yaml and set:
-     accounts-registration-open: true
+  Edit config.yaml and set:
+    accounts-registration-open: true
 
 
 ================================================================================

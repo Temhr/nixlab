@@ -1,302 +1,304 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.services.comfyui-p5000;
-  modelsCfg = config.services.comfyui-models;
-in {
-  # ============================================================================
-  # OPTIONS - Define what can be configured
-  # ============================================================================
-  options = {
-    services.comfyui-models = {
-      # REQUIRED: Enable model downloader
-      enable = lib.mkEnableOption "ComfyUI Model Downloader";
+{...}: {
+  flake.nixosModules.comfyui-models = {
+    config,
+    lib,
+    pkgs,
+    ...
+  }: let
+    cfg = config.services.comfyui-p5000;
+    modelsCfg = config.services.comfyui-models;
+  in {
+    # ============================================================================
+    # OPTIONS - Define what can be configured
+    # ============================================================================
+    options = {
+      services.comfyui-models = {
+        # REQUIRED: Enable model downloader
+        enable = lib.mkEnableOption "ComfyUI Model Downloader";
 
-      # OPTIONAL: Download popular Stable Diffusion models
-      downloadSD15 = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Download Stable Diffusion 1.5 model (~4GB)";
-      };
+        # OPTIONAL: Download popular Stable Diffusion models
+        downloadSD15 = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Download Stable Diffusion 1.5 model (~4GB)";
+        };
 
-      downloadSDXL = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Download Stable Diffusion XL model (~7GB)";
-      };
+        downloadSDXL = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Download Stable Diffusion XL model (~7GB)";
+        };
 
-      # OPTIONAL: Download VAE models
-      downloadVAE = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-        description = "Download recommended VAE models";
-      };
+        # OPTIONAL: Download VAE models
+        downloadVAE = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Download recommended VAE models";
+        };
 
-      # OPTIONAL: Download upscale models
-      downloadUpscalers = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Download upscale models (ESRGAN, etc)";
-      };
+        # OPTIONAL: Download upscale models
+        downloadUpscalers = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Download upscale models (ESRGAN, etc)";
+        };
 
-      # OPTIONAL: Hugging Face token for gated models
-      huggingFaceToken = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "Hugging Face API token for downloading gated models (store in secrets)";
-      };
+        # OPTIONAL: Hugging Face token for gated models
+        huggingFaceToken = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          description = "Hugging Face API token for downloading gated models (store in secrets)";
+        };
 
-      # OPTIONAL: Custom model URLs to download
-      customModels = lib.mkOption {
-        type = lib.types.listOf (lib.types.submodule {
-          options = {
-            name = lib.mkOption {
-              type = lib.types.str;
-              description = "Model filename";
+        # OPTIONAL: Custom model URLs to download
+        customModels = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.str;
+                description = "Model filename";
+              };
+              url = lib.mkOption {
+                type = lib.types.str;
+                description = "Download URL";
+              };
+              type = lib.mkOption {
+                type = lib.types.enum ["checkpoint" "vae" "lora" "controlnet" "upscale" "clip"];
+                default = "checkpoint";
+                description = "Model type (determines storage directory)";
+              };
+              sha256 = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "SHA256 hash for verification (optional)";
+              };
             };
-            url = lib.mkOption {
-              type = lib.types.str;
-              description = "Download URL";
-            };
-            type = lib.mkOption {
-              type = lib.types.enum ["checkpoint" "vae" "lora" "controlnet" "upscale" "clip"];
-              default = "checkpoint";
-              description = "Model type (determines storage directory)";
-            };
-            sha256 = lib.mkOption {
-              type = lib.types.nullOr lib.types.str;
-              default = null;
-              description = "SHA256 hash for verification (optional)";
-            };
-          };
-        });
-        default = [];
-        example = [
-          {
-            name = "my-custom-model.safetensors";
-            url = "https://example.com/models/my-model.safetensors";
-            type = "checkpoint";
-            sha256 = "abc123...";
-          }
-        ];
-        description = "Custom models to download";
+          });
+          default = [];
+          example = [
+            {
+              name = "my-custom-model.safetensors";
+              url = "https://example.com/models/my-model.safetensors";
+              type = "checkpoint";
+              sha256 = "abc123...";
+            }
+          ];
+          description = "Custom models to download";
+        };
       };
     };
-  };
 
-  # ============================================================================
-  # CONFIG - What happens when model downloader is enabled
-  # ============================================================================
-  config = lib.mkIf (cfg.enable && modelsCfg.enable) {
-    # ----------------------------------------------------------------------------
-    # MODEL DIRECTORIES - Create subdirectories for different model types
-    # ----------------------------------------------------------------------------
-    systemd.tmpfiles.rules = [
-      "d ${cfg.dataDir}/models/checkpoints 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/vae 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/loras 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/controlnet 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/upscale_models 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/clip 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/clip_vision 0770 comfyui comfyui -"
-      "d ${cfg.dataDir}/models/embeddings 0770 comfyui comfyui -"
-    ];
+    # ============================================================================
+    # CONFIG - What happens when model downloader is enabled
+    # ============================================================================
+    config = lib.mkIf (cfg.enable && modelsCfg.enable) {
+      # ----------------------------------------------------------------------------
+      # MODEL DIRECTORIES - Create subdirectories for different model types
+      # ----------------------------------------------------------------------------
+      systemd.tmpfiles.rules = [
+        "d ${cfg.dataDir}/models/checkpoints 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/vae 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/loras 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/controlnet 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/upscale_models 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/clip 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/clip_vision 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/embeddings 0770 comfyui comfyui -"
+      ];
 
-    # ----------------------------------------------------------------------------
-    # MODEL DOWNLOADER - One-shot service to download models
-    # ----------------------------------------------------------------------------
-    systemd.services.comfyui-models-download = {
-      description = "Download ComfyUI Models";
-      wantedBy = ["comfyui.service"];
-      before = ["comfyui.service"];
-      after = ["comfyui-pytorch-setup.service"];
+      # ----------------------------------------------------------------------------
+      # MODEL DOWNLOADER - One-shot service to download models
+      # ----------------------------------------------------------------------------
+      systemd.services.comfyui-models-download = {
+        description = "Download ComfyUI Models";
+        wantedBy = ["comfyui.service"];
+        before = ["comfyui.service"];
+        after = ["comfyui-pytorch-setup.service"];
 
-      serviceConfig = {
-        Type = "oneshot";
-        User = "comfyui";
-        Group = "comfyui";
-        RemainAfterExit = true;
-        WorkingDirectory = cfg.dataDir;
-        # Models can be large, allow plenty of time
-        TimeoutStartSec = "infinity";
-        # Allow writing to data directory
-        ReadWritePaths = [cfg.dataDir];
-      };
+        serviceConfig = {
+          Type = "oneshot";
+          User = "comfyui";
+          Group = "comfyui";
+          RemainAfterExit = true;
+          WorkingDirectory = cfg.dataDir;
+          # Models can be large, allow plenty of time
+          TimeoutStartSec = "infinity";
+          # Allow writing to data directory
+          ReadWritePaths = [cfg.dataDir];
+        };
 
-      path = [pkgs.curl pkgs.wget pkgs.coreutils];
+        path = [pkgs.curl pkgs.wget pkgs.coreutils];
 
-      script = ''
-        set -e
-        MODELS_DIR="${cfg.dataDir}/models"
+        script = ''
+          set -e
+          MODELS_DIR="${cfg.dataDir}/models"
 
-        # Ensure all model directories exist
-        mkdir -p "$MODELS_DIR/checkpoints"
-        mkdir -p "$MODELS_DIR/vae"
-        mkdir -p "$MODELS_DIR/loras"
-        mkdir -p "$MODELS_DIR/controlnet"
-        mkdir -p "$MODELS_DIR/upscale_models"
-        mkdir -p "$MODELS_DIR/clip"
-        mkdir -p "$MODELS_DIR/clip_vision"
-        mkdir -p "$MODELS_DIR/embeddings"
+          # Ensure all model directories exist
+          mkdir -p "$MODELS_DIR/checkpoints"
+          mkdir -p "$MODELS_DIR/vae"
+          mkdir -p "$MODELS_DIR/loras"
+          mkdir -p "$MODELS_DIR/controlnet"
+          mkdir -p "$MODELS_DIR/upscale_models"
+          mkdir -p "$MODELS_DIR/clip"
+          mkdir -p "$MODELS_DIR/clip_vision"
+          mkdir -p "$MODELS_DIR/embeddings"
 
-        echo "Starting model downloads..."
+          echo "Starting model downloads..."
 
-        # Helper function to download with resume support
-        download_model() {
-          local url="$1"
-          local output="$2"
-          local model_name=$(basename "$output")
+          # Helper function to download with resume support
+          download_model() {
+            local url="$1"
+            local output="$2"
+            local model_name=$(basename "$output")
 
-          if [ -f "$output" ]; then
-            echo "Model $model_name already exists, skipping..."
-            return 0
-          fi
+            if [ -f "$output" ]; then
+              echo "Model $model_name already exists, skipping..."
+              return 0
+            fi
 
-          echo "Downloading $model_name..."
-          echo "  from: $url"
-          echo "  to: $output"
+            echo "Downloading $model_name..."
+            echo "  from: $url"
+            echo "  to: $output"
 
-          # Try with wget first (better resume support), fallback to curl
-          ${pkgs.wget}/bin/wget -c -O "$output.partial" "$url" || \
-          ${pkgs.curl}/bin/curl -L -C - -o "$output.partial" "$url" || {
-            echo "Error: Failed to download $model_name"
-            rm -f "$output.partial"
-            return 1
+            # Try with wget first (better resume support), fallback to curl
+            ${pkgs.wget}/bin/wget -c -O "$output.partial" "$url" || \
+            ${pkgs.curl}/bin/curl -L -C - -o "$output.partial" "$url" || {
+              echo "Error: Failed to download $model_name"
+              rm -f "$output.partial"
+              return 1
+            }
+
+            # Move completed download
+            mv "$output.partial" "$output"
+            echo "Successfully downloaded $model_name"
           }
 
-          # Move completed download
-          mv "$output.partial" "$output"
-          echo "Successfully downloaded $model_name"
-        }
+          ${lib.optionalString modelsCfg.downloadSD15 ''
+            # Download Stable Diffusion 1.5
+            echo "Downloading Stable Diffusion 1.5..."
+            download_model \
+              "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" \
+              "$MODELS_DIR/checkpoints/sd_v1-5-pruned-emaonly.safetensors" \
+              || echo "Warning: Failed to download SD 1.5"
+          ''}
 
-        ${lib.optionalString modelsCfg.downloadSD15 ''
-          # Download Stable Diffusion 1.5
-          echo "Downloading Stable Diffusion 1.5..."
-          download_model \
-            "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" \
-            "$MODELS_DIR/checkpoints/sd_v1-5-pruned-emaonly.safetensors" \
-            || echo "Warning: Failed to download SD 1.5"
-        ''}
+          ${lib.optionalString modelsCfg.downloadSDXL ''
+            # Download Stable Diffusion XL Base
+            echo "Downloading Stable Diffusion XL..."
+            download_model \
+              "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors" \
+              "$MODELS_DIR/checkpoints/sd_xl_base_1.0.safetensors" \
+              || echo "Warning: Failed to download SDXL"
+          ''}
 
-        ${lib.optionalString modelsCfg.downloadSDXL ''
-          # Download Stable Diffusion XL Base
-          echo "Downloading Stable Diffusion XL..."
-          download_model \
-            "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors" \
-            "$MODELS_DIR/checkpoints/sd_xl_base_1.0.safetensors" \
-            || echo "Warning: Failed to download SDXL"
-        ''}
+          ${lib.optionalString modelsCfg.downloadVAE ''
+            # Download recommended VAE models
+            echo "Downloading VAE models..."
 
-        ${lib.optionalString modelsCfg.downloadVAE ''
-          # Download recommended VAE models
-          echo "Downloading VAE models..."
+            # SD 1.5 VAE
+            download_model \
+              "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors" \
+              "$MODELS_DIR/vae/vae-ft-mse-840000-ema-pruned.safetensors" \
+              || echo "Warning: Failed to download SD 1.5 VAE"
 
-          # SD 1.5 VAE
-          download_model \
-            "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors" \
-            "$MODELS_DIR/vae/vae-ft-mse-840000-ema-pruned.safetensors" \
-            || echo "Warning: Failed to download SD 1.5 VAE"
+            # SDXL VAE
+            download_model \
+              "https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors" \
+              "$MODELS_DIR/vae/sdxl_vae.safetensors" \
+              || echo "Warning: Failed to download SDXL VAE"
+          ''}
 
-          # SDXL VAE
-          download_model \
-            "https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors" \
-            "$MODELS_DIR/vae/sdxl_vae.safetensors" \
-            || echo "Warning: Failed to download SDXL VAE"
-        ''}
+          ${lib.optionalString modelsCfg.downloadUpscalers ''
+            # Download upscale models
+            echo "Downloading upscale models..."
 
-        ${lib.optionalString modelsCfg.downloadUpscalers ''
-          # Download upscale models
-          echo "Downloading upscale models..."
+            # ESRGAN 4x
+            download_model \
+              "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth" \
+              "$MODELS_DIR/upscale_models/RealESRGAN_x4plus.pth" \
+              || echo "Warning: Failed to download RealESRGAN"
 
-          # ESRGAN 4x
-          download_model \
-            "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth" \
-            "$MODELS_DIR/upscale_models/RealESRGAN_x4plus.pth" \
-            || echo "Warning: Failed to download RealESRGAN"
+            # ESRGAN 4x Anime
+            download_model \
+              "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth" \
+              "$MODELS_DIR/upscale_models/RealESRGAN_x4plus_anime_6B.pth" \
+              || echo "Warning: Failed to download RealESRGAN Anime"
+          ''}
 
-          # ESRGAN 4x Anime
-          download_model \
-            "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth" \
-            "$MODELS_DIR/upscale_models/RealESRGAN_x4plus_anime_6B.pth" \
-            || echo "Warning: Failed to download RealESRGAN Anime"
-        ''}
+          # Download custom models
+          ${lib.concatMapStringsSep "\n" (model: ''
+              echo "Downloading custom model: ${model.name}..."
 
-        # Download custom models
-        ${lib.concatMapStringsSep "\n" (model: ''
-            echo "Downloading custom model: ${model.name}..."
+              # Determine output directory based on type
+              case "${model.type}" in
+                checkpoint) OUT_DIR="$MODELS_DIR/checkpoints" ;;
+                vae) OUT_DIR="$MODELS_DIR/vae" ;;
+                lora) OUT_DIR="$MODELS_DIR/loras" ;;
+                controlnet) OUT_DIR="$MODELS_DIR/controlnet" ;;
+                upscale) OUT_DIR="$MODELS_DIR/upscale_models" ;;
+                clip) OUT_DIR="$MODELS_DIR/clip" ;;
+                *) OUT_DIR="$MODELS_DIR/checkpoints" ;;
+              esac
 
-            # Determine output directory based on type
-            case "${model.type}" in
-              checkpoint) OUT_DIR="$MODELS_DIR/checkpoints" ;;
-              vae) OUT_DIR="$MODELS_DIR/vae" ;;
-              lora) OUT_DIR="$MODELS_DIR/loras" ;;
-              controlnet) OUT_DIR="$MODELS_DIR/controlnet" ;;
-              upscale) OUT_DIR="$MODELS_DIR/upscale_models" ;;
-              clip) OUT_DIR="$MODELS_DIR/clip" ;;
-              *) OUT_DIR="$MODELS_DIR/checkpoints" ;;
-            esac
+              download_model "${model.url}" "$OUT_DIR/${model.name}" || echo "Warning: Failed to download ${model.name}"
 
-            download_model "${model.url}" "$OUT_DIR/${model.name}" || echo "Warning: Failed to download ${model.name}"
+              ${lib.optionalString (model.sha256 != null) ''
+                # Verify SHA256 if provided
+                if [ -f "$OUT_DIR/${model.name}" ]; then
+                  echo "Verifying checksum for ${model.name}..."
+                  echo "${model.sha256}  $OUT_DIR/${model.name}" | ${pkgs.coreutils}/bin/sha256sum -c - || {
+                    echo "ERROR: Checksum mismatch for ${model.name}!"
+                    rm "$OUT_DIR/${model.name}"
+                    exit 1
+                  }
+                fi
+              ''}
+            '')
+            modelsCfg.customModels}
 
-            ${lib.optionalString (model.sha256 != null) ''
-              # Verify SHA256 if provided
-              if [ -f "$OUT_DIR/${model.name}" ]; then
-                echo "Verifying checksum for ${model.name}..."
-                echo "${model.sha256}  $OUT_DIR/${model.name}" | ${pkgs.coreutils}/bin/sha256sum -c - || {
-                  echo "ERROR: Checksum mismatch for ${model.name}!"
-                  rm "$OUT_DIR/${model.name}"
-                  exit 1
-                }
-              fi
-            ''}
-          '')
-          modelsCfg.customModels}
-
-        echo "Model downloads complete!"
-        echo ""
-        echo "Downloaded models are in: $MODELS_DIR"
-        echo "You can add more models manually to these directories:"
-        echo "  - Checkpoints: $MODELS_DIR/checkpoints/"
-        echo "  - VAE: $MODELS_DIR/vae/"
-        echo "  - LoRA: $MODELS_DIR/loras/"
-        echo "  - ControlNet: $MODELS_DIR/controlnet/"
-        echo "  - Upscalers: $MODELS_DIR/upscale_models/"
-      '';
-    };
-    # ----------------------------------------------------------------------------
-    # Generate extra_model_paths.yaml for ComfyUI
-    # ----------------------------------------------------------------------------
-    systemd.services.comfyui-model-config = {
-      description = "Create ComfyUI model paths configuration";
-      wantedBy = ["comfyui.service"];
-      before = ["comfyui.service"];
-
-      serviceConfig = {
-        Type = "oneshot";
-        User = "comfyui";
-        Group = "comfyui";
-        RemainAfterExit = true;
+          echo "Model downloads complete!"
+          echo ""
+          echo "Downloaded models are in: $MODELS_DIR"
+          echo "You can add more models manually to these directories:"
+          echo "  - Checkpoints: $MODELS_DIR/checkpoints/"
+          echo "  - VAE: $MODELS_DIR/vae/"
+          echo "  - LoRA: $MODELS_DIR/loras/"
+          echo "  - ControlNet: $MODELS_DIR/controlnet/"
+          echo "  - Upscalers: $MODELS_DIR/upscale_models/"
+        '';
       };
+      # ----------------------------------------------------------------------------
+      # Generate extra_model_paths.yaml for ComfyUI
+      # ----------------------------------------------------------------------------
+      systemd.services.comfyui-model-config = {
+        description = "Create ComfyUI model paths configuration";
+        wantedBy = ["comfyui.service"];
+        before = ["comfyui.service"];
 
-      script = ''
-                cat > ${cfg.dataDir}/extra_model_paths.yaml <<'EOF'
-        comfyui:
-          base_path: ${cfg.dataDir}/
-          checkpoints: models/checkpoints/
-          vae: models/vae/
-          loras: models/loras/
-          controlnet: models/controlnet/
-          upscale_models: models/upscale_models/
-          embeddings: models/embeddings/
-          clip: models/clip/
-          clip_vision: models/clip_vision/
-        EOF
-                chmod 644 ${cfg.dataDir}/extra_model_paths.yaml
-                echo "Created extra_model_paths.yaml"
-      '';
+        serviceConfig = {
+          Type = "oneshot";
+          User = "comfyui";
+          Group = "comfyui";
+          RemainAfterExit = true;
+        };
+
+        script = ''
+                  cat > ${cfg.dataDir}/extra_model_paths.yaml <<'EOF'
+          comfyui:
+            base_path: ${cfg.dataDir}/
+            checkpoints: models/checkpoints/
+            vae: models/vae/
+            loras: models/loras/
+            controlnet: models/controlnet/
+            upscale_models: models/upscale_models/
+            embeddings: models/embeddings/
+            clip: models/clip/
+            clip_vision: models/clip_vision/
+          EOF
+                  chmod 644 ${cfg.dataDir}/extra_model_paths.yaml
+                  echo "Created extra_model_paths.yaml"
+        '';
+      };
     };
   };
 }

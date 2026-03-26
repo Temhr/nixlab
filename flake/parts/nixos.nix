@@ -72,7 +72,6 @@ in {
     hosts-global = import ../../hosts/common/global;
     hosts-optional = import ../../hosts/common/optional;
     cachix = import ../../cachix.nix;
-    services = import ../../modules/nixos;
 
     # System — nixzen-only optional
     auto-backup-phone-media =
@@ -119,10 +118,27 @@ in {
         self.nixosModules.hosts-global
         self.nixosModules.hosts-optional
         self.nixosModules.cachix
-        self.nixosModules.services
         self.nixosModules.nixace
+        self.nixosModules.bookstack-custom
         self.nixosModules.secrets-bookstack
+        self.nixosModules.comfyui-p5000
+        self.nixosModules.comfyui-extensions
+        self.nixosModules.comfyui-models
+        self.nixosModules.grafana-custom
         self.nixosModules.secrets-grafana
+        self.nixosModules.homepage-custom
+        self.nixosModules.loki-custom
+        self.nixosModules.ollama-cpu
+        self.nixosModules.ollama-p5000
+        self.nixosModules.prometheus-custom
+        self.nixosModules.glance-custom
+        self.nixosModules.gotosocial-custom
+        self.nixosModules.home-assistant-custom
+        self.nixosModules.node-red-custom
+        self.nixosModules.syncthing-custom
+        self.nixosModules.waydroid-custom
+        self.nixosModules.wiki-js-custom
+        self.nixosModules.zola-custom
       ];
     };
     nixsun = mkHost {
@@ -133,10 +149,27 @@ in {
         self.nixosModules.hosts-global
         self.nixosModules.hosts-optional
         self.nixosModules.cachix
-        self.nixosModules.services
         self.nixosModules.nixsun
+        self.nixosModules.bookstack-custom
         self.nixosModules.secrets-bookstack
+        self.nixosModules.comfyui-p5000
+        self.nixosModules.comfyui-extensions
+        self.nixosModules.comfyui-models
+        self.nixosModules.grafana-custom
         self.nixosModules.secrets-grafana
+        self.nixosModules.homepage-custom
+        self.nixosModules.loki-custom
+        self.nixosModules.ollama-cpu
+        self.nixosModules.ollama-p5000
+        self.nixosModules.prometheus-custom
+        self.nixosModules.glance-custom
+        self.nixosModules.gotosocial-custom
+        self.nixosModules.home-assistant-custom
+        self.nixosModules.node-red-custom
+        self.nixosModules.syncthing-custom
+        self.nixosModules.waydroid-custom
+        self.nixosModules.wiki-js-custom
+        self.nixosModules.zola-custom
       ];
     };
     nixtop = mkHost {
@@ -147,10 +180,27 @@ in {
         self.nixosModules.hosts-global
         self.nixosModules.hosts-optional
         self.nixosModules.cachix
-        self.nixosModules.services
         self.nixosModules.nixtop
+        self.nixosModules.bookstack-custom
         self.nixosModules.secrets-bookstack
+        self.nixosModules.comfyui-p5000
+        self.nixosModules.comfyui-extensions
+        self.nixosModules.comfyui-models
+        self.nixosModules.grafana-custom
         self.nixosModules.secrets-grafana
+        self.nixosModules.homepage-custom
+        self.nixosModules.loki-custom
+        self.nixosModules.ollama-cpu
+        self.nixosModules.ollama-p5000
+        self.nixosModules.prometheus-custom
+        self.nixosModules.glance-custom
+        self.nixosModules.gotosocial-custom
+        self.nixosModules.home-assistant-custom
+        self.nixosModules.node-red-custom
+        self.nixosModules.syncthing-custom
+        self.nixosModules.waydroid-custom
+        self.nixosModules.wiki-js-custom
+        self.nixosModules.zola-custom
       ];
     };
     nixvat = mkHost {
@@ -161,10 +211,27 @@ in {
         self.nixosModules.hosts-global
         self.nixosModules.hosts-optional
         self.nixosModules.cachix
-        self.nixosModules.services
         self.nixosModules.nixvat
+        self.nixosModules.bookstack-custom
         self.nixosModules.secrets-bookstack
+        self.nixosModules.comfyui-p5000
+        self.nixosModules.comfyui-extensions
+        self.nixosModules.comfyui-models
+        self.nixosModules.grafana-custom
         self.nixosModules.secrets-grafana
+        self.nixosModules.homepage-custom
+        self.nixosModules.loki-custom
+        self.nixosModules.ollama-cpu
+        self.nixosModules.ollama-p5000
+        self.nixosModules.prometheus-custom
+        self.nixosModules.glance-custom
+        self.nixosModules.gotosocial-custom
+        self.nixosModules.home-assistant-custom
+        self.nixosModules.node-red-custom
+        self.nixosModules.syncthing-custom
+        self.nixosModules.waydroid-custom
+        self.nixosModules.wiki-js-custom
+        self.nixosModules.zola-custom
       ];
     };
     nixzen = mkHost {
@@ -175,10 +242,27 @@ in {
         self.nixosModules.hosts-global
         self.nixosModules.hosts-optional
         self.nixosModules.cachix
-        self.nixosModules.services
         self.nixosModules.nixzen
+        self.nixosModules.bookstack-custom
         self.nixosModules.secrets-bookstack
+        self.nixosModules.comfyui-p5000
+        self.nixosModules.comfyui-extensions
+        self.nixosModules.comfyui-models
+        self.nixosModules.grafana-custom
         self.nixosModules.secrets-grafana
+        self.nixosModules.homepage-custom
+        self.nixosModules.loki-custom
+        self.nixosModules.ollama-cpu
+        self.nixosModules.ollama-p5000
+        self.nixosModules.prometheus-custom
+        self.nixosModules.glance-custom
+        self.nixosModules.gotosocial-custom
+        self.nixosModules.home-assistant-custom
+        self.nixosModules.node-red-custom
+        self.nixosModules.syncthing-custom
+        self.nixosModules.waydroid-custom
+        self.nixosModules.wiki-js-custom
+        self.nixosModules.zola-custom
       ];
     };
   };
