@@ -56,7 +56,7 @@
   services.waydroid-custom = {
     enable = true;
     dataDir = "/data/waydroid";
-    allowedUsers = ["temhr"];
+    allowedUsers = ["${config.nixlab.mainUser}"];
     autoStart = false;
     enableGapps = true;
   };

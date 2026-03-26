@@ -63,12 +63,12 @@
       };
       /*
       systemd.services.fix-shelf-permissions = {
-        description = "Fix ownership of /home/temhr/shelf for temhr user";
+        description = "Fix ownership of ~/shelf for user";
         wantedBy = [ "local-fs.target" ];
         after = [ "local-fs.target" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = "/run/current-system/sw/bin/chown -R temhr:users /home/temhr/shelf";
+          ExecStart = "/run/current-system/sw/bin/chown -R ${config.nixlab.mainUser}:users ~/shelf";
         };
       };
       */
@@ -91,7 +91,7 @@
         allowedTCPPorts = [111 2049 4000 4001 4002 20048];
         allowedUDPPorts = [111 2049 4000 4001 4002 20048];
       };
-      systemd.tmpfiles.rules = ["d /mirror 1744 temhr user "];
+      systemd.tmpfiles.rules = ["d /mirror 1744 ${config.nixlab.mainUser} user "];
     })
     (lib.mkIf config.mount-mirk1.enable {
       fileSystems."/mnt/mirk1" = {
@@ -109,7 +109,7 @@
       # Ensure network-online.target is actually waited for
       systemd.network.wait-online.enable = true;
 
-      systemd.tmpfiles.rules = ["d /mnt 1744 temhr user"];
+      systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} user"];
     })
 
     (lib.mkIf config.mount-mirk3.enable {
@@ -127,7 +127,7 @@
 
       systemd.network.wait-online.enable = true;
 
-      systemd.tmpfiles.rules = ["d /mnt 1744 temhr user"];
+      systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} user"];
     })
   ];
 }

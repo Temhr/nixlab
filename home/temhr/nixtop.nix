@@ -1,4 +1,5 @@
 {
+  config,
   self,
   pkgs,
   ...
@@ -13,8 +14,8 @@
   # Add stuff for your user as you see fit:
   home = {
     enableNixpkgsReleaseCheck = false;
-    username = "temhr";
-    homeDirectory = "/home/temhr";
+    username = "${config.nixlab.mainUser}";
+    homeDirectory = "/home/${config.nixlab.mainUser}";
     #Environment Variables
     sessionVariables = {
     };

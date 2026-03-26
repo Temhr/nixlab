@@ -58,11 +58,11 @@
 
   services.syncthing-custom = {
     enable = true;
-    user = "temhr";
+    user = "${config.nixlab.mainUser}";
     group = "users";
     guiPort = 8384;
     guiAddress = "0.0.0.0";
-    configDir = "/home/temhr/.config/syncthing";
+    configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
     openFirewall = true;
     devices = {
       "nixvat" = {

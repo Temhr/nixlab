@@ -3,9 +3,9 @@
   config,
   ...
 }: {
-  home-manager.users.temhr =
+  home-manager.users.${config.nixlab.mainUser} =
     self.homeModules.
-      "temhr-${config.networking.hostName}";
+      "${config.nixlab.mainUser}-${config.networking.hostName}";
   # Pure name lookup. No path construction.
   # e.g. resolves to
   # self.homeModules.temhr-nixsun
