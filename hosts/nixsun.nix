@@ -59,7 +59,6 @@
     openFirewall = true;
     dataDir = "/data/grafana";
     credentialsFile = config.sops.secrets.GF_SECURITY_ADMIN_PASSWORD.path;
-    # adminPassword removed — now managed by sops
   };
   services.loki-custom.enable = false;
   services.prometheus-custom.enable = false;
