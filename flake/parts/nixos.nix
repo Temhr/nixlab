@@ -55,7 +55,7 @@ in {
 
     # Module — owns its own secrets path
     secrets-bookstack = import ../../hosts/common/optional/secrets-bookstack.nix;
-    secrets-grafana   = import ../../hosts/common/optional/secrets-grafana.nix;
+    secrets-grafana = import ../../hosts/common/optional/secrets-grafana.nix;
 
     # Hardware — common layers
     hw-common-global = import ../../hardware/common/global;

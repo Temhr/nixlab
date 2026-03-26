@@ -77,8 +77,8 @@ in {
 
       # Credentials File
       credentialsFile = lib.mkOption {
-        type        = lib.types.path;
-        example     = "/run/secrets/GF_SECURITY_ADMIN_PASSWORD";
+        type = lib.types.path;
+        example = "/run/secrets/GF_SECURITY_ADMIN_PASSWORD";
         description = ''
           Path to a file containing KEY=value environment variable overrides
           for Grafana. Should at minimum contain GF_SECURITY_ADMIN_PASSWORD.

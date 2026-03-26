@@ -1,8 +1,11 @@
-{ config, lib, ... }: {
-
+{
+  config,
+  lib,
+  ...
+}: {
   options.services.grafana-custom.secretsFile = lib.mkOption {
-    type        = lib.types.path;
-    default     = ../../../secrets/grafana.yaml;
+    type = lib.types.path;
+    default = ../../../secrets/grafana.yaml;
     description = "Path to the sops-encrypted grafana secrets file";
   };
 
