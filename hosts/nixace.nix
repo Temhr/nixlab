@@ -4,6 +4,14 @@
   pkgs,
   ...
 }: {
+  ## Shared system-wide user option
+  nixlab.mainUser = "temhr";
+  ## Enable automatic login for the user.
+  services.displayManager.autoLogin.user = config.nixlab.mainUser;
+
+  ## Graphical Shells ("none" "gnome" "plasma6")
+  gShells.DE = "plasma6";
+
   services.ignoreLid = {
     enable = true;
     # Optional:
@@ -12,12 +20,6 @@
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
-
-  ## Enable automatic login for the user.
-  services.displayManager.autoLogin.user = "temhr";
-
-  ## Graphical Shells ("none" "gnome" "plasma6")
-  gShells.DE = "plasma6";
 
   ## Development
   blender.enable = true; #3D Creation/Animation/Publishing System

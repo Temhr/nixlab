@@ -1,5 +1,17 @@
 # This is your system's configuration file. Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
+  ## Shared system-wide user option
+  nixlab.mainUser = "temhr";
+  ## Enable automatic login for the user.
+  services.displayManager.autoLogin.user = config.nixlab.mainUser;
+
+  ## Graphical Shells ("none" "gnome" "plasma6")
+  gShells.DE = "plasma6";
+
   services.ignoreLid = {
     enable = true;
     # Optional:
@@ -8,12 +20,6 @@
 
   ## Enable CUPS to print documents.
   services.printing.enable = true;
-
-  ## Enable automatic login for the user.
-  services.displayManager.autoLogin.user = "guest";
-
-  ## Graphical Shells ("none" "gnome" "plasma6")
-  gShells.DE = "plasma6";
 
   ## Development
   #blender.enable = true;    #3D Creation/Animation/Publishing System
