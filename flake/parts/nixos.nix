@@ -55,6 +55,7 @@ in {
 
     # Module — owns its own secrets path
     secrets-bookstack = import ../../hosts/common/optional/secrets-bookstack.nix;
+    secrets-grafana   = import ../../hosts/common/optional/secrets-grafana.nix;
 
     # Hardware — common layers
     hw-common-global = import ../../hardware/common/global;
@@ -121,6 +122,7 @@ in {
         self.nixosModules.services
         self.nixosModules.nixace
         self.nixosModules.secrets-bookstack
+        self.nixosModules.secrets-grafana
       ];
     };
     nixsun = mkHost {
@@ -134,6 +136,7 @@ in {
         self.nixosModules.services
         self.nixosModules.nixsun
         self.nixosModules.secrets-bookstack
+        self.nixosModules.secrets-grafana
       ];
     };
     nixtop = mkHost {
@@ -147,6 +150,7 @@ in {
         self.nixosModules.services
         self.nixosModules.nixtop
         self.nixosModules.secrets-bookstack
+        self.nixosModules.secrets-grafana
       ];
     };
     nixvat = mkHost {
@@ -160,6 +164,7 @@ in {
         self.nixosModules.services
         self.nixosModules.nixvat
         self.nixosModules.secrets-bookstack
+        self.nixosModules.secrets-grafana
       ];
     };
     nixzen = mkHost {
@@ -173,6 +178,7 @@ in {
         self.nixosModules.services
         self.nixosModules.nixzen
         self.nixosModules.secrets-bookstack
+        self.nixosModules.secrets-grafana
       ];
     };
   };

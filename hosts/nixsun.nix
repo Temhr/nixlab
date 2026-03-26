@@ -52,7 +52,15 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
-  services.grafana-custom.enable = false;
+  services.grafana-custom = {
+    enable          = false;
+    port            = 3101;
+    bindIP          = "0.0.0.0";
+    openFirewall    = true;
+    dataDir         = "/data/grafana";
+    credentialsFile = config.sops.secrets.GF_SECURITY_ADMIN_PASSWORD.path;
+    # adminPassword removed — now managed by sops
+  };
   services.loki-custom.enable = false;
   services.prometheus-custom.enable = false;
 

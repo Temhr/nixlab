@@ -75,12 +75,15 @@ in {
         description = "Allow anonymous read-only access to dashboards";
       };
 
-      # OPTIONAL: Default admin password (default: admin)
-      # IMPORTANT: Change this on first login!
-      adminPassword = lib.mkOption {
-        type = lib.types.str;
-        default = "admin";
-        description = "Initial admin password (change after first login!)";
+      # Credentials File
+      credentialsFile = lib.mkOption {
+        type        = lib.types.path;
+        example     = "/run/secrets/GF_SECURITY_ADMIN_PASSWORD";
+        description = ''
+          Path to a file containing KEY=value environment variable overrides
+          for Grafana. Should at minimum contain GF_SECURITY_ADMIN_PASSWORD.
+          Manage this file with sops-nix via secrets-grafana.nix.
+        '';
       };
 
       # MULTIPLE DASHBOARDS SUPPORT
@@ -220,7 +223,6 @@ in {
             else "http"
           }://${cfg.domain}/"
           else "http://localhost:${toString cfg.port}/";
-        GF_SECURITY_ADMIN_PASSWORD = cfg.adminPassword;
         GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
         GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
         GF_DATABASE_TYPE = "sqlite3";
@@ -240,9 +242,18 @@ in {
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [cfg.dataDir];
+        # Add this line — points systemd at the env file built in preStart
+        EnvironmentFile = "/run/grafana-credentials.env";
       };
 
-      preStart = ''
+      preStart = lib.mkBefore ''
+                # Build the credentials env file from the sops-decrypted secret.
+                # sops-nix decrypts to a bare value (just the password string),
+                # so we wrap it into KEY=value format that EnvironmentFile requires.
+                echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
+                  > /run/grafana-credentials.env
+                chmod 600 /run/grafana-credentials.env
+
                 # Create minimal config if it doesn't exist
                 if [ ! -f ${cfg.dataDir}/grafana.ini ]; then
                   cat > ${cfg.dataDir}/grafana.ini << EOF

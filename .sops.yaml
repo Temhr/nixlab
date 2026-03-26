@@ -1,8 +1,16 @@
 keys:
-  - &nixace age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332  # paste your public key here
+  - &nixace age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332
+  - &nixsun age1uc06xlk6sw8z3nzc9sxugvcdmsnyrapwdamewmxz03hfqqcc8d3q29ydjr
 
 creation_rules:
   - path_regex: secrets/bookstack\.yaml$
     key_groups:
       - age:
         - *nixace
+        - *nixsun
+
+  - path_regex: secrets/grafana\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixsun
