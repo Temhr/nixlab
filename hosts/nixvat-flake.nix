@@ -30,7 +30,7 @@
       self.nixosModules.prometheus-nixlab
       self.nixosModules.glance-nixlab
       self.nixosModules.gotosocial-nixlab
-      self.nixosModules.home-assistant-custom
+      self.nixosModules.home-assistant-nixlab
       self.nixosModules.node-red-custom
       self.nixosModules.syncthing-custom
       self.nixosModules.waydroid-custom

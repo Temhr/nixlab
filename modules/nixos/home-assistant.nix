@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.home-assistant-custom = {
+  flake.nixosModules.home-assistant-nixlab = {
     config,
     lib,
     ...
