@@ -60,7 +60,7 @@
     dataDir = "/data/grafana";
     credentialsFile = config.sops.secrets.GF_SECURITY_ADMIN_PASSWORD.path;
   };
-  services.loki-custom.enable = false;
+  services.loki-nixlab.enable = false;
   services.prometheus-custom.enable = false;
 
   # Define your Flatpak packages here

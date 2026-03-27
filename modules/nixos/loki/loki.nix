@@ -1,17 +1,17 @@
 {...}: {
-  flake.nixosModules.loki-custom = {
+  flake.nixosModules.loki-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.loki-custom;
+    cfg = config.services.loki-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.loki-custom = {
+      services.loki-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Loki log aggregation system";
 
@@ -497,10 +497,10 @@ Why Migrate:
 Migration from Old Config:
 --------------------------
 If you had:
-  services.loki-custom.enablePromtail = true;
+  services.loki-nixlab.enablePromtail = true;
 
 Now use:
-  services.loki-custom.enableAlloy = true;
+  services.loki-nixlab.enableAlloy = true;
 
 Everything else remains the same!
 
@@ -511,7 +511,7 @@ USAGE EXAMPLE
 
 Minimal configuration:
 ----------------------
-services.loki-custom = {
+services.loki-nixlab = {
   enable = true;
   enableAlloy = true;  # Changed from enablePromtail
 };
@@ -521,7 +521,7 @@ services.loki-custom = {
 
 Full configuration with domain:
 --------------------------------
-services.loki-custom = {
+services.loki-nixlab = {
   enable = true;
   port = 3100;
   bindIP = "0.0.0.0";
@@ -539,7 +539,7 @@ services.loki-custom = {
 
 With maintenance logging:
 --------------------------
-services.loki-custom = {
+services.loki-nixlab = {
   enable = true;
   enableAlloy = true;
 

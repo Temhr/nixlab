@@ -22,7 +22,7 @@
     };
   };
 
-  services.loki-custom = lib.mkDefault {
+  services.loki-nixlab = lib.mkDefault {
     enable = false;
     port = 3100;
     bindIP = "0.0.0.0";

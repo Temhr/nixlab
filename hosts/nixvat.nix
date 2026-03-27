@@ -122,7 +122,7 @@
   };
 
   services.grafana-nixlab.enable = false;
-  services.loki-custom.enable = false;
+  services.loki-nixlab.enable = false;
   services.prometheus-custom.enable = false;
 
   services.syncthing-custom = {

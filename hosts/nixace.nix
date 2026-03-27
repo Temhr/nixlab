@@ -157,7 +157,7 @@
     dataDir = "/data/grafana";
     # dashboards uses module defaults
   };
-  services.loki-custom.enable = false;
+  services.loki-nixlab.enable = false;
   services.prometheus-custom.enable = false;
 
   # Define your Flatpak packages here

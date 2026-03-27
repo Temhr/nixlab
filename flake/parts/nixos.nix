@@ -127,7 +127,7 @@ in {
         self.nixosModules.grafana-nixlab
         self.nixosModules.secrets-grafana
         self.nixosModules.homepage-nixlab
-        self.nixosModules.loki-custom
+        self.nixosModules.loki-nixlab
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-custom
@@ -158,7 +158,7 @@ in {
         self.nixosModules.grafana-nixlab
         self.nixosModules.secrets-grafana
         self.nixosModules.homepage-nixlab
-        self.nixosModules.loki-custom
+        self.nixosModules.loki-nixlab
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-custom
@@ -189,7 +189,7 @@ in {
         self.nixosModules.grafana-nixlab
         self.nixosModules.secrets-grafana
         self.nixosModules.homepage-nixlab
-        self.nixosModules.loki-custom
+        self.nixosModules.loki-nixlab
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-custom
@@ -220,7 +220,7 @@ in {
         self.nixosModules.grafana-nixlab
         self.nixosModules.secrets-grafana
         self.nixosModules.homepage-nixlab
-        self.nixosModules.loki-custom
+        self.nixosModules.loki-nixlab
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-custom
@@ -251,7 +251,7 @@ in {
         self.nixosModules.grafana-nixlab
         self.nixosModules.secrets-grafana
         self.nixosModules.homepage-nixlab
-        self.nixosModules.loki-custom
+        self.nixosModules.loki-nixlab
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-custom
