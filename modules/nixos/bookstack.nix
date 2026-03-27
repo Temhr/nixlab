@@ -1,16 +1,16 @@
 {...}: {
-  flake.nixosModules.bookstack-custom = {
+  flake.nixosModules.bookstack-nixlab = {
     config,
     lib,
     ...
   }: let
-    cfg = config.services.bookstack-custom;
+    cfg = config.services.bookstack-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.bookstack-custom = {
+      services.bookstack-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "BookStack wiki service";
 
@@ -393,7 +393,7 @@ Declare secrets (elegant shorthand using lib.genAttrs):
 
 Wire the module:
 
-  services.bookstack-custom = {
+  services.bookstack-nixlab = {
     enable             = true;
     appURL             = "http://192.168.1.50:6875";   # your LAN IP
     dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
@@ -403,7 +403,7 @@ Wire the module:
 
 With dataDir on a separate drive:
 
-  services.bookstack-custom = {
+  services.bookstack-nixlab = {
     enable             = true;
     appURL             = "http://192.168.1.50:6875";
     dataDir            = "/data/bookstack";
@@ -426,7 +426,7 @@ With mDNS .local hostname (no domain registrar needed):
   };
   networking.hostName = "bookstack";
 
-  services.bookstack-custom = {
+  services.bookstack-nixlab = {
     enable             = true;
     appURL             = "http://bookstack.local";
     dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
@@ -437,7 +437,7 @@ With mDNS .local hostname (no domain registrar needed):
 
 With nginx reverse proxy (LAN domain via Pi-hole or router DNS):
 
-  services.bookstack-custom = {
+  services.bookstack-nixlab = {
     enable             = true;
     appURL             = "http://bookstack.home";
     domain             = "bookstack.home";

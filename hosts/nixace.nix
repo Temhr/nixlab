@@ -137,7 +137,7 @@
   networking.firewall.extraInputRules = ''
     ip saddr 10.88.0.0/16 tcp dport 3306 accept
   '';
-  services.bookstack-custom = {
+  services.bookstack-nixlab = {
     enable = true;
     appURL = "http://192.168.0.200:6875";
     dataDir = "/data/bookstack";

@@ -68,7 +68,7 @@
     openFirewall = true;
   };
 
-  services.bookstack-custom = {
+  services.bookstack-nixlab = {
     enable = false;
     port = 3002;
     bindIP = "0.0.0.0";

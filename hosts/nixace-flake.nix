@@ -15,7 +15,7 @@
       self.nixosModules.hosts-optional
       self.nixosModules.cachix
       self.nixosModules.nixace
-      self.nixosModules.bookstack-custom
+      self.nixosModules.bookstack-nixlab
       self.nixosModules.secrets-bookstack
       self.nixosModules.comfyui-p5000
       self.nixosModules.comfyui-extensions
