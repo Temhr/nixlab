@@ -1,7 +1,4 @@
 {...}: {
-  flake.nixosModules = {
-    nixlab = import ../../modules/nixos;
-  };
   flake.homeModules = {
     # Common layers
     home-common-global = import ../../home/common/global;
