@@ -22,7 +22,7 @@
       self.nixosModules.comfyui-models
       self.nixosModules.grafana-nixlab
       self.nixosModules.secrets-grafana
-      self.nixosModules.homepage-custom
+      self.nixosModules.homepage-nixlab
       self.nixosModules.loki-custom
       self.nixosModules.ollama-cpu
       self.nixosModules.ollama-p5000

@@ -52,7 +52,7 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
-  services.homepage-custom = {
+  services.homepage-nixlab = {
     enable = true;
     port = 3000;
     bindIP = "0.0.0.0";

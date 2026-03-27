@@ -1,11 +1,11 @@
 {...}: {
-  flake.nixosModules.homepage-custom = {
+  flake.nixosModules.homepage-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.homepage-custom;
+    cfg = config.services.homepage-nixlab;
 
     # Import the services configuration from services.nix
     servicesConfig = import ./_services.nix;
@@ -18,7 +18,7 @@
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.homepage-custom = {
+      services.homepage-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Homepage service";
 
@@ -227,7 +227,7 @@ USAGE EXAMPLE
 
 Minimal configuration:
 ----------------------
-services.homepage-custom = {
+services.homepage-nixlab = {
   enable = true;
 };
 # Access at: http://localhost:3000
@@ -235,7 +235,7 @@ services.homepage-custom = {
 
 Network access without domain:
 -------------------------------
-services.homepage-custom = {
+services.homepage-nixlab = {
   enable = true;
   bindIP = "0.0.0.0";
   openFirewall = true;
@@ -245,7 +245,7 @@ services.homepage-custom = {
 
 Configuration with home directory:
 -----------------------------------
-services.homepage-custom = {
+services.homepage-nixlab = {
   enable = true;
   dataDir = "~/shelf/data/homepage";
 };
@@ -254,7 +254,7 @@ services.homepage-custom = {
 
 Full configuration with domain:
 --------------------------------
-services.homepage-custom = {
+services.homepage-nixlab = {
   enable = true;
   port = 3000;
   bindIP = "127.0.0.1";
