@@ -1,17 +1,17 @@
 {...}: {
-  flake.nixosModules.waydroid-custom = {
+  flake.nixosModules.waydroid-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.waydroid-custom;
+    cfg = config.services.waydroid-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.waydroid-custom = {
+      services.waydroid-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Waydroid Android container service";
 
@@ -43,7 +43,7 @@
         imagesDir = lib.mkOption {
           type = lib.types.path;
           default = "${cfg.dataDir}/images";
-          defaultText = lib.literalExpression ''"''${config.services.waydroid-custom.dataDir}/images"'';
+          defaultText = lib.literalExpression ''"''${config.services.waydroid-nixlab.dataDir}/images"'';
           description = "Directory for Android system images";
         };
 
@@ -206,7 +206,7 @@ USAGE EXAMPLE
 
 Minimal configuration (RECOMMENDED - manual start):
 ----------------------------------------------------
-services.waydroid-custom = {
+services.waydroid-nixlab = {
   enable = true;
   autoStart = false;  # Don't auto-start - prevents blocking rebuilds
 };
@@ -216,7 +216,7 @@ services.waydroid-custom = {
 
 Basic configuration with users:
 --------------------------------
-services.waydroid-custom = {
+services.waydroid-nixlab = {
   enable = true;
   allowedUsers = [ "<user>" ];
   autoStart = false;  # Keep false to avoid rebuild hangs
@@ -225,7 +225,7 @@ services.waydroid-custom = {
 
 Configuration with Google Play Services:
 -----------------------------------------
-services.waydroid-custom = {
+services.waydroid-nixlab = {
   enable = true;
   enableGapps = true;  # Install Google Play Services
   allowedUsers = [ "<user>" ];
@@ -234,7 +234,7 @@ services.waydroid-custom = {
 
 Full configuration:
 -------------------
-services.waydroid-custom = {
+services.waydroid-nixlab = {
   enable = true;
   dataDir = "/data/waydroid";
   allowedUsers = [ "alice" "bob" ];

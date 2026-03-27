@@ -53,7 +53,7 @@
   #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
   ## Self-hosted apps and services
-  services.waydroid-custom = {
+  services.waydroid-nixlab = {
     enable = true;
     dataDir = "/data/waydroid";
     allowedUsers = ["${config.nixlab.mainUser}"];
