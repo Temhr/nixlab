@@ -16,6 +16,7 @@
     ./lid.nix
     ./locale.nix
     ./network.nix
+    ./nginx.nix
     ./nix.nix
     ./nixpkgs.nix
     ./open-ssh.nix
