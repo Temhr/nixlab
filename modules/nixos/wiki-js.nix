@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.wiki-js-custom = {
+  flake.nixosModules.wiki-js-nixlab = {
     config,
     lib,
     ...

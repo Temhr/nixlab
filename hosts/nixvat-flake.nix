@@ -34,7 +34,7 @@
       self.nixosModules.node-red-nixlab
       self.nixosModules.syncthing-nixlab
       self.nixosModules.waydroid-nixlab
-      self.nixosModules.wiki-js-custom
+      self.nixosModules.wiki-js-nixlab
       self.nixosModules.zola-custom
     ];
   };
