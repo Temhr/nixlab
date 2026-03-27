@@ -61,6 +61,7 @@
       imports = [
         (inputs.import-tree ./flake/parts)
         (inputs.import-tree ./modules/nixos)
+        (inputs.import-tree ./overlays)
       ];
     };
 }

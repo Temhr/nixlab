@@ -3,9 +3,9 @@
   flake.overlays = {
     additions = final: _prev: import ../pkgs final.pkgs;
     modifications = final: prev: let
-      ollamaOverlay = import ./ollama-p5000.nix final prev;
-      open-webuiOverlay = import ./open-webui.nix final prev;
-      comfyuiOverlay = import ./comfyui-p5000.nix final prev;
+      ollamaOverlay = import ./_ollama-p5000.nix final prev;
+      open-webuiOverlay = import ./_open-webui.nix final prev;
+      comfyuiOverlay = import ./_comfyui-p5000.nix final prev;
     in
       ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
     ollama-packages = final: _prev: {

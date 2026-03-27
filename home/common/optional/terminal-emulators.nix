@@ -1,0 +1,39 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  options = {
+    alacritty = {
+      enable = lib.mkEnableOption "enables alacritty";
+    };
+    ghostty = {
+      enable = lib.mkEnableOption "enables ghostty";
+    };
+    kitty = {
+      enable = lib.mkEnableOption "enables kitty";
+    };
+    konsole = {
+      enable = lib.mkEnableOption "enables konsole";
+    };
+  };
+
+  config = lib.mkMerge [
+    (lib.mkIf config.alacritty.enable {
+      home.packages = with pkgs; [alacritty]; #Cross-platform, GPU-accelerated terminal emulator
+    })
+    (lib.mkIf config.ghostty.enable {
+      home.packages = [
+        #inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
+        pkgs.unstable.ghostty
+      ]; #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
+    })
+    (lib.mkIf config.kitty.enable {
+      home.packages = with pkgs; [kitty]; #Modern, hackable, featureful, OpenGL based terminal emulator
+    })
+    (lib.mkIf config.konsole.enable {
+      home.packages = with pkgs; [kdePackages.konsole]; #Terminal emulator by KDE
+    })
+  ];
+}
