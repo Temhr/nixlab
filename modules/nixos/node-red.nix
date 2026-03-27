@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.node-red-custom = {
+  flake.nixosModules.node-red-nixlab = {
     config,
     lib,
     pkgs,

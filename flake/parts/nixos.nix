@@ -134,7 +134,7 @@ in {
         self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-nixlab
         self.nixosModules.home-assistant-nixlab
-        self.nixosModules.node-red-custom
+        self.nixosModules.node-red-nixlab
         self.nixosModules.syncthing-custom
         self.nixosModules.waydroid-custom
         self.nixosModules.wiki-js-custom
@@ -165,7 +165,7 @@ in {
         self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-nixlab
         self.nixosModules.home-assistant-nixlab
-        self.nixosModules.node-red-custom
+        self.nixosModules.node-red-nixlab
         self.nixosModules.syncthing-custom
         self.nixosModules.waydroid-custom
         self.nixosModules.wiki-js-custom
@@ -196,7 +196,7 @@ in {
         self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-nixlab
         self.nixosModules.home-assistant-nixlab
-        self.nixosModules.node-red-custom
+        self.nixosModules.node-red-nixlab
         self.nixosModules.syncthing-custom
         self.nixosModules.waydroid-custom
         self.nixosModules.wiki-js-custom
@@ -227,7 +227,7 @@ in {
         self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-nixlab
         self.nixosModules.home-assistant-nixlab
-        self.nixosModules.node-red-custom
+        self.nixosModules.node-red-nixlab
         self.nixosModules.syncthing-custom
         self.nixosModules.waydroid-custom
         self.nixosModules.wiki-js-custom
@@ -258,7 +258,7 @@ in {
         self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-nixlab
         self.nixosModules.home-assistant-nixlab
-        self.nixosModules.node-red-custom
+        self.nixosModules.node-red-nixlab
         self.nixosModules.syncthing-custom
         self.nixosModules.waydroid-custom
         self.nixosModules.wiki-js-custom
