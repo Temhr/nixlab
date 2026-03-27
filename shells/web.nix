@@ -1,34 +1,37 @@
-{pkgs, ...}:
-pkgs.mkShell {
-  name = "web-dev";
+{...}: {
+  perSystem = {pkgs, ...}: {
+    devShells.web = pkgs.mkShell {
+      name = "web-dev";
 
-  buildInputs = with pkgs; [
-    # Node.js ecosystem
-    nodejs
-    nodePackages.npm
-    nodePackages.yarn
-    nodePackages.pnpm
+      buildInputs = with pkgs; [
+        # Node.js ecosystem
+        nodejs
+        nodePackages.npm
+        nodePackages.yarn
+        nodePackages.pnpm
 
-    # Development tools
-    nodePackages.typescript
-    nodePackages.typescript-language-server
-    nodePackages.prettier
-    nodePackages.eslint
+        # Development tools
+        nodePackages.typescript
+        nodePackages.typescript-language-server
+        nodePackages.prettier
+        nodePackages.eslint
 
-    # Browsers for testing
-    chromium
-  ];
+        # Browsers for testing
+        chromium
+      ];
 
-  shellHook = ''
-    echo "🌐 Web Development Environment"
-    echo "Node version: $(node --version)"
-    echo "NPM version: $(npm --version)"
-    echo ""
-    echo "Available tools:"
-    echo "  - npm/yarn/pnpm: Package managers"
-    echo "  - typescript: TypeScript compiler"
-    echo "  - prettier: Code formatter"
-    echo "  - eslint: Linter"
-    echo "  - webpack/vite: install per-project via npm"
-  '';
+      shellHook = ''
+        echo "🌐 Web Development Environment"
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        echo ""
+        echo "Available tools:"
+        echo "  - npm/yarn/pnpm: Package managers"
+        echo "  - typescript: TypeScript compiler"
+        echo "  - prettier: Code formatter"
+        echo "  - eslint: Linter"
+        echo "  - webpack/vite: install per-project via npm"
+      '';
+    };
+  };
 }
