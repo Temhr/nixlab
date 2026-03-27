@@ -56,7 +56,7 @@
   services.loki-nixlab.enable = false;
   services.prometheus-nixlab.enable = false;
 
-  services.syncthing-custom = {
+  services.syncthing-nixlab = {
     enable = true;
     user = "${config.nixlab.mainUser}";
     group = "users";

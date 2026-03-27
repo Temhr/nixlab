@@ -1,16 +1,16 @@
 {...}: {
-  flake.nixosModules.syncthing-custom = {
+  flake.nixosModules.syncthing-nixlab = {
     config,
     lib,
     ...
   }: let
-    cfg = config.services.syncthing-custom;
+    cfg = config.services.syncthing-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.syncthing-custom = {
+      services.syncthing-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Syncthing service";
 
@@ -381,7 +381,7 @@ Example scenarios:
 
 Fully declarative (recommended for servers):
 --------------------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   overrideDevices = true;
   overrideFolders = true;
@@ -393,7 +393,7 @@ services.syncthing-custom = {
 
 GUI-managed (easier for personal use):
 ---------------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   overrideDevices = false;
   overrideFolders = false;
@@ -403,7 +403,7 @@ services.syncthing-custom = {
 
 Hybrid approach:
 ----------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   overrideDevices = true;   # Devices in Nix
   overrideFolders = false;  # Folders via GUI
@@ -433,7 +433,7 @@ USAGE EXAMPLE
 
 Minimal configuration (only required options):
 ----------------------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;  # REQUIRED
 };
 # This runs Syncthing as the "syncthing" system user
@@ -442,7 +442,7 @@ services.syncthing-custom = {
 
 Run as specific user (e.g., your personal user):
 -------------------------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   user = "myuser";              # Run as this user
   group = "users";              # User's group
@@ -453,7 +453,7 @@ services.syncthing-custom = {
 
 Full configuration (all options):
 ----------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;                # REQUIRED: Turn on the service
   user = "syncthing";           # OPTIONAL: User to run as (default: syncthing)
   group = "syncthing";          # OPTIONAL: Group (default: same as user)
@@ -547,7 +547,7 @@ OPTION A: Configure in Nix (declarative, survives rebuilds):
   Copy the long alphanumeric string
 
 2. Add to your Nix config:
-  services.syncthing-custom = {
+  services.syncthing-nixlab = {
     enable = true;
     overrideDevices = true;  # Important!
     devices = {
@@ -662,7 +662,7 @@ COMMON USE CASES
 
 Personal file sync between computers:
 --------------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   user = "myuser";
   guiAddress = "127.0.0.1";  # Only local access
@@ -671,7 +671,7 @@ services.syncthing-custom = {
 
 Family file sharing server:
 ----------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   user = "syncthing";
   guiAddress = "0.0.0.0";    # Allow network access
@@ -687,7 +687,7 @@ services.syncthing-custom = {
 
 Secure remote access with domain:
 ----------------------------------
-services.syncthing-custom = {
+services.syncthing-nixlab = {
   enable = true;
   domain = "sync.example.com";
   enableSSL = true;
