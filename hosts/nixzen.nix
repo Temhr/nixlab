@@ -52,7 +52,7 @@
   #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
 
   ## Self-hosted apps and services
-  services.grafana-custom.enable = false;
+  services.grafana-nixlab.enable = false;
   services.loki-custom.enable = false;
   services.prometheus-custom.enable = false;
 

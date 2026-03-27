@@ -1,17 +1,17 @@
 {...}: {
-  flake.nixosModules.grafana-custom = {
+  flake.nixosModules.grafana-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.grafana-custom;
+    cfg = config.services.grafana-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.grafana-custom = {
+      services.grafana-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Grafana monitoring and visualization platform";
 
@@ -402,7 +402,7 @@ MULTIPLE DASHBOARDS USAGE
 
 Basic example with multiple dashboards:
 ---------------------------------------
-services.grafana-custom = {
+services.grafana-nixlab = {
   enable = true;
 
   dashboards = {
@@ -445,7 +445,7 @@ services.grafana-custom = {
 
 Advanced example with organization:
 ------------------------------------
-services.grafana-custom = {
+services.grafana-nixlab = {
   enable = true;
   port = 3100;
   bindIP = "0.0.0.0";
@@ -517,7 +517,7 @@ Directory structure example:
 
 Organizing dashboards by source:
 ---------------------------------
-services.grafana-custom = {
+services.grafana-nixlab = {
   enable = true;
 
   dashboards = {

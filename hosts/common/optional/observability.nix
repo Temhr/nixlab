@@ -2,7 +2,7 @@
   # All three services default to disabled.
   # Enable per-host by setting enable = true in the host file.
 
-  services.grafana-custom = lib.mkDefault {
+  services.grafana-nixlab = lib.mkDefault {
     enable = false;
     port = 3101;
     bindIP = "0.0.0.0";

@@ -20,7 +20,7 @@
       self.nixosModules.comfyui-p5000
       self.nixosModules.comfyui-extensions
       self.nixosModules.comfyui-models
-      self.nixosModules.grafana-custom
+      self.nixosModules.grafana-nixlab
       self.nixosModules.secrets-grafana
       self.nixosModules.homepage-custom
       self.nixosModules.loki-custom

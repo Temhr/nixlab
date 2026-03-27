@@ -61,7 +61,7 @@
     enableGapps = true;
   };
 
-  services.grafana-custom.enable = false;
+  services.grafana-nixlab.enable = false;
   services.loki-custom.enable = false;
   services.prometheus-custom.enable = false;
 

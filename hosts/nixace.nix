@@ -149,7 +149,7 @@
 
   # Dashboard paths removed entirely.
   # Module supplies its own defaults.
-  services.grafana-custom = {
+  services.grafana-nixlab = {
     enable = false;
     port = 3101;
     bindIP = "0.0.0.0";
