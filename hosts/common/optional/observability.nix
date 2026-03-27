@@ -31,7 +31,7 @@
     maintenance.enable = true;
   };
 
-  services.prometheus-custom = lib.mkDefault {
+  services.prometheus-nixlab = lib.mkDefault {
     enable = false;
     port = 9090;
     bindIP = "0.0.0.0";

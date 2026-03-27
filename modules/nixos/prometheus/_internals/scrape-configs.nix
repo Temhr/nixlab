@@ -5,7 +5,7 @@
   config,
   lib,
 }: let
-  cfg = config.services.prometheus-custom;
+  cfg = config.services.prometheus-nixlab;
 
   # Helper for blackbox exporter jobs
   mkBlackboxJob = jobName: module: targets: {

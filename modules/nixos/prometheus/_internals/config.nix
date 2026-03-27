@@ -6,7 +6,7 @@
   lib,
   pkgs,
 }: let
-  cfg = config.services.prometheus-custom;
+  cfg = config.services.prometheus-nixlab;
 
   # Import specialized configurations
   prometheusService = import ./services/prometheus.nix {inherit config lib pkgs;};

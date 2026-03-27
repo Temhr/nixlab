@@ -12,7 +12,7 @@
   lib,
   pkgs,
 }: let
-  cfg = config.services.prometheus-custom;
+  cfg = config.services.prometheus-nixlab;
 
   # Build collector flags dynamically
   collectorFlags = lib.concatStringsSep " " ([

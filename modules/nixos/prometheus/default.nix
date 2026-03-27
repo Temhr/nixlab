@@ -18,20 +18,20 @@
 # FILE: prometheus/default.nix (main entry point)
 # ============================================================================
 {...}: {
-  flake.nixosModules.prometheus-custom = {
+  flake.nixosModules.prometheus-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.prometheus-custom;
+    cfg = config.services.prometheus-nixlab;
 
     # Import all submodules - pass pkgs to options
     options = import ./_internals/options.nix {inherit lib pkgs;};
     prometheusConfig = import ./_internals/config.nix {inherit config lib pkgs;};
   in {
     # Import options from separate file
-    options.services.prometheus-custom = options;
+    options.services.prometheus-nixlab = options;
 
     # Import configuration from separate file
     config = lib.mkIf cfg.enable prometheusConfig;
@@ -47,7 +47,7 @@
 #   imports = [ ./prometheus ];  # imports prometheus/default.nix
 #
 # Configuration stays the same:
-#   services.prometheus-custom = {
+#   services.prometheus-nixlab = {
 #     enable = true;
 #     # ... options
 #   };

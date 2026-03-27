@@ -6,7 +6,7 @@
   lib,
   pkgs,
 }: let
-  cfg = config.services.prometheus-custom;
+  cfg = config.services.prometheus-nixlab;
 
   blackboxConfig = pkgs.writeText "blackbox.yml" ''
     modules:

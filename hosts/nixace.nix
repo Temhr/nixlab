@@ -158,7 +158,7 @@
     # dashboards uses module defaults
   };
   services.loki-nixlab.enable = false;
-  services.prometheus-custom.enable = false;
+  services.prometheus-nixlab.enable = false;
 
   # Define your Flatpak packages here
   flatpakPackages = [

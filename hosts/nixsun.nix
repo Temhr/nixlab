@@ -61,7 +61,7 @@
     credentialsFile = config.sops.secrets.GF_SECURITY_ADMIN_PASSWORD.path;
   };
   services.loki-nixlab.enable = false;
-  services.prometheus-custom.enable = false;
+  services.prometheus-nixlab.enable = false;
 
   # Define your Flatpak packages here
   flatpakPackages = [

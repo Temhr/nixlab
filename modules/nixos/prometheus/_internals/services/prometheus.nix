@@ -6,7 +6,7 @@
   lib,
   pkgs,
 }: let
-  cfg = config.services.prometheus-custom;
+  cfg = config.services.prometheus-nixlab;
   scrapeConfigs = import ../scrape-configs.nix {inherit config lib;};
 
   # Alert rules

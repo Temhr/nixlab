@@ -5,7 +5,7 @@
   config,
   lib,
 }: let
-  cfg = config.services.prometheus-custom;
+  cfg = config.services.prometheus-nixlab;
 in {
   enable = lib.mkIf (cfg.domain != null) true;
 

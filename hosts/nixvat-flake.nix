@@ -27,7 +27,7 @@
       self.nixosModules.loki-nixlab
       self.nixosModules.ollama-cpu
       self.nixosModules.ollama-p5000
-      self.nixosModules.prometheus-custom
+      self.nixosModules.prometheus-nixlab
       self.nixosModules.glance-custom
       self.nixosModules.gotosocial-custom
       self.nixosModules.home-assistant-custom
