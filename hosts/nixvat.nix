@@ -100,7 +100,7 @@
     openFirewall = true;
   };
 
-  services.glance-custom = {
+  services.glance-nixlab = {
     enable = true;
     port = 3004;
     bindIP = "0.0.0.0";

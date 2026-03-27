@@ -131,7 +131,7 @@ in {
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-nixlab
-        self.nixosModules.glance-custom
+        self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-custom
         self.nixosModules.home-assistant-custom
         self.nixosModules.node-red-custom
@@ -162,7 +162,7 @@ in {
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-nixlab
-        self.nixosModules.glance-custom
+        self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-custom
         self.nixosModules.home-assistant-custom
         self.nixosModules.node-red-custom
@@ -193,7 +193,7 @@ in {
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-nixlab
-        self.nixosModules.glance-custom
+        self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-custom
         self.nixosModules.home-assistant-custom
         self.nixosModules.node-red-custom
@@ -224,7 +224,7 @@ in {
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-nixlab
-        self.nixosModules.glance-custom
+        self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-custom
         self.nixosModules.home-assistant-custom
         self.nixosModules.node-red-custom
@@ -255,7 +255,7 @@ in {
         self.nixosModules.ollama-cpu
         self.nixosModules.ollama-p5000
         self.nixosModules.prometheus-nixlab
-        self.nixosModules.glance-custom
+        self.nixosModules.glance-nixlab
         self.nixosModules.gotosocial-custom
         self.nixosModules.home-assistant-custom
         self.nixosModules.node-red-custom

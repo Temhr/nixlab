@@ -1,17 +1,17 @@
 {...}: {
-  flake.nixosModules.glance-custom = {
+  flake.nixosModules.glance-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.glance-custom;
+    cfg = config.services.glance-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.glance-custom = {
+      services.glance-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Glance dashboard service";
 
@@ -200,7 +200,7 @@ USAGE EXAMPLE
 
 Minimal configuration:
 ----------------------
-services.glance-custom = {
+services.glance-nixlab = {
   enable = true;
 };
 # Access at: http://your-ip:3004
@@ -208,7 +208,7 @@ services.glance-custom = {
 
 Full configuration with domain:
 --------------------------------
-services.glance-custom = {
+services.glance-nixlab = {
   enable = true;
   port = 3004;
   bindIP = "0.0.0.0";
