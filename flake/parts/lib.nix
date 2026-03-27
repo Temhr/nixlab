@@ -29,6 +29,15 @@
         inherit inputs self;
         outputs = self;
         flakePath = self;
+        # self' scoped to this system — available in any module that
+        # declares it as an argument: { self', ... }
+        self' =
+          self.packages.${system}
+          // {
+            packages = self.packages.${system};
+            devShells = self.devShells.${system};
+            apps = self.apps.${system} or {};
+          };
       };
       modules = commonModules ++ modules;
     };
