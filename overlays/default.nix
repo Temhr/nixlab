@@ -1,12 +1,13 @@
 # This file imports and combines all overlays
-{ inputs, ... }: {
+{inputs, ...}: {
   flake.overlays = {
-    additions    = final: _prev: import ../pkgs final.pkgs;
+    additions = final: _prev: import ../pkgs final.pkgs;
     modifications = final: prev: let
-      ollamaOverlay    = import ./ollama-p5000.nix final prev;
+      ollamaOverlay = import ./ollama-p5000.nix final prev;
       open-webuiOverlay = import ./open-webui.nix final prev;
-      comfyuiOverlay   = import ./comfyui-p5000.nix final prev;
-    in ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
+      comfyuiOverlay = import ./comfyui-p5000.nix final prev;
+    in
+      ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
     ollama-packages = final: _prev: {
       ollamaPkgs = import inputs.nixpkgs-ollama {
         system = final.stdenv.hostPlatform.system;
