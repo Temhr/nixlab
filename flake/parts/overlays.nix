@@ -6,9 +6,6 @@
     # Common layers
     home-common-global = import ../../home/common/global;
     home-common-optional = import ../../home/common/optional;
-    # Module library
-    browsers = import ../../modules/home-manager/browsers.nix;
-    terminal-emulators = import ../../modules/home-manager/terminal-emulators.nix;
     # Per-host user configs
     temhr-nixace = import ../../home/temhr/nixace.nix;
     temhr-nixsun = import ../../home/temhr/nixsun.nix;

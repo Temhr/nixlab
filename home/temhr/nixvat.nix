@@ -6,8 +6,6 @@
   imports = [
     self.homeModules.home-common-global
     self.homeModules.home-common-optional
-    self.homeModules.browsers
-    self.homeModules.terminal-emulators
   ];
 
   # Add stuff for your user as you see fit:
