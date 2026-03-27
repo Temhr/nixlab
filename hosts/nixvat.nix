@@ -92,7 +92,7 @@
     dataDir = "/data/node-red";
   };
 
-  services.zola-custom = {
+  services.zola-nixlab = {
     enable = true;
     port = 3003;
     siteDir = "/data/www/myblog";

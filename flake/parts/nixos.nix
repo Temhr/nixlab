@@ -138,7 +138,7 @@ in {
         self.nixosModules.syncthing-nixlab
         self.nixosModules.waydroid-nixlab
         self.nixosModules.wiki-js-nixlab
-        self.nixosModules.zola-custom
+        self.nixosModules.zola-nixlab
       ];
     };
     nixsun = mkHost {
@@ -169,7 +169,7 @@ in {
         self.nixosModules.syncthing-nixlab
         self.nixosModules.waydroid-nixlab
         self.nixosModules.wiki-js-nixlab
-        self.nixosModules.zola-custom
+        self.nixosModules.zola-nixlab
       ];
     };
     nixtop = mkHost {
@@ -200,7 +200,7 @@ in {
         self.nixosModules.syncthing-nixlab
         self.nixosModules.waydroid-nixlab
         self.nixosModules.wiki-js-nixlab
-        self.nixosModules.zola-custom
+        self.nixosModules.zola-nixlab
       ];
     };
     nixvat = mkHost {
@@ -231,7 +231,7 @@ in {
         self.nixosModules.syncthing-nixlab
         self.nixosModules.waydroid-nixlab
         self.nixosModules.wiki-js-nixlab
-        self.nixosModules.zola-custom
+        self.nixosModules.zola-nixlab
       ];
     };
     nixzen = mkHost {
@@ -262,7 +262,7 @@ in {
         self.nixosModules.syncthing-nixlab
         self.nixosModules.waydroid-nixlab
         self.nixosModules.wiki-js-nixlab
-        self.nixosModules.zola-custom
+        self.nixosModules.zola-nixlab
       ];
     };
   };

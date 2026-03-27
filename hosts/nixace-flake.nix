@@ -34,7 +34,7 @@
       self.nixosModules.syncthing-nixlab
       self.nixosModules.waydroid-nixlab
       self.nixosModules.wiki-js-nixlab
-      self.nixosModules.zola-custom
+      self.nixosModules.zola-nixlab
     ];
   };
 }

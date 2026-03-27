@@ -1,17 +1,17 @@
 {...}: {
-  flake.nixosModules.zola-custom = {
+  flake.nixosModules.zola-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.zola-custom;
+    cfg = config.services.zola-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.zola-custom = {
+      services.zola-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "Zola static site server";
 
@@ -229,7 +229,7 @@ USAGE EXAMPLE
 
 Minimal configuration:
 ----------------------
-services.zola-custom = {
+services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";  # REQUIRED
 };
@@ -238,7 +238,7 @@ services.zola-custom = {
 
 Network access:
 ---------------
-services.zola-custom = {
+services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";
   bindIP = "0.0.0.0";
@@ -249,7 +249,7 @@ services.zola-custom = {
 
 Full configuration with domain:
 --------------------------------
-services.zola-custom = {
+services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";
   port = 3003;
