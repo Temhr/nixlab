@@ -1,17 +1,17 @@
 {...}: {
-  flake.nixosModules.gotosocial-custom = {
+  flake.nixosModules.gotosocial-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.gotosocial-custom;
+    cfg = config.services.gotosocial-nixlab;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
     options = {
-      services.gotosocial-custom = {
+      services.gotosocial-nixlab = {
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "GoToSocial federated social media server";
 
@@ -41,7 +41,7 @@
         accountDomain = lib.mkOption {
           type = lib.types.str;
           default = cfg.domain;
-          defaultText = lib.literalExpression "config.services.gotosocial-custom.domain";
+          defaultText = lib.literalExpression "config.services.gotosocial-nixlab.domain";
           example = "example.com";
           description = "Domain to use in account names (e.g., @user@example.com)";
         };
@@ -228,7 +228,7 @@ USAGE EXAMPLE
 
 Minimal configuration:
 ----------------------
-services.gotosocial-custom = {
+services.gotosocial-nixlab = {
   enable = true;
   domain = "social.example.com";
 };
@@ -237,7 +237,7 @@ services.gotosocial-custom = {
 
 Full configuration:
 -------------------
-services.gotosocial-custom = {
+services.gotosocial-nixlab = {
   enable = true;
   port = 3005;
   bindIP = "127.0.0.1";

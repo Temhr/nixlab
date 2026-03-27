@@ -28,7 +28,7 @@
       self.nixosModules.ollama-p5000
       self.nixosModules.prometheus-nixlab
       self.nixosModules.glance-nixlab
-      self.nixosModules.gotosocial-custom
+      self.nixosModules.gotosocial-nixlab
       self.nixosModules.home-assistant-custom
       self.nixosModules.node-red-custom
       self.nixosModules.syncthing-custom
