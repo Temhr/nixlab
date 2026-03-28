@@ -202,36 +202,28 @@ nixlab/
 │       ├── lib.nix                  # mkHost helper + home-manager-config module
 │       ├── overlays.nix             # Package overlays
 │       ├── packages.nix             # Custom packages + alejandra formatter
-│       └── checks.nix              # Pre-commit hooks (alejandra, deadnix, merge-conflict)
+│       └── checks.nix               # Pre-commit hooks (alejandra, deadnix, merge-conflict)
 │
 ├── hardware/                        # Machine-level hardware configurations
 │   ├── common/
 │   │   ├── global/                  # Applied to all machines unconditionally
-│   │   │   └── flake/
-│   │   │       └── flake-module.nix # Self-registers nixosModules.hardware.common-global
+│   │   │   └── flake/               # Self-registers nixosModules.hardware.common-global
 │   │   └── optional/                # Selectable hardware modules (GPU drivers, extra drives)
-│   │       └── flake/
-│   │           └── flake-module.nix # Self-registers nixosModules.hardware.common-optional
+│   │       └── flake/               # Self-registers nixosModules.hardware.common-optional
 │   ├── flake/                       # Per-device self-registering wrappers
-│   │   └── <model>-flake.nix       # Self-registers nixosModules.hardware.<model>
+│   │   └── <model>-flake.nix        # Self-registers nixosModules.hardware.<model>
 │   └── <model>.nix                  # Per-device generated configs (nixos-generate-config)
 │
 ├── hosts/                           # System-level NixOS configurations
 │   ├── common/
 │   │   ├── global/                  # Applied to all hosts unconditionally
-│   │   │   ├── users/
-│   │   │   │   └── main-user.nix   # Declares nixlab.mainUser option
-│   │   │   └── flake/
-│   │   │       └── flake-module.nix # Self-registers nixosModules.hosts.common-global
+│   │   │   ├── users/               # Declares nixlab.mainUser option
+│   │   │   └── flake/               # Self-registers nixosModules.hosts.common-global
 │   │   └── optional/                # Selectable feature modules
-│   │       └── flake/
-│   │           ├── flake-module.nix           # Self-registers nixosModules.hosts.common-optional
-│   │           ├── secrets-bookstack-flake.nix # Self-registers nixosModules.secrets.bookstack
-│   │           ├── secrets-grafana-flake.nix   # Self-registers nixosModules.secrets.grafana
-│   │           └── auto-backup-phone-media-flake.nix
+│   │       └── flake/               # Self-registers nixosModules.hosts.common-optional
 │   ├── flake/                       # Per-host self-registering wrappers
-│   │   └── <hostname>-flake.nix    # Self-registers nixosModules.hosts.<n> + nixosConfigurations.<n>
-│   └── <hostname>.nix              # Per-host feature manifests — pure option selections, no imports
+│   │   └── <hostname>-flake.nix     # Self-registers nixosModules.hosts.<n> + nixosConfigurations.<n>
+│   └── <hostname>.nix               # Per-host feature manifests — pure option selections, no imports
 │
 ├── home/                            # User-level Home Manager configurations
 │   ├── common/
@@ -239,14 +231,14 @@ nixlab/
 │   │   ├── global/                  # Applied to all users unconditionally
 │   │   └── optional/                # Selectable user features
 │   └── temhr/
-│       └── <hostname>.nix          # Per-user, per-host feature selections
+│       └── <hostname>.nix           # Per-user, per-host feature selections
 │
 ├── modules/                         # Reusable self-exporting service modules (auto-discovered)
 │   ├── nixos/                       # System-level service modules
 │   │   ├── <service>/
-│   │   │   ├── default.nix         # Self-registers nixosModules.services.<service>
-│   │   │   └── _internals/         # Leaf files imported by default.nix — not discovered directly
-│   │   └── <service>.nix           # Single-file services — self-registers nixosModules.services.<n>
+│   │   │   ├── default.nix          # Self-registers nixosModules.services.<service>
+│   │   │   └── _internals/          # Leaf files imported by default.nix — not discovered directly
+│   │   └── <service>.nix            # Single-file services — self-registers nixosModules.services.<n>
 │   └── home-manager/                # User-level modules (browsers, terminal emulators)
 │
 ├── overlays/                        # nixpkgs modifications and pinned channel overlays
@@ -254,7 +246,7 @@ nixlab/
 │   └── _*.nix                       # Leaf overlay functions — imported by default.nix
 │
 ├── shells/                          # Isolated development environments (auto-discovered)
-│   └── <name>.nix                  # Each self-registers one or more perSystem.devShells.<n>
+│   └── <name>.nix                   # Each self-registers one or more perSystem.devShells.<n>
 │
 ├── secrets/                         # sops-encrypted secret files (one per service)
 ├── cachix/                          # Cachix binary cache declarations
