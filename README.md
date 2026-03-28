@@ -234,11 +234,7 @@ nixlab/
 │       └── <hostname>.nix           # Per-user, per-host feature selections
 │
 ├── modules/                         # Reusable self-exporting service modules (auto-discovered)
-│   ├── nixos/                       # System-level service modules
-│   │   ├── <service>/
-│   │   │   ├── default.nix          # Self-registers nixosModules.services.<service>
-│   │   │   └── _internals/          # Leaf files imported by default.nix — not discovered directly
-│   │   └── <service>.nix            # Single-file services — self-registers nixosModules.services.<n>
+│   ├── nixos/                       # System-level sservice modules
 │   └── home-manager/                # User-level modules (browsers, terminal emulators)
 │
 ├── overlays/                        # nixpkgs modifications and pinned channel overlays
