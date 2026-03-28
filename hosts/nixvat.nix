@@ -112,8 +112,8 @@
     enable = true;
     ollamaPort = 11434;
     webuiPort = 3006;
-    ollamalistenAddress = "0.0.0.0";
-    webuilistenAddress = "0.0.0.0";
+    ollamaListenAddress = "0.0.0.0";
+    webuiListenAddress = "0.0.0.0";
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
     # Pre-download models

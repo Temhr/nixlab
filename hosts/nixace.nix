@@ -62,8 +62,8 @@
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
-    ollamalistenAddress = "0.0.0.0"; # Listen on all interfaces
-    webuilistenAddress = "0.0.0.0";
+    ollamaListenAddress = "0.0.0.0"; # Listen on all interfaces
+    webuiListenAddress = "0.0.0.0";
     # Data directories
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";

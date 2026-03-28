@@ -5,7 +5,7 @@
   services.grafana-nixlab = lib.mkDefault {
     enable = false;
     port = 3101;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/grafana";
     dashboards = {
@@ -25,7 +25,7 @@
   services.loki-nixlab = lib.mkDefault {
     enable = false;
     port = 3100;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/loki";
     maintenance.enable = true;
@@ -34,7 +34,7 @@
   services.prometheus-nixlab = lib.mkDefault {
     enable = false;
     port = 9090;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/prometheus";
     maintenance.enable = true;
