@@ -211,7 +211,6 @@ nixlab/
 │   │   └── optional/                # Selectable hardware modules (GPU drivers, extra drives)
 │   │       └── flake/               # Self-registers nixosModules.hardware.common-optional
 │   ├── flake/                       # Per-device self-registering wrappers
-│   │   └── <model>-flake.nix        # Self-registers nixosModules.hardware.<model>
 │   └── <model>.nix                  # Per-device generated configs (nixos-generate-config)
 │
 ├── hosts/                           # System-level NixOS configurations
@@ -222,7 +221,6 @@ nixlab/
 │   │   └── optional/                # Selectable feature modules
 │   │       └── flake/               # Self-registers nixosModules.hosts.common-optional
 │   ├── flake/                       # Per-host self-registering wrappers
-│   │   └── <hostname>-flake.nix     # Self-registers nixosModules.hosts.<n> + nixosConfigurations.<n>
 │   └── <hostname>.nix               # Per-host feature manifests — pure option selections, no imports
 │
 ├── home/                            # User-level Home Manager configurations
@@ -230,8 +228,7 @@ nixlab/
 │   │   ├── files/                   # Managed dotfiles and scripts (bash config, themes)
 │   │   ├── global/                  # Applied to all users unconditionally
 │   │   └── optional/                # Selectable user features
-│   └── temhr/
-│       └── <hostname>.nix           # Per-user, per-host feature selections
+│   └── temhr/                       # Per-user, per-host feature selections
 │
 ├── modules/                         # Reusable self-exporting service modules (auto-discovered)
 │   ├── nixos/                       # System-level sservice modules
@@ -242,8 +239,6 @@ nixlab/
 │   └── _*.nix                       # Leaf overlay functions — imported by default.nix
 │
 ├── shells/                          # Isolated development environments (auto-discovered)
-│   └── <name>.nix                   # Each self-registers one or more perSystem.devShells.<n>
-│
 ├── secrets/                         # sops-encrypted secret files (one per service)
 ├── cachix/                          # Cachix binary cache declarations
 ├── bin/                             # Utility shell scripts
