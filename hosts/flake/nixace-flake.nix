@@ -3,7 +3,7 @@
 {self, ...}: {
   flake.nixosModules.nixace = {...}: {
     networking.hostName = "nixace";
-    imports = [(import ./nixace.nix)];
+    imports = [(import ../nixace.nix)];
   };
 
   flake.nixosConfigurations.nixace = self.lib.mkHost {

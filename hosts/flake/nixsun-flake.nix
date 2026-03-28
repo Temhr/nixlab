@@ -1,7 +1,7 @@
 {self, ...}: {
   flake.nixosModules.nixsun = {...}: {
     networking.hostName = "nixsun";
-    imports = [(import ./nixsun.nix)];
+    imports = [(import ../nixsun.nix)];
   };
 
   flake.nixosConfigurations.nixsun = self.lib.mkHost {

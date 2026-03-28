@@ -60,6 +60,12 @@
       ];
       imports = [
         (inputs.import-tree ./flake/parts)
+        (inputs.import-tree ./hosts/flake)
+        (inputs.import-tree ./hosts/common/global/flake)
+        (inputs.import-tree ./hosts/common/optional/flake)
+        (inputs.import-tree ./hardware/flake)
+        (inputs.import-tree ./hardware/common/global/flake)
+        (inputs.import-tree ./hardware/common/optional/flake)
         (inputs.import-tree ./modules/nixos)
         (inputs.import-tree ./overlays)
       ];

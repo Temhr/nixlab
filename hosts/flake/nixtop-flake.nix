@@ -1,21 +1,18 @@
 {self, ...}: {
-  flake.nixosModules.nixvat = {...}: {
-    networking.hostName = "nixvat";
-    imports = [
-      (import ./nixvat.nix)
-      "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
-    ];
+  flake.nixosModules.nixtop = {...}: {
+    networking.hostName = "nixtop";
+    imports = [(import ../nixtop.nix)];
   };
 
-  flake.nixosConfigurations.nixvat = self.lib.mkHost {
+  flake.nixosConfigurations.nixtop = self.lib.mkHost {
     modules = [
       self.nixosModules.hw-common-global
       self.nixosModules.hw-common-optional
-      self.nixosModules.hw-zb17g1-k3
+      self.nixosModules.hw-zb17g2-k5
       self.nixosModules.hosts-global
       self.nixosModules.hosts-optional
       self.nixosModules.cachix
-      self.nixosModules.nixvat
+      self.nixosModules.nixtop
       self.nixosModules.bookstack-nixlab
       self.nixosModules.secrets-bookstack
       self.nixosModules.comfyui-p5000
