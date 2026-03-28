@@ -126,16 +126,16 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 ```
 nixosModules
 ├── hardware
-│   ├── common-global       # Applied to all machines unconditionally
-│   ├── common-optional     # Selectable hardware modules (GPU drivers, drives)
-│   ├── zb17g4-p5           # nixace
-│   ├── zb17g1-k4           # nixsun
-│   ├── zb17g2-k5           # nixtop
-│   ├── zb17g1-k3           # nixvat
-│   └── zb15g2-k1           # nixzen
+│   ├── common-global
+│   ├── common-optional
+│   ├── zb17g4-p5
+│   ├── zb17g1-k4
+│   ├── zb17g2-k5
+│   ├── zb17g1-k3
+│   └── zb15g2-k1
 ├── hosts
-│   ├── common-global       # Applied to all hosts unconditionally
-│   ├── common-optional     # Selectable host feature modules
+│   ├── common-global
+│   ├── common-optional
 │   ├── nixace
 │   ├── nixsun
 │   ├── nixtop
