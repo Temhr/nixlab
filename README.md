@@ -194,55 +194,55 @@ The `nixlab.mainUser` option (declared in `hosts/common/global/users/main-user.n
 
 ```
 nixlab/
-├── flake.nix                        # Thin root — delegates to multiple directories via import-tree
-├── flake.lock                       # Version-pinned input revisions
+├── flake.nix                     # Thin root — delegates to multiple directories via import-tree
+├── flake.lock                    # Version-pinned input revisions
 │
 ├── flake/
-│   └── parts/                       # Conventional flake-parts files (auto-discovered)
-│       ├── lib.nix                  # mkHost helper + home-manager-config module
-│       ├── overlays.nix             # Package overlays
-│       ├── packages.nix             # Custom packages + alejandra formatter
-│       └── checks.nix               # Pre-commit hooks (alejandra, deadnix, merge-conflict)
+│   └── parts/                    # Conventional flake-parts files (auto-discovered)
+│       ├── lib.nix               # mkHost helper + home-manager-config module
+│       ├── overlays.nix          # Package overlays
+│       ├── packages.nix          # Custom packages + alejandra formatter
+│       └── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
 │
-├── hardware/                        # Machine-level hardware configurations
+├── hardware/                     # Machine-level hardware configurations
 │   ├── common/
-│   │   ├── global/                  # Applied to all machines unconditionally
-│   │   │   └── flake/               # Self-registers nixosModules.hardware.common-global
-│   │   └── optional/                # Selectable hardware modules (GPU drivers, extra drives)
-│   │       └── flake/               # Self-registers nixosModules.hardware.common-optional
-│   ├── flake/                       # Per-device self-registering wrappers
-│   └── <model>.nix                  # Per-device generated configs (nixos-generate-config)
+│   │   ├── global/               # Applied to all machines unconditionally
+│   │   │   └── flake/            # Self-registers nixosModules.hardware.common-global
+│   │   └── optional/             # Selectable hardware modules (GPU drivers, extra drives)
+│   │       └── flake/            # Self-registers nixosModules.hardware.common-optional
+│   ├── flake/                    # Per-device self-registering wrappers
+│   └── <model>.nix               # Per-device generated configs (nixos-generate-config)
 │
-├── hosts/                           # System-level NixOS configurations
+├── hosts/                        # System-level NixOS configurations
 │   ├── common/
-│   │   ├── global/                  # Applied to all hosts unconditionally
-│   │   │   ├── users/               # Declares nixlab.mainUser option
-│   │   │   └── flake/               # Self-registers nixosModules.hosts.common-global
-│   │   └── optional/                # Selectable feature modules
-│   │       └── flake/               # Self-registers nixosModules.hosts.common-optional
-│   ├── flake/                       # Per-host self-registering wrappers
-│   └── <hostname>.nix               # Per-host feature manifests — pure option selections, no imports
+│   │   ├── global/               # Applied to all hosts unconditionally
+│   │   │   ├── users/            # Declares nixlab.mainUser option
+│   │   │   └── flake/            # Self-registers nixosModules.hosts.common-global
+│   │   └── optional/             # Selectable feature modules
+│   │       └── flake/            # Self-registers nixosModules.hosts.common-optional
+│   ├── flake/                    # Per-host self-registering wrappers
+│   └── <hostname>.nix            # Per-host feature manifests — pure option selections, no imports
 │
-├── home/                            # User-level Home Manager configurations
+├── home/                         # User-level Home Manager configurations
 │   ├── common/
-│   │   ├── files/                   # Managed dotfiles and scripts (bash config, themes)
-│   │   ├── global/                  # Applied to all users unconditionally
-│   │   └── optional/                # Selectable user features
-│   └── temhr/                       # Per-user, per-host feature selections
+│   │   ├── files/                # Managed dotfiles and scripts (bash config, themes)
+│   │   ├── global/               # Applied to all users unconditionally
+│   │   └── optional/             # Selectable user features
+│   └── temhr/                    # Per-user, per-host feature selections
 │
-├── modules/                         # Reusable self-exporting service modules (auto-discovered)
-│   ├── nixos/                       # System-level sservice modules
-│   └── home-manager/                # User-level modules (browsers, terminal emulators)
+├── modules/                      # Reusable self-exporting service modules (auto-discovered)
+│   ├── nixos/                    # System-level sservice modules
+│   └── home-manager/             # User-level modules (browsers, terminal emulators)
 │
-├── overlays/                        # nixpkgs modifications and pinned channel overlays
-│   ├── default.nix                  # Self-registers all overlays into flake.overlays
-│   └── _*.nix                       # Leaf overlay functions — imported by default.nix
+├── overlays/                     # nixpkgs modifications and pinned channel overlays
+│   ├── default.nix               # Self-registers all overlays into flake.overlays
+│   └── _*.nix                    # Leaf overlay functions — imported by default.nix
 │
-├── shells/                          # Isolated development environments (auto-discovered)
-├── secrets/                         # sops-encrypted secret files (one per service)
-├── cachix/                          # Cachix binary cache declarations
-├── bin/                             # Utility shell scripts
-└── .sops.yaml                       # sops age key configuration
+├── shells/                       # Isolated development environments (auto-discovered)
+├── secrets/                      # sops-encrypted secret files (one per service)
+├── cachix/                       # Cachix binary cache declarations
+├── bin/                          # Utility shell scripts
+└── .sops.yaml                    # sops age key configuration
 ```
 
 > The repository tree is the authoritative reference for current hosts, modules, shells, and features. The layout above describes purpose and convention — browse the directories themselves for precise contents.
