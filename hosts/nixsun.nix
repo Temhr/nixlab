@@ -55,7 +55,7 @@
   services.grafana-nixlab = {
     enable = false;
     port = 3101;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/grafana";
     credentialsFile = config.sops.secrets.GF_SECURITY_ADMIN_PASSWORD.path;

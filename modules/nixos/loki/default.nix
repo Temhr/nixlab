@@ -23,7 +23,7 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -177,7 +177,7 @@
             auth_enabled = false;
 
             server = {
-              http_listen_address = cfg.bindIP;
+              http_listen_address = cfg.listenAddress;
               http_listen_port = cfg.port;
               grpc_listen_port = 9096;
               log_level = "info";
@@ -436,7 +436,7 @@
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             extraConfig = ''
               proxy_set_header Host $host;
               proxy_set_header X-Real-IP $remote_addr;
@@ -524,7 +524,7 @@ Full configuration with domain:
 services.loki-nixlab = {
   enable = true;
   port = 3100;
-  bindIP = "0.0.0.0";
+  listenAddress = "0.0.0.0";
   dataDir = "/data/loki";
   retention = "2160h";  # 90 days
 

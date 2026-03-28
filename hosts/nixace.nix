@@ -62,8 +62,8 @@
     # Network configuration
     ollamaPort = 11434;
     webuiPort = 3007;
-    ollamaBindIP = "0.0.0.0"; # Listen on all interfaces
-    webuiBindIP = "0.0.0.0";
+    ollamalistenAddress = "0.0.0.0"; # Listen on all interfaces
+    webuilistenAddress = "0.0.0.0";
     # Data directories
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
@@ -79,7 +79,7 @@
     enable = true;
     # Network configuration
     port = 8188;
-    bindIP = "0.0.0.0"; # Listen on all interfaces
+    listenAddress = "0.0.0.0"; # Listen on all interfaces
     # Data directory (models, outputs, inputs)
     dataDir = "/data/comfyui";
     # GPU configuration
@@ -152,7 +152,7 @@
   services.grafana-nixlab = {
     enable = false;
     port = 3101;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/grafana";
     # dashboards uses module defaults

@@ -23,7 +23,7 @@
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
         # Home Assistant typically needs network access for IoT devices
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -126,7 +126,7 @@
           http =
             {
               # IP address to listen on
-              server_host = cfg.bindIP;
+              server_host = cfg.listenAddress;
               # Port to listen on
               server_port = cfg.port;
             }
@@ -183,7 +183,7 @@
 
           # Proxy all requests to Home Assistant
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             # Enable WebSocket support (required for real-time updates)
             proxyWebsockets = true;
             extraConfig = ''
@@ -227,7 +227,7 @@ Full configuration (all options):
 services.homeassistant-custom = {
   enable = true;                    # REQUIRED: Turn on the service
   port = 8123;                      # OPTIONAL: Default is 8123
-  bindIP = "0.0.0.0";              # OPTIONAL: Default is 0.0.0.0
+  listenAddress = "0.0.0.0";              # OPTIONAL: Default is 0.0.0.0
   dataDir = "/data/homeassistant";  # OPTIONAL: Default is /var/lib/hass
 
   # OPTIONAL: Your home's location (used for sun/weather)

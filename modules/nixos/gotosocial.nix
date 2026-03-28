@@ -24,7 +24,7 @@
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
         # GoToSocial is typically accessed through reverse proxy
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -146,7 +146,7 @@
             then "https"
             else "http"
           }"
-          bind-address: "${cfg.bindIP}"
+          bind-address: "${cfg.listenAddress}"
           port: ${toString cfg.port}
 
           # Database (SQLite by default)
@@ -193,7 +193,7 @@
         enableACME = cfg.enableSSL;
 
         locations."/" = {
-          proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+          proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
           proxyWebsockets = true;
           extraConfig = ''
             proxy_set_header Host $host;
@@ -240,7 +240,7 @@ Full configuration:
 services.gotosocial-nixlab = {
   enable = true;
   port = 3005;
-  bindIP = "127.0.0.1";
+  listenAddress = "127.0.0.1";
   domain = "social.example.com";
   accountDomain = "example.com";  # Users will be @user@example.com
   enableSSL = true;

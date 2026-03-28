@@ -55,7 +55,7 @@
   services.homepage-nixlab = {
     enable = true;
     port = 3000;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/homepage";
   };
@@ -63,7 +63,7 @@
   services.wikijs-custom = {
     enable = true;
     port = 3001;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     dataDir = "/data/wiki-js";
     openFirewall = true;
   };
@@ -71,7 +71,7 @@
   services.bookstack-nixlab = {
     enable = false;
     port = 3002;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/bookstack";
   };
@@ -79,7 +79,7 @@
   services.homeassistant-custom = {
     enable = false;
     port = 8123;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/homeassistant";
   };
@@ -87,7 +87,7 @@
   services.nodered-service = {
     enable = false;
     port = 1880;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/node-red";
   };
@@ -96,14 +96,14 @@
     enable = true;
     port = 3003;
     siteDir = "/data/www/myblog";
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
   };
 
   services.glance-nixlab = {
     enable = true;
     port = 3004;
-    bindIP = "0.0.0.0";
+    listenAddress = "0.0.0.0";
     openFirewall = true;
     dataDir = "/data/glance";
   };
@@ -112,8 +112,8 @@
     enable = true;
     ollamaPort = 11434;
     webuiPort = 3006;
-    ollamaBindIP = "0.0.0.0";
-    webuiBindIP = "0.0.0.0";
+    ollamalistenAddress = "0.0.0.0";
+    webuilistenAddress = "0.0.0.0";
     ollamaDataDir = "/data/ollama";
     webuiDataDir = "/data/open-webui";
     # Pre-download models

@@ -24,9 +24,9 @@
 
         # OPTIONAL: IP to bind to (default: 0.0.0.0 = all interfaces)
         # Use 0.0.0.0 for LAN access. Use 127.0.0.1 to restrict to localhost only.
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
-          default = "0.0.0.0";
+          default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for LAN access)";
         };
 
@@ -262,7 +262,7 @@
         # Bridge networking — port mapping works, BookStack reaches DB via host gateway
         ports =
           lib.optionals (cfg.domain == null) [
-            "${cfg.bindIP}:${toString cfg.port}:80"
+            "${cfg.listenAddress}:${toString cfg.port}:80"
           ]
           ++ lib.optionals (cfg.domain != null) [
             "127.0.0.1:${toString cfg.port}:80"
@@ -513,7 +513,7 @@ Broken layout / missing assets:
   - No trailing slash on appURL.
 
 Can't reach from LAN:
-  - Ensure bindIP = "0.0.0.0".
+  - Ensure listenAddress = "0.0.0.0".
   - Ensure openFirewall = true.
   - Check: sudo ss -tlnp | grep 6875
 

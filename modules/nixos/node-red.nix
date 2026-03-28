@@ -23,8 +23,7 @@
         };
 
         # OPTIONAL: IP to bind GUI to (default: 127.0.0.1 = localhost only)
-        # Use "0.0.0.0" for access from other devices
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address for web GUI (use 0.0.0.0 for all interfaces)";
@@ -138,7 +137,7 @@
 
           # Proxy all requests to Node-RED
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             # Enable WebSocket support (required for Node-RED editor)
             proxyWebsockets = true;
             extraConfig = ''
@@ -184,7 +183,7 @@ Full configuration (all options):
 services.nodered-service = {
   enable = true;                # REQUIRED: Turn on the service
   port = 1880;                  # OPTIONAL: Default is 1880
-  bindIP = "0.0.0.0";          # OPTIONAL: Default is 127.0.0.1 (localhost only)
+  listenAddress = "0.0.0.0";          # OPTIONAL: Default is 127.0.0.1 (localhost only)
   dataDir = "/data/node-red";   # OPTIONAL: Default is /var/lib/node-red
 
   # OPTIONAL: Nginx reverse proxy

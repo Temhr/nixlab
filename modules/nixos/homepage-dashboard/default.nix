@@ -30,8 +30,7 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        # Use "0.0.0.0" for access from other devices
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -124,7 +123,7 @@
         environment = {
           HOMEPAGE_CONFIG_DIR = "${cfg.dataDir}/config";
           PORT = toString cfg.port;
-          HOSTNAME = cfg.bindIP;
+          HOSTNAME = cfg.listenAddress;
           # Host validation: comma-separated list (no spaces)
           HOMEPAGE_ALLOWED_HOSTS = lib.concatStringsSep "," cfg.allowedHosts;
         };
@@ -193,7 +192,7 @@
 
         virtualHosts.${cfg.domain} = {
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             proxyWebsockets = true;
             extraConfig = ''
               proxy_set_header Host $host;
@@ -213,7 +212,7 @@
       # ----------------------------------------------------------------------------
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
         # Open Homepage port if not using reverse proxy or binding to non-localhost
-        lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
+        lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
         # Open HTTP/HTTPS if using reverse proxy
         ++ lib.optionals (cfg.domain != null) [80 443]
       );
@@ -237,7 +236,7 @@ Network access without domain:
 -------------------------------
 services.homepage-nixlab = {
   enable = true;
-  bindIP = "0.0.0.0";
+  listenAddress = "0.0.0.0";
   openFirewall = true;
 };
 # Access at: http://your-ip:3000
@@ -257,7 +256,7 @@ Full configuration with domain:
 services.homepage-nixlab = {
   enable = true;
   port = 3000;
-  bindIP = "127.0.0.1";
+  listenAddress = "127.0.0.1";
   dataDir = "/data/homepage";
 
   # Host validation (add all ways you'll access it)
@@ -324,7 +323,7 @@ Host validation error:
   Add your IP/hostname to allowedHosts
 
 Cannot access from network:
-  Set bindIP = "0.0.0.0" and openFirewall = true
+  Set listenAddress = "0.0.0.0" and openFirewall = true
 
 Check config files:
   ls -la /var/lib/homepage/config/

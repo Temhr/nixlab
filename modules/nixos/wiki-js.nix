@@ -22,8 +22,7 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        # Use "0.0.0.0" for access from other devices
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -155,7 +154,7 @@
         settings = {
           # Network configuration
           port = cfg.port;
-          bindIP = cfg.bindIP;
+          listenAddress = cfg.listenAddress;
 
           # Database configuration (PostgreSQL via Unix socket)
           db = {
@@ -215,7 +214,7 @@
         virtualHosts.${cfg.domain} = {
           # Proxy all requests to Wiki.js
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             # Enable WebSocket support (required for real-time collaboration)
             proxyWebsockets = true;
             extraConfig = ''
@@ -241,7 +240,7 @@
       # ----------------------------------------------------------------------------
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
         # Open Wiki.js port if not using reverse proxy or binding to non-localhost
-        lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
+        lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
         # Open HTTP/HTTPS if using reverse proxy
         ++ lib.optionals (cfg.domain != null) [80 443]
       );
@@ -281,7 +280,7 @@ Full configuration (all options):
 services.wikijs-custom = {
   enable = true;                # REQUIRED: Turn on the service
   port = 3001;                  # OPTIONAL: Default is 3001
-  bindIP = "127.0.0.1";        # OPTIONAL: Default is 127.0.0.1
+  listenAddress = "127.0.0.1";        # OPTIONAL: Default is 127.0.0.1
   dataDir = "/data/wiki-js";    # OPTIONAL: Default is /var/lib/wiki-js
 
   # OPTIONAL: Store uploads on separate storage
@@ -303,7 +302,7 @@ Network-accessible without reverse proxy:
 services.wikijs-custom = {
   enable = true;
   port = 3001;
-  bindIP = "0.0.0.0";          # Allow network access
+  listenAddress = "0.0.0.0";          # Allow network access
   openFirewall = true;
 };
 # Access at: http://your-ip:3001
@@ -321,7 +320,7 @@ Step 1: Apply your NixOS configuration
 Step 2: Access Wiki.js
 -----------------------
 Local access:      http://localhost:3001
-Network access:    http://your-ip:3001 (if bindIP = "0.0.0.0")
+Network access:    http://your-ip:3001 (if listenAddress = "0.0.0.0")
 Domain access:     https://wiki.example.com (if configured)
 
 
@@ -417,7 +416,7 @@ Team wiki with network access:
 -------------------------------
 services.wikijs-custom = {
   enable = true;
-  bindIP = "0.0.0.0";
+  listenAddress = "0.0.0.0";
   backupPath = "/backup/wiki-js";
   backupSchedule = "daily";
 };
@@ -539,7 +538,7 @@ SECURITY BEST PRACTICES
 ✓ Keep Wiki.js updated (rebuild NixOS regularly)
 ✓ Use strong admin password
 ✓ Enable 2FA for administrator accounts
-✓ Restrict bindIP to localhost if using reverse proxy
+✓ Restrict listenAddress to localhost if using reverse proxy
 ✓ Regular backups (enable backupPath)
 ✓ Monitor logs for suspicious activity
 ✓ Use authentication providers (LDAP/OAuth) for team wikis

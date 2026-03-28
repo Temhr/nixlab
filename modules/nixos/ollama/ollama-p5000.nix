@@ -37,14 +37,14 @@
         };
 
         # OPTIONAL: IP to bind Ollama to (default: 127.0.0.1 = localhost only)
-        ollamaBindIP = lib.mkOption {
+        ollamaListenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address for Ollama to bind to (use 0.0.0.0 for all interfaces)";
         };
 
         # OPTIONAL: IP to bind Open WebUI to (default: 127.0.0.1 = localhost only)
-        webuiBindIP = lib.mkOption {
+        webuiListenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address for Open WebUI to bind to (use 0.0.0.0 for all interfaces)";
@@ -154,7 +154,7 @@
 
         environment =
           {
-            OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+            OLLAMA_HOST = "${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
             OLLAMA_MODELS = "${cfg.ollamaDataDir}/models";
             CUDA_VISIBLE_DEVICES = toString cfg.gpuDevice;
             OLLAMA_NUM_GPU = "1";
@@ -202,7 +202,7 @@
         requires = ["ollama.service"];
 
         environment = {
-          OLLAMA_HOST = "${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+          OLLAMA_HOST = "${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
         };
 
         serviceConfig = {
@@ -217,7 +217,7 @@
           # Wait for Ollama to be ready
           echo "Waiting for Ollama service..."
           for i in {1..30}; do
-            if ${pkgs.curl}/bin/curl -s http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}/ > /dev/null 2>&1; then
+            if ${pkgs.curl}/bin/curl -s http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}/ > /dev/null 2>&1; then
               echo "Ollama is ready"
               break
             fi
@@ -250,7 +250,7 @@
         requires = ["ollama.service"];
 
         environment = {
-          OLLAMA_BASE_URL = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+          OLLAMA_BASE_URL = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
           WEBUI_AUTH = "True";
           DATA_DIR = cfg.webuiDataDir;
           ENV = "prod";
@@ -267,7 +267,7 @@
           Group = "open-webui";
           WorkingDirectory = cfg.webuiDataDir;
           # Use the full serve command with explicit parameters
-          ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiBindIP} --port ${toString cfg.webuiPort}";
+          ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
           Restart = "on-failure";
           RestartSec = "10s";
 
@@ -296,7 +296,7 @@
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.webuiBindIP}:${toString cfg.webuiPort}";
+            proxyPass = "http://${cfg.webuiListenAddress}:${toString cfg.webuiPort}";
             proxyWebsockets = true;
             extraConfig = ''
               proxy_set_header Host $host;
@@ -308,7 +308,7 @@
           };
 
           locations."/api" = {
-            proxyPass = "http://${cfg.ollamaBindIP}:${toString cfg.ollamaPort}";
+            proxyPass = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
             extraConfig = ''
               proxy_set_header Host $host;
               proxy_set_header X-Real-IP $remote_addr;
@@ -377,8 +377,8 @@ services.ollama-p5000 = {
   # Network configuration
   ollamaPort = 11434;
   webuiPort = 3007;
-  ollamaBindIP = "0.0.0.0";  # Listen on all interfaces
-  webuiBindIP = "0.0.0.0";
+  ollamaListenAddress = "0.0.0.0";  # Listen on all interfaces
+  webuiListenAddress = "0.0.0.0";
 
   # Data directories
   ollamaDataDir = "/data/ollama";

@@ -15,7 +15,7 @@ in {
       enableACME = cfg.enableSSL;
 
       locations."/" = {
-        proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+        proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
         extraConfig = ''
           proxy_set_header Host $host;
           proxy_set_header X-Real-IP $remote_addr;

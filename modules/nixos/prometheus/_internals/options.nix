@@ -13,10 +13,11 @@
     description = "Port for Prometheus to listen on";
   };
 
-  bindIP = lib.mkOption {
+  # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
+  listenAddress = lib.mkOption {
     type = lib.types.str;
     default = "127.0.0.1";
-    description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
+    description = "IP address for ComfyUI to bind to (use 0.0.0.0 for all interfaces)";
   };
 
   domain = lib.mkOption {

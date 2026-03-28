@@ -95,7 +95,7 @@ in {
         --config.file=${cfg.dataDir}/prometheus.yml \
         --storage.tsdb.path=${cfg.dataDir}/data \
         --storage.tsdb.retention.time=${cfg.retention} \
-        --web.listen-address=${cfg.bindIP}:${toString cfg.port} \
+        --web.listen-address=${cfg.listenAddress}:${toString cfg.port} \
         --web.console.templates=${cfg.package}/etc/prometheus/consoles \
         --web.console.libraries=${cfg.package}/etc/prometheus/console_libraries
     '';

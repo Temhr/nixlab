@@ -31,7 +31,7 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -139,7 +139,7 @@
           cat > ${cfg.dataDir}/glance.yml << 'SERVEREOF'
           server:
             port: ${toString cfg.port}
-            host: "${cfg.bindIP}"
+            host: "${cfg.listenAddress}"
 
           SERVEREOF
 
@@ -170,7 +170,7 @@
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             proxyWebsockets = true;
             extraConfig = ''
               proxy_set_header Host $host;

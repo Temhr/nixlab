@@ -35,8 +35,7 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        # Use "0.0.0.0" for access from other devices
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -225,7 +224,7 @@
           GF_LOG_MODE = "console file";
           GF_LOG_LEVEL = "info";
           GF_SERVER_HTTP_PORT = toString cfg.port;
-          GF_SERVER_HTTP_ADDR = cfg.bindIP;
+          GF_SERVER_HTTP_ADDR = cfg.listenAddress;
           GF_SERVER_DOMAIN = serverDomain;
           GF_SERVER_ROOT_URL = rootUrl;
           GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
@@ -323,7 +322,7 @@
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             proxyWebsockets = true;
             extraConfig = ''
               proxy_set_header Host $host;
@@ -403,7 +402,7 @@ Advanced example with organization:
 services.grafana-nixlab = {
   enable = true;
   port = 3100;
-  bindIP = "0.0.0.0";
+  listenAddress = "0.0.0.0";
   domain = "grafana.example.com";
   enableSSL = true;
 

@@ -23,7 +23,7 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address for ComfyUI to bind to (use 0.0.0.0 for all interfaces)";
@@ -262,7 +262,7 @@
           # Ensure user directory exists before starting
           ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
           # Use patched ComfyUI from writable location
-          ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.bindIP} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
+          ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
           Restart = "on-failure";
           RestartSec = "10s";
 
@@ -323,7 +323,7 @@
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             proxyWebsockets = true;
             extraConfig = ''
               proxy_set_header Host $host;
@@ -390,7 +390,7 @@ services.comfyui-p5000 = {
 
   # Network configuration
   port = 8188;
-  bindIP = "0.0.0.0";  # Listen on all interfaces
+  listenAddress = "0.0.0.0";  # Listen on all interfaces
 
   # Data directory (models, outputs, inputs)
   dataDir = "/data/comfyui";

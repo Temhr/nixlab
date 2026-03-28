@@ -24,7 +24,7 @@
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
         # Use "0.0.0.0" for access from other devices
-        bindIP = lib.mkOption {
+        listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
           description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
@@ -178,8 +178,8 @@
           # Start Zola server with watch mode or static serve
           ExecStart =
             if cfg.watchMode
-            then "${cfg.package}/bin/zola serve --interface ${cfg.bindIP} --port ${toString cfg.port} --base-url http://${cfg.bindIP}:${toString cfg.port}"
-            else "${cfg.package}/bin/zola serve --interface ${cfg.bindIP} --port ${toString cfg.port} --base-url http://${cfg.bindIP}:${toString cfg.port} --watch-only";
+            then "${cfg.package}/bin/zola serve --interface ${cfg.listenAddress} --port ${toString cfg.port} --base-url http://${cfg.listenAddress}:${toString cfg.port}"
+            else "${cfg.package}/bin/zola serve --interface ${cfg.listenAddress} --port ${toString cfg.port} --base-url http://${cfg.listenAddress}:${toString cfg.port} --watch-only";
           Restart = "on-failure";
           RestartSec = "10s";
 
@@ -199,7 +199,7 @@
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.bindIP}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             extraConfig = ''
               proxy_set_header Host $host;
               proxy_set_header X-Real-IP $remote_addr;
@@ -215,7 +215,7 @@
       # ----------------------------------------------------------------------------
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
         # Open Zola port if not using reverse proxy or binding to non-localhost
-        lib.optionals (cfg.domain == null && cfg.bindIP != "127.0.0.1") [cfg.port]
+        lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
         # Open HTTP/HTTPS if using reverse proxy
         ++ lib.optionals (cfg.domain != null) [80 443]
       );
@@ -241,7 +241,7 @@ Network access:
 services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";
-  bindIP = "0.0.0.0";
+  listenAddress = "0.0.0.0";
   openFirewall = true;
 };
 # Access at: http://your-ip:3003
@@ -253,7 +253,7 @@ services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";
   port = 3003;
-  bindIP = "127.0.0.1";
+  listenAddress = "127.0.0.1";
   watchMode = true;  # Auto-rebuild on changes
 
   # Nginx reverse proxy
