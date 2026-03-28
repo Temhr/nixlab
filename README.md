@@ -194,7 +194,7 @@ The `nixlab.mainUser` option (declared in `hosts/common/global/users/main-user.n
 
 ```
 nixlab/
-├── flake.nix                     # Thin root — delegates to multiple directories via import-tree
+├── flake.nix                     # Thin root — delegates to directories via import-tree
 ├── flake.lock                    # Version-pinned input revisions
 │
 ├── flake/
@@ -221,7 +221,7 @@ nixlab/
 │   │   └── optional/             # Selectable feature modules
 │   │       └── flake/            # Self-registers nixosModules.hosts.common-optional
 │   ├── flake/                    # Per-host self-registering wrappers
-│   └── <hostname>.nix            # Per-host feature manifests — pure option selections, no imports
+│   └── <hostname>.nix            # Feature manifests — pure option selections, no imports
 │
 ├── home/                         # User-level Home Manager configurations
 │   ├── common/
