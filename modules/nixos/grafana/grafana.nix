@@ -6,6 +6,18 @@
     ...
   }: let
     cfg = config.services.grafana-nixlab;
+    rootUrl =
+      if cfg.domain != null
+      then "${
+        if cfg.enableSSL
+        then "https"
+        else "http"
+      }://${cfg.domain}/"
+      else "http://localhost:${toString cfg.port}/";
+    serverDomain =
+      if cfg.domain != null
+      then cfg.domain
+      else "localhost";
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -210,20 +222,12 @@
           GF_PATHS_LOGS = "${cfg.dataDir}/logs";
           GF_PATHS_PLUGINS = "${cfg.dataDir}/plugins";
           GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
+          GF_LOG_MODE = "console file";
+          GF_LOG_LEVEL = "info";
           GF_SERVER_HTTP_PORT = toString cfg.port;
           GF_SERVER_HTTP_ADDR = cfg.bindIP;
-          GF_SERVER_DOMAIN =
-            if cfg.domain != null
-            then cfg.domain
-            else "localhost";
-          GF_SERVER_ROOT_URL =
-            if cfg.domain != null
-            then "${
-              if cfg.enableSSL
-              then "https"
-              else "http"
-            }://${cfg.domain}/"
-            else "http://localhost:${toString cfg.port}/";
+          GF_SERVER_DOMAIN = serverDomain;
+          GF_SERVER_ROOT_URL = rootUrl;
           GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
           GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
           GF_DATABASE_TYPE = "sqlite3";
@@ -235,7 +239,7 @@
           User = "grafana";
           Group = "grafana";
           WorkingDirectory = cfg.dataDir;
-          ExecStart = "${cfg.package}/bin/grafana server --config=${cfg.dataDir}/grafana.ini --homepath=${cfg.package}/share/grafana";
+          ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
           Restart = "on-failure";
           RestartSec = "10s";
           NoNewPrivileges = true;
@@ -248,68 +252,19 @@
         };
 
         preStart = lib.mkBefore ''
-                  # Build the credentials env file from the sops-decrypted secret.
-                  # sops-nix decrypts to a bare value (just the password string),
-                  # so we wrap it into KEY=value format that EnvironmentFile requires.
-                  echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
-                    > /run/grafana-credentials.env
-                  chmod 600 /run/grafana-credentials.env
+          # Build the credentials env file from the sops-decrypted secret.
+          echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
+            > /run/grafana-credentials.env
+          chmod 600 /run/grafana-credentials.env
 
-                  # Create minimal config if it doesn't exist
-                  if [ ! -f ${cfg.dataDir}/grafana.ini ]; then
-                    cat > ${cfg.dataDir}/grafana.ini << EOF
-          # Grafana Configuration
-          [paths]
-          data = ${cfg.dataDir}/data
-          logs = ${cfg.dataDir}/logs
-          plugins = ${cfg.dataDir}/plugins
-          provisioning = ${cfg.dataDir}/provisioning
+          # Set up provisioning directories
+          mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
+          chown -R grafana:grafana ${cfg.dataDir}/provisioning
 
-          [server]
-          http_port = ${toString cfg.port}
-          http_addr = ${cfg.bindIP}
-          domain = ${
-            if cfg.domain != null
-            then cfg.domain
-            else "localhost"
-          }
-          root_url = ${
-            if cfg.domain != null
-            then "${
-              if cfg.enableSSL
-              then "https"
-              else "http"
-            }://${cfg.domain}/"
-            else "http://localhost:${toString cfg.port}/"
-          }
-
-          [database]
-          type = sqlite3
-          path = ${cfg.dataDir}/data/grafana.db
-
-          [security]
-          admin_password = ${cfg.adminPassword}
-
-          [auth.anonymous]
-          enabled = ${lib.boolToString cfg.allowAnonymous}
-          org_role = Viewer
-
-          [log]
-          mode = console file
-          level = info
-          EOF
-                    chown grafana:grafana ${cfg.dataDir}/grafana.ini
-                    chmod 660 ${cfg.dataDir}/grafana.ini
-                  fi
-
-                  # Set up provisioning directories
-                  mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
-                  chown -R grafana:grafana ${cfg.dataDir}/provisioning
-
-                  # ┌─────────────────────────────────────────────────────────┐
-                  # │ PROVISION ALL DASHBOARDS                                │
-                  # └─────────────────────────────────────────────────────────┘
-                  ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
+                          # ┌─────────────────────────────────────────────────────────┐
+                          # │ PROVISION ALL DASHBOARDS                                │
+                          # └─────────────────────────────────────────────────────────┘
+                          ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
                         # Setup dashboard: ${name}
                         mkdir -p ${cfg.dataDir}/dashboards/${name}
                         chown grafana:grafana ${cfg.dataDir}/dashboards/${name}
