@@ -1,3 +1,3 @@
 {...}: {
-  flake.nixosModules.hw-common-optional = import ../.;
+  flake.nixosModules.hw--common-optional = import ../.;
 }

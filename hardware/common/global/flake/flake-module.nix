@@ -1,3 +1,3 @@
 {...}: {
-  flake.nixosModules.hw-common-global = import ../.;
+  flake.nixosModules.hw--common-global = import ../.;
 }

@@ -1,6 +1,6 @@
 # WARN: this file will get overwritten by $ cachix use <name>
 {...}: {
-  flake.nixosModules.cachix = {lib, ...}: let
+  flake.nixosModules.sys--cachix = {lib, ...}: let
     folder = ../../cachix;
     toImport = name: _: folder + ("/" + name);
     filterCaches = key: value: value == "regular" && lib.hasSuffix ".nix" key;

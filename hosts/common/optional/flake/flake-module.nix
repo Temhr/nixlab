@@ -1,3 +1,3 @@
 {...}: {
-  flake.nixosModules.hosts-optional = import ../.;
+  flake.nixosModules.hosts--common-optional = import ../.;
 }

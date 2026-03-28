@@ -15,7 +15,7 @@
 
   commonModules = [
     inputs.sops-nix.nixosModules.sops
-    self.nixosModules.home-manager-config
+    self.nixosModules.sys--home-manager-config
     {nixpkgs.overlays = allOverlays;}
   ];
 
@@ -44,7 +44,7 @@
 in {
   flake.lib.mkHost = mkHost;
 
-  flake.nixosModules.home-manager-config = {
+  flake.nixosModules.sys--home-manager-config = {
     imports = [inputs.home-manager.nixosModules.home-manager];
     home-manager = {
       useGlobalPkgs = true;
