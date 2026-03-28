@@ -15,16 +15,16 @@
       self.nixosModules.hosts--common-optional
       self.nixosModules.sys--cachix
       self.nixosModules.hosts--nixace
-      self.nixosModules.bookstack-nixlab
+      self.nixosModules.svc--bookstack-nixlab
       self.nixosModules.secrets--bookstack
-      self.nixosModules.comfyui-p5000
-      self.nixosModules.comfyui-extensions
-      self.nixosModules.comfyui-models
-      self.nixosModules.grafana-nixlab
+      self.nixosModules.svc--comfyui-p5000
+      self.nixosModules.svc--comfyui-extensions
+      self.nixosModules.svc--comfyui-models
+      self.nixosModules.svc--grafana-nixlab
       self.nixosModules.secrets--grafana
-      self.nixosModules.loki-nixlab
-      self.nixosModules.ollama-p5000
-      self.nixosModules.prometheus-nixlab
+      self.nixosModules.svc--loki-nixlab
+      self.nixosModules.svc--ollama-p5000
+      self.nixosModules.svc--prometheus-nixlab
     ];
   };
 }

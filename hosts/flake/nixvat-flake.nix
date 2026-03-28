@@ -20,26 +20,24 @@
       self.nixosModules.hosts--common-optional
       self.nixosModules.sys--cachix
       self.nixosModules.hosts--nixvat
-      self.nixosModules.bookstack-nixlab
+      self.nixosModules.svc--bookstack-nixlab
       self.nixosModules.secrets--bookstack
-      self.nixosModules.comfyui-p5000
-      self.nixosModules.comfyui-extensions
-      self.nixosModules.comfyui-models
-      self.nixosModules.grafana-nixlab
+      self.nixosModules.svc--comfyui-p5000
+      self.nixosModules.svc--comfyui-extensions
+      self.nixosModules.svc--comfyui-models
+      self.nixosModules.svc--grafana-nixlab
       self.nixosModules.secrets--grafana
-      self.nixosModules.homepage-nixlab
-      self.nixosModules.loki-nixlab
-      self.nixosModules.ollama-cpu
-      self.nixosModules.ollama-p5000
-      self.nixosModules.prometheus-nixlab
-      self.nixosModules.glance-nixlab
-      self.nixosModules.gotosocial-nixlab
-      self.nixosModules.home-assistant-nixlab
-      self.nixosModules.node-red-nixlab
-      self.nixosModules.syncthing-nixlab
-      self.nixosModules.waydroid-nixlab
-      self.nixosModules.wiki-js-nixlab
-      self.nixosModules.zola-nixlab
+      self.nixosModules.svc--homepage-nixlab
+      self.nixosModules.svc--loki-nixlab
+      self.nixosModules.svc--ollama-cpu
+      self.nixosModules.svc--prometheus-nixlab
+      self.nixosModules.svc--glance-nixlab
+      self.nixosModules.svc--gotosocial-nixlab
+      self.nixosModules.svc--home-assistant-nixlab
+      self.nixosModules.svc--node-red-nixlab
+      self.nixosModules.svc--syncthing-nixlab
+      self.nixosModules.svc--wiki-js-nixlab
+      self.nixosModules.svc--zola-nixlab
     ];
   };
 }

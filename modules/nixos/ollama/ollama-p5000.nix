@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.ollama-p5000 = {
+  flake.nixosModules.svc--ollama-p5000 = {
     config,
     lib,
     pkgs,

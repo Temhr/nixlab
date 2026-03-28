@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.gotosocial-nixlab = {
+  flake.nixosModules.svc--gotosocial-nixlab = {
     config,
     lib,
     pkgs,

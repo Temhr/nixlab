@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.glance-nixlab = {
+  flake.nixosModules.svc--glance-nixlab = {
     config,
     lib,
     pkgs,

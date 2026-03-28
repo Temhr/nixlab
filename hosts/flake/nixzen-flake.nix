@@ -16,11 +16,11 @@
       self.nixosModules.hosts--common-optional
       self.nixosModules.sys--cachix
       self.nixosModules.hosts--nixzen
-      self.nixosModules.grafana-nixlab
+      self.nixosModules.svc--grafana-nixlab
       self.nixosModules.secrets--grafana
-      self.nixosModules.loki-nixlab
-      self.nixosModules.prometheus-nixlab
-      self.nixosModules.syncthing-nixlab
+      self.nixosModules.svc--loki-nixlab
+      self.nixosModules.svc--prometheus-nixlab
+      self.nixosModules.svc--syncthing-nixlab
     ];
   };
 }
