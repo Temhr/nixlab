@@ -6,6 +6,14 @@
     ...
   }: let
     cfg = config.services.glance-nixlab;
+
+    # Import the pages configuration from _glance-pages.nix
+    pagesConfig = import ./_glance-pages.nix;
+
+    # Convert pages to a JSON file (will be converted to YAML in preStart)
+    pagesJsonFile =
+      builtins.toFile "glance-pages.json"
+      (builtins.toJSON {pages = pagesConfig;});
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -23,7 +31,6 @@
         };
 
         # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        # Glance is typically accessed from network
         bindIP = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
@@ -108,8 +115,6 @@
           User = "glance";
           Group = "glance";
           WorkingDirectory = cfg.dataDir;
-          # Glance reads config from glance.yml in current directory
-          # No command-line flags needed - it just runs
           ExecStart = "${cfg.package}/bin/glance";
           Restart = "on-failure";
           RestartSec = "10s";
@@ -122,39 +127,35 @@
           ReadWritePaths = [cfg.dataDir];
         };
 
-        # Ensure config file exists with proper permissions
-        # Port and bind address are configured in the YAML file
+        # Always regenerate glance.yml so the pages section stays in sync
+        # with _glance-pages.nix on every rebuild.
+        #
+        # Strategy:
+        #   1. Write the server block (port + bind address) directly as YAML
+        #   2. Convert _glance-pages.nix → JSON → YAML via remarshal
+        #   3. Append the pages YAML to the server block
         preStart = ''
-                  # Create default config if it doesn't exist
-                  if [ ! -f ${cfg.dataDir}/glance.yml ]; then
-                    cat > ${cfg.dataDir}/glance.yml << EOF
+          # ── 1. Write the server block ──────────────────────────────────────
+          cat > ${cfg.dataDir}/glance.yml << 'SERVEREOF'
           server:
             port: ${toString cfg.port}
             host: "${cfg.bindIP}"
 
-          pages:
-            - name: Home
-              columns:
-                - size: small
-                  widgets:
-                    - type: clock
-                      hour-format: 24h
+          SERVEREOF
 
-                    - type: calendar
+          # ── 2. Convert pages JSON → YAML ───────────────────────────────────
+          ${pkgs.remarshal}/bin/remarshal \
+            -i ${pagesJsonFile} \
+            -o /tmp/glance-pages.yaml.tmp \
+            -if json \
+            -of yaml
 
-                - size: full
-                  widgets:
-                    - type: rss
-                      limit: 10
-                      collapse-after: 3
-                      cache: 3h
-                      feeds:
-                        - url: https://news.ycombinator.com/rss
-                          title: Hacker News
-          EOF
-                    chown glance:glance ${cfg.dataDir}/glance.yml
-                    chmod 660 ${cfg.dataDir}/glance.yml
-                  fi
+          # ── 3. Append pages YAML to the server block ───────────────────────
+          cat /tmp/glance-pages.yaml.tmp >> ${cfg.dataDir}/glance.yml
+          rm -f /tmp/glance-pages.yaml.tmp
+
+          chown glance:glance ${cfg.dataDir}/glance.yml
+          chmod 660 ${cfg.dataDir}/glance.yml
         '';
       };
 
@@ -185,93 +186,9 @@
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Open Glance port if not using reverse proxy
         lib.optionals (cfg.domain == null) [cfg.port]
-        # Open HTTP/HTTPS if using reverse proxy
         ++ lib.optionals (cfg.domain != null) [80 443]
       );
     };
   };
 }
-/*
-================================================================================
-USAGE EXAMPLE
-================================================================================
-
-Minimal configuration:
-----------------------
-services.glance-nixlab = {
-  enable = true;
-};
-# Access at: http://your-ip:3004
-
-
-Full configuration with domain:
---------------------------------
-services.glance-nixlab = {
-  enable = true;
-  port = 3004;
-  bindIP = "0.0.0.0";
-  dataDir = "/data/glance";
-
-  # Nginx reverse proxy
-  domain = "dashboard.example.com";
-  enableSSL = true;
-  openFirewall = true;
-};
-
-
-================================================================================
-CONFIGURATION
-================================================================================
-
-Glance reads configuration from glance.yml in dataDir.
-A default config is created automatically on first run.
-
-Edit configuration:
-  sudo nano /var/lib/glance/glance.yml
-  sudo systemctl restart glance
-
-Example glance.yml:
-  pages:
-    - name: Home
-      columns:
-        - size: small
-          widgets:
-            - type: clock
-            - type: weather
-              location: New York
-        - size: full
-          widgets:
-            - type: rss
-              feeds:
-                - url: https://example.com/feed
-                  title: My Feed
-
-Available widgets:
-  - clock, calendar, weather
-  - rss, reddit, hacker-news
-  - monitor (server monitoring)
-  - stocks, markets
-  - videos (YouTube)
-  - bookmarks, iframe
-
-
-================================================================================
-TROUBLESHOOTING
-================================================================================
-
-Check service status:
-  sudo systemctl status glance
-
-View logs:
-  sudo journalctl -u glance -f
-
-Edit configuration:
-  sudo nano /var/lib/glance/glance.yml
-  sudo systemctl restart glance
-
-Config syntax errors:
-  ${pkgs.glance}/bin/glance --config /var/lib/glance/glance.yml --check
-*/
-
