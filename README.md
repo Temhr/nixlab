@@ -55,13 +55,11 @@ outputs = inputs @ { flake-parts, ... }:
     systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
     imports = [
       (inputs.import-tree ./flake/parts)
-      (inputs.import-tree ./modules)
+      (inputs.import-tree ./hosts)
+      (inputs.import-tree ./hardware)
+      (inputs.import-tree ./modules/nixos)
       (inputs.import-tree ./overlays)
       (inputs.import-tree ./shells)
-      (inputs.import-tree ./hardware)
-      (inputs.import-tree ./hosts/flake)
-      (inputs.import-tree ./hosts/common/global/flake)
-      (inputs.import-tree ./hosts/common/optional/flake)
     ];
   };
 ```
@@ -97,18 +95,19 @@ Every file in this flake is a **flake-parts module** — a function that takes `
 ```
 
 ```nix
-# hosts/flake/nixace-flake.nix
+# hosts/nixace.nix
 { self, ... }: {
   flake.nixosModules.hosts.nixace = { ... }: {
     networking.hostName = "nixace";
-    imports = [ (import ../nixace.nix) ];
+    ...
   };
 
   flake.nixosConfigurations.nixace = self.lib.mkHost {
     modules = [
-      self.nixosModules.hardware.c-global
-      self.nixosModules.hosts.nixace
-      self.nixosModules.services.glance
+      self.nixosModules.hardw--c-global
+      self.nixosModules.hosts--nixace
+      self.nixosModules.servc--glance-nixlab
+      self.nixosModules.systm--home-manager-config
       # ...
     ];
   };
@@ -223,7 +222,7 @@ nixlab/
 │   ├── nixos/                    # System-level service modules
 │   └── home-manager/             # User-level service modules
 │
-├── overlays/                     # nixpkgs modifications and pinned channel overlays
+├── overlays/                     # nixpkgs modifications and channel pinning (auto-discovered)
 │   ├── default.nix               # Self-registers all overlays into flake.overlays
 │   └── _*.nix                    # Leaf overlay functions — imported by default.nix
 │
