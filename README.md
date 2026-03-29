@@ -125,48 +125,43 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 
 ```
 nixosModules
-├── hardware
-│   ├── c-global
-│   ├── c-optional
-│   ├── zb17g4-p5
-│   ├── zb17g1-k4
-│   ├── zb17g2-k5
-│   ├── zb17g1-k3
-│   └── zb15g2-k1
-├── hosts
-│   ├── c-global
-│   ├── c-optional
-│   ├── nixace
-│   ├── nixsun
-│   ├── nixtop
-│   ├── nixvat
-│   └── nixzen
-├── secrets
-│   ├── bookstack
-│   └── grafana
-├── services
-│   ├── bookstack
-│   ├── comfyui-extensions
-│   ├── comfyui-models
-│   ├── comfyui-p5000
-│   ├── glance
-│   ├── gotosocial
-│   ├── grafana
-│   ├── home-assistant
-│   ├── homepage
-│   ├── loki
-│   ├── node-red
-│   ├── ollama-cpu
-│   ├── ollama-p5000
-│   ├── prometheus
-│   ├── syncthing
-│   ├── waydroid
-│   ├── wiki-js
-│   └── zola
-└── system
-    ├── cachix
-    ├── home-manager
-    └── auto-backup-phone
+├───hosts--c-global
+├───hosts--c-optional
+├───hosts--nixace
+├───hosts--nixsun
+├───hosts--nixtop
+├───hosts--nixvat
+├───hosts--nixzen
+├───hw--c-global
+├───hw--c-optional--driver-nvidia
+├───hw--zb15g2-k1
+├───hw--zb17g1-k3
+├───hw--zb17g1-k4
+├───hw--zb17g2-k5
+├───hw--zb17g4-p5
+├───secrets--bookstack
+├───secrets--grafana
+├───svc--bookstack-nixlab
+├───svc--comfyui-extensions
+├───svc--comfyui-models
+├───svc--comfyui-p5000
+├───svc--glance-nixlab
+├───svc--gotosocial-nixlab
+├───svc--grafana-nixlab
+├───svc--home-assistant-nixlab
+├───svc--homepage-nixlab
+├───svc--loki-nixlab
+├───svc--node-red-nixlab
+├───svc--ollama-cpu
+├───svc--ollama-p5000
+├───svc--prometheus-nixlab
+├───svc--syncthing-nixlab
+├───svc--waydroid-nixlab
+├───svc--wiki-js-nixlab
+├───svc--zola-nixlab
+├───sys--auto-backup-phone-media
+├───sys--cachix
+└───sys--home-manager-config
 ```
 
 ## Remaining flake/parts/ files
