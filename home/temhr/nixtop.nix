@@ -4,8 +4,8 @@
   ...
 }: {
   imports = [
-    self.homeModules.home-common-global
-    self.homeModules.home-common-optional
+    self.homeModules.home-c-global
+    self.homeModules.home-c-optional
   ];
 
   # Add stuff for your user as you see fit:

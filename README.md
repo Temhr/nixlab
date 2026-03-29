@@ -106,7 +106,7 @@ Every file in this flake is a **flake-parts module** — a function that takes `
 
   flake.nixosConfigurations.nixace = self.lib.mkHost {
     modules = [
-      self.nixosModules.hardware.common-global
+      self.nixosModules.hardware.c-global
       self.nixosModules.hosts.nixace
       self.nixosModules.services.glance
       # ...
@@ -126,16 +126,16 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 ```
 nixosModules
 ├── hardware
-│   ├── common-global
-│   ├── common-optional
+│   ├── c-global
+│   ├── c-optional
 │   ├── zb17g4-p5
 │   ├── zb17g1-k4
 │   ├── zb17g2-k5
 │   ├── zb17g1-k3
 │   └── zb15g2-k1
 ├── hosts
-│   ├── common-global
-│   ├── common-optional
+│   ├── c-global
+│   ├── c-optional
 │   ├── nixace
 │   ├── nixsun
 │   ├── nixtop
@@ -214,9 +214,9 @@ nixlab/
 │   ├── common/
 │   │   ├── global/               # Applied to all hosts unconditionally
 │   │   │   ├── users/            # Declares nixlab.mainUser option
-│   │   │   └── flake/            # Self-registers nixosModules.hosts.common-global
+│   │   │   └── flake/            # Self-registers nixosModules.hosts.c-global
 │   │   └── optional/             # Selectable feature modules
-│   │       └── flake/            # Self-registers nixosModules.hosts.common-optional
+│   │       └── flake/            # Self-registers nixosModules.hosts.c-optional
 │   ├── flake/                    # Self-registering, per-host wrappers
 │   └── <hostname>.nix            # Per-host, feature manifest — pure option selections, no imports
 │
@@ -326,11 +326,11 @@ nix flake show /home/temhr/nixlab
      };
      flake.nixosConfigurations.<hostname> = self.lib.mkHost {
        modules = [
-         self.nixosModules.hardware.common-global
-         self.nixosModules.hardware.common-optional
+         self.nixosModules.hardware.c-global
+         self.nixosModules.hardware.c-optional
          self.nixosModules.hardware.<model>
-         self.nixosModules.hosts.common-global
-         self.nixosModules.hosts.common-optional
+         self.nixosModules.hosts.c-global
+         self.nixosModules.hosts.c-optional
          self.nixosModules.system.cachix
          # add only the services this host actually uses:
          self.nixosModules.services.<n>

@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hw--common-global = {
+  flake.nixosModules.hw--c-global = {
     imports = [
       # Paths to other modules.
       # Compose this module out of smaller ones.

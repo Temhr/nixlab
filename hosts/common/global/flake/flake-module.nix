@@ -1,3 +1,3 @@
 {...}: {
-  flake.nixosModules.hosts--common-global = import ../.;
+  flake.nixosModules.hosts--c-global = import ../.;
 }
