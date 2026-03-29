@@ -1,15 +1,12 @@
 {...}: {
-  imports = [
-    ./common/global
-    ./common/optional
-  ];
+  flake.nixosModules.hw--zb17g4-p5 = {
+    # Choose between these choices: "none" "k" "p"
+    driver-nvidia.quadro = "p";
 
-  # Choose between these choices: "none" "k" "p"
-  driver-nvidia.quadro = "p";
-
-  mount-home.enable = true; #mounts home drive
-  mount-shelf.enable = true; #mounts shelf drive in home directory
-  #mount-mirror.enable = true; #mounts mirror drive
-  mount-mirk1.enable = true; #mounts mirk1 nfs
-  mount-mirk3.enable = true; #mounts mirk3 nfs
+    mount-home.enable = true; #mounts home drive
+    mount-shelf.enable = true; #mounts shelf drive in home directory
+    #mount-mirror.enable = true; #mounts mirror drive
+    mount-mirk1.enable = true; #mounts mirk1 nfs
+    mount-mirk3.enable = true; #mounts mirk3 nfs
+  };
 }

@@ -10,7 +10,7 @@
   flake.nixosConfigurations.nixzen = self.lib.mkHost {
     modules = [
       self.nixosModules.hw--common-global
-      self.nixosModules.hw--common-optional
+      self.nixosModules.hw--common-optional--driver-nvidia
       self.nixosModules.hw--zb15g2-k1
       self.nixosModules.hosts--common-global
       self.nixosModules.hosts--common-optional

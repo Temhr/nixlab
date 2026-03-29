@@ -7,7 +7,7 @@
   flake.nixosConfigurations.nixtop = self.lib.mkHost {
     modules = [
       self.nixosModules.hw--common-global
-      self.nixosModules.hw--common-optional
+      self.nixosModules.hw--common-optional--driver-nvidia
       self.nixosModules.hw--zb17g2-k5
       self.nixosModules.hosts--common-global
       self.nixosModules.hosts--common-optional
