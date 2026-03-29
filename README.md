@@ -203,28 +203,25 @@ nixlab/
 │   ├── common/
 │   │   ├── global/               # Applied to all machines unconditionally
 │   │   └── optional/             # Selectable hardware modules (GPU drivers)
-│   └── <model>.nix               # Per-device, feature manifest
+│   └── <model>.nix               # Per-device, module manifests
 │
-├── hosts/                        # System-level NixOS configurations
+├── hosts/                        # System-level NixOS configurations (auto-discovered)
 │   ├── common/
 │   │   ├── global/               # Applied to all hosts unconditionally
-│   │   │   ├── users/            # Declares nixlab.mainUser option
-│   │   │   └── flake/            # Self-registers nixosModules.hosts.c-global
-│   │   └── optional/             # Selectable feature modules
-│   │       └── flake/            # Self-registers nixosModules.hosts.c-optional
-│   ├── flake/                    # Self-registering, per-host wrappers
-│   └── <hostname>.nix            # Per-host, feature manifest — pure option selections, no imports
+│   │   │   └── users/            # Declares nixlab.mainUser option
+│   │   └── optional/             # Selectable sys-package modules (games, media)
+│   └── <hostname>.nix            # Per-host, module manifests
 │
 ├── home/                         # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/                # Managed dotfiles and scripts (bash config, themes)
 │   │   ├── global/               # Applied to all users unconditionally
-│   │   └── optional/             # Selectable user features (browsers, terminal emulators)
-│   └── temhr/                    # Per-user, host feature selections
+│   │   └── optional/             # Selectable user-package modules (browsers, terminals)
+│   └── temhr/                    # Per-user, host module manifests
 │
 ├── modules/                      # Reusable self-exporting service modules (auto-discovered)
-│   ├── nixos/                    # System-level sservice modules
-│   └── home-manager/             # User-level modules
+│   ├── nixos/                    # System-level service modules
+│   └── home-manager/             # User-level service modules
 │
 ├── overlays/                     # nixpkgs modifications and pinned channel overlays
 │   ├── default.nix               # Self-registers all overlays into flake.overlays
