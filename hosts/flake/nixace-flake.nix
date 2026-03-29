@@ -1,5 +1,3 @@
-# Flake-parts wrapper for nixace.
-# The feature manifest (nixace.nix) is unchanged and stays in place.
 {self, ...}: {
   flake.nixosModules.hosts--nixace = {...}: {
     networking.hostName = "nixace";
@@ -11,10 +9,18 @@
       self.nixosModules.hw--c-global
       self.nixosModules.hw--c-optional--driver-nvidia
       self.nixosModules.hw--zb17g4-p5
-      self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional
-      self.nixosModules.sys--cachix
       self.nixosModules.hosts--nixace
+      self.nixosModules.hosts--c-global
+      self.nixosModules.hosts--c-optional--development
+      self.nixosModules.hosts--c-optional--education
+      self.nixosModules.hosts--c-optional--games
+      self.nixosModules.hosts--c-optional--media
+      self.nixosModules.hosts--c-optional--productivity
+      self.nixosModules.hosts--c-optional--virtualizations
+      self.nixosModules.sys--cachix
+      self.nixosModules.sys--gui-shells
+      self.nixosModules.sys--ignore-lid
+      self.nixosModules.sys--monitoring
       self.nixosModules.svc--bookstack-nixlab
       self.nixosModules.secrets--bookstack
       self.nixosModules.svc--comfyui-p5000
