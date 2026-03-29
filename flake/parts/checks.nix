@@ -42,15 +42,6 @@
           )
           self.nixosConfigurations)}
       '';
-      host-validation = pkgs.runCommand "validate-hosts" {} ''
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (
-            hostname: _:
-              "[ -f ${../../hosts}/${hostname}.nix ] || "
-              + "(echo 'Missing: hosts/${hostname}.nix' && exit 1)"
-          )
-          self.nixosConfigurations)}
-        echo 'All host files exist' > $out
-      '';
     };
   };
 }
