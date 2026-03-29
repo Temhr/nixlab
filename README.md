@@ -197,21 +197,18 @@ nixlab/
 ├── flake.nix                     # Thin root — delegates to directories via import-tree
 ├── flake.lock                    # Version-pinned input revisions
 │
-├── flake/
-│   └── parts/                    # Conventional flake-parts files (auto-discovered)
+├── flake/                        # Orchestration-level flake-parts files (auto-discovered)
+│   └── parts/
 │       ├── lib.nix               # mkHost helper + home-manager-config module
 │       ├── overlays.nix          # Package overlays
 │       ├── packages.nix          # Custom packages + alejandra formatter
 │       └── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
 │
-├── hardware/                     # Machine-level hardware configurations
+├── hardware/                     # Machine-level hardware configurations (auto-discovered)
 │   ├── common/
 │   │   ├── global/               # Applied to all machines unconditionally
-│   │   │   └── flake/            # Self-registers nixosModules.hardware.common-global
-│   │   └── optional/             # Selectable hardware modules (GPU drivers, extra drives)
-│   │       └── flake/            # Self-registers nixosModules.hardware.common-optional
-│   ├── flake/                    # Per-device self-registering wrappers
-│   └── <model>.nix               # Per-device generated configs (nixos-generate-config)
+│   │   └── optional/             # Selectable hardware modules (GPU drivers)
+│   └── <model>.nix               # Per-device, feature manifests
 │
 ├── hosts/                        # System-level NixOS configurations
 │   ├── common/
@@ -221,7 +218,7 @@ nixlab/
 │   │   └── optional/             # Selectable feature modules
 │   │       └── flake/            # Self-registers nixosModules.hosts.common-optional
 │   ├── flake/                    # Per-host self-registering wrappers
-│   └── <hostname>.nix            # Feature manifests — pure option selections, no imports
+│   └── <hostname>.nix            # Per-host, feature manifests — pure option selections, no imports
 │
 ├── home/                         # User-level Home Manager configurations
 │   ├── common/
