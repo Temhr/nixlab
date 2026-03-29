@@ -197,18 +197,18 @@ nixlab/
 ├── flake.nix                     # Thin root — delegates to directories via import-tree
 ├── flake.lock                    # Version-pinned input revisions
 │
-├── flake/                        # Orchestration-level flake-parts files (auto-discovered)
+├── flake/                        # Orchestration-level flake-parts configs (auto-discovered)
 │   └── parts/
 │       ├── lib.nix               # mkHost helper + home-manager-config module
 │       ├── overlays.nix          # Package overlays
 │       ├── packages.nix          # Custom packages + alejandra formatter
 │       └── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
 │
-├── hardware/                     # Machine-level hardware configurations (auto-discovered)
+├── hardware/                     # Machine-level hardware configs (auto-discovered)
 │   ├── common/
 │   │   ├── global/               # Applied to all machines unconditionally
 │   │   └── optional/             # Selectable hardware modules (GPU drivers)
-│   └── <model>.nix               # Per-device, feature manifests
+│   └── <model>.nix               # Per-device, feature manifest
 │
 ├── hosts/                        # System-level NixOS configurations
 │   ├── common/
@@ -217,19 +217,19 @@ nixlab/
 │   │   │   └── flake/            # Self-registers nixosModules.hosts.common-global
 │   │   └── optional/             # Selectable feature modules
 │   │       └── flake/            # Self-registers nixosModules.hosts.common-optional
-│   ├── flake/                    # Per-host self-registering wrappers
-│   └── <hostname>.nix            # Per-host, feature manifests — pure option selections, no imports
+│   ├── flake/                    # Self-registering, per-host wrappers
+│   └── <hostname>.nix            # Per-host, feature manifest — pure option selections, no imports
 │
 ├── home/                         # User-level Home Manager configurations
 │   ├── common/
 │   │   ├── files/                # Managed dotfiles and scripts (bash config, themes)
 │   │   ├── global/               # Applied to all users unconditionally
-│   │   └── optional/             # Selectable user features
-│   └── temhr/                    # Per-user, per-host feature selections
+│   │   └── optional/             # Selectable user features (browsers, terminal emulators)
+│   └── temhr/                    # Per-user, host feature selections
 │
 ├── modules/                      # Reusable self-exporting service modules (auto-discovered)
 │   ├── nixos/                    # System-level sservice modules
-│   └── home-manager/             # User-level modules (browsers, terminal emulators)
+│   └── home-manager/             # User-level modules
 │
 ├── overlays/                     # nixpkgs modifications and pinned channel overlays
 │   ├── default.nix               # Self-registers all overlays into flake.overlays
