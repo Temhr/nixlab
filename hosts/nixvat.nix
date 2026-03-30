@@ -9,8 +9,6 @@
       self.nixosModules.hosts--c-optional--media
       self.nixosModules.hosts--c-optional--productivity
       self.nixosModules.hosts--c-optional--virtualizations
-      self.nixosModules.hardw--c-global
-      self.nixosModules.hardw--c-optional--driver-nvidia
       self.nixosModules.hardw--zb17g1-k3
       self.nixosModules.systm--cachix
       self.nixosModules.systm--gui-shells

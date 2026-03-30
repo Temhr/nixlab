@@ -2,8 +2,7 @@
   imports = [
     # Paths to other modules.
     # Compose this module out of smaller ones.
-    ./drives.nix
-    ./drives-additional.nix
+    ./mounts.nix
     ./hardware-configuration.nix
   ];
 }

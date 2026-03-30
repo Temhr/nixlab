@@ -9,8 +9,6 @@
       self.nixosModules.hosts--c-optional--media
       self.nixosModules.hosts--c-optional--productivity
       self.nixosModules.hosts--c-optional--virtualizations
-      self.nixosModules.hardw--c-global
-      self.nixosModules.hardw--c-optional--driver-nvidia
       self.nixosModules.hardw--zb15g2-k1
       self.nixosModules.systm--auto-backup-phone-media
       self.nixosModules.systm--cachix

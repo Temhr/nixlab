@@ -1,8 +1,8 @@
 {...}: {
   flake.homeModules = {
     # Common layers
-    home-c-global = import ../../home/common/global;
-    home-c-optional = import ../../home/common/optional;
+    home--c-global = import ../../home/common/global;
+    home--c-optional = import ../../home/common/optional;
     # Per-host user configs
     temhr-nixace = import ../../home/temhr/nixace.nix;
     temhr-nixsun = import ../../home/temhr/nixsun.nix;

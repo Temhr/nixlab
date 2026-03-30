@@ -1,5 +1,10 @@
-{...}: {
-  flake.nixosModules.hardw--zb17g1-k3 = {
+{self, ...}: {
+  flake.nixosModules.hardw--zb17g1-k3 = {...}: {
+    imports = [
+      self.nixosModules.hardw--c-global
+      self.nixosModules.hardw--c-optional--driver-nvidia
+      self.nixosModules.hardw--c-optional--mounts-extra
+    ];
     # Choose between these choices: "none" "k" "p"
     driver-nvidia.quadro = "k";
 
