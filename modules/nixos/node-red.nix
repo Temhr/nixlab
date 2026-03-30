@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--node-red-nixlab = {
+  flake.nixosModules.servc--node-red-nixlab = {
     config,
     lib,
     pkgs,

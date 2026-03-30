@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--loki-nixlab = {
+  flake.nixosModules.servc--loki-nixlab = {
     config,
     lib,
     pkgs,

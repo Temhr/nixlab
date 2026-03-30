@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sys--auto-backup-phone-media = {pkgs, ...}: let
+  flake.nixosModules.systm--auto-backup-phone-media = {pkgs, ...}: let
     photoMoveScript = pkgs.writeShellScriptBin "backup-phone-media" ''
       set -euo pipefail
 

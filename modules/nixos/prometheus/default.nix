@@ -18,7 +18,7 @@
 # FILE: prometheus/default.nix (main entry point)
 # ============================================================================
 {...}: {
-  flake.nixosModules.svc--prometheus-nixlab = {
+  flake.nixosModules.servc--prometheus-nixlab = {
     config,
     lib,
     pkgs,

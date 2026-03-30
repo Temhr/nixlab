@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sys--gui-shells = {
+  flake.nixosModules.systm--gui-shells = {
     config,
     lib,
     ...

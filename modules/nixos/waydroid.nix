@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--waydroid-nixlab = {
+  flake.nixosModules.servc--waydroid-nixlab = {
     config,
     lib,
     pkgs,

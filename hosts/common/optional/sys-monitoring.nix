@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sys--monitoring = {lib, ...}: {
+  flake.nixosModules.systm--monitoring = {lib, ...}: {
     # All three services default to disabled.
     # Enable per-host by setting enable = true in the host file.
 

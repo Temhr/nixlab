@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hw--c-optional--driver-nvidia = {
+  flake.nixosModules.hardw--c-optional--driver-nvidia = {
     config,
     pkgs,
     lib,

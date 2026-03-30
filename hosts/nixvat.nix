@@ -1,4 +1,41 @@
 {self, ...}: {
+  flake.nixosConfigurations.nixvat = self.lib.mkHost {
+    modules = [
+      self.nixosModules.hosts--nixvat
+      self.nixosModules.hosts--c-global
+      self.nixosModules.hosts--c-optional--development
+      self.nixosModules.hosts--c-optional--education
+      self.nixosModules.hosts--c-optional--games
+      self.nixosModules.hosts--c-optional--media
+      self.nixosModules.hosts--c-optional--productivity
+      self.nixosModules.hosts--c-optional--virtualizations
+      self.nixosModules.hardw--c-global
+      self.nixosModules.hardw--c-optional--driver-nvidia
+      self.nixosModules.hardw--zb17g1-k3
+      self.nixosModules.systm--cachix
+      self.nixosModules.systm--gui-shells
+      self.nixosModules.systm--ignore-lid
+      self.nixosModules.systm--monitoring
+      self.nixosModules.servc--bookstack-nixlab
+      self.nixosModules.secrets--bookstack
+      self.nixosModules.servc--comfyui-p5000
+      self.nixosModules.servc--comfyui-extensions
+      self.nixosModules.servc--comfyui-models
+      self.nixosModules.servc--grafana-nixlab
+      self.nixosModules.secrets--grafana
+      self.nixosModules.servc--homepage-nixlab
+      self.nixosModules.servc--loki-nixlab
+      self.nixosModules.servc--ollama-cpu
+      self.nixosModules.servc--prometheus-nixlab
+      self.nixosModules.servc--glance-nixlab
+      self.nixosModules.servc--gotosocial-nixlab
+      self.nixosModules.servc--home-assistant-nixlab
+      self.nixosModules.servc--node-red-nixlab
+      self.nixosModules.servc--syncthing-nixlab
+      self.nixosModules.servc--wiki-js-nixlab
+      self.nixosModules.servc--zola-nixlab
+    ];
+  };
   flake.nixosModules.hosts--nixvat = {
     config,
     inputs,
@@ -156,43 +193,5 @@
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     system.stateVersion = "24.11";
-  };
-
-  flake.nixosConfigurations.nixvat = self.lib.mkHost {
-    modules = [
-      self.nixosModules.hw--c-global
-      self.nixosModules.hw--c-optional--driver-nvidia
-      self.nixosModules.hw--zb17g1-k3
-      self.nixosModules.hosts--nixvat
-      self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional--development
-      self.nixosModules.hosts--c-optional--education
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
-      self.nixosModules.hosts--c-optional--productivity
-      self.nixosModules.hosts--c-optional--virtualizations
-      self.nixosModules.sys--cachix
-      self.nixosModules.sys--gui-shells
-      self.nixosModules.sys--ignore-lid
-      self.nixosModules.sys--monitoring
-      self.nixosModules.svc--bookstack-nixlab
-      self.nixosModules.secrets--bookstack
-      self.nixosModules.svc--comfyui-p5000
-      self.nixosModules.svc--comfyui-extensions
-      self.nixosModules.svc--comfyui-models
-      self.nixosModules.svc--grafana-nixlab
-      self.nixosModules.secrets--grafana
-      self.nixosModules.svc--homepage-nixlab
-      self.nixosModules.svc--loki-nixlab
-      self.nixosModules.svc--ollama-cpu
-      self.nixosModules.svc--prometheus-nixlab
-      self.nixosModules.svc--glance-nixlab
-      self.nixosModules.svc--gotosocial-nixlab
-      self.nixosModules.svc--home-assistant-nixlab
-      self.nixosModules.svc--node-red-nixlab
-      self.nixosModules.svc--syncthing-nixlab
-      self.nixosModules.svc--wiki-js-nixlab
-      self.nixosModules.svc--zola-nixlab
-    ];
   };
 }

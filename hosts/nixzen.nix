@@ -1,4 +1,29 @@
 {self, ...}: {
+  flake.nixosConfigurations.nixzen = self.lib.mkHost {
+    modules = [
+      self.nixosModules.hosts--nixzen
+      self.nixosModules.hosts--c-global
+      self.nixosModules.hosts--c-optional--development
+      self.nixosModules.hosts--c-optional--education
+      self.nixosModules.hosts--c-optional--games
+      self.nixosModules.hosts--c-optional--media
+      self.nixosModules.hosts--c-optional--productivity
+      self.nixosModules.hosts--c-optional--virtualizations
+      self.nixosModules.hardw--c-global
+      self.nixosModules.hardw--c-optional--driver-nvidia
+      self.nixosModules.hardw--zb15g2-k1
+      self.nixosModules.systm--auto-backup-phone-media
+      self.nixosModules.systm--cachix
+      self.nixosModules.systm--gui-shells
+      self.nixosModules.systm--ignore-lid
+      self.nixosModules.systm--monitoring
+      self.nixosModules.servc--grafana-nixlab
+      self.nixosModules.secrets--grafana
+      self.nixosModules.servc--loki-nixlab
+      self.nixosModules.servc--prometheus-nixlab
+      self.nixosModules.servc--syncthing-nixlab
+    ];
+  };
   flake.nixosModules.hosts--nixzen = {
     config,
     pkgs,
@@ -113,31 +138,5 @@
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     system.stateVersion = "24.11";
-  };
-
-  flake.nixosConfigurations.nixzen = self.lib.mkHost {
-    modules = [
-      self.nixosModules.hw--c-global
-      self.nixosModules.hw--c-optional--driver-nvidia
-      self.nixosModules.hw--zb15g2-k1
-      self.nixosModules.hosts--nixzen
-      self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional--development
-      self.nixosModules.hosts--c-optional--education
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
-      self.nixosModules.hosts--c-optional--productivity
-      self.nixosModules.hosts--c-optional--virtualizations
-      self.nixosModules.sys--auto-backup-phone-media
-      self.nixosModules.sys--cachix
-      self.nixosModules.sys--gui-shells
-      self.nixosModules.sys--ignore-lid
-      self.nixosModules.sys--monitoring
-      self.nixosModules.svc--grafana-nixlab
-      self.nixosModules.secrets--grafana
-      self.nixosModules.svc--loki-nixlab
-      self.nixosModules.svc--prometheus-nixlab
-      self.nixosModules.svc--syncthing-nixlab
-    ];
   };
 }

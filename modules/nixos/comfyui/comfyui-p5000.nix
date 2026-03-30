@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--comfyui-p5000 = {
+  flake.nixosModules.servc--comfyui-p5000 = {
     config,
     lib,
     pkgs,

@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--homepage-nixlab = {
+  flake.nixosModules.servc--homepage-nixlab = {
     config,
     lib,
     pkgs,

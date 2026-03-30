@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sys--ignore-lid = {
+  flake.nixosModules.systm--ignore-lid = {
     config,
     lib,
     ...
@@ -20,8 +20,8 @@
       # systemd-logind: ignore all lid events
       services.logind.settings.Login = {
         HandleLidSwitch = "ignore";
-        HandleLidSwitchDocked = "ignore";
-        HandleLidSwitchExternalPower = "ignore";
+        HandleLidSwitchDocked = "ignore"; # Optional: disables lid action even when docked
+        HandleLidSwitchExternalPower = "ignore"; # Optional: disables lid action when charging
       };
 
       # Optional: disable all sleep mechanisms

@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--zola-nixlab = {
+  flake.nixosModules.servc--zola-nixlab = {
     config,
     lib,
     pkgs,

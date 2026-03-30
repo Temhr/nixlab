@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--home-assistant-nixlab = {
+  flake.nixosModules.servc--home-assistant-nixlab = {
     config,
     lib,
     ...

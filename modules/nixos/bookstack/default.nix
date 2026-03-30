@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--bookstack-nixlab = {
+  flake.nixosModules.servc--bookstack-nixlab = {
     config,
     lib,
     ...

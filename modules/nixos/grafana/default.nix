@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--grafana-nixlab = {
+  flake.nixosModules.servc--grafana-nixlab = {
     config,
     lib,
     pkgs,

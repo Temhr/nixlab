@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--syncthing-nixlab = {
+  flake.nixosModules.servc--syncthing-nixlab = {
     config,
     lib,
     ...

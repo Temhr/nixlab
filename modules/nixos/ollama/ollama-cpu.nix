@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--ollama-cpu = {
+  flake.nixosModules.servc--ollama-cpu = {
     config,
     lib,
     pkgs,

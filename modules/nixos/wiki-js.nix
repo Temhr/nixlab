@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.svc--wiki-js-nixlab = {
+  flake.nixosModules.servc--wiki-js-nixlab = {
     config,
     lib,
     ...

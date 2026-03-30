@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hw--zb17g4-p5 = {
+  flake.nixosModules.hardw--zb17g4-p5 = {
     # Choose between these choices: "none" "k" "p"
     driver-nvidia.quadro = "p";
 
