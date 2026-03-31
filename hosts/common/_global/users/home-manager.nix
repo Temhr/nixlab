@@ -4,7 +4,7 @@
   ...
 }: {
   home-manager.users.${config.nixlab.mainUser} =
-    self.homeModules.
+    self."${config.nixlab.mainUser}-${config.networking.hostName}".
       "${config.nixlab.mainUser}-${config.networking.hostName}";
   # Pure name lookup. No path construction.
   # e.g. resolves to

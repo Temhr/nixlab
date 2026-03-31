@@ -59,14 +59,12 @@
         "x86_64-darwin"
       ];
       imports = [
-        (inputs.import-tree ./flake/parts)
+        (inputs.import-tree ./flake)
         (inputs.import-tree ./hardware)
+        (inputs.import-tree ./home)
         (inputs.import-tree ./hosts)
-        (inputs.import-tree ./modules/nixos)
+        (inputs.import-tree ./modules)
         (inputs.import-tree ./overlays)
-        (inputs.import-tree ./home/temhr/flake)
-        (inputs.import-tree ./home/common/global/flake)
-        (inputs.import-tree ./home/common/optional/flake)
       ];
     };
 }
