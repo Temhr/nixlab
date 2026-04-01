@@ -3,7 +3,9 @@
     config,
     lib,
     ...
-  }: {
+  }: let
+    cfg = config.services.bookstack-nixlab;
+  in {
     options.services.bookstack-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./bookstack.yaml;
@@ -15,12 +17,12 @@
       '';
     };
 
-    config = lib.mkIf config.services.bookstack-nixlab.enable {
+    config = lib.mkIf cfg.enable {
       sops.age.keyFile = "/var/lib/sops-nix/key.txt";
       sops.secrets =
         lib.genAttrs
         ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"]
-        (_: {sopsFile = config.services.bookstack-nixlab.secretsFile;});
+        (_: {sopsFile = cfg.secretsFile;});
     };
   };
 }

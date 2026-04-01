@@ -3,7 +3,9 @@
     config,
     lib,
     ...
-  }: {
+  }: let
+    cfg = config.services.grafana-nixlab;
+  in {
     options.services.grafana-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./grafana.yaml;
@@ -13,12 +15,13 @@
         Defaults to grafana.yaml co-located with this module.
         Override per-host if needed.
       '';
+    };
 
-    config = lib.mkIf config.services.grafana-nixlab.enable {
+    config = lib.mkIf cfg.enable {
       sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
       sops.secrets.GF_SECURITY_ADMIN_PASSWORD = {
-        sopsFile = config.services.grafana-nixlab.secretsFile;
+        sopsFile = cfg.secretsFile;
       };
     };
   };
