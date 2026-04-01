@@ -20,9 +20,9 @@ _: prev: {
     src = prev.fetchFromGitHub {
       owner = "comfyanonymous";
       repo = "ComfyUI";
-      # To get latest [rev]; blank out [sha256] then pick a tag-release commit hash: https://github.com/Comfy-Org/ComfyUI/tags
+      # To get update; blank out [sha256] and pick a tag-release commit hash for [rev]: https://github.com/Comfy-Org/ComfyUI/tags
       rev = "a0ae3f3bd46b9e58f43fccfe17077873bf16f905";
-      sha256 = "";
+      sha256 = "sha256-tv1IclHucV42JSVpxO/IdsOm+j6a5UcmZ+wBThZEhkY=";
     };
     nativeBuildInputs = [prev.makeWrapper prev.autoPatchelfHook];
     buildInputs = with prev; [
