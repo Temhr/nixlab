@@ -3,13 +3,13 @@ keys:
   - &nixsun age1uc06xlk6sw8z3nzc9sxugvcdmsnyrapwdamewmxz03hfqqcc8d3q29ydjr
 
 creation_rules:
-  - path_regex: secrets/bookstack\.yaml$
+  - path_regex: modules/nixos/bookstack/bookstack\.yaml$
     key_groups:
       - age:
         - *nixace
         - *nixsun
 
-  - path_regex: secrets/grafana\.yaml$
+  - path_regex: modules/nixos/grafana/grafana\.yaml$
     key_groups:
       - age:
         - *nixace
