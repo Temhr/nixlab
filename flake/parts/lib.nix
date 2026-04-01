@@ -1,3 +1,5 @@
+# Host assembly infrastructure.
+# Provides self.lib.mkHost for use in hosts/flake/*-flake.nix files.
 {
   self,
   inputs,
@@ -29,8 +31,6 @@
         inherit inputs self;
         outputs = self;
         flakePath = self;
-        # self' scoped to this system — available in any module that
-        # declares it as an argument: { self', ... }
         self' =
           self.packages.${system}
           // {
@@ -43,17 +43,4 @@
     };
 in {
   flake.lib.mkHost = mkHost;
-
-  flake.nixosModules.systm--home-manager-config = {
-    imports = [inputs.home-manager.nixosModules.home-manager];
-    home-manager = {
-      useGlobalPkgs = true;
-      useUserPackages = true;
-      extraSpecialArgs = {
-        inherit inputs self;
-        outputs = self;
-        flakePath = self;
-      };
-    };
-  };
 }

@@ -4,16 +4,18 @@
       name = "nixlab-dev";
 
       buildInputs = with pkgs; [
-        # NixOS tools
+        # NixOS rebuild and inspection
         nixos-rebuild
-        home-manager
+        nix-tree # visualise the dependency graph of any derivation
+        nvd # diff two NixOS generations side-by-side
+        nix-output-monitor # prettier nix build output
 
         # Secret management
         sops
         age
         ssh-to-age
 
-        # Development tools
+        # Code quality
         git
         alejandra
         deadnix
@@ -25,24 +27,26 @@
 
       shellHook = ''
         echo "🚀 NixLab Development Environment"
-        echo "Available commands:"
-        echo "  - nixos-rebuild: Rebuild NixOS configuration"
-        echo "  - home-manager: Manage user environment"
-        echo "  - sops: Edit encrypted secrets"
-        echo "  - alejandra: Format Nix code"
-        echo "  - deadnix: Find unused Nix code"
-        echo "  - statix: Lint Nix code"
         echo ""
-        echo "Available dev shells:"
-        echo "  - default: Main development environment"
-        echo "  - rust: Rust development"
-        echo "  - python: Python development"
-        echo "  - web: Web development"
-        echo "  - security: Security tools"
-        echo "  - minimal: Lightweight shell"
-        echo "  - repast: repast4py"
+        echo "NixOS tools:"
+        echo "  nixos-rebuild   Rebuild and switch the current host"
+        echo "  nix-tree        Visualise derivation dependency graph"
+        echo "  nvd             Diff two NixOS generations"
+        echo "  nom             Prettier nix build output (wrap: nom-build)"
         echo ""
-        echo "Usage: nix develop .#<shell-name>"
+        echo "Secrets:"
+        echo "  sops            Edit encrypted secret files"
+        echo "  age / ssh-to-age Manage age keys"
+        echo ""
+        echo "Code quality:"
+        echo "  alejandra       Format Nix files"
+        echo "  deadnix         Find unused Nix bindings"
+        echo "  statix          Lint Nix anti-patterns"
+        echo ""
+        echo "Available shells:  nix develop .#<name>"
+        echo "  default  rust  python  web  security  minimal"
+        echo "  mesa  mesa-cpu  mesa-gpu"
+        echo "  repast  repast-cpu  repast-gpu"
       '';
     };
   };

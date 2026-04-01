@@ -4,40 +4,41 @@
       name = "python-dev";
 
       buildInputs = with pkgs; [
-        # Python
+        # Python runtime
         python3
         python3Packages.pip
         python3Packages.virtualenv
-        python3Packages.poetry-core
 
-        # Development tools
+        # Dependency management — poetry itself, not just poetry-core
+        poetry
+
+        # Code quality
         python3Packages.black
-        python3Packages.flake8
+        python3Packages.ruff # faster flake8 + isort replacement
         python3Packages.mypy
         python3Packages.pytest
+        python3Packages.pytest-cov
+
+        # Interactive development
         python3Packages.ipython
         python3Packages.jupyter
 
-        # Common libraries
+        # Common data libraries
         python3Packages.requests
         python3Packages.numpy
         python3Packages.pandas
-
-        mpich
       ];
 
       shellHook = ''
         echo "🐍 Python Development Environment"
-        echo "Python version: $(python --version)"
-        echo "Pip version: $(pip --version)"
+        echo "  Python: $(python --version)"
+        echo "  Pip:    $(pip --version)"
+        echo "  Poetry: $(poetry --version)"
         echo ""
-        echo "Available tools:"
-        echo "  - poetry: Dependency management"
-        echo "  - black: Code formatter"
-        echo "  - flake8: Linter"
-        echo "  - mypy: Type checker"
-        echo "  - pytest: Testing framework"
-        echo "  - ipython/jupyter: Interactive development"
+        echo "Tools:  black  ruff  mypy  pytest  ipython  jupyter"
+        echo ""
+        echo "Tip: use 'python -m venv .venv && source .venv/bin/activate'"
+        echo "     for project-isolated dependencies."
       '';
     };
   };

@@ -8,13 +8,16 @@
         curl
         wget
         jq
+        yq-go # like jq but for YAML — useful alongside Nix configs
         tree
         htop
+        ripgrep # faster grep, useful for searching configs
+        fd # faster find
       ];
 
       shellHook = ''
         echo "⚡ Minimal Development Environment"
-        echo "Just the basics - git, curl, wget, jq, tree, htop"
+        echo "git  curl  wget  jq  yq  tree  htop  ripgrep  fd"
       '';
     };
   };

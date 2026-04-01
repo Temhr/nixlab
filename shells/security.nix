@@ -1,43 +1,45 @@
+# NOTE: Several packages in this shell require allowUnfree = true in nixpkgs.
+# If a package fails to build, check whether it requires unfree and whether
+# it is available on your current nixpkgs channel.
 {...}: {
   perSystem = {pkgs, ...}: {
     devShells.security = pkgs.mkShell {
       name = "security-dev";
 
       buildInputs = with pkgs; [
-        # Network tools
+        # Network reconnaissance
         nmap
-        netcat
-        wireshark
+        masscan # faster port scanner for large ranges
+        netcat-gnu
+
+        # Traffic analysis
         tcpdump
+        termshark # terminal UI for tshark / wireshark captures
 
-        # Web security
-        burpsuite
+        # Web application testing
         nikto
-        dirb
         gobuster
+        ffuf # fast web fuzzer, modern dirb replacement
 
-        # Cryptography
+        # Cryptography and password tools
+        openssl
         hashcat
         john
-        openssl
 
-        # General security
-        metasploit
+        # Utilities
         sqlmap
-        hydra
+        thc-hydra
       ];
 
       shellHook = ''
         echo "🔒 Security Development Environment"
-        echo "⚠️  Use these tools responsibly and ethically!"
+        echo "⚠️  Use these tools only on systems you own or"
+        echo "   have explicit written permission to test."
         echo ""
-        echo "Available tools:"
-        echo "  - nmap: Network scanner"
-        echo "  - burpsuite: Web application security"
-        echo "  - hashcat/john: Password cracking"
-        echo "  - metasploit: Penetration testing framework"
-        echo ""
-        echo "Remember: Only test on systems you own or have permission to test!"
+        echo "Network:   nmap  masscan  netcat  tcpdump  termshark"
+        echo "Web:       nikto  gobuster  ffuf  sqlmap"
+        echo "Passwords: hashcat  john  hydra"
+        echo "Crypto:    openssl"
       '';
     };
   };

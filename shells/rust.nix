@@ -11,37 +11,29 @@
         clippy
         rust-analyzer
 
-        # Additional Rust tools
-        cargo-watch
-        cargo-edit
-        cargo-audit
-        cargo-outdated
+        # Cargo extensions
+        cargo-watch # auto-rebuild on file changes
+        cargo-edit # cargo add / cargo rm
+        cargo-audit # check dependencies for known vulnerabilities
+        cargo-outdated # list outdated dependencies
+        cargo-nextest # faster test runner
 
-        # Build tools
+        # Build dependencies
         pkg-config
         openssl
-
-        # Common dependencies
         sqlite
       ];
 
       shellHook = ''
         echo "🦀 Rust Development Environment"
-        echo "Rust version: $(rustc --version)"
-        echo "Cargo version: $(cargo --version)"
+        echo "  Rust:  $(rustc --version)"
+        echo "  Cargo: $(cargo --version)"
         echo ""
-        echo "Available tools:"
-        echo "  - cargo: Rust package manager"
-        echo "  - rustfmt: Code formatter"
-        echo "  - clippy: Linter"
-        echo "  - rust-analyzer: Language server"
-        echo "  - cargo-watch: Auto-rebuild on changes"
-        echo ""
-        echo "Useful aliases:"
-        alias cr="cargo run"
-        alias ct="cargo test"
-        alias cb="cargo build --release"
-        alias cw="cargo watch -x run"
+        echo "Cargo shortcuts:"
+        echo "  cargo run / test / build --release / check / clippy"
+        echo "  cargo watch -x run     auto-rebuild on changes"
+        echo "  cargo nextest run      faster parallel test runner"
+        echo "  cargo audit            check for vulnerability advisories"
       '';
     };
   };

@@ -4,33 +4,36 @@
       name = "web-dev";
 
       buildInputs = with pkgs; [
-        # Node.js ecosystem
-        nodejs
-        nodePackages.npm
-        nodePackages.yarn
-        nodePackages.pnpm
+        # Node.js runtime and package managers
+        nodejs_20 # LTS — use nodePackages_latest for bleeding edge
+        nodePackages_latest.npm
+        nodePackages_latest.yarn
+        nodePackages_latest.pnpm
 
-        # Development tools
-        nodePackages.typescript
-        nodePackages.typescript-language-server
-        nodePackages.prettier
-        nodePackages.eslint
+        # TypeScript and language tooling
+        nodePackages_latest.typescript
+        nodePackages_latest.typescript-language-server
 
-        # Browsers for testing
-        chromium
+        # Code quality
+        nodePackages_latest.prettier
+        nodePackages_latest.eslint
+
+        # Useful extras
+        nodePackages_latest.http-server # quick local static server
+        jq # JSON manipulation
       ];
 
       shellHook = ''
         echo "🌐 Web Development Environment"
-        echo "Node version: $(node --version)"
-        echo "NPM version: $(npm --version)"
+        echo "  Node: $(node --version)"
+        echo "  npm:  $(npm --version)"
         echo ""
-        echo "Available tools:"
-        echo "  - npm/yarn/pnpm: Package managers"
-        echo "  - typescript: TypeScript compiler"
-        echo "  - prettier: Code formatter"
-        echo "  - eslint: Linter"
-        echo "  - webpack/vite: install per-project via npm"
+        echo "Package managers:  npm  yarn  pnpm"
+        echo "Tooling:           typescript  prettier  eslint"
+        echo "Utilities:         http-server  jq"
+        echo ""
+        echo "Tip: bundlers (vite, webpack, esbuild) are best"
+        echo "     installed per-project via npm/pnpm."
       '';
     };
   };
