@@ -34,7 +34,6 @@
 
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
-
     services.ignoreLid = {
       enable = true;
       # Optional:

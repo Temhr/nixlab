@@ -237,7 +237,6 @@ nixlab/
 │   └── _*.nix                    # Leaf overlay functions — imported by default.nix
 │
 ├── shells/                       # Isolated development environments (auto-discovered)
-├── secrets/                      # sops-encrypted secret files (one per service)
 ├── cachix/                       # Cachix binary cache declarations
 ├── bin/                          # Utility shell scripts
 └── .sops.yaml                    # sops age key configuration
