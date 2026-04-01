@@ -10,10 +10,10 @@
     };
 
     mkRepastShell = {useGPU ? false}: let
-      pythonEnvGPU = pkgs.buildEnv {
-        name = "empty-python-env";
-        paths = [];
-      };
+      # GPU mode: use python311 directly from pkgs so `python3` is available
+      # before the venv is activated (needed for `python3 -m venv` and the
+      # status checks at the bottom of shellHook).
+      pythonEnvGPU = pkgs.python311;
 
       pythonEnvCPU = python3WithOverrides.withPackages (ps:
         with ps; [
@@ -90,7 +90,8 @@
 
               if [ ! -d "$VENV_DIR" ]; then
                 echo "Creating clean Python 3.11 venv for GPU mode..."
-                ${pkgs.python311}/bin/python3 -m venv "$VENV_DIR"
+                # python311 is now in buildInputs so `python3` exists here
+                python3 -m venv "$VENV_DIR"
                 source "$VENV_DIR/bin/activate"
                 pip install --upgrade pip wheel setuptools
 
@@ -107,12 +108,18 @@
                 source "$VENV_DIR/bin/activate"
               fi
 
-              export PYTHONPATH="$VENV_DIR/lib/python3.11/site-packages:$PYTHONPATH"
+              # Make venv python the default for this session AND subshells
               export PATH="$VENV_DIR/bin:$PATH"
+              export PYTHONPATH="$VENV_DIR/lib/python3.11/site-packages:$PYTHONPATH"
               export LD_LIBRARY_PATH="${pkgs.linuxPackages.nvidia_x11}/lib:$LD_LIBRARY_PATH"
+
+              # Canonical `python` alias so scripts using bare `python` work
+              export PYTHON="$VENV_DIR/bin/python"
             ''
             else ''
               export CUDA_VISIBLE_DEVICES=""
+              # Point PYTHON at the Nix-managed interpreter
+              export PYTHON="$(which python3)"
             ''
           }
 
@@ -137,8 +144,9 @@
           if [ -z "$SO_FILE" ]; then
             echo "Building Repast4Py C++ extensions..."
             cd $REPAST4PY_HOME/repast4py
-            python setup.py build_ext --inplace || \
-              echo "Build failed. Please run: cd $REPAST4PY_HOME/repast4py && python setup.py build_ext --inplace"
+            # Use $PYTHON so both GPU (venv) and CPU (Nix) paths work
+            $PYTHON setup.py build_ext --inplace || \
+              echo "Build failed. Please run: cd $REPAST4PY_HOME/repast4py && python3 setup.py build_ext --inplace"
             cd - > /dev/null
           fi
 
@@ -169,9 +177,10 @@
           echo "============================================================"
           echo ""
           echo "Environment ready!"
-          echo "  Python: $(python --version)"
+          # Use $PYTHON (set above) so the correct interpreter is always found
+          echo "  Python: $($PYTHON --version)"
 
-          python - <<'PY' 2>/dev/null || echo "  NumPy import failed!"
+          $PYTHON - <<'PY' 2>/dev/null || echo "  NumPy import failed!"
           import sys
           try:
               import numpy as np
@@ -180,7 +189,7 @@
               print("  NumPy import error:", e, file=sys.stderr)
           PY
 
-          python - <<'PY' 2>/dev/null || echo "  mpi4py import failed!"
+          $PYTHON - <<'PY' 2>/dev/null || echo "  mpi4py import failed!"
           import sys
           try:
               from mpi4py import MPI
@@ -189,7 +198,7 @@
               print("  mpi4py import error:", e, file=sys.stderr)
           PY
 
-          python - <<'PY' 2>/dev/null || echo "  Repast4Py / PyTorch import failed!"
+          $PYTHON - <<'PY' 2>/dev/null || echo "  Repast4Py / PyTorch import failed!"
           import sys
           try:
               import repast4py
@@ -205,12 +214,12 @@
 
           echo ""
           echo "To run models:"
-          echo "  Single process:  python your_model.py config.yaml"
-          echo "  MPI parallel:    mpiexec -n 4 python your_model.py config.yaml"
+          echo "  Single process:  python3 your_model.py config.yaml"
+          echo "  MPI parallel:    mpiexec -n 4 python3 your_model.py config.yaml"
           echo ""
           echo "Example models available at:"
           echo "  cd $REPAST4PY_HOME/repast4py/examples/zombies"
-          echo "  mpiexec -n 2 python zombies.py zombie_model.yaml"
+          echo "  mpiexec -n 2 python3 zombies.py zombie_model.yaml"
           echo "============================================================"
         '';
       };
