@@ -57,7 +57,7 @@ outputs = inputs @ { flake-parts, ... }:
       (inputs.import-tree ./flake/parts)
       (inputs.import-tree ./hosts)
       (inputs.import-tree ./hardware)
-      (inputs.import-tree ./modules/nixos)
+      (inputs.import-tree ./modules)
       (inputs.import-tree ./overlays)
       (inputs.import-tree ./shells)
     ];
@@ -77,7 +77,7 @@ The key shift is in the **axis of composition**: instead of asking _"what does t
 In practice:
 - Shared behaviour lives in `*/common/global/` (universal) or `*/common/optional/` (selectable)
 - Host files express feature selections: `steam.enable = true`, `incus.enable = true`
-- Adding a new host means writing two small files — no knowledge of filesystem layout required
+- Adding a new host means writing three small files (outlining host, home, hardware) — no knowledge of filesystem layout required
 - Changing a feature happens in one place and propagates to every host that selects it
 
 ## Self-Exporting Module Schema
@@ -106,6 +106,7 @@ Every file in this flake is a **flake-parts module** — a function that takes `
     modules = [
       self.nixosModules.hardw--c-global
       self.nixosModules.hosts--nixace
+      self.homeModules.temhr-nixace
       self.nixosModules.servc--glance-nixlab
       self.nixosModules.systm--home-manager-config
       # ...
@@ -123,44 +124,53 @@ A single file can also emit **multiple related outputs** — for example, a serv
 All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern. This produces a readable tree in `nix flake show`:
 
 ```
-nixosModules
-├───hosts--c-global
-├───hosts--c-optional
-├───hosts--nixace
-├───hosts--nixsun
-├───hosts--nixtop
-├───hosts--nixvat
-├───hosts--nixzen
-├───hardw--c-global
-├───hardw--c-optional--driver-nvidia
-├───hardw--zb15g2-k1
-├───hardw--zb17g1-k3
-├───hardw--zb17g1-k4
-├───hardw--zb17g2-k5
-├───hardw--zb17g4-p5
-├───secrets--bookstack
-├───secrets--grafana
-├───servc--bookstack-nixlab
-├───servc--comfyui-extensions
-├───servc--comfyui-models
-├───servc--comfyui-p5000
-├───servc--glance-nixlab
-├───servc--gotosocial-nixlab
-├───servc--grafana-nixlab
-├───servc--home-assistant-nixlab
-├───servc--homepage-nixlab
-├───servc--loki-nixlab
-├───servc--node-red-nixlab
-├───servc--ollama-cpu
-├───servc--ollama-p5000
-├───servc--prometheus-nixlab
-├───servc--syncthing-nixlab
-├───servc--waydroid-nixlab
-├───servc--wiki-js-nixlab
-├───servc--zola-nixlab
-├───systm--auto-backup-phone-media
-├───systm--cachix
-└───systm--home-manager-config
+├───nixosModules
+│   ├───hardw--c-global: NixOS module
+│   ├───hardw--c-optional--driver-nvidia: NixOS module
+│   ├───hardw--c-optional--mounts-extra: NixOS module
+│   ├───hardw--zb15g2-k1: NixOS module
+│   ├───hardw--zb17g1-k3: NixOS module
+│   ├───hardw--zb17g1-k4: NixOS module
+│   ├───hardw--zb17g2-k5: NixOS module
+│   ├───hardw--zb17g4-p5: NixOS module
+│   ├───hosts--c-global: NixOS module
+│   ├───hosts--c-optional--development: NixOS module
+│   ├───hosts--c-optional--education: NixOS module
+│   ├───hosts--c-optional--games: NixOS module
+│   ├───hosts--c-optional--media: NixOS module
+│   ├───hosts--c-optional--productivity: NixOS module
+│   ├───hosts--c-optional--virtualizations: NixOS module
+│   ├───hosts--nixace: NixOS module
+│   ├───hosts--nixsun: NixOS module
+│   ├───hosts--nixtop: NixOS module
+│   ├───hosts--nixvat: NixOS module
+│   ├───hosts--nixzen: NixOS module
+│   ├───secrets--bookstack: NixOS module
+│   ├───secrets--grafana: NixOS module
+│   ├───servc--bookstack-nixlab: NixOS module
+│   ├───servc--comfyui-extensions: NixOS module
+│   ├───servc--comfyui-models: NixOS module
+│   ├───servc--comfyui-p5000: NixOS module
+│   ├───servc--glance-nixlab: NixOS module
+│   ├───servc--gotosocial-nixlab: NixOS module
+│   ├───servc--grafana-nixlab: NixOS module
+│   ├───servc--home-assistant-nixlab: NixOS module
+│   ├───servc--homepage-nixlab: NixOS module
+│   ├───servc--loki-nixlab: NixOS module
+│   ├───servc--node-red-nixlab: NixOS module
+│   ├───servc--ollama-cpu: NixOS module
+│   ├───servc--ollama-p5000: NixOS module
+│   ├───servc--prometheus-nixlab: NixOS module
+│   ├───servc--syncthing-nixlab: NixOS module
+│   ├───servc--waydroid-nixlab: NixOS module
+│   ├───servc--wiki-js-nixlab: NixOS module
+│   ├───servc--zola-nixlab: NixOS module
+│   ├───systm--auto-backup-phone-media: NixOS module
+│   ├───systm--cachix: NixOS module
+│   ├───systm--gui-shells: NixOS module
+│   ├───systm--home-manager-config: NixOS module
+│   ├───systm--ignore-lid: NixOS module
+│   └───systm--monitoring: NixOS module
 ```
 
 ## Remaining flake/parts/ files
@@ -170,7 +180,7 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 | File | Responsibility | Output namespace |
 |---|---|---|
 | `lib.nix` | `mkHost` host assembly helper + `home-manager-config` module | `flake.lib`, `flake.nixosModules.system` |
-| `overlays.nix` | Bridge for overlay registration during migration | `flake.overlays` |
+| `home-options.nix` | Declares flake.homeModules as a mergeable attrset option so multiple self-registering files can each contribute one key without collision | `flake.homeModules` |
 | `packages.nix` | Custom packages and `alejandra` formatter | `perSystem` |
 | `checks.nix` | Pre-commit hooks and build validation | `perSystem` |
 
@@ -300,39 +310,42 @@ nix flake show /home/temhr/nixlab
 ## Adding a new host
 
 1. Create `hosts/<hostname>.nix` — feature selections only, no imports block, no hostname declaration. Set `nixlab.mainUser` to the primary user for this machine.
-2. Create `home/temhr/<hostname>.nix` — user config referencing `self.homeModules.*`.
+2. Create `home/<username>/<hostname>.nix` — user config referencing `self.homeModules.*`.
 3. Generate hardware config: `nixos-generate-config`, save to `hardware/<model>.nix`.
-4. Create `hardware/flake/<model>-flake.nix` to self-register the hardware module:
+4. Create `hardware/<model>.nix` to self-register the hardware module:
    ```nix
-   { ... }: {
-     flake.nixosModules.hardware.<model> = import ../<model>.nix;
+    { self, ...}: {
+      flake.nixosModules.hardw--<model> = {...}: {
+        imports = [
+         self.nixosModules.hardw--c-global
+         self.nixosModules.hardw--c-optional--...
+        ];
+        ...
+      };
    }
    ```
-5. Create `hosts/flake/<hostname>-flake.nix` to self-register the host module and configuration:
+5. Create `hosts/<hostname>.nix` to self-register the host module and configuration:
    ```nix
    { self, ... }: {
-     flake.nixosModules.hosts.<hostname> = { ... }: {
-       networking.hostName = "<hostname>";
-       imports = [ (import ../<hostname>.nix) ];
-     };
      flake.nixosConfigurations.<hostname> = self.lib.mkHost {
        modules = [
-         self.nixosModules.hardware.c-global
-         self.nixosModules.hardware.c-optional
-         self.nixosModules.hardware.<model>
-         self.nixosModules.hosts.c-global
-         self.nixosModules.hosts.c-optional
-         self.nixosModules.system.cachix
+         self.nixosModules.hosts--<hostname>
+         self.nixosModules.hosts--c-global
+         self.nixosModules.hosts--c-optional--...
+         self.nixosModules.hardw--<model>
+         self.nixosModules.systm--cachix
          # add only the services this host actually uses:
-         self.nixosModules.services.<n>
-         self.nixosModules.hosts.<hostname>
+         self.nixosModules.servc--<n>
        ];
+     };
+     flake.nixosModules.hosts--<hostname> = { ... }: {
+      networking.hostName = "<hostname>";
+      nixlab.mainUser = "<username>";
      };
    }
    ```
-6. Add `temhr-<hostname>` to `flake.homeModules` in the home modules bridge file.
-7. Commit all new files (`git add -A`) — Nix only copies git-tracked files into the store.
-8. Run `nix flake check` to validate, then deploy: `sudo nixos-rebuild switch --flake .#<hostname>`
+6. Commit all new files (`git add -A`) — Nix only copies git-tracked files into the store.
+7. Run `nix flake check` to validate, then deploy: `sudo nixos-rebuild switch --flake .#<hostname>`
 
 ## Adding a new service module
 

@@ -1,5 +1,5 @@
 {...}: {
-  flake.temhr-nixzen.temhr-nixzen = {
+  flake.homeModules.temhr-nixzen = {
     self,
     pkgs,
     ...
