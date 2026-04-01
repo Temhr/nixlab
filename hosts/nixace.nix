@@ -13,16 +13,16 @@
       self.nixosModules.systm--cachix
       self.nixosModules.systm--gui-shells
       self.nixosModules.systm--ignore-lid
-      self.nixosModules.systm--monitoring
       self.nixosModules.servc--bookstack-nixlab
       self.nixosModules.secrets--bookstack
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
+      self.nixosModules.servc--ollama-p5000
+      self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.servc--grafana-nixlab
       self.nixosModules.secrets--grafana
       self.nixosModules.servc--loki-nixlab
-      self.nixosModules.servc--ollama-p5000
       self.nixosModules.servc--prometheus-nixlab
     ];
   };
@@ -169,18 +169,18 @@
       dbPasswordFile = config.sops.secrets.DB_PASS.path;
       appKeyFile = config.sops.secrets.APP_KEY.path;
     };
-    # Dashboard paths removed entirely.
-    # Module supplies its own defaults.
-    services.grafana-nixlab = {
-      enable = false;
-      port = 3101;
-      listenAddress = "0.0.0.0";
+    services.nixlab-monitoring = {
+      enable = true;
+      dataDir = "/data";
       openFirewall = true;
-      dataDir = "/data/grafana";
-      # dashboards uses module defaults
+      ports.grafana = 3101;
+      ports.loki = 3100;
+      ports.prometheus = 9090;
+      loki.maintenance.enable = true;
+      prometheus.maintenance.enable = true;
+      prometheus.maintenance.exporters.systemd = true;
+      prometheus.maintenance.exporters.smartctl.enable = true;
     };
-    services.loki-nixlab.enable = false;
-    services.prometheus-nixlab.enable = false;
 
     # Define your Flatpak packages here
     flatpakPackages = [

@@ -100,6 +100,11 @@
             description = "Path to maintenance log file";
           };
         };
+        grpcPort = lib.mkOption {
+          type = lib.types.port;
+          default = 9096;
+          description = "gRPC port for Loki internal communication. Only relevant for multi-instance deployments.";
+        };
       };
     };
 
@@ -146,7 +151,8 @@
 
       users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups = ["loki" "alloy"];
+      users.users.${config.nixlab.mainUser}.extraGroups =
+        lib.mkAfter ["loki" "alloy"];
 
       # ----------------------------------------------------------------------------
       # LOKI SERVICE - Configure the systemd service
@@ -179,7 +185,7 @@
             server = {
               http_listen_address = cfg.listenAddress;
               http_listen_port = cfg.port;
-              grpc_listen_port = 9096;
+              grpc_listen_port = cfg.grpcPort;
               log_level = "info";
             };
 
@@ -456,7 +462,7 @@
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null) [cfg.port]
+        lib.optionals (cfg.domain == null) [cfg.port cfg.grpcPort]
         ++ lib.optionals (cfg.domain != null) [80 443]
       );
 

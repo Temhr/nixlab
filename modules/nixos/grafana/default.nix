@@ -89,12 +89,12 @@
 
         # Credentials File
         credentialsFile = lib.mkOption {
-          type = lib.types.path;
-          example = "/run/secrets/GF_SECURITY_ADMIN_PASSWORD";
+          type = lib.types.nullOr lib.types.path;
+          default = null;
           description = ''
-            Path to a file containing KEY=value environment variable overrides
-            for Grafana. Should at minimum contain GF_SECURITY_ADMIN_PASSWORD.
-            Manage this file with sops-nix via secrets-grafana.nix.
+            Path to a file containing GF_SECURITY_ADMIN_PASSWORD=<value>.
+            Set automatically by importing the secrets--grafana module.
+            If null, no credentials file is loaded (service will use Grafana defaults).
           '';
         };
 
@@ -206,7 +206,8 @@
 
       users.groups.grafana = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups = ["grafana"];
+      users.users.${config.nixlab.mainUser}.extraGroups =
+        lib.mkAfter ["grafana"];
 
       # ----------------------------------------------------------------------------
       # GRAFANA SERVICE - Configure the systemd service
@@ -233,83 +234,73 @@
           GF_DATABASE_PATH = "${cfg.dataDir}/data/grafana.db";
         };
 
-        serviceConfig = {
-          Type = "simple";
-          User = "grafana";
-          Group = "grafana";
-          WorkingDirectory = cfg.dataDir;
-          ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
-          Restart = "on-failure";
-          RestartSec = "10s";
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = [cfg.dataDir];
-          # Add this line — points systemd at the env file built in preStart
-          EnvironmentFile = "/run/grafana-credentials.env";
-        };
+        serviceConfig =
+          {
+            Type = "simple";
+            User = "grafana";
+            Group = "grafana";
+            WorkingDirectory = cfg.dataDir;
+            ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            ReadWritePaths = [cfg.dataDir];
+          }
+          // lib.optionalAttrs (cfg.credentialsFile != null) {
+            EnvironmentFile = "/run/grafana-credentials.env";
+          };
 
-        preStart = lib.mkBefore ''
-          # Build the credentials env file from the sops-decrypted secret.
-          echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
-            > /run/grafana-credentials.env
-          chmod 600 /run/grafana-credentials.env
+        preStart = lib.mkBefore (
+          lib.optionalString (cfg.credentialsFile != null) ''
+            echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
+              > /run/grafana-credentials.env
+            chown grafana:grafana /run/grafana-credentials.env
+            chmod 600 /run/grafana-credentials.env
+          ''
+          + ''
+            # Set up provisioning directories
+            mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
+            chown -R grafana:grafana ${cfg.dataDir}/provisioning
 
-          # Set up provisioning directories
-          mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
-          chown -R grafana:grafana ${cfg.dataDir}/provisioning
+            # ┌─────────────────────────────────────────────────────────┐
+            # │ PROVISION ALL DASHBOARDS                                │
+            # └─────────────────────────────────────────────────────────┘
+            ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
+                # Setup dashboard: ${name}
+                mkdir -p ${cfg.dataDir}/dashboards/${name}
+                chown grafana:grafana ${cfg.dataDir}/dashboards/${name}
 
-                          # ┌─────────────────────────────────────────────────────────┐
-                          # │ PROVISION ALL DASHBOARDS                                │
-                          # └─────────────────────────────────────────────────────────┘
-                          ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
-                        # Setup dashboard: ${name}
-                        mkdir -p ${cfg.dataDir}/dashboards/${name}
-                        chown grafana:grafana ${cfg.dataDir}/dashboards/${name}
+                # Copy dashboard JSON if it exists
+                if [ -f ${dashboard.path} ]; then
+                  install -m 644 -o grafana -g grafana ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
+                else
+                  echo "Warning: Dashboard file not found: ${dashboard.path}"
+                fi
 
-                        # Copy dashboard JSON if it exists
-                        if [ -f ${dashboard.path} ]; then
-                          install -m 644 -o grafana -g grafana ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
-                        else
-                          echo "Warning: Dashboard file not found: ${dashboard.path}"
-                        fi
-
-                        # Create dashboard provisioning config
-                        cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
-              apiVersion: 1
-
-              providers:
-                - name: '${name}'
-                  orgId: 1
-                  folder: '${dashboard.folder}'
-                  type: file
-                  disableDeletion: false
-                  updateIntervalSeconds: ${toString dashboard.updateInterval}
-                  allowUiUpdates: ${lib.boolToString dashboard.editable}
-                  options:
-                    path: ${cfg.dataDir}/dashboards/${name}
-                    foldersFromFilesStructure: false
-              DASHEOF
-                        chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
-            '')
-            cfg.dashboards)}
-        '';
+                # Create dashboard provisioning config
+                cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
+                apiVersion: 1
+                providers:
+                  - name: '${name}'
+                    orgId: 1
+                    folder: '${dashboard.folder}'
+                    type: file
+                    disableDeletion: false
+                    updateIntervalSeconds: ${toString dashboard.updateInterval}
+                    allowUiUpdates: ${lib.boolToString dashboard.editable}
+                    options:
+                      path: ${cfg.dataDir}/dashboards/${name}
+                      foldersFromFilesStructure: false
+                DASHEOF
+                chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
+              '')
+              cfg.dashboards)}
+          ''
+        );
       };
-
-      # ┌─────────────────────────────────────────────────────────┐
-      # │ ACTIVATION SCRIPT - Copy dashboards on system rebuild  │
-      # └─────────────────────────────────────────────────────────┘
-      system.activationScripts.grafana-dashboards = lib.mkIf (cfg.dashboards != {}) ''
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
-            if [ -f ${dashboard.path} ]; then
-              mkdir -p ${cfg.dataDir}/dashboards/${name}
-              install -m 644 ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
-              chown -R grafana:grafana ${cfg.dataDir}/dashboards/${name}
-            fi
-          '')
-          cfg.dashboards)}
-      '';
 
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY - Only configured if domain is set

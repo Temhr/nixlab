@@ -14,12 +14,12 @@
       self.nixosModules.systm--cachix
       self.nixosModules.systm--gui-shells
       self.nixosModules.systm--ignore-lid
-      self.nixosModules.systm--monitoring
+      self.nixosModules.servc--syncthing-nixlab
+      self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.servc--grafana-nixlab
       self.nixosModules.secrets--grafana
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab
-      self.nixosModules.servc--syncthing-nixlab
     ];
   };
   flake.nixosModules.hosts--nixzen = {
@@ -73,9 +73,18 @@
     #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
-    services.grafana-nixlab.enable = false;
-    services.loki-nixlab.enable = false;
-    services.prometheus-nixlab.enable = false;
+    services.nixlab-monitoring = {
+      enable = true;
+      dataDir = "/data";
+      openFirewall = true;
+      ports.grafana = 3101;
+      ports.loki = 3100;
+      ports.prometheus = 9090;
+      loki.maintenance.enable = true;
+      prometheus.maintenance.enable = true;
+      prometheus.maintenance.exporters.systemd = true;
+      prometheus.maintenance.exporters.smartctl.enable = true;
+    };
     services.syncthing-nixlab = {
       enable = true;
       user = "${config.nixlab.mainUser}";

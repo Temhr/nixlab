@@ -13,7 +13,7 @@
       self.nixosModules.systm--cachix
       self.nixosModules.systm--gui-shells
       self.nixosModules.systm--ignore-lid
-      self.nixosModules.systm--monitoring
+      self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.servc--grafana-nixlab
       self.nixosModules.secrets--grafana
       self.nixosModules.servc--loki-nixlab
@@ -79,9 +79,18 @@
       autoStart = false;
       enableGapps = true;
     };
-    services.grafana-nixlab.enable = false;
-    services.loki-nixlab.enable = false;
-    services.prometheus-nixlab.enable = false;
+    services.nixlab-monitoring = {
+      enable = true;
+      dataDir = "/data";
+      openFirewall = true;
+      ports.grafana = 3101;
+      ports.loki = 3100;
+      ports.prometheus = 9090;
+      loki.maintenance.enable = true;
+      prometheus.maintenance.enable = true;
+      prometheus.maintenance.exporters.systemd = true;
+      prometheus.maintenance.exporters.smartctl.enable = true;
+    };
 
     # Define your Flatpak packages here
     flatpakPackages = [
