@@ -58,7 +58,7 @@
           {
             type = "rss";
             limit = 50;
-            "collapse-after" = 7;
+            "collapse-after" = 4;
             cache = "3h";
             feeds = [
               {
