@@ -36,29 +36,29 @@
             title = "Services";
             sites = [
               {
-                title = "Home Assistant";
-                url = "http://192.168.0.200:8123";
-                icon = "si:homeassistant";
+                title = "Homepage - nixace";
+                url = "http://192.168.0.200:3000/";
+                icon = "si:homepage";
               }
               {
-                title = "Grafana - nixace";
-                url = "http://192.168.0.200:3101";
-                icon = "si:grafana";
+                title = "Homepage - nixsun";
+                url = "http://192.168.0.203:3000/";
+                icon = "si:homepage";
               }
               {
-                title = "Grafana - nixvat";
-                url = "http://192.168.0.201:3101";
-                icon = "si:grafana";
+                title = "Homepage - nixtop";
+                url = "http://192.168.0.202:3000/";
+                icon = "si:homepage";
               }
               {
-                title = "Prometheus - nixace";
-                url = "http://192.168.0.200:9090";
-                icon = "si:prometheus";
+                title = "Homepage - nixvat";
+                url = "http://192.168.0.201:3000/";
+                icon = "si:homepage";
               }
               {
-                title = "Syncthing - nixvat";
-                url = "http://192.168.0.201:8384";
-                icon = "si:syncthing";
+                title = "Homepage - nixzen";
+                url = "http://192.168.0.204:3000/";
+                icon = "si:homepage";
               }
             ];
           }
