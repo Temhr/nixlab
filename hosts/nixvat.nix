@@ -128,6 +128,8 @@
       enable = true;
       acceleration = "cpu";
       extraUsers = [config.nixlab.mainUser];
+      ollamaListenAddress = "0.0.0.0";
+      webuiListenAddress = "0.0.0.0";
       # Data directories
       ollamaDataDir = "/data/ollama";
       webuiDataDir = "/data/open-webui";
