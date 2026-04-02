@@ -99,30 +99,30 @@
           {
             type = "monitor";
             cache = "1m";
-            title = "Services";
+            title = "Homepage";
             sites = [
               {
-                title = "Homepage - nixace";
+                title = "nixace services";
                 url = "http://192.168.0.200:3000/";
                 icon = "si:homepage";
               }
               {
-                title = "Homepage - nixsun";
+                title = "nixsun services";
                 url = "http://192.168.0.203:3000/";
                 icon = "si:homepage";
               }
               {
-                title = "Homepage - nixtop";
+                title = "nixtop services";
                 url = "http://192.168.0.202:3000/";
                 icon = "si:homepage";
               }
               {
-                title = "Homepage - nixvat";
+                title = "nixvat services";
                 url = "http://192.168.0.201:3000/";
                 icon = "si:homepage";
               }
               {
-                title = "Homepage - nixzen";
+                title = "nixzen services";
                 url = "http://192.168.0.204:3000/";
                 icon = "si:homepage";
               }
