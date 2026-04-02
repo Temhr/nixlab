@@ -4,19 +4,19 @@
       ./_global
       self.nixosModules.systm--ignore-lid
       self.nixosModules.systm--cachix
-      self.nixosModules.servc--glance-nixlab
+      self.nixosModules.servc--homepage-nixlab
       self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.servc--grafana-nixlab
       self.nixosModules.secrets--grafana
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab
     ];
-    services.glance-nixlab = {
+    services.homepage-nixlab = {
       enable = true;
-      port = 3004;
+      port = 3000;
       listenAddress = "0.0.0.0";
       openFirewall = true;
-      dataDir = "/data/glance";
+      dataDir = "/data/homepage";
     };
     services.nixlab-monitoring = {
       enable = true;

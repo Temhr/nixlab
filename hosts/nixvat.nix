@@ -16,7 +16,7 @@
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
-      self.nixosModules.servc--homepage-nixlab
+      self.nixosModules.servc--glance-nixlab
       self.nixosModules.servc--ollama-cpu
       self.nixosModules.servc--gotosocial-nixlab
       self.nixosModules.servc--home-assistant-nixlab
@@ -81,12 +81,12 @@
     #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
-    services.homepage-nixlab = {
+    services.glance-nixlab = {
       enable = true;
-      port = 3000;
+      port = 3004;
       listenAddress = "0.0.0.0";
       openFirewall = true;
-      dataDir = "/data/homepage";
+      dataDir = "/data/glance";
     };
     services.wikijs-custom = {
       enable = true;
