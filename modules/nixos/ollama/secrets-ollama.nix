@@ -25,11 +25,19 @@
         }
       ];
       sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
       sops.secrets.WEBUI_SECRET_KEY = {
         sopsFile = cfg.secretsFile;
         owner = "open-webui";
+        restartUnits = [ "open-webui.service" ];  # restart webui when secret rotates
       };
-      # Wire the sops runtime path back into the service module's option
+
+      # Tell open-webui to wait for secrets to be installed
+      systemd.services.open-webui = {
+        after = [ "sops-install-secrets.service" ];
+        requires = [ "sops-install-secrets.service" ];
+      };
+
       services.ollama-stack.webuiSecretKeyFile =
         config.sops.secrets.WEBUI_SECRET_KEY.path;
     };
