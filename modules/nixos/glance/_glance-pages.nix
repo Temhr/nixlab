@@ -31,38 +31,6 @@
         size = "full";
         widgets = [
           {
-            type = "monitor";
-            cache = "1m";
-            title = "Services";
-            sites = [
-              {
-                title = "Homepage - nixace";
-                url = "http://192.168.0.200:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "Homepage - nixsun";
-                url = "http://192.168.0.203:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "Homepage - nixtop";
-                url = "http://192.168.0.202:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "Homepage - nixvat";
-                url = "http://192.168.0.201:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "Homepage - nixzen";
-                url = "http://192.168.0.204:3000/";
-                icon = "si:homepage";
-              }
-            ];
-          }
-          {
             type = "rss";
             limit = 50;
             "collapse-after" = 30;
@@ -119,6 +87,44 @@
               {
                 url = "https://xeiaso.net/blog.rss";
                 title = "Xe's (blog)";
+              }
+            ];
+          }
+        ];
+      }
+      {
+        # ── Right column: Hompage ──────────
+        size = "small";
+        widgets = [
+          {
+            type = "monitor";
+            cache = "1m";
+            title = "Services";
+            sites = [
+              {
+                title = "Homepage - nixace";
+                url = "http://192.168.0.200:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "Homepage - nixsun";
+                url = "http://192.168.0.203:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "Homepage - nixtop";
+                url = "http://192.168.0.202:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "Homepage - nixvat";
+                url = "http://192.168.0.201:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "Homepage - nixzen";
+                url = "http://192.168.0.204:3000/";
+                icon = "si:homepage";
               }
             ];
           }
