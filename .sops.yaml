@@ -1,6 +1,7 @@
 keys:
   - &nixace age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332
   - &nixsun age1uc06xlk6sw8z3nzc9sxugvcdmsnyrapwdamewmxz03hfqqcc8d3q29ydjr
+  - &nixvat age10jn8vgw2896pp52z3vxmdadczt267wsaca4ct6n597djuvrccc7qtdjkx0
 
 creation_rules:
   - path_regex: modules/nixos/bookstack/bookstack\.yaml$
@@ -8,15 +9,18 @@ creation_rules:
       - age:
         - *nixace
         - *nixsun
+        - *nixvat
 
   - path_regex: modules/nixos/grafana/grafana\.yaml$
     key_groups:
       - age:
         - *nixace
         - *nixsun
+        - *nixvat
 
   - path_regex: modules/nixos/ollama/ollama\.yaml$
     key_groups:
       - age:
         - *nixace
         - *nixsun
+        - *nixvat
