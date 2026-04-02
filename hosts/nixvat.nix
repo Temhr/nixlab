@@ -10,9 +10,7 @@
       self.nixosModules.hosts--c-optional--productivity
       self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb17g1-k3
-      self.nixosModules.systm--cachix
       self.nixosModules.systm--gui-shells
-      self.nixosModules.systm--ignore-lid
       self.nixosModules.servc--bookstack-nixlab
       self.nixosModules.secrets--bookstack
       self.nixosModules.servc--comfyui-p5000
@@ -20,18 +18,12 @@
       self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--homepage-nixlab
       self.nixosModules.servc--ollama-cpu
-      self.nixosModules.servc--glance-nixlab
       self.nixosModules.servc--gotosocial-nixlab
       self.nixosModules.servc--home-assistant-nixlab
       self.nixosModules.servc--node-red-nixlab
       self.nixosModules.servc--syncthing-nixlab
       self.nixosModules.servc--wiki-js-nixlab
       self.nixosModules.servc--zola-nixlab
-      self.nixosModules.servc--monitoring-nixlab
-      self.nixosModules.servc--grafana-nixlab
-      self.nixosModules.secrets--grafana
-      self.nixosModules.servc--loki-nixlab
-      self.nixosModules.servc--prometheus-nixlab
     ];
   };
   flake.nixosModules.hosts--nixvat = {
@@ -131,13 +123,6 @@
       listenAddress = "0.0.0.0";
       openFirewall = true;
     };
-    services.glance-nixlab = {
-      enable = true;
-      port = 3004;
-      listenAddress = "0.0.0.0";
-      openFirewall = true;
-      dataDir = "/data/glance";
-    };
     services.ollama-cpu = {
       enable = true;
       ollamaPort = 11434;
@@ -149,18 +134,6 @@
       # Pre-download models
       models = ["llama2" "mistral" "codellama"];
       openFirewall = true;
-    };
-    services.nixlab-monitoring = {
-      enable = true;
-      dataDir = "/data";
-      openFirewall = true;
-      ports.grafana = 3101;
-      ports.loki = 3100;
-      ports.prometheus = 9090;
-      loki.maintenance.enable = true;
-      prometheus.maintenance.enable = true;
-      prometheus.maintenance.exporters.systemd = true;
-      prometheus.maintenance.exporters.smartctl.enable = true;
     };
     services.syncthing-nixlab = {
       enable = true;

@@ -10,14 +10,7 @@
       self.nixosModules.hosts--c-optional--productivity
       self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb17g2-k5
-      self.nixosModules.systm--cachix
       self.nixosModules.systm--gui-shells
-      self.nixosModules.systm--ignore-lid
-      self.nixosModules.servc--monitoring-nixlab
-      self.nixosModules.servc--grafana-nixlab
-      self.nixosModules.secrets--grafana
-      self.nixosModules.servc--loki-nixlab
-      self.nixosModules.servc--prometheus-nixlab
       self.nixosModules.servc--waydroid-nixlab
     ];
   };
@@ -78,18 +71,6 @@
       allowedUsers = ["${config.nixlab.mainUser}"];
       autoStart = false;
       enableGapps = true;
-    };
-    services.nixlab-monitoring = {
-      enable = true;
-      dataDir = "/data";
-      openFirewall = true;
-      ports.grafana = 3101;
-      ports.loki = 3100;
-      ports.prometheus = 9090;
-      loki.maintenance.enable = true;
-      prometheus.maintenance.enable = true;
-      prometheus.maintenance.exporters.systemd = true;
-      prometheus.maintenance.exporters.smartctl.enable = true;
     };
 
     # Define your Flatpak packages here

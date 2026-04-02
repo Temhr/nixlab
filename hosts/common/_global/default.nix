@@ -13,7 +13,6 @@
     ./firefox.nix
     ./flatpak.nix
     ./journald.nix
-    ./lid.nix
     ./locale.nix
     ./network.nix
     ./nginx.nix
