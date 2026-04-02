@@ -16,7 +16,8 @@
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
-      self.nixosModules.servc--ollama-p5000
+      self.nixosModules.servc--ollama
+      self.nixosModules.secrets--ollama
     ];
   };
   flake.nixosModules.hosts--nixace = {
@@ -75,13 +76,10 @@
     ##Remove models
     #systemctl cat ollama | grep ExecStart
     #sudo -u ollama OLLAMA_MODELS=/data/ollama/models /nix/store/h10qpb3ac91irs946dzissanbs2klz4a-ollama-cuda-p5000-0.12.11/bin/ollama rm [model]
-    services.ollama-p5000 = {
+    services.ollama-stack = {
       enable = true;
-      # Network configuration
-      ollamaPort = 11434;
-      webuiPort = 3007;
-      ollamaListenAddress = "0.0.0.0"; # Listen on all interfaces
-      webuiListenAddress = "0.0.0.0";
+      acceleration = "cuda-p5000";
+      extraUsers = [config.nixlab.mainUser];
       # Data directories
       ollamaDataDir = "/data/ollama";
       webuiDataDir = "/data/open-webui";

@@ -17,7 +17,8 @@
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--glance-nixlab
-      self.nixosModules.servc--ollama-cpu
+      self.nixosModules.servc--ollama
+      self.nixosModules.secrets--ollama
       self.nixosModules.servc--gotosocial-nixlab
       self.nixosModules.servc--home-assistant-nixlab
       self.nixosModules.servc--node-red-nixlab
@@ -123,12 +124,11 @@
       listenAddress = "0.0.0.0";
       openFirewall = true;
     };
-    services.ollama-cpu = {
+    services.ollama-stack = {
       enable = true;
-      ollamaPort = 11434;
-      webuiPort = 3006;
-      ollamaListenAddress = "0.0.0.0";
-      webuiListenAddress = "0.0.0.0";
+      acceleration = "cpu";
+      extraUsers = [config.nixlab.mainUser];
+      # Data directories
       ollamaDataDir = "/data/ollama";
       webuiDataDir = "/data/open-webui";
       # Pre-download models

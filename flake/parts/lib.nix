@@ -10,7 +10,6 @@
   allOverlays = [
     self.overlays.unstable-packages
     self.overlays.stable-packages
-    self.overlays.ollama-packages
     self.overlays.additions
     self.overlays.modifications
   ];

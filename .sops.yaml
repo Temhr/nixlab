@@ -14,3 +14,9 @@ creation_rules:
       - age:
         - *nixace
         - *nixsun
+
+  - path_regex: modules/nixos/ollama/ollama\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixsun
