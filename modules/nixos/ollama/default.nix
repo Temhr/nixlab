@@ -310,7 +310,7 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target" "ollama.service"];
         requires = ["ollama.service"];
-        environment =
+        environment = lib.mkMerge [
           {
             OLLAMA_BASE_URL = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
             WEBUI_AUTH = "True";
@@ -319,9 +319,10 @@
             STATIC_DIR = "${cfg.webuiDataDir}/static";
             FRONTEND_BUILD_DIR = "${pkgs.open-webui}/share/open-webui";
           }
-          // lib.mkIf (cfg.webuiSecretKeyFile == null) {
+          (lib.mkIf (cfg.webuiSecretKeyFile == null) {
             WEBUI_SECRET_KEY = "change-me-set-webuiSecretKeyFile";
-          };
+          })
+        ];
         serviceConfig = {
           Type = "simple";
           User = "open-webui";
@@ -339,7 +340,7 @@
           ProtectHome = true;
           ReadWritePaths = [cfg.webuiDataDir];
           # Load the secret key from a file if provided
-          EnvironmentFile = config.sops.secrets.WEBUI_SECRET_KEY.path;
+          EnvironmentFile = lib.mkIf (cfg.webuiSecretKeyFile != null) cfg.webuiSecretKeyFile;
         };
       };
 

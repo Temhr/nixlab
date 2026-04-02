@@ -15,7 +15,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/grafana/grafana\.yaml$
+  - path_regex: modules/nixos/monitoring/grafana/grafana\.yaml$
     key_groups:
       - age:
         - *nixace

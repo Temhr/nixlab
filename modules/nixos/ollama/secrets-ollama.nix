@@ -18,13 +18,20 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.ollama-stack ? enable;
+          message = "secrets--ollama requires servc--ollama to also be imported";
+        }
+      ];
       sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-
       sops.secrets.WEBUI_SECRET_KEY = {
         sopsFile = cfg.secretsFile;
         owner = "open-webui";
-        # Makes it available as /run/secrets/WEBUI_SECRET_KEY
       };
+      # Wire the sops runtime path back into the service module's option
+      services.ollama-stack.webuiSecretKeyFile =
+        config.sops.secrets.WEBUI_SECRET_KEY.path;
     };
   };
 }
