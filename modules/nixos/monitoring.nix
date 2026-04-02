@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--monitoring-nixlab = {
     config,
     lib,
@@ -6,6 +6,12 @@
   }: let
     cfg = config.services.nixlab-monitoring;
   in {
+    imports = [
+      self.nixosModules.servc--grafana-nixlab
+      self.nixosModules.secrets--grafana
+      self.nixosModules.servc--loki-nixlab
+      self.nixosModules.servc--prometheus-nixlab
+    ];
     options.services.nixlab-monitoring = {
       enable = lib.mkEnableOption "nixlab monitoring stack (Prometheus + Loki + Grafana)";
 
