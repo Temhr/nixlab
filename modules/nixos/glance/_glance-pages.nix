@@ -86,16 +86,24 @@
                 title = "The French Ghosty's blog";
               }
               {
+                url = "https://freebooters.uk/rss.xml";
+                title = "Freebooters (podcast)";
+              }
+            ];
+          }
+          {
+            type = "rss";
+            limit = 50;
+            "collapse-after" = 30;
+            cache = "3h";
+            feeds = [
+              {
                 url = "https://brennan.day/feed.xml";
                 title = "Brennan Day (blog)";
               }
               {
                 url = "https://emilygorcenski.com/index.xml";
                 title = "Emily Gorcenski (blog)";
-              }
-              {
-                url = "https://freebooters.uk/rss.xml";
-                title = "Freebooters (podcast)";
               }
               {
                 url = "https://blog.ewancroft.uk/rss";
