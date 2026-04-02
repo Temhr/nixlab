@@ -14,20 +14,45 @@
     name = "Home";
     columns = [
       {
-        # ── Left column: clock + calendar ──────────
+        # ── Left column ──────────
         size = "small";
         widgets = [
           {
-            type = "clock";
-            hour-format = "24h";
-          }
-          {
-            type = "calendar";
+            type = "monitor";
+            cache = "1m";
+            title = "Homepage";
+            sites = [
+              {
+                title = "nixace services";
+                url = "http://192.168.0.200:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "nixsun services";
+                url = "http://192.168.0.203:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "nixtop services";
+                url = "http://192.168.0.202:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "nixvat services";
+                url = "http://192.168.0.201:3000/";
+                icon = "si:homepage";
+              }
+              {
+                title = "nixzen services";
+                url = "http://192.168.0.204:3000/";
+                icon = "si:homepage";
+              }
+            ];
           }
         ];
       }
       {
-        # ── Main column: monitor + RSS ──────────────
+        # ── Main column ──────────────
         size = "full";
         widgets = [
           {
@@ -93,40 +118,15 @@
         ];
       }
       {
-        # ── Right column: Hompage ──────────
+        # ── Right column ──────────
         size = "small";
         widgets = [
           {
-            type = "monitor";
-            cache = "1m";
-            title = "Homepage";
-            sites = [
-              {
-                title = "nixace services";
-                url = "http://192.168.0.200:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "nixsun services";
-                url = "http://192.168.0.203:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "nixtop services";
-                url = "http://192.168.0.202:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "nixvat services";
-                url = "http://192.168.0.201:3000/";
-                icon = "si:homepage";
-              }
-              {
-                title = "nixzen services";
-                url = "http://192.168.0.204:3000/";
-                icon = "si:homepage";
-              }
-            ];
+            type = "clock";
+            hour-format = "24h";
+          }
+          {
+            type = "calendar";
           }
         ];
       }
