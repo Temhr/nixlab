@@ -24,17 +24,17 @@ _: prev: {
     torch = prev.fetchurl {
       name = "torch-2.2.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torch-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-1100x4mczx1ia6gmf2fm4m45gwwnph6zggd0wamg0859qr3n00lc";
+      hash = "";
     };
     torchvision = prev.fetchurl {
       name = "torchvision-0.17.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torchvision-0.17.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-01wc9wp22hyn9kxx3w1c3ajnyi2bv1risbwhcd0gnssd6sl9q7cn";
+      hash = "";
     };
     torchaudio = prev.fetchurl {
       name = "torchaudio-2.2.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torchaudio-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-1h7brm003lai3l4dapprbp234jx2pi1flp0sfbjw9rlihxwb8j2p";
+      hash = "";
     };
   };
 
