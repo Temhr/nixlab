@@ -29,7 +29,7 @@ _: prev: {
     torchvision = prev.fetchurl {
       name = "torchvision-0.17.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torchvision-0.17.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      hash = "sha256-lh2cqDZNa/tAY5AvHXPYS0RvpRos8NH7TNZDIS5PjAc=";
     };
     torchaudio = prev.fetchurl {
       name = "torchaudio-2.2.2-cu118-cp311-linux_x86_64.whl";
