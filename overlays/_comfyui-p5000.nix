@@ -24,7 +24,7 @@ _: prev: {
     torch = prev.fetchurl {
       name = "torch-2.2.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torch-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-V0i0eIeR5sTlchpc6kK8oksyxF35XtUIHVHRAUDN68A=";
+      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
     torchvision = prev.fetchurl {
       name = "torchvision-0.17.2-cu118-cp311-linux_x86_64.whl";
@@ -34,7 +34,7 @@ _: prev: {
     torchaudio = prev.fetchurl {
       name = "torchaudio-2.2.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torchaudio-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      hash = "sha256-V0i0eIeR5sTlchpc6kK8oksyxF35XtUIHVHRAUDN68A=";
     };
   };
 
