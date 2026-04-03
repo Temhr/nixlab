@@ -214,12 +214,21 @@
                     echo "Creating Python virtual environment..."
                     ${pkgs.python311}/bin/python -m venv "$VENV_DIR"
 
-                    # Install PyTorch wheels from the Nix store — no index URL, no network
+                    # pip parses wheel filenames for compatibility tags — the name must be exact.
+                    # We renamed the files in the Nix store to strip '%2B', so we symlink them
+                    # back to their original names in a temp directory before installing.
+                    WHEEL_DIR=$(mktemp -d)
+                    ln -s "${pytorchWheels.torch}"     "$WHEEL_DIR/torch-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
+                    ln -s "${pytorchWheels.torchvision}" "$WHEEL_DIR/torchvision-0.17.2+cu118-cp311-cp311-linux_x86_64.whl"
+                    ln -s "${pytorchWheels.torchaudio}" "$WHEEL_DIR/torchaudio-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
+
                     echo "Installing PyTorch 2.2.2+cu118 from Nix store..."
-                    "$VENV_DIR/bin/pip" install --no-index --no-deps \
-                      "${pytorchWheels.torch}" \
-                      "${pytorchWheels.torchvision}" \
-                      "${pytorchWheels.torchaudio}"
+                    "$VENV_DIR/bin/pip" install --no-index --find-links "$WHEEL_DIR" \
+                      "torch==2.2.2+cu118" \
+                      "torchvision==0.17.2+cu118" \
+                      "torchaudio==2.2.2+cu118"
+
+                    rm -rf "$WHEEL_DIR"
 
                     # Install remaining ComfyUI dependencies.
                     # These still come from PyPI; pin them with a requirements.txt with
