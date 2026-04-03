@@ -124,6 +124,14 @@ A single file can also emit **multiple related outputs** — for example, a serv
 All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern. This produces a readable tree in `nix flake show`:
 
 ```
+├───homeModules: unknown
+├───lib: unknown
+├───nixosConfigurations
+│   ├───nixace: NixOS configuration
+│   ├───nixsun: NixOS configuration
+│   ├───nixtop: NixOS configuration
+│   ├───nixvat: NixOS configuration
+│   └───nixzen: NixOS configuration
 ├───nixosModules
 │   ├───hardw--c-global: NixOS module
 │   ├───hardw--c-optional--driver-nvidia: NixOS module
@@ -147,6 +155,7 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───hosts--nixzen: NixOS module
 │   ├───secrets--bookstack: NixOS module
 │   ├───secrets--grafana: NixOS module
+│   ├───secrets--ollama: NixOS module
 │   ├───servc--bookstack-nixlab: NixOS module
 │   ├───servc--comfyui-extensions: NixOS module
 │   ├───servc--comfyui-models: NixOS module
@@ -157,9 +166,9 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───servc--home-assistant-nixlab: NixOS module
 │   ├───servc--homepage-nixlab: NixOS module
 │   ├───servc--loki-nixlab: NixOS module
+│   ├───servc--monitoring-nixlab: NixOS module
 │   ├───servc--node-red-nixlab: NixOS module
-│   ├───servc--ollama-cpu: NixOS module
-│   ├───servc--ollama-p5000: NixOS module
+│   ├───servc--ollama: NixOS module
 │   ├───servc--prometheus-nixlab: NixOS module
 │   ├───servc--syncthing-nixlab: NixOS module
 │   ├───servc--waydroid-nixlab: NixOS module
@@ -169,8 +178,12 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───systm--cachix: NixOS module
 │   ├───systm--gui-shells: NixOS module
 │   ├───systm--home-manager-config: NixOS module
-│   ├───systm--ignore-lid: NixOS module
-│   └───systm--monitoring: NixOS module
+│   └───systm--ignore-lid: NixOS module
+└───overlays
+    ├───additions: Nixpkgs overlay
+    ├───modifications: Nixpkgs overlay
+    ├───stable-packages: Nixpkgs overlay
+    └───unstable-packages: Nixpkgs overlay
 ```
 
 ## Remaining flake/parts/ files
@@ -186,7 +199,7 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 
 ## Secrets management
 
-Secrets are managed with [sops-nix](https://github.com/Mic92/sops-nix) using age encryption. Each service that requires secrets has a dedicated encrypted YAML file in `secrets/` and a corresponding secrets module in `hosts/common/optional/flake/` that declares which keys to decrypt and when. Secrets modules accept a `*File` path option rather than a plaintext string — the decrypted runtime path is passed in from the host file via `config.sops.secrets.<KEY>.path`.
+Secrets are managed with [sops-nix](https://github.com/Mic92/sops-nix) using age encryption. Each service that requires secrets has a dedicated encrypted YAML file in `modules/<user/system>/<service folder>` with their corresponding secrets.nix module that declares which keys to decrypt and when. Secrets modules accept a `*File` path option rather than a plaintext string — the decrypted runtime path is passed in from the host file via `config.sops.secrets.<KEY>.path`.
 
 The `nixlab.mainUser` option (declared in `hosts/common/global/users/main-user.nix`) provides the primary system username to all modules, replacing hardcoded usernames throughout the codebase.
 
@@ -204,6 +217,8 @@ nixlab/
 ├── flake/                        # Orchestration-level flake-parts configs (auto-discovered)
 │   └── parts/
 │       ├── lib.nix               # mkHost helper + home-manager-config module
+│       ├── hm-module.nix         # 
+│       ├── home-options.nix      # 
 │       ├── overlays.nix          # Package overlays
 │       ├── packages.nix          # Custom packages + alejandra formatter
 │       └── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)

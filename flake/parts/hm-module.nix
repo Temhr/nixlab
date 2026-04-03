@@ -14,6 +14,7 @@
         inherit inputs self;
         outputs = self;
         flakePath = self;
+        allHosts = self.lib.hostsMeta;
       };
     };
   };

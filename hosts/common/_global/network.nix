@@ -1,4 +1,25 @@
-{...}: {
+{
+  hostMeta,
+  lib,
+  ...
+}: {
+  networking.useDHCP = false;
+  networking.defaultGateway = hostMeta.gateway;
+  networking.nameservers = hostMeta.nameservers;
+  networking.interfaces = lib.listToAttrs (map (iface: {
+      name = iface.name;
+      value = {
+        useDHCP = false;
+        ipv4.addresses = [
+          {
+            address = iface.address;
+            prefixLength = hostMeta.prefixLength;
+          }
+        ];
+      };
+    })
+    hostMeta.interfaces);
+
   # Enable NetworkManager (rename if you already enable it elsewhere)
   networking.networkmanager.enable = true;
 

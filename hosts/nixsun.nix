@@ -1,5 +1,6 @@
 {self, ...}: {
   flake.nixosConfigurations.nixsun = self.lib.mkHost {
+    name = "nixsun";
     modules = [
       self.nixosModules.hosts--nixsun
       self.nixosModules.hosts--c-global
@@ -18,8 +19,6 @@
     pkgs,
     ...
   }: {
-    networking.hostName = "nixsun";
-
     ## Shared system-wide user option
     nixlab.mainUser = "temhr";
     ## Enable automatic login for the user.

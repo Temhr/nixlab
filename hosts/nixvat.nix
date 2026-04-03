@@ -1,5 +1,6 @@
 {self, ...}: {
   flake.nixosConfigurations.nixvat = self.lib.mkHost {
+    name = "nixvat";
     modules = [
       self.nixosModules.hosts--nixvat
       self.nixosModules.hosts--c-global
@@ -36,7 +37,6 @@
     imports = [
       "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     ];
-    networking.hostName = "nixvat";
 
     ## Shared system-wide user option
     nixlab.mainUser = "temhr";
