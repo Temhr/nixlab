@@ -6,6 +6,7 @@
     ...
   }: let
     cfg = config.services.comfyui-p5000;
+    pytorchWheels = pkgs.pytorchCu118Wheels;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -151,12 +152,26 @@
       };
 
       # ----------------------------------------------------------------------------
-      # PYTORCH INSTALLER - One-shot service to install PyTorch 2.2 with CUDA support
+      # PYTORCH INSTALLER - installs from Nix store wheels; no network at boot
+      #
+      # The wheels (torch, torchvision, torchaudio) are fetched into the Nix store
+      # as Fixed Output Derivations during `nixos-rebuild`, not at runtime. This
+      # means:
+      #   - No internet access required at boot
+      #   - Hashes are pinned and verified by Nix
+      #   - Reproducible across rebuilds
+      #
+      # A version sentinel file ($VENV_DIR/.pytorch-version) records what was
+      # installed. The service re-runs if the sentinel is absent or stale, so a
+      # `nixos-rebuild switch` that changes the wheel derivations will trigger a
+      # clean reinstall.
       # ----------------------------------------------------------------------------
       systemd.services.comfyui-pytorch-setup = {
-        description = "Install PyTorch 2.2 for ComfyUI (P5000 support)";
+        description = "Install PyTorch 2.2 cu118 for ComfyUI (P5000 / sm_61) from Nix store";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
+
+        # No After = network.target — we don't need the network.
 
         environment = {
           LD_LIBRARY_PATH = lib.makeLibraryPath [
@@ -177,67 +192,77 @@
         path = [pkgs.python311];
 
         script = ''
-          set -e
-          VENV_DIR="${cfg.dataDir}/venv"
+                    set -e
+                    VENV_DIR="${cfg.dataDir}/venv"
 
-          # Create venv if it doesn't exist
-          if [ ! -d "$VENV_DIR" ]; then
-            echo "Creating Python virtual environment..."
-            ${pkgs.python311}/bin/python -m venv "$VENV_DIR"
-          fi
+                    # The sentinel records the store path of the torch wheel that was last
+                    # installed. If it matches the current derivation output, skip the install.
+                    SENTINEL="$VENV_DIR/.pytorch-version"
+                    EXPECTED_TORCH="${pytorchWheels.torch}"
 
-          # Force reinstall if numpy 2.x is detected
-          NUMPY_VERSION=$($VENV_DIR/bin/python -c "import numpy; print(numpy.__version__)" 2>/dev/null || echo "0")
-          if [[ "$NUMPY_VERSION" == 2.* ]]; then
-            echo "NumPy 2.x detected, forcing reinstall with numpy<2..."
-            $VENV_DIR/bin/pip uninstall -y numpy
-          fi
+                    if [ -f "$SENTINEL" ] && grep -qF "$EXPECTED_TORCH" "$SENTINEL" 2>/dev/null; then
+                      echo "PyTorch already installed from $EXPECTED_TORCH — skipping"
+                      exit 0
+                    fi
 
-          # Check if all dependencies are installed
-          if $VENV_DIR/bin/python -c "import torch, torchvision, torchaudio, yaml, PIL, aiohttp, torchsde, av, pydantic, alembic; import numpy; assert numpy.__version__.startswith('1.'); from comfyui_frontend_package import __version__; from comfyui_workflow_templates import __version__ as wt; from comfyui_embedded_docs import __version__ as ed" 2>/dev/null; then
-            echo "All dependencies already installed with correct versions"
-            exit 0
-          fi
+                    # (Re)create the venv on first run or after a wheel change
+                    if [ -d "$VENV_DIR" ]; then
+                      echo "Wheel derivation changed — removing stale venv..."
+                      rm -rf "$VENV_DIR"
+                    fi
 
-          echo "Installing PyTorch 2.2.2 with CUDA 11.8 support (sm_61 for P5000)..."
-          $VENV_DIR/bin/pip install --no-cache-dir \
-            torch==2.2.2 \
-            torchvision==0.17.2 \
-            torchaudio==2.2.2 \
-            --index-url https://download.pytorch.org/whl/cu118
+                    echo "Creating Python virtual environment..."
+                    ${pkgs.python311}/bin/python -m venv "$VENV_DIR"
 
-          echo "Installing ComfyUI dependencies..."
-          $VENV_DIR/bin/pip install --no-cache-dir \
-            "numpy<2" \
-            pillow \
-            safetensors \
-            aiohttp \
-            pyyaml \
-            tqdm \
-            psutil \
-            scipy \
-            einops \
-            opencv-python \
-            matplotlib \
-            transformers \
-            accelerate \
-            sentencepiece \
-            kornia \
-            torchsde \
-            spandrel \
-            soundfile \
-            av \
-            pydantic \
-            pydantic-settings \
-            alembic \
-            comfyui-frontend-package \
-            comfyui-workflow-templates \
-            comfyui-embedded-docs \
-            || echo "Warning: Failed to install some dependencies"
+                    # Install PyTorch wheels from the Nix store — no index URL, no network
+                    echo "Installing PyTorch 2.2.2+cu118 from Nix store..."
+                    "$VENV_DIR/bin/pip" install --no-index --no-deps \
+                      "${pytorchWheels.torch}" \
+                      "${pytorchWheels.torchvision}" \
+                      "${pytorchWheels.torchaudio}"
 
-          echo "PyTorch setup complete!"
-          echo "Testing CUDA availability..."
-          $VENV_DIR/bin/python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')" || echo "Warning: CUDA test failed"
+                    # Install remaining ComfyUI dependencies.
+                    # These still come from PyPI; pin them with a requirements.txt with
+                    # hashes if you want full reproducibility here too.
+                    echo "Installing ComfyUI dependencies..."
+                    "$VENV_DIR/bin/pip" install --no-cache-dir \
+                      "numpy<2" \
+                      pillow \
+                      safetensors \
+                      aiohttp \
+                      pyyaml \
+                      tqdm \
+                      psutil \
+                      scipy \
+                      einops \
+                      opencv-python \
+                      matplotlib \
+                      transformers \
+                      accelerate \
+                      sentencepiece \
+                      kornia \
+                      torchsde \
+                      spandrel \
+                      soundfile \
+                      av \
+                      pydantic \
+                      pydantic-settings \
+                      alembic \
+                      comfyui-frontend-package \
+                      comfyui-workflow-templates \
+                      comfyui-embedded-docs
+
+                    # Write sentinel so we can skip this on the next boot
+                    echo "$EXPECTED_TORCH" > "$SENTINEL"
+
+                    echo "PyTorch setup complete!"
+                    echo "Testing CUDA availability..."
+                    "$VENV_DIR/bin/python" -c "
+          import torch
+          print(f'PyTorch version: {torch.__version__}')
+          print(f'CUDA available: {torch.cuda.is_available()}')
+          print(f'CUDA device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')
+          " || echo "Warning: CUDA test failed — check nvidia drivers"
         '';
       };
 

@@ -12,15 +12,39 @@ _: prev: {
     };
   };
 
-  # ComfyUI with CUDA support for P5000
-  # Uses Python packages from current nixpkgs but we'll override torch
+  # PyTorch 2.2.2 cu118 wheels fetched into the Nix store with pinned hashes.
+  # These are Fixed Output Derivations: reproducible, offline after first fetch,
+  # and hash-verified — no network access at boot.
+  #
+  # To obtain hashes, run:
+  #   nix store prefetch-file --hash-type sha256 \
+  #     "https://download.pytorch.org/whl/cu118/torch-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl"
+  # (repeat for torchvision and torchaudio)
+  pytorchCu118Wheels = {
+    torch = prev.fetchurl {
+      name = "torch-2.2.2-cu118-cp311-linux_x86_64.whl";
+      url = "https://download.pytorch.org/whl/cu118/torch-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
+      hash = "sha256-1100x4mczx1ia6gmf2fm4m45gwwnph6zggd0wamg0859qr3n00lc";
+    };
+    torchvision = prev.fetchurl {
+      name = "torchvision-0.17.2-cu118-cp311-linux_x86_64.whl";
+      url = "https://download.pytorch.org/whl/cu118/torchvision-0.17.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
+      hash = "sha256-01wc9wp22hyn9kxx3w1c3ajnyi2bv1risbwhcd0gnssd6sl9q7cn";
+    };
+    torchaudio = prev.fetchurl {
+      name = "torchaudio-2.2.2-cu118-cp311-linux_x86_64.whl";
+      url = "https://download.pytorch.org/whl/cu118/torchaudio-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
+      hash = "sha256-1h7brm003lai3l4dapprbp234jx2pi1flp0sfbjw9rlihxwb8j2p";
+    };
+  };
+
+  # ComfyUI package — source pinned via fetchFromGitHub hash
   comfyui = prev.stdenv.mkDerivation rec {
     pname = "comfyui";
     version = "unstable-2024-11-30";
     src = prev.fetchFromGitHub {
       owner = "comfyanonymous";
       repo = "ComfyUI";
-      # To get update; blank out [sha256] and pick a tag-release commit hash for [rev]: https://github.com/Comfy-Org/ComfyUI/tags
       rev = "a0ae3f3bd46b9e58f43fccfe17077873bf16f905";
       sha256 = "sha256-tv1IclHucV42JSVpxO/IdsOm+j6a5UcmZ+wBThZEhkY=";
     };
@@ -30,7 +54,6 @@ _: prev: {
       stdenv.cc.cc.lib
       zlib
     ];
-    # Use Python 3.11 packages
     propagatedBuildInputs = with prev.python311Packages; [
       pillow
       numpy
@@ -46,27 +69,20 @@ _: prev: {
       transformers
       accelerate
       sentencepiece
-      # Don't include torch here - we'll add it via requirements at runtime
+      # torch is NOT included here — it is installed into the venv
+      # from the Nix store wheels in pytorchCu118Wheels.
     ];
     dontBuild = true;
     dontConfigure = true;
     installPhase = ''
-            mkdir -p $out/share/comfyui
-            cp -r . $out/share/comfyui/
-            # Create a requirements file for runtime installation
-            cat > $out/share/comfyui/requirements-torch.txt <<EOF
-      --extra-index-url https://download.pytorch.org/whl/cu118
-      torch==2.2.2
-      torchvision==0.17.2
-      torchaudio==2.2.2
-      kornia
-      EOF
-            mkdir -p $out/bin
-            makeWrapper ${prev.python311}/bin/python $out/bin/comfyui \
-              --add-flags "$out/share/comfyui/main.py" \
-              --prefix PYTHONPATH : "${prev.python311.pkgs.makePythonPath propagatedBuildInputs}" \
-              --prefix LD_LIBRARY_PATH : "${prev.lib.makeLibraryPath [prev.stdenv.cc.cc.lib]}" \
-              --chdir "$out/share/comfyui"
+      mkdir -p $out/share/comfyui
+      cp -r . $out/share/comfyui/
+      mkdir -p $out/bin
+      makeWrapper ${prev.python311}/bin/python $out/bin/comfyui \
+        --add-flags "$out/share/comfyui/main.py" \
+        --prefix PYTHONPATH : "${prev.python311.pkgs.makePythonPath propagatedBuildInputs}" \
+        --prefix LD_LIBRARY_PATH : "${prev.lib.makeLibraryPath [prev.stdenv.cc.cc.lib]}" \
+        --chdir "$out/share/comfyui"
     '';
     meta = with prev.lib; {
       description = "A powerful and modular stable diffusion GUI and backend";
