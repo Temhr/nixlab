@@ -15,7 +15,7 @@
       dataDir = "/data/homepage";
     };
     services.nixlab-monitoring = {
-      enable = true;
+      enable = false;
       dataDir = "/data";
       openFirewall = true;
       ports.grafana = 3101;
