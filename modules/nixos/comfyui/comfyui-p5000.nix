@@ -218,23 +218,26 @@
                     # We renamed the files in the Nix store to strip '%2B', so we symlink them
                     # back to their original names in a temp directory before installing.
                     WHEEL_DIR=$(mktemp -d)
-                    ln -s "${pytorchWheels.torch}"     "$WHEEL_DIR/torch-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
+                    ln -s "${pytorchWheels.torch}"      "$WHEEL_DIR/torch-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
                     ln -s "${pytorchWheels.torchvision}" "$WHEEL_DIR/torchvision-0.17.2+cu118-cp311-cp311-linux_x86_64.whl"
-                    ln -s "${pytorchWheels.torchaudio}" "$WHEEL_DIR/torchaudio-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
+                    ln -s "${pytorchWheels.torchaudio}"  "$WHEEL_DIR/torchaudio-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
 
                     echo "Installing PyTorch 2.2.2+cu118 from Nix store..."
-                    "$VENV_DIR/bin/pip" install --no-index --find-links "$WHEEL_DIR" \
-                      "torch==2.2.2+cu118" \
-                      "torchvision==0.17.2+cu118" \
-                      "torchaudio==2.2.2+cu118"
+                    "$VENV_DIR/bin/pip" install --no-deps \
+                      "$WHEEL_DIR/torch-2.2.2+cu118-cp311-cp311-linux_x86_64.whl" \
+                      "$WHEEL_DIR/torchvision-0.17.2+cu118-cp311-cp311-linux_x86_64.whl" \
+                      "$WHEEL_DIR/torchaudio-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
 
                     rm -rf "$WHEEL_DIR"
 
-                    # Install remaining ComfyUI dependencies.
-                    # These still come from PyPI; pin them with a requirements.txt with
-                    # hashes if you want full reproducibility here too.
-                    echo "Installing ComfyUI dependencies..."
+                    echo "Installing ComfyUI dependencies (includes torch deps)..."
                     "$VENV_DIR/bin/pip" install --no-cache-dir \
+                      filelock \
+                      sympy \
+                      networkx \
+                      jinja2 \
+                      fsspec \
+                      "typing-extensions>=4.8.0" \
                       "numpy<2" \
                       pillow \
                       safetensors \
