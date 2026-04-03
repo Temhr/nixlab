@@ -14,7 +14,6 @@
     ./flatpak.nix
     ./journald.nix
     ./locale.nix
-    ./network.nix
     ./nginx.nix
     ./nix.nix
     ./nixpkgs.nix

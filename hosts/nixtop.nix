@@ -13,6 +13,7 @@
       self.nixosModules.hardw--zb17g2-k5
       self.nixosModules.systm--gui-shells
       self.nixosModules.servc--waydroid-nixlab
+      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixtop = {

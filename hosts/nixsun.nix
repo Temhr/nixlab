@@ -12,6 +12,7 @@
       self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb17g1-k4
       self.nixosModules.systm--gui-shells
+      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixsun = {

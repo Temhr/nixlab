@@ -19,6 +19,7 @@
       self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--ollama
       self.nixosModules.secrets--ollama
+      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixace = {

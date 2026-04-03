@@ -14,6 +14,7 @@
       self.nixosModules.systm--gui-shells
       self.nixosModules.systm--auto-backup-phone-media
       self.nixosModules.servc--syncthing-nixlab
+      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixzen = {

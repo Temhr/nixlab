@@ -16,10 +16,12 @@
         {
           name = "enp0s31f6";
           address = "192.168.0.200";
+          type = "ethernet";
         }
         {
           name = "wlp3s0";
           address = "192.168.0.200";
+          type = "wifi";
         }
       ];
     };
@@ -32,10 +34,12 @@
         {
           name = "enp0s25";
           address = "192.168.0.203";
+          type = "ethernet";
         }
         {
           name = "wlo1";
           address = "192.168.0.203";
+          type = "wifi";
         }
       ];
     };
@@ -48,10 +52,12 @@
         {
           name = "enp0s25";
           address = "192.168.0.202";
+          type = "ethernet";
         }
         {
           name = "wlp61s0";
           address = "192.168.0.202";
+          type = "wifi";
         }
       ];
     };
@@ -64,10 +70,12 @@
         {
           name = "enp0s25";
           address = "192.168.0.201";
+          type = "ethernet";
         }
         {
           name = "wlo1";
           address = "192.168.0.201";
+          type = "wifi";
         }
       ];
     };
@@ -80,10 +88,12 @@
         {
           name = "enp0s25";
           address = "192.168.0.204";
+          type = "ethernet";
         }
         {
           name = "wlp61s0";
           address = "192.168.0.204";
+          type = "wifi";
         }
       ];
     };

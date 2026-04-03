@@ -26,6 +26,7 @@
       self.nixosModules.servc--syncthing-nixlab
       self.nixosModules.servc--wiki-js-nixlab
       self.nixosModules.servc--zola-nixlab
+      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixvat = {

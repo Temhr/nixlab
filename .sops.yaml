@@ -32,3 +32,12 @@ creation_rules:
         - *nixtop
         - *nixvat
         - *nixzen
+
+  - path_regex: hosts/common/optional/networking/networking\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
