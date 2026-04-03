@@ -24,7 +24,7 @@ _: prev: {
     torch = prev.fetchurl {
       name = "torch-2.2.2-cu118-cp311-linux_x86_64.whl";
       url = "https://download.pytorch.org/whl/cu118/torch-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl";
-      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      hash = "sha256-jAJgR8apIPCq4qC99w28lvNXSCXVCVefUTH0zyrpAIQ=";
     };
     torchvision = prev.fetchurl {
       name = "torchvision-0.17.2-cu118-cp311-linux_x86_64.whl";
