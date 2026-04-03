@@ -32,12 +32,6 @@
         restartUnits = [ "open-webui.service" ];  # restart webui when secret rotates
       };
 
-      # Tell open-webui to wait for secrets to be installed
-      systemd.services.open-webui = {
-        after = [ "sops-install-secrets.service" ];
-        requires = [ "sops-install-secrets.service" ];
-      };
-
       services.ollama-stack.webuiSecretKeyFile =
         config.sops.secrets.WEBUI_SECRET_KEY.path;
     };
