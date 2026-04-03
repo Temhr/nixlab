@@ -102,32 +102,38 @@
     {nixpkgs.overlays = allOverlays;}
   ];
 
-  mkHost = { name, modules }:
-    let meta = hostsMeta.${name};
-    in
+  mkHost = {
+    name,
+    modules,
+  }: let
+    meta = hostsMeta.${name};
+  in
     assert lib.assertMsg
-      (builtins.hasAttr name hostsMeta)
-      "mkHost: no hostsMeta entry found for '${name}' — add it to the hostsMeta attrset in flake/parts/lib.nix";
-    lib.nixosSystem {
-      system = meta.system;
-      specialArgs = {
-        inherit inputs self;
-        outputs   = self;
-        flakePath = self;
-        allHosts  = hostsMeta;
-        hostMeta  = meta;
-        self' =
-          self.packages.${meta.system}
-          // {
-            packages  = self.packages.${meta.system};
-            devShells = self.devShells.${meta.system};
-            apps      = self.apps.${meta.system} or {};
-          };
+    (builtins.hasAttr name hostsMeta)
+    "mkHost: no hostsMeta entry found for '${name}' — add it to the hostsMeta attrset in flake/parts/lib.nix";
+      lib.nixosSystem {
+        system = meta.system;
+        specialArgs = {
+          inherit inputs self;
+          outputs = self;
+          flakePath = self;
+          allHosts = hostsMeta;
+          hostMeta = meta;
+          self' =
+            self.packages.${meta.system}
+            // {
+              packages = self.packages.${meta.system};
+              devShells = self.devShells.${meta.system};
+              apps = self.apps.${meta.system} or {};
+            };
+        };
+        modules =
+          commonModules
+          ++ modules
+          ++ [
+            {networking.hostName = name;}
+          ];
       };
-      modules = commonModules ++ modules ++ [
-        { networking.hostName = name; }
-      ];
-    };
 in {
-  flake.lib = { inherit mkHost hostsMeta; };
+  flake.lib = {inherit mkHost hostsMeta;};
 }

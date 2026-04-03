@@ -38,6 +38,7 @@
       "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     ];
 
+    networking.networkmanager.unmanaged = [ "wlo1" ];
     ## Shared system-wide user option
     nixlab.mainUser = "temhr";
     ## Enable automatic login for the user.
