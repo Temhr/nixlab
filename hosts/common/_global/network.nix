@@ -1,45 +1,40 @@
-{
-  hostMeta,
-  lib,
-  ...
-}: {
+# hosts/common/global/networking.nix
+{ hostMeta, lib, ... }: {
   networking.useDHCP = false;
-  networking.defaultGateway = hostMeta.gateway;
-  networking.nameservers = hostMeta.nameservers;
-  networking.interfaces = lib.listToAttrs (map (iface: {
-      name = iface.name;
-      value = {
-        useDHCP = false;
-        ipv4.addresses = [
-          {
-            address = iface.address;
-            prefixLength = hostMeta.prefixLength;
-          }
-        ];
-      };
-    })
-    hostMeta.interfaces);
-
-  # Enable NetworkManager (rename if you already enable it elsewhere)
+  networking.nameservers    = hostMeta.nameservers;
   networking.networkmanager.enable = true;
-
-  # Tell NM not to power-save Wi-Fi
   networking.networkmanager.settings = {
-    "connection" = {"wifi.powersave" = 2;}; # 2 = disabled
+    "connection"."wifi.powersave" = 2;
   };
 
-  # Force-disable chipset power save at the kernel level (works for iwlwifi, ath9k, etc.)
-  boot.extraModprobeConfig = ''
-    options iwlwifi power_save=0
-    options cfg80211 ieee80211_default_ps=0
-  '';
+  networking.networkmanager.ensureProfiles.profiles =
+    lib.listToAttrs (map (iface: {
+      name  = iface.name;
+      value = {
+        connection = {
+          id   = iface.name;
+          type = if lib.hasPrefix "wl" iface.name then "wifi" else "ethernet";
+          interface-name = iface.name;
+        };
+        ipv4 = {
+          method   = "manual";
+          addresses = "${iface.address}/${toString hostMeta.prefixLength}";
+          gateway  = hostMeta.gateway;
+          dns      = lib.concatStringsSep ";" hostMeta.nameservers;
+        };
+        ipv6.method = "disabled";
+      };
+    }) hostMeta.interfaces);
 
-  # Allow Entire LAN Subnet
   networking.firewall = {
     enable = true;
-
     extraInputRules = ''
       ip saddr 192.168.0.0/24 accept
     '';
   };
+
+  boot.extraModprobeConfig = ''
+    options iwlwifi power_save=0
+    options cfg80211 ieee80211_default_ps=0
+  '';
 }
