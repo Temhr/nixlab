@@ -7,6 +7,12 @@
       self.nixosModules.servc--homepage-nixlab
       self.nixosModules.servc--monitoring-nixlab
     ];
+
+    services.ignoreLid = {
+      enable = true;
+      # Optional:
+      disableSleepTargets = true;
+    };
     services.homepage-nixlab = {
       enable = true;
       port = 3000;

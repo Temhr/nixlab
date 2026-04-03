@@ -30,12 +30,6 @@
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 
-    services.ignoreLid = {
-      enable = true;
-      # Optional:
-      disableSleepTargets = true;
-    };
-
     ## Enable CUPS to print documents.
     services.printing.enable = true;
 
