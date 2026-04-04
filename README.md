@@ -216,12 +216,13 @@ nixlab/
 │
 ├── flake/                        # Orchestration-level flake-parts configs (auto-discovered)
 │   └── parts/
-│       ├── lib.nix               # mkHost helper + home-manager-config module
-│       ├── hm-module.nix         # 
-│       ├── home-options.nix      # 
-│       ├── overlays.nix          # Package overlays
-│       ├── packages.nix          # Custom packages + alejandra formatter
-│       └── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
+│       ├── _host-meta.nix        # hostsMeta attrset of network defaults
+│       ├── apps.nix              # mkHost helper + home-manager-config module
+│       ├── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
+│       ├── lib.nix               # mkHost constructor
+│       ├── nixpkgs.nix           # Package overlays
+│       ├── options-home.nix      # Declares flake.homeModules option
+│       └── packages.nix          # Custom packages perSystem import
 │
 ├── hardware/                     # Machine-level hardware configs (auto-discovered)
 │   ├── common/
@@ -234,6 +235,7 @@ nixlab/
 │   │   ├── global/               # Applied to all hosts unconditionally
 │   │   │   └── users/            # Declares nixlab.mainUser option
 │   │   └── optional/             # Selectable sys-package modules (games, media)
+│   │   │   └── networking/       # Network related config
 │   └── <hostname>.nix            # Per-host, module manifests
 │
 ├── home/                         # User-level Home Manager configurations
