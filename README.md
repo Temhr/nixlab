@@ -214,7 +214,7 @@ nixlab/
 ├── flake.nix                     # Thin root — delegates to directories via import-tree
 ├── flake.lock                    # Version-pinned input revisions
 │
-├── flake/                        # Orchestration-level flake-parts configs (auto-discovered)
+├── flake/                        # Orchestration-level flake-parts configs
 │   └── parts/
 │       ├── _host-meta.nix        # hostsMeta attrset of network
 │       ├── apps.nix              # mkHost helper + home-manager-config module
@@ -224,13 +224,13 @@ nixlab/
 │       ├── options-home.nix      # Declares flake.homeModules option
 │       └── packages.nix          # Custom packages perSystem import
 │
-├── hardware/                     # Machine-level hardware configs (auto-discovered)
+├── hardware/                     # Machine-level hardware configs
 │   ├── common/
 │   │   ├── global/               # Applied to all machines unconditionally
 │   │   └── optional/             # Selectable hardware modules (GPU drivers)
 │   └── <model>.nix               # Per-device, module manifests
 │
-├── hosts/                        # System-level NixOS configurations (auto-discovered)
+├── hosts/                        # System-level NixOS configurations
 │   ├── common/
 │   │   ├── global/               # Applied to all hosts unconditionally
 │   │   │   └── users/            # Declares nixlab.mainUser option
@@ -245,15 +245,15 @@ nixlab/
 │   │   └── optional/             # Selectable user-package modules (browsers, terminals)
 │   └── temhr/                    # Per-user, host module manifests
 │
-├── modules/                      # Reusable self-exporting service modules (auto-discovered)
+├── modules/                      # Reusable self-exporting service modules
 │   ├── nixos/                    # System-level service modules
 │   └── home-manager/             # User-level service modules
 │
-├── overlays/                     # nixpkgs modifications and channel pinning (auto-discovered)
+├── overlays/                     # nixpkgs modifications and channel pinning
 │   ├── default.nix               # Self-registers all overlays into flake.overlays
 │   └── _*.nix                    # Leaf overlay functions — imported by default.nix
 │
-├── shells/                       # Isolated development environments (auto-discovered)
+├── shells/                       # Isolated development environments
 ├── cachix/                       # Cachix binary cache declarations
 ├── bin/                          # Utility shell scripts
 └── .sops.yaml                    # sops age key configuration
