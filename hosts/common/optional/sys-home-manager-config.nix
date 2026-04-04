@@ -1,5 +1,4 @@
 # Shared Home Manager NixOS module.
-# Injected into every host via commonModules in lib.nix.
 {
   inputs,
   self,

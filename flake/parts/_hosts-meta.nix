@@ -1,0 +1,51 @@
+let
+  mkHostMeta = {
+    address,
+    ethIface,
+    wifiIface,
+    system ? "x86_64-linux",
+    gateway ? "192.168.0.1",
+    prefixLength ? 24,
+    nameservers ? ["1.1.1.1" "9.9.9.9"],
+  }: {
+    inherit system gateway prefixLength nameservers;
+    interfaces = [
+      {
+        name = ethIface;
+        inherit address;
+        type = "ethernet";
+      }
+      {
+        name = wifiIface;
+        inherit address;
+        type = "wifi";
+      }
+    ];
+  };
+in {
+  nixace = mkHostMeta {
+    address = "192.168.0.200";
+    ethIface = "enp0s31f6";
+    wifiIface = "wlp3s0";
+  };
+  nixsun = mkHostMeta {
+    address = "192.168.0.203";
+    ethIface = "enp0s25";
+    wifiIface = "wlo1";
+  };
+  nixtop = mkHostMeta {
+    address = "192.168.0.202";
+    ethIface = "enp0s25";
+    wifiIface = "wlp61s0";
+  };
+  nixvat = mkHostMeta {
+    address = "192.168.0.201";
+    ethIface = "enp0s25";
+    wifiIface = "wlo1";
+  };
+  nixzen = mkHostMeta {
+    address = "192.168.0.204";
+    ethIface = "enp0s25";
+    wifiIface = "wlp61s0";
+  };
+}

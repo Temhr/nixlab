@@ -1,15 +1,10 @@
-{
-  inputs,
-  self,
-  ...
-}: {
+{inputs, ...}: {
   perSystem = {
     pkgs,
     system,
     ...
-  }: let
-    inherit (inputs.nixpkgs) lib;
-  in {
+  }: {
+    formatter = pkgs.alejandra;
     checks = {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
         src = ./../..;
@@ -33,15 +28,6 @@
           #prettier.enable = true; #                    Formats non-Nix files (JSON, YAML, Markdown, etc.)
         };
       };
-      build-check = pkgs.writeShellScriptBin "build-check" ''
-        echo "Checking all NixOS configurations..."
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (
-            name: _:
-              "nix build .#nixosConfigurations.${name}"
-              + ".config.system.build.toplevel --no-link"
-          )
-          self.nixosConfigurations)}
-      '';
     };
   };
 }

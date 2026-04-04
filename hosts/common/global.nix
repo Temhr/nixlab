@@ -4,6 +4,7 @@
       ./_global
       self.nixosModules.systm--ignore-lid
       self.nixosModules.systm--cachix
+      self.nixosModules.systm--home-manager-config
       self.nixosModules.servc--homepage-nixlab
       self.nixosModules.servc--monitoring-nixlab
     ];
