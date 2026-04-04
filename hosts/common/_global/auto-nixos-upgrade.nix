@@ -7,8 +7,6 @@
     randomizedDelaySec = "30m";
     dates = "02:00";
     flags = [
-      "--update-input"
-      "nixpkgs"
       "-L" # print build logs
       #"--commit-lock-file"
       "--no-write-lock-file"
