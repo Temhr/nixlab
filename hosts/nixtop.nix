@@ -4,16 +4,8 @@
     modules = [
       self.nixosModules.hosts--nixtop
       self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional--development
-      self.nixosModules.hosts--c-optional--education
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
-      self.nixosModules.hosts--c-optional--productivity
-      self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb17g2-k5
-      self.nixosModules.systm--gui-shells
       self.nixosModules.servc--waydroid-nixlab
-      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixtop = {

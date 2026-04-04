@@ -4,14 +4,7 @@
     modules = [
       self.nixosModules.hosts--nixvat
       self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional--development
-      self.nixosModules.hosts--c-optional--education
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
-      self.nixosModules.hosts--c-optional--productivity
-      self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb17g1-k3
-      self.nixosModules.systm--gui-shells
       self.nixosModules.servc--bookstack-nixlab
       self.nixosModules.secrets--bookstack
       self.nixosModules.servc--comfyui-p5000
@@ -26,7 +19,6 @@
       self.nixosModules.servc--syncthing-nixlab
       self.nixosModules.servc--wiki-js-nixlab
       self.nixosModules.servc--zola-nixlab
-      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixvat = {

@@ -4,15 +4,7 @@
     modules = [
       self.nixosModules.hosts--nixsun
       self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional--development
-      self.nixosModules.hosts--c-optional--education
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
-      self.nixosModules.hosts--c-optional--productivity
-      self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb17g1-k4
-      self.nixosModules.systm--gui-shells
-      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixsun = {

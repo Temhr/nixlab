@@ -4,17 +4,9 @@
     modules = [
       self.nixosModules.hosts--nixzen
       self.nixosModules.hosts--c-global
-      self.nixosModules.hosts--c-optional--development
-      self.nixosModules.hosts--c-optional--education
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
-      self.nixosModules.hosts--c-optional--productivity
-      self.nixosModules.hosts--c-optional--virtualizations
       self.nixosModules.hardw--zb15g2-k1
-      self.nixosModules.systm--gui-shells
       self.nixosModules.systm--auto-backup-phone-media
       self.nixosModules.servc--syncthing-nixlab
-      self.nixosModules.systm--networking
     ];
   };
   flake.nixosModules.hosts--nixzen = {
