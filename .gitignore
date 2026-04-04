@@ -1,2 +1,3 @@
-sum.sh
+sum-abs.sh
+sum-rel.sh
 all_files.txt
