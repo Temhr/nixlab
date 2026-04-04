@@ -220,7 +220,7 @@ nixlab/
 │       ├── apps.nix              # mkHost helper + home-manager-config module
 │       ├── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
 │       ├── lib.nix               # mkHost constructor
-│       ├── nixpkgs.nix           # Package overlays
+│       ├── nixpkgs.nix           # Configures pkgs instance for all perSystem blocks
 │       ├── options-home.nix      # Declares flake.homeModules option
 │       └── packages.nix          # Custom packages perSystem import
 │
