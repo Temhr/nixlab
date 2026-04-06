@@ -17,6 +17,7 @@
   flake.nixosModules.hosts--nixace = {
     config,
     pkgs,
+    hostMeta,
     ...
   }: {
     ## Shared system-wide user option
@@ -142,7 +143,7 @@
     services.bookstack-nixlab = {
       enable = true;
       listenAddress = "0.0.0.0";
-      appURL = "http://192.168.0.200:6875";
+      appURL = "http://${hostMeta.address}:6875";
       dataDir = "/data/bookstack";
       dataMountUnit = "data.mount";
       openFirewall = true;

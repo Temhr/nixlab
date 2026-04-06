@@ -8,7 +8,7 @@ let
     prefixLength ? 24,
     nameservers ? ["1.1.1.1" "9.9.9.9"],
   }: {
-    inherit system gateway prefixLength nameservers;
+    inherit address system gateway prefixLength nameservers;
     interfaces = [
       {
         name = ethIface;

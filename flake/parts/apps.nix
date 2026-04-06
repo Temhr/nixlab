@@ -8,6 +8,7 @@
   in {
     apps.build-all = {
       type = "app";
+      meta.description = "Build all NixOS configurations";
       program = toString (pkgs.writeShellScript "build-all" ''
         set -e
         echo "Building all NixOS configurations..."
