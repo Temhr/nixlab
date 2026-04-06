@@ -23,7 +23,6 @@
         href = "http://${hostMeta.address}:3007";
         icon = "ollama";
         description = "Local model inference — CPU backend";
-        target = "_blank";
         ping = "http://${hostMeta.address}:3007";
         statusStyle = "dot";
       };
@@ -34,7 +33,6 @@
         href = "http://${hostMeta.address}:3007";
         icon = "ollama";
         description = "Local model inference — GPU accelerated";
-        target = "_blank";
         ping = "http://${hostMeta.address}:3007";
         statusStyle = "dot";
       };
@@ -45,7 +43,6 @@
         href = "http://${hostMeta.address}:8188";
         icon = "comfyui";
         description = "Stable Diffusion node-based pipeline";
-        target = "_blank";
         ping = "http://${hostMeta.address}:8188";
         statusStyle = "dot";
       };
@@ -57,7 +54,6 @@
         href = "http://${hostMeta.address}:6875/";
         icon = "bookstack";
         description = "Organised book/chapter/page wiki";
-        target = "_blank";
         ping = "http://${hostMeta.address}:6875/";
         statusStyle = "dot";
       };
@@ -68,7 +64,6 @@
         href = "http://${hostMeta.address}:3001";
         icon = "wikijs";
         description = "Markdown-first wiki with git backend";
-        target = "_blank";
         ping = "http://${hostMeta.address}:3001";
         statusStyle = "dot";
       };
@@ -79,7 +74,6 @@
         href = "http://${hostMeta.address}:3003";
         icon = "zola";
         description = "Static site generator for personal or project pages";
-        target = "_blank";
         ping = "http://${hostMeta.address}:3003";
         statusStyle = "dot";
       };
@@ -91,7 +85,6 @@
         href = "http://${hostMeta.address}:3101";
         icon = "grafana";
         description = "Metrics visualisation and dashboards";
-        target = "_blank";
         ping = "http://${hostMeta.address}:3101";
         statusStyle = "dot";
       };
@@ -102,7 +95,6 @@
         href = "http://${hostMeta.address}:9090";
         icon = "prometheus";
         description = "Metrics scraping and alerting rules";
-        target = "_blank";
         ping = "http://${hostMeta.address}:9090";
         statusStyle = "dot";
       };
@@ -113,7 +105,6 @@
         href = "http://${hostMeta.address}:3100";
         icon = "loki";
         description = "Log aggregation and querying";
-        target = "_blank";
         ping = "http://${hostMeta.address}:3100";
         statusStyle = "dot";
       };
@@ -125,14 +116,8 @@
         href = "http://${hostMeta.address}:8123";
         icon = "home-assistant";
         description = "Central home automation hub";
-        target = "_blank";
         ping = "http://${hostMeta.address}:8123";
         statusStyle = "dot";
-        widget = {
-          type = "homeassistant";
-          url = "http://${hostMeta.address}:8123";
-          key = "{{HOMEPAGE_VAR_HA_TOKEN}}";
-        };
       };
     };
 
@@ -141,7 +126,6 @@
         href = "http://${hostMeta.address}:1880";
         icon = "nodered";
         description = "Visual automation and flow-based logic editor";
-        target = "_blank";
         ping = "http://${hostMeta.address}:1880";
         statusStyle = "dot";
       };
@@ -153,7 +137,6 @@
         href = "http://${hostMeta.address}:8384";
         icon = "syncthing";
         description = "Main sync node — peer-to-peer file synchronisation";
-        target = "_blank";
         ping = "http://${hostMeta.address}:8384";
         statusStyle = "dot";
       };
@@ -164,7 +147,6 @@
         href = "http://${hostMeta.address}:8384";
         icon = "syncthing";
         description = "Secondary sync node — peer-to-peer file synchronisation";
-        target = "_blank";
         ping = "http://${hostMeta.address}:8384";
         statusStyle = "dot";
       };
@@ -176,7 +158,6 @@
         href = "http://${hostMeta.address}:8080";
         icon = "gotosocial";
         description = "Lightweight ActivityPub social server";
-        target = "_blank";
         ping = "http://${hostMeta.address}:8080";
         statusStyle = "dot";
       };
@@ -187,7 +168,6 @@
         href = "http://${allHosts.nixvat.address}:3004";
         icon = "gauge";
         description = "Feed dashboard — RSS, weather, links";
-        target = "_blank";
         ping = "http://${allHosts.nixvat.address}:3004";
         statusStyle = "dot";
       };
