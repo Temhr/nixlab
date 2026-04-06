@@ -2,6 +2,7 @@
   flake.nixosModules.servc--bookstack-nixlab = {
     config,
     lib,
+    hostMeta,
     ...
   }: let
     cfg = config.services.bookstack-nixlab;
@@ -39,8 +40,8 @@
         #   http://bookstack.home         (with Pi-hole or router DNS)
         appURL = lib.mkOption {
           type = lib.types.str;
-          default = "http://localhost:6875";
-          example = "http://192.168.1.50:6875";
+          default = "http://${hostMeta.address}:6875";
+          example = "http://localhost:6875";
           description = "Full URL BookStack is accessed at (no trailing slash). Must match browser address exactly.";
         };
 

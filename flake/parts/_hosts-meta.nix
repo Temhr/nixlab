@@ -3,12 +3,13 @@ let
     address,
     ethIface,
     wifiIface,
+    services,
     system ? "x86_64-linux",
     gateway ? "192.168.0.1",
     prefixLength ? 24,
     nameservers ? ["1.1.1.1" "9.9.9.9"],
   }: {
-    inherit address system gateway prefixLength nameservers;
+    inherit address system gateway prefixLength nameservers services;
     interfaces = [
       {
         name = ethIface;
@@ -27,25 +28,30 @@ in {
     address = "192.168.0.200";
     ethIface = "enp0s31f6";
     wifiIface = "wlp3s0";
+    services = ["grafana" "prometheus" "loki" "comfyui" "ollama-gpu"];
   };
   nixsun = mkHostMeta {
     address = "192.168.0.203";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
+    services = ["grafana" "prometheus" "loki"];
   };
   nixtop = mkHostMeta {
     address = "192.168.0.202";
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
+    services = ["grafana" "prometheus" "loki"];
   };
   nixvat = mkHostMeta {
     address = "192.168.0.201";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
+    services = ["grafana" "prometheus" "loki" "glance" "ollama-cpu" "syncthing-nixvat" "wikijs" "zola"];
   };
   nixzen = mkHostMeta {
     address = "192.168.0.204";
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
+    services = ["grafana" "prometheus" "loki" "syncthing-nixzen"];
   };
 }

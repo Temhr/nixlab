@@ -56,7 +56,6 @@
       enable = true;
       user = "${config.nixlab.mainUser}";
       group = "users";
-      guiPort = 8384;
       guiAddress = "0.0.0.0";
       configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;

@@ -3,16 +3,23 @@
     config,
     lib,
     pkgs,
+    hostMeta,
     ...
   }: let
     cfg = config.services.homepage-nixlab;
 
-    # Import the services configuration from services.nix
-    servicesConfig = import ./_services.nix;
-    # Convert services to JSON file (will be converted to YAML in preStart)
+    # Import configurations from their respective nix files
+    servicesConfig = import ./_services.nix {inherit hostMeta;};
+    widgetsConfig = import ./_widgets.nix {inherit hostMeta;};
+    settingsConfig = import ./_settings.nix {inherit hostMeta;};
+
+    # Convert each to a JSON store path (remarshal converts to YAML at preStart)
     servicesJsonFile =
-      builtins.toFile "services.json"
-      (builtins.toJSON servicesConfig);
+      builtins.toFile "services.json" (builtins.toJSON servicesConfig);
+    widgetsJsonFile =
+      builtins.toFile "widgets.json" (builtins.toJSON widgetsConfig);
+    settingsJsonFile =
+      builtins.toFile "settings.json" (builtins.toJSON settingsConfig);
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -69,7 +76,6 @@
         };
 
         # OPTIONAL: Allowed hostnames/IPs for host validation (default: ["*"] = all)
-        # Homepage validates the Host header for security
         allowedHosts = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = ["*"];
@@ -91,7 +97,7 @@
     # ============================================================================
     config = lib.mkIf cfg.enable {
       # ----------------------------------------------------------------------------
-      # USER SETUP - Create dedicated system user for Homepage
+      # USER SETUP
       # ----------------------------------------------------------------------------
       users.users.homepage = {
         isSystemUser = true;
@@ -105,73 +111,78 @@
       users.users.${config.nixlab.mainUser}.extraGroups = ["homepage"];
 
       # ----------------------------------------------------------------------------
-      # DIRECTORY SETUP - Create necessary directories with proper permissions
+      # DIRECTORY SETUP
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
         "d ${cfg.dataDir} 0770 homepage homepage -"
       ];
 
       # ----------------------------------------------------------------------------
-      # HOMEPAGE SERVICE - Configure the systemd service
+      # HOMEPAGE SERVICE
       # ----------------------------------------------------------------------------
       systemd.services.homepage = {
         description = "Homepage Dashboard";
         wantedBy = ["multi-user.target"];
         after = ["network.target" "local-fs.target"];
 
-        # Environment variables for Homepage configuration
         environment = {
           HOMEPAGE_CONFIG_DIR = "${cfg.dataDir}/config";
           PORT = toString cfg.port;
           HOSTNAME = cfg.listenAddress;
-          # Host validation: comma-separated list (no spaces)
           HOMEPAGE_ALLOWED_HOSTS = lib.concatStringsSep "," cfg.allowedHosts;
         };
 
-        # Fix config file permissions on startup
-        # Note: preStart inherits User/Group from serviceConfig
         preStart = let
-          # Use /tmp for temporary file since preStart runs as homepage user
-          servicesYamlTmp = "/tmp/homepage-services.yaml.tmp";
+          servicesTmp = "/tmp/homepage-services.yaml.tmp";
+          widgetsTmp = "/tmp/homepage-widgets.yaml.tmp";
+          settingsTmp = "/tmp/homepage-settings.yaml.tmp";
         in ''
-
           [ -d "${cfg.dataDir}/config" ] || mkdir -p "${cfg.dataDir}/config"
           chown homepage:homepage ${cfg.dataDir}/config/
           chmod 0770 ${cfg.dataDir}/config/
 
-          # Convert service rules from services.nix: JSON → YAML
+          # services.yaml
           ${pkgs.remarshal}/bin/remarshal \
             -i ${servicesJsonFile} \
-            -o ${servicesYamlTmp} \
-            -if json \
-            -of yaml
-
-          # Copy temp file to final location
-          cp -f ${servicesYamlTmp} ${cfg.dataDir}/config/services.yaml
+            -o ${servicesTmp} \
+            -if json -of yaml
+          cp -f ${servicesTmp} ${cfg.dataDir}/config/services.yaml
           chmod 664 ${cfg.dataDir}/config/services.yaml
+          rm -f ${servicesTmp}
 
-          # Clean up temp file
-          rm -f ${servicesYamlTmp}
+          # widgets.yaml
+          ${pkgs.remarshal}/bin/remarshal \
+            -i ${widgetsJsonFile} \
+            -o ${widgetsTmp} \
+            -if json -of yaml
+          cp -f ${widgetsTmp} ${cfg.dataDir}/config/widgets.yaml
+          chmod 664 ${cfg.dataDir}/config/widgets.yaml
+          rm -f ${widgetsTmp}
+
+          # settings.yaml
+          ${pkgs.remarshal}/bin/remarshal \
+            -i ${settingsJsonFile} \
+            -o ${settingsTmp} \
+            -if json -of yaml
+          cp -f ${settingsTmp} ${cfg.dataDir}/config/settings.yaml
+          chmod 664 ${cfg.dataDir}/config/settings.yaml
+          rm -f ${settingsTmp}
         '';
 
         serviceConfig = {
           Type = "simple";
           User = "homepage";
           Group = "homepage";
-          # NOTE: WorkingDirectory removed - Homepage uses HOMEPAGE_CONFIG_DIR env var
           ExecStart = "${cfg.package}/bin/homepage";
           Restart = "on-failure";
           RestartSec = "10s";
 
-          # Security hardening - relaxed when using /home directory
           NoNewPrivileges = true;
           PrivateTmp = true;
-          # Temporarily disable ProtectSystem to test
           ProtectSystem =
             if lib.hasPrefix "/home/" cfg.dataDir
             then "false"
             else "strict";
-          # Disable ProtectHome entirely when dataDir is in /home (required for access)
           ProtectHome =
             if lib.hasPrefix "/home/" cfg.dataDir
             then false
@@ -181,7 +192,7 @@
       };
 
       # ----------------------------------------------------------------------------
-      # NGINX REVERSE PROXY - Only configured if domain is set
+      # NGINX REVERSE PROXY
       # ----------------------------------------------------------------------------
       services.nginx = lib.mkIf (cfg.domain != null) {
         enable = true;
@@ -208,128 +219,12 @@
       };
 
       # ----------------------------------------------------------------------------
-      # FIREWALL - Open necessary ports if requested
+      # FIREWALL
       # ----------------------------------------------------------------------------
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Open Homepage port if not using reverse proxy or binding to non-localhost
         lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
-        # Open HTTP/HTTPS if using reverse proxy
         ++ lib.optionals (cfg.domain != null) [80 443]
       );
     };
   };
 }
-/*
-================================================================================
-USAGE EXAMPLE
-================================================================================
-
-Minimal configuration:
-----------------------
-services.homepage-nixlab = {
-  enable = true;
-};
-# Access at: http://localhost:3000
-
-
-Network access without domain:
--------------------------------
-services.homepage-nixlab = {
-  enable = true;
-  listenAddress = "0.0.0.0";
-  openFirewall = true;
-};
-# Access at: http://your-ip:3000
-
-
-Configuration with home directory:
------------------------------------
-services.homepage-nixlab = {
-  enable = true;
-  dataDir = "~/shelf/data/homepage";
-};
-# ProtectHome will automatically be disabled for home directory paths
-
-
-Full configuration with domain:
---------------------------------
-services.homepage-nixlab = {
-  enable = true;
-  port = 3000;
-  listenAddress = "127.0.0.1";
-  dataDir = "/data/homepage";
-
-  # Host validation (add all ways you'll access it)
-  allowedHosts = [ "home.example.com" "localhost" "192.168.1.100" ];
-
-  # Nginx reverse proxy
-  domain = "home.example.com";
-  enableSSL = true;
-  openFirewall = true;
-};
-
-
-================================================================================
-HOST VALIDATION
-================================================================================
-
-Homepage validates the Host header for security. If you get "Host validation
-failed" errors, add the hostname/IP to allowedHosts:
-
-  allowedHosts = [
-    "localhost"
-    "127.0.0.1"
-    "192.168.1.100"
-    "home.example.com"
-  ];
-
-Or disable validation entirely (not recommended):
-  allowedHosts = [ "*" ];
-
-
-================================================================================
-CONFIGURATION
-================================================================================
-
-Homepage stores config in YAML files under dataDir/config/:
-- services.yaml  - Dashboard services/links
-- widgets.yaml   - Dashboard widgets
-- bookmarks.yaml - Quick links
-- settings.yaml  - General settings
-
-Edit these files manually or use the built-in editor (if enabled).
-
-Example services.yaml:
-  - Group 1:
-      - Service 1:
-          href: http://example.com
-          description: My service
-
-Restart after config changes:
-  sudo systemctl restart homepage
-
-
-================================================================================
-TROUBLESHOOTING
-================================================================================
-
-Check service status:
-  sudo systemctl status homepage
-
-View logs:
-  sudo journalctl -u homepage -f
-
-Host validation error:
-  Add your IP/hostname to allowedHosts
-
-Cannot access from network:
-  Set listenAddress = "0.0.0.0" and openFirewall = true
-
-Check config files:
-  ls -la /var/lib/homepage/config/
-
-Service fails with home directory:
-  The fix automatically disables ProtectHome when dataDir is in /home/
-  Make sure the homepage user has proper permissions to the directory
-*/
-

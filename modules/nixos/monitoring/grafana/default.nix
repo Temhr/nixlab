@@ -30,7 +30,7 @@
         # OPTIONAL: Port to listen on (default: 3100)
         port = lib.mkOption {
           type = lib.types.port;
-          default = 3100;
+          default = 3101;
           description = "Port for Grafana to listen on";
         };
 

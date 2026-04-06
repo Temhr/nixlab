@@ -82,7 +82,6 @@
     services.comfyui-p5000 = {
       enable = true;
       # Network configuration
-      port = 8188;
       listenAddress = "0.0.0.0"; # Listen on all interfaces
       # Data directory (models, outputs, inputs)
       dataDir = "/data/comfyui";

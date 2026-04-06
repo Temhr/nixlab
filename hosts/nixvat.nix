@@ -71,42 +71,36 @@
     ## SELF-HOSTED SERVICES
     services.glance-nixlab = {
       enable = true;
-      port = 3004;
       listenAddress = "0.0.0.0";
       openFirewall = true;
       dataDir = "/data/glance";
     };
     services.wikijs-custom = {
       enable = true;
-      port = 3001;
       listenAddress = "0.0.0.0";
       dataDir = "/data/wiki-js";
       openFirewall = true;
     };
     services.bookstack-nixlab = {
       enable = false;
-      port = 3002;
       listenAddress = "0.0.0.0";
       openFirewall = true;
       dataDir = "/data/bookstack";
     };
     services.homeassistant-custom = {
       enable = false;
-      port = 8123;
       listenAddress = "0.0.0.0";
       openFirewall = true;
       dataDir = "/data/homeassistant";
     };
     services.nodered-service = {
       enable = false;
-      port = 1880;
       listenAddress = "0.0.0.0";
       openFirewall = true;
       dataDir = "/data/node-red";
     };
     services.zola-nixlab = {
       enable = true;
-      port = 3003;
       siteDir = "/data/www/myblog";
       listenAddress = "0.0.0.0";
       openFirewall = true;
@@ -128,7 +122,6 @@
       enable = true;
       user = "${config.nixlab.mainUser}";
       group = "users";
-      guiPort = 8384;
       guiAddress = "0.0.0.0";
       configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;

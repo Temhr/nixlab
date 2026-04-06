@@ -15,10 +15,10 @@
         # REQUIRED: Enable the service
         enable = lib.mkEnableOption "GoToSocial federated social media server";
 
-        # OPTIONAL: Port to listen on (default: 3005)
+        # OPTIONAL: Port to listen on (default: 8080)
         port = lib.mkOption {
           type = lib.types.port;
-          default = 3005;
+          default = 8080;
           description = "Port for GoToSocial to listen on";
         };
 
