@@ -28,30 +28,30 @@ in {
     address = "192.168.0.200";
     ethIface = "enp0s31f6";
     wifiIface = "wlp3s0";
-    services = ["grafana" "prometheus" "loki" "comfyui" "ollama-gpu"];
+    services = ["glance" "grafana" "prometheus" "loki" "comfyui" "ollama-gpu"];
   };
   nixsun = mkHostMeta {
     address = "192.168.0.203";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
-    services = ["grafana" "prometheus" "loki"];
+    services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixtop = mkHostMeta {
     address = "192.168.0.202";
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
-    services = ["grafana" "prometheus" "loki"];
+    services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixvat = mkHostMeta {
     address = "192.168.0.201";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
-    services = ["grafana" "prometheus" "loki" "glance" "ollama-cpu" "syncthing-nixvat" "wikijs" "zola"];
+    services = ["glance" "grafana" "prometheus" "loki" "ollama-cpu" "syncthing-nixvat" "wikijs" "zola"];
   };
   nixzen = mkHostMeta {
     address = "192.168.0.204";
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
-    services = ["grafana" "prometheus" "loki" "syncthing-nixzen"];
+    services = ["glance" "grafana" "prometheus" "loki" "syncthing-nixzen"];
   };
 }

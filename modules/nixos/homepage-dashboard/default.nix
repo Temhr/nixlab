@@ -3,13 +3,14 @@
     config,
     lib,
     pkgs,
+    allHosts,
     hostMeta,
     ...
   }: let
     cfg = config.services.homepage-nixlab;
 
     # Import configurations from their respective nix files
-    servicesConfig = import ./_services.nix {inherit hostMeta;};
+    servicesConfig = import ./_services.nix {inherit allHosts hostMeta;};
     widgetsConfig = import ./_widgets.nix {inherit config hostMeta;};
     settingsConfig = import ./_settings.nix {inherit hostMeta;};
 

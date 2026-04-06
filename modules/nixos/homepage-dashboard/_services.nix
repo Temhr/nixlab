@@ -7,7 +7,10 @@
 #
 #   hostMeta.services = [ "ollama-gpu" "grafana" "syncthing-nixvat" ];
 #
-{hostMeta}: let
+{
+  allHosts,
+  hostMeta,
+}: let
   # ──────────────────────────────────────────────────────────────────────────
   # MASTER SERVICE DEFINITIONS
   # Add new services here. The attribute name is the key used in
@@ -153,11 +156,6 @@
         target = "_blank";
         ping = "http://${hostMeta.address}:8384";
         statusStyle = "dot";
-        widget = {
-          type = "syncthing";
-          url = "http://${hostMeta.address}:8384";
-          key = "{{HOMEPAGE_VAR_SYNCTHING_NIXVAT_KEY}}";
-        };
       };
     };
 
@@ -169,11 +167,6 @@
         target = "_blank";
         ping = "http://${hostMeta.address}:8384";
         statusStyle = "dot";
-        widget = {
-          type = "syncthing";
-          url = "http://${hostMeta.address}:8384";
-          key = "{{HOMEPAGE_VAR_SYNCTHING_NIXZEN_KEY}}";
-        };
       };
     };
 
@@ -191,11 +184,11 @@
 
     "glance" = {
       "Glance" = {
-        href = "http://${hostMeta.address}:3004";
+        href = "http://${allHosts.nixvat.address}:3004";
         icon = "gauge";
         description = "Feed dashboard — RSS, weather, links";
         target = "_blank";
-        ping = "http://${hostMeta.address}:3004";
+        ping = "http://${allHosts.nixvat.address}:3004";
         statusStyle = "dot";
       };
     };
