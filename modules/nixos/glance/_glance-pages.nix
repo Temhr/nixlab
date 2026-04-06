@@ -6,8 +6,7 @@
 # columns. Each column has a size ("small" | "full" | "large") and a list
 # of widgets. The structure maps 1-to-1 onto glance.yml — it is converted
 # to YAML and appended to the server block by glance.nix.
-{ allHosts }:
-[
+{allHosts}: [
   {
     # ──────────────────────────────────────────────
     # PAGE: Home

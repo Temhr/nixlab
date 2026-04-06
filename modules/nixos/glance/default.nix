@@ -1,15 +1,15 @@
 {...}: {
   flake.nixosModules.servc--glance-nixlab = {
-    allhosts,
     config,
     lib,
     pkgs,
+    allHosts,
     ...
   }: let
     cfg = config.services.glance-nixlab;
 
     # Import the pages configuration from _glance-pages.nix
-    pagesConfig = import ./_glance-pages.nix { inherit allHosts; };
+    pagesConfig = import ./_glance-pages.nix {inherit allHosts;};
 
     # Convert pages to a JSON file (will be converted to YAML in preStart)
     pagesJsonFile =
