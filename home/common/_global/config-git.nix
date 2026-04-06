@@ -1,7 +1,6 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     git
-    unstable.github-desktop #GUI for managing Git and GitHub
     unstable.git-cola #Sleek and powerful Git GUI
     unstable.ungit #Git made easy
     git-credential-keepassxc #Helper that allows Git (and shell scripts) to use KeePassXC as credential store

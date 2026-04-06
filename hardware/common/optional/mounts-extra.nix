@@ -12,12 +12,6 @@
           default = false;
         };
       };
-      mount-home1 = {
-        enable = lib.mkEnableOption {
-          description = "mounts home drive";
-          default = false;
-        };
-      };
       mount-shelf = {
         enable = lib.mkEnableOption {
           description = "mounts shelf drive in home directory";
@@ -51,29 +45,12 @@
           fsType = "ext4";
         };
       })
-      (lib.mkIf config.mount-home1.enable {
-        fileSystems."/home1" = {
-          device = "/dev/disk/by-label/home";
-          fsType = "ext4";
-        };
-      })
       (lib.mkIf config.mount-shelf.enable {
         fileSystems."/data" = {
           device = "/dev/disk/by-label/data";
           fsType = "ext4";
           options = ["defaults" "auto"];
         };
-        /*
-        systemd.services.fix-shelf-permissions = {
-          description = "Fix ownership of ~/shelf for user";
-          wantedBy = [ "local-fs.target" ];
-          after = [ "local-fs.target" ];
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "/run/current-system/sw/bin/chown -R ${config.nixlab.mainUser}:users ~/shelf";
-          };
-        };
-        */
       })
       (lib.mkIf config.mount-mirror.enable {
         fileSystems."/mirror" = {

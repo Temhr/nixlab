@@ -216,7 +216,7 @@ nixlab/
 │
 ├── flake/                        # Orchestration-level flake-parts configs
 │   └── parts/
-│       ├── _host-meta.nix        # hostsMeta attrset of network
+│       ├── _host-meta.nix        # hostsMeta attrset of network + services
 │       ├── apps.nix              # mkHost helper + home-manager-config module
 │       ├── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
 │       ├── lib.nix               # mkHost constructor
