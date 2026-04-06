@@ -10,7 +10,7 @@
 
     # Import configurations from their respective nix files
     servicesConfig = import ./_services.nix {inherit hostMeta;};
-    widgetsConfig = import ./_widgets.nix {inherit hostMeta;};
+    widgetsConfig = import ./_widgets.nix {inherit config hostMeta;};
     settingsConfig = import ./_settings.nix {inherit hostMeta;};
 
     # Convert each to a JSON store path (remarshal converts to YAML at preStart)

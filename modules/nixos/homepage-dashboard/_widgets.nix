@@ -1,7 +1,7 @@
 # /var/lib/homepage/config/widgets.yaml
 # Homepage top-of-page widget bar configuration
 # Docs: https://gethomepage.dev/en/configs/widgets/
-{...}: [
+{config, ...}: [
   # ── System resources (cpu, memory, disk, network, uptime — all one block) ─
   # Homepage only supports a single `resources` entry in widgets.yaml.
   {
