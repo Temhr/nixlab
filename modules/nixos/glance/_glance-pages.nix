@@ -6,6 +6,7 @@
 # columns. Each column has a size ("small" | "full" | "large") and a list
 # of widgets. The structure maps 1-to-1 onto glance.yml — it is converted
 # to YAML and appended to the server block by glance.nix.
+{ allHosts }:
 [
   {
     # ──────────────────────────────────────────────
@@ -24,27 +25,27 @@
             sites = [
               {
                 title = "nixace services";
-                url = "http://192.168.0.200:3000/";
+                url = "http://${allHosts.nixace.address}:3000/";
                 icon = "si:homepage";
               }
               {
                 title = "nixsun services";
-                url = "http://192.168.0.203:3000/";
+                url = "http://${allHosts.nixsun.address}:3000/";
                 icon = "si:homepage";
               }
               {
                 title = "nixtop services";
-                url = "http://192.168.0.202:3000/";
+                url = "http://${allHosts.nixtop.address}:3000/";
                 icon = "si:homepage";
               }
               {
                 title = "nixvat services";
-                url = "http://192.168.0.201:3000/";
+                url = "http://${allHosts.nixvat.address}:3000/";
                 icon = "si:homepage";
               }
               {
                 title = "nixzen services";
-                url = "http://192.168.0.204:3000/";
+                url = "http://${allHosts.nixzen.address}:3000/";
                 icon = "si:homepage";
               }
             ];
