@@ -91,12 +91,6 @@
         target = "_blank";
         ping = "http://${hostMeta.address}:3101";
         statusStyle = "dot";
-        widget = {
-          type = "grafana";
-          url = "http://${hostMeta.address}:3101";
-          username = "admin";
-          password = "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}";
-        };
       };
     };
 
@@ -108,10 +102,6 @@
         target = "_blank";
         ping = "http://${hostMeta.address}:9090";
         statusStyle = "dot";
-        widget = {
-          type = "prometheus";
-          url = "http://${hostMeta.address}:9090";
-        };
       };
     };
 
