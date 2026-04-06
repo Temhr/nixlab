@@ -102,7 +102,6 @@
 
     "loki" = {
       "Loki" = {
-        href = "http://${hostMeta.address}:3100";
         icon = "loki";
         description = "Log aggregation and querying";
         ping = "http://${hostMeta.address}:3100";
