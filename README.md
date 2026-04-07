@@ -217,52 +217,52 @@ The `nixlab.mainUser` option (declared in `hosts/common/global/users/main-user.n
 
 ```
 nixlab/
-├── flake.nix                     # Thin root — delegates to directories via import-tree
-├── flake.lock                    # Version-pinned input revisions
+├── flake.nix                    # Thin root — delegates to directories via import-tree
+├── flake.lock                   # Version-pinned input revisions
 │
-├── flake/                        # Orchestration-level flake-parts configs
+├── flake/                       # Orchestration-level flake-parts configs
 │   └── parts/
-│       ├── _hosts-meta.nix       # Static per-host metadata: IPs, interfaces, system arch, services
-│       ├── apps.nix              # build-all app: builds every nixosConfiguration in CI
-│       ├── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter
-│       ├── lib.nix               # mkHost constructor; reads hostsMeta; wires common modules + overlays
-│       ├── nixpkgs.nix           # Configures shared pkgs instance (allowUnfree + all overlays) for perSystem
-│       ├── options-home.nix      # Declares flake.homeModules as a mergeable lazyAttrsOf option
-│       └── packages.nix          # Imports pkgs/ into perSystem.packages
+│       ├── _hosts-meta.nix      # Static per-host metadata: IPs, interfaces, services
+│       ├── apps.nix             # build-all app: builds every nixosConfiguration in CI
+│       ├── checks.nix           # Pre-commit hooks (alejandra, deadnix, guards) + formatter
+│       ├── lib.nix              # mkHost constructor; reads hostsMeta; wires modules + overlays
+│       ├── nixpkgs.nix          # Configs pkgs instance (allowUnfree + overlays) for perSystem
+│       ├── options-home.nix     # Declares flake.homeModules as a mergeable lazyAttrsOf option
+│       └── packages.nix         # Imports pkgs/ into perSystem.packages
 │
-├── hardware/                     # Machine-level hardware configs
+├── hardware/                    # Machine-level hardware configs
 │   ├── common/
-│   │   ├── global/               # Applied to all machines unconditionally
-│   │   └── optional/             # Selectable hardware modules (GPU drivers)
-│   └── <model>.nix               # Per-device, module manifests
+│   │   ├── global/              # Applied to all machines unconditionally
+│   │   └── optional/            # Selectable hardware modules (GPU drivers)
+│   └── <model>.nix              # Per-device, module manifests
 │
-├── hosts/                        # System-level NixOS configurations
+├── hosts/                       # System-level NixOS configurations
 │   ├── common/
-│   │   ├── global/               # Applied to all hosts unconditionally
-│   │   │   └── users/            # Declares nixlab.mainUser option
-│   │   └── optional/             # Selectable sys-package modules (games, media)
-│   │   │   └── networking/       # Network related config
-│   └── <hostname>.nix            # Per-host, module manifests
+│   │   ├── global/              # Applied to all hosts unconditionally
+│   │   │   └── users/           # Declares nixlab.mainUser option
+│   │   └── optional/            # Selectable sys-package modules (games, media)
+│   │   │   └── networking/      # Network related config
+│   └── <hostname>.nix           # Per-host, module manifests
 │
-├── home/                         # User-level Home Manager configurations
+├── home/                        # User-level Home Manager configurations
 │   ├── common/
-│   │   ├── files/                # Managed dotfiles and scripts (bash config, themes)
-│   │   ├── global/               # Applied to all users unconditionally
-│   │   └── optional/             # Selectable user-package modules (browsers, terminals)
-│   └── temhr/                    # Per-user, host module manifests
+│   │   ├── files/               # Managed dotfiles and scripts (bash config, themes)
+│   │   ├── global/              # Applied to all users unconditionally
+│   │   └── optional/            # Selectable user-package modules (browsers, terminals)
+│   └── temhr/                   # Per-user, host module manifests
 │
-├── modules/                      # Reusable self-exporting service modules
-│   ├── nixos/                    # System-level service modules
-│   └── home-manager/             # User-level service modules
+├── modules/                     # Reusable self-exporting service modules
+│   ├── nixos/                   # System-level service modules
+│   └── home-manager/            # User-level service modules
 │
-├── overlays/                     # nixpkgs modifications and channel pinning
-│   ├── default.nix               # Self-registers all overlays into flake.overlays
-│   └── _*.nix                    # Leaf overlay functions — imported by default.nix
+├── overlays/                    # nixpkgs modifications and channel pinning
+│   ├── default.nix              # Self-registers all overlays into flake.overlays
+│   └── _*.nix                   # Leaf overlay functions — imported by default.nix
 │
-├── shells/                       # Isolated development environments
-├── cachix/                       # Cachix binary cache declarations
-├── bin/                          # Utility shell scripts
-└── .sops.yaml                    # sops age key configuration
+├── shells/                      # Isolated development environments
+├── cachix/                      # Cachix binary cache declarations
+├── bin/                         # Utility shell scripts
+└── .sops.yaml                   # sops age key configuration
 ```
 
 > The repository tree is the authoritative reference for current hosts, modules, shells, and features. The layout above describes purpose and convention — browse the directories themselves for precise contents.
