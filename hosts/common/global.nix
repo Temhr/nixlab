@@ -43,7 +43,7 @@
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
     services.rustdesk-nixlab = {
-      enable       = true;
+      enable = true;
       openFirewall = true;
       dataDir = "/data/rustdesk";
       client = {
