@@ -155,6 +155,7 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───hosts--nixzen: NixOS module
 │   ├───secrets--bookstack: NixOS module
 │   ├───secrets--grafana: NixOS module
+│   ├───secrets--networking: NixOS module
 │   ├───secrets--ollama: NixOS module
 │   ├───servc--bookstack-nixlab: NixOS module
 │   ├───servc--comfyui-extensions: NixOS module
@@ -170,6 +171,7 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───servc--node-red-nixlab: NixOS module
 │   ├───servc--ollama: NixOS module
 │   ├───servc--prometheus-nixlab: NixOS module
+│   ├───servc--rustdesk-nixlab: NixOS module
 │   ├───servc--syncthing-nixlab: NixOS module
 │   ├───servc--waydroid-nixlab: NixOS module
 │   ├───servc--wiki-js-nixlab: NixOS module
@@ -178,7 +180,8 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───systm--cachix: NixOS module
 │   ├───systm--gui-shells: NixOS module
 │   ├───systm--home-manager-config: NixOS module
-│   └───systm--ignore-lid: NixOS module
+│   ├───systm--ignore-lid: NixOS module
+│   └───systm--networking: NixOS module
 └───overlays
     ├───additions: Nixpkgs overlay
     ├───modifications: Nixpkgs overlay
@@ -192,10 +195,13 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 
 | File | Responsibility | Output namespace |
 |---|---|---|
-| `lib.nix` | `mkHost` host assembly helper + `home-manager-config` module | `flake.lib`, `flake.nixosModules.system` |
-| `home-options.nix` | Declares flake.homeModules as a mergeable attrset option so multiple self-registering files can each contribute one key without collision | `flake.homeModules` |
-| `packages.nix` | Custom packages and `alejandra` formatter | `perSystem` |
-| `checks.nix` | Pre-commit hooks and build validation | `perSystem` |
+| `lib.nix` | `mkHost` host-assembly helper; reads `_hosts-meta.nix` for per-host network/service metadata; wires in common modules (`sops-nix`, `systm--home-manager-config`, overlays) | `flake.lib` |
+| `_hosts-meta.nix` | Static `hostsMeta` attrset — IP addresses, interfaces, system arch, and service lists for every host | *(imported by `lib.nix`, no direct flake output)* |
+| `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option so multiple files can each contribute one key without collision | `flake.homeModules` |
+| `nixpkgs.nix` | Configures the default `pkgs` instance for all `perSystem` blocks — sets `allowUnfree = true` and applies all four overlays | `perSystem._module.args.pkgs` |
+| `packages.nix` | Imports custom packages from `pkgs/` into the per-system package set | `perSystem.packages` |
+| `checks.nix` | Pre-commit hooks (`alejandra`, `deadnix`, merge-conflict guards) and the `alejandra` formatter | `perSystem.checks`, `perSystem.formatter` |
+| `apps.nix` | Defines the `build-all` app — a shell script that runs `nix build` against every `nixosConfiguration` in the flake | `perSystem.apps.build-all` |
 
 ## Secrets management
 
@@ -216,13 +222,13 @@ nixlab/
 │
 ├── flake/                        # Orchestration-level flake-parts configs
 │   └── parts/
-│       ├── _host-meta.nix        # hostsMeta attrset of network + services
-│       ├── apps.nix              # mkHost helper + home-manager-config module
-│       ├── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict)
-│       ├── lib.nix               # mkHost constructor
-│       ├── nixpkgs.nix           # Configures pkgs instance for all perSystem blocks
-│       ├── options-home.nix      # Declares flake.homeModules option
-│       └── packages.nix          # Custom packages perSystem import
+│       ├── _hosts-meta.nix       # Static per-host metadata: IPs, interfaces, system arch, services
+│       ├── apps.nix              # build-all app: builds every nixosConfiguration in CI
+│       ├── checks.nix            # Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter
+│       ├── lib.nix               # mkHost constructor; reads hostsMeta; wires common modules + overlays
+│       ├── nixpkgs.nix           # Configures shared pkgs instance (allowUnfree + all overlays) for perSystem
+│       ├── options-home.nix      # Declares flake.homeModules as a mergeable lazyAttrsOf option
+│       └── packages.nix          # Imports pkgs/ into perSystem.packages
 │
 ├── hardware/                     # Machine-level hardware configs
 │   ├── common/
