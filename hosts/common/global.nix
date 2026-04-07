@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--c-global = {...}: {
+  flake.nixosModules.hosts--c-global = {hostMeta, ...}: {
     imports = [
       ./_global
       self.nixosModules.hosts--c-optional--development
@@ -15,6 +15,7 @@
       self.nixosModules.servc--homepage-nixlab
       self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.systm--networking
+      self.nixosModules.servc--rustdesk-nixlab
     ];
 
     services.ignoreLid = {
@@ -40,6 +41,27 @@
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.systemd = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
+    };
+    services.rustdesk-nixlab = {
+      enable       = true;
+      openFirewall = true;
+      dataDir = "/data/rustdesk";
+      client = {
+        enable = true;
+        connection = {
+          idServer = "${hostMeta.address}";
+          relayServer = "${hostMeta.address}";
+          publicKey = "your-public-key-here";
+        };
+      };
+      remote = {
+        enable = true;
+        connection = {
+          idServer = "${hostMeta.address}";
+          relayServer = "${hostMeta.address}";
+          publicKey = "your-public-key-here";
+        };
+      };
     };
   };
 }
