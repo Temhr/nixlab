@@ -98,6 +98,28 @@
           example = "Europe/London";
           description = "Time zone for Home Assistant";
         };
+        # OPTIONAL: sops-nix path to the decrypted Home Assistant secrets.yaml.
+        # Home Assistant's secrets.yaml holds plaintext credentials referenced
+        # in configuration.yaml as !secret <key_name>.
+        # Generate a secrets.yaml with your secrets, encrypt it with sops,
+        # then point this option at config.sops.secrets.HA_SECRETS_YAML.path.
+        #
+        # Example secrets.yaml content (plaintext, before encryption):
+        #   mqtt_password: your-mqtt-password
+        #   ha_token: your-long-lived-access-token
+        #
+        # In configuration.nix:
+        #   secretsYamlFile = config.sops.secrets.HA_SECRETS_YAML.path;
+        secretsYamlFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/HA_SECRETS_YAML";
+          description = ''
+            Path to a sops-decrypted file whose contents will be installed as
+            Home Assistant's secrets.yaml on every service start.
+            The file should contain key: value pairs (standard YAML).
+          '';
+        };
       };
     };
 
@@ -151,14 +173,24 @@
       # ----------------------------------------------------------------------------
       # CUSTOM DATA DIRECTORY - Override default if specified
       # ----------------------------------------------------------------------------
-      systemd.services.home-assistant = lib.mkIf (cfg.dataDir != "/var/lib/hass") {
-        serviceConfig = {
-          # Clear the default state directory
-          StateDirectory = lib.mkForce "";
-          # Use custom working directory instead
-          WorkingDirectory = lib.mkForce cfg.dataDir;
-        };
-      };
+      systemd.services.home-assistant = lib.mkMerge [
+        (lib.mkIf (cfg.dataDir != "/var/lib/hass") {
+          serviceConfig = {
+            StateDirectory = lib.mkForce "";
+            WorkingDirectory = lib.mkForce cfg.dataDir;
+          };
+        })
+        (lib.mkIf (cfg.secretsYamlFile != null) {
+          # Install the sops-decrypted secrets.yaml before HA starts.
+          # We copy (not symlink) so HA's file-watch doesn't get confused by
+          # a /run/secrets path that may briefly disappear on rotation.
+          preStart = lib.mkBefore ''
+            install -m 640 -o hass -g hass \
+              ${cfg.secretsYamlFile} \
+              ${cfg.dataDir}/secrets.yaml
+          '';
+        })
+      ];
 
       # Create custom data directory with proper permissions
       systemd.tmpfiles.rules = lib.mkIf (cfg.dataDir != "/var/lib/hass") [

@@ -168,25 +168,23 @@
           (baseNameOf cfg.dataDir);
 
         # Wiki.js application settings
-        settings =
-          {
-            # Network configuration
-            port = cfg.port;
-            listenAddress = cfg.listenAddress;
+        settings = {
+          # Network configuration
+          port = cfg.port;
+          listenAddress = cfg.listenAddress;
 
-            # Database configuration (PostgreSQL via Unix socket)
-            db = {
-              type = "postgres";
-              host = "/run/postgresql"; # Unix socket connection
-              db = "wiki-js";
-              user = "wiki-js";
-            };
+          # Database configuration (PostgreSQL via Unix socket)
+          db = {
+            type = "postgres";
+            host = "/run/postgresql"; # Unix socket connection
+            db = "wiki-js";
+            user = "wiki-js";
+          };
 
-            # Logging and high-availability settings
-            logLevel = "info";
-            ha = false; # High availability mode disabled (single instance)
-          }
-        ;
+          # Logging and high-availability settings
+          logLevel = "info";
+          ha = false; # High availability mode disabled (single instance)
+        };
       };
 
       # ----------------------------------------------------------------------------
