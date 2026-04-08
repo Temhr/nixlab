@@ -199,13 +199,20 @@ alias vdr='lspci -n -n -k | grep -A 2 -e VGA -e 3D'
 alias lsgpu='lspci | grep -i -E "vga|3d|display"'
 alias nsmi='watch -n1 nvidia-smi'
 
-## get top process eating memory
-alias mem5='ps -eo pid,ppid,%cpu,comm --sort=-%mem | head -n5'
-alias mem10='ps -eo pid,ppid,%cpu,comm --sort=-%mem | head -n10'
+    ## get top process eating memory
+alias memp5='ps -eo pid,ppid,%cpu,comm --sort=-%mem | head -n5'
+alias memp10='ps -eo pid,ppid,%cpu,comm --sort=-%mem | head -n10'
+    ## get top executable eating memory
+alias mem5='ps -eo pid,user,ppid,%mem,%cpu,exe --sort=-%mem | head -n5'
+alias mem10='ps -eo pid,user,ppid,%mem,%cpu,exe --sort=-%mem | head -n10'
 
-## get top process eating cpu ##
-alias cpu5='ps -eo pid,ppid,%cpu,comm --sort=-%cpu | head -n5'
-alias cpu10='ps -eo pid,ppid,%cpu,comm --sort=-%cpu | head -n10'
+    ## get top process eating cpu ##
+alias cpup5='ps -eo pid,ppid,%cpu,comm --sort=-%cpu | head -n5'
+alias cpup10='ps -eo pid,ppid,%cpu,comm --sort=-%cpu | head -n10'
+    ## get top executable eating cpu ##
+alias cpu5='ps -eo pid,user,ppid,%mem,%cpu,exe --sort=-%cpu | head -n5'
+alias cpu10='ps -eo pid,user,ppid,%mem,%cpu,exe --sort=-%cpu | head -n10'
+
 
 ## List largest directories (aka "ducks")
 alias dir5='du -cksh * | sort -hr | head -n 5'
