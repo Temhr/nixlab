@@ -81,7 +81,6 @@
       listenAddress = "0.0.0.0";
       dataDir = "/data/wiki-js";
       openFirewall = true;
-      appSecretFile = config.sops.secrets.WIKIJS_SECRET.path;
     };
     services.bookstack-nixlab = {
       enable = false;
