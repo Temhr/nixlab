@@ -11,9 +11,92 @@
     # HELPERS
     # ============================================================================
 
-    # Script fragment that resolves the public key into $RUSTDESK_KEY at
-    # shell runtime (not Nix eval time), so autoKey can read the file on disk.
-    # - autoKey=true:  reads id_ed25519.pub from dataDir; empty string if not yet generated
+    # --------------------------------------------------------------------------
+    # PEER ID DERIVATION
+    #
+    # RustDesk IDs must be numeric strings in the range 100000000-999999999.
+    # We derive a stable ID from the hostname by:
+    #   1. MD5-hashing the hostname (gives a hex string)
+    #   2. Taking the first 8 hex chars and converting to decimal
+    #   3. Clamping to the valid range by mapping into 100000000-999999999
+    #
+    # This is pure Nix — evaluated at build time, no runtime dependencies.
+    # --------------------------------------------------------------------------
+    deriveId = hostname: let
+      # md5 hex string → first 8 chars → parse as base-16 integer
+      hash = builtins.hashString "md5" hostname;
+      hexPart = builtins.substring 0 8 hash;
+      # Nix doesn't have a built-in hex parser, so we convert manually
+      hexDigit = c:
+        if c == "0"
+        then 0
+        else if c == "1"
+        then 1
+        else if c == "2"
+        then 2
+        else if c == "3"
+        then 3
+        else if c == "4"
+        then 4
+        else if c == "5"
+        then 5
+        else if c == "6"
+        then 6
+        else if c == "7"
+        then 7
+        else if c == "8"
+        then 8
+        else if c == "9"
+        then 9
+        else if c == "a"
+        then 10
+        else if c == "b"
+        then 11
+        else if c == "c"
+        then 12
+        else if c == "d"
+        then 13
+        else if c == "e"
+        then 14
+        else if c == "f"
+        then 15
+        else 0;
+      chars = lib.stringToCharacters hexPart;
+      asInt = lib.foldl (acc: c: acc * 16 + hexDigit c) 0 chars;
+      # Clamp to 100000000-999999999 (9 digits)
+      range = 999999999 - 100000000;
+      clamped = 100000000 + (lib.mod asInt range);
+    in
+      toString clamped;
+
+    # This machine's own derived ID
+    thisId = deriveId config.networking.hostName;
+
+    # Peers list with IDs derived from hostnames, excluding this machine
+    resolvedPeers =
+      lib.filter
+      (p: p.hostname != config.networking.hostName)
+      (map (p: p // {id = deriveId p.hostname;}) cfg.peers);
+
+    # Render the [peers] section of RustDesk2.toml
+    # Format: alias = { id = '...', username = '', hostname = '', platform = '', alias = '...' }
+    renderPeersSection =
+      if resolvedPeers == []
+      then ""
+      else
+        "[peers]
+"
+        + lib.concatMapStrings (p: ''
+          ${p.hostname} = { id = "${p.id}", username = "", hostname = "${p.hostname}", platform = "", alias = "${p.alias or p.hostname}" }
+        '')
+        resolvedPeers;
+
+    # --------------------------------------------------------------------------
+    # SCRIPT HELPERS
+    # --------------------------------------------------------------------------
+
+    # Resolves the public key into $RUSTDESK_KEY at shell runtime.
+    # - autoKey=true:  reads id_ed25519.pub from dataDir; empty if not yet generated
     # - autoKey=false: uses the publicKey option value verbatim
     resolveKeyScript =
       if cfg.connection.autoKey
@@ -33,13 +116,14 @@
       '';
 
     # Write RustDesk2.toml for a given user.
-    # Uses an unquoted heredoc so the shell expands $RUSTDESK_KEY inline —
-    # no sed substitution needed.
-    # Always overwrites so key/server changes propagate on every rebuild.
+    # Uses an unquoted heredoc so the shell expands $RUSTDESK_KEY inline.
+    # The [peers] section and this machine's fixed ID are baked in at eval time.
+    # Always overwrites so changes propagate on every rebuild.
     writeConfigForUser = user: homeDir: ''
       CONFIG_DIR="${homeDir}/.config/rustdesk"
       mkdir -p "$CONFIG_DIR"
       cat > "$CONFIG_DIR/RustDesk2.toml" << RDEOF
+      id = '${thisId}'
       rendezvous_server = '${cfg.connection.idServer}'
       nat_type = 1
       serial = 0
@@ -51,10 +135,12 @@
       key = '$RUSTDESK_KEY'
       direct-server = 'Y'
       direct-access-port = '21118'
+
+      ${renderPeersSection}
       RDEOF
       chown -R "${user}:" "$CONFIG_DIR"
       chmod 600 "$CONFIG_DIR/RustDesk2.toml"
-      echo "rustdesk-nixlab: wrote config for ${user}"
+      echo "rustdesk-nixlab: wrote config for ${user} (id=${thisId})"
     '';
   in {
     # ============================================================================
@@ -62,7 +148,6 @@
     # ============================================================================
     options = {
       services.rustdesk-nixlab = {
-
         # REQUIRED: Enable the module
         enable = lib.mkEnableOption "RustDesk self-hosted remote desktop server";
 
@@ -244,9 +329,58 @@
 
           users = lib.mkOption {
             type = lib.types.listOf lib.types.str;
-            default = [ config.nixlab.mainUser ];
+            default = [config.nixlab.mainUser];
             description = "Users to pre-configure the RustDesk client for";
           };
+        };
+
+        # ----------------------------------------------------------------------------
+        # PEERS - Fleet manifest for declarative peer discovery
+        #
+        # List all machines in your fleet here. Each machine's RustDesk ID is
+        # derived deterministically from its hostname using a hash, so IDs are
+        # stable and known at build time without any manual lookup.
+        #
+        # Every machine gets this list written into its RustDesk config, filtered
+        # to exclude itself. The result is that every machine in your fleet
+        # appears pre-populated in every other machine's address book.
+        #
+        # Define this list once in a shared nixlab module imported by all machines.
+        # ----------------------------------------------------------------------------
+        peers = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              hostname = lib.mkOption {
+                type = lib.types.str;
+                example = "nixsun";
+                description = ''
+                  The NixOS hostname of the peer (config.networking.hostName).
+                  Used to derive a stable RustDesk ID via hostname hash.
+                '';
+              };
+              alias = lib.mkOption {
+                type = lib.types.str;
+                example = "Living Room PC";
+                description = ''
+                  Human-readable display name shown in the RustDesk address book.
+                  Defaults to the hostname if not set.
+                '';
+              };
+            };
+          });
+          default = [];
+          example = lib.literalExpression ''
+            [
+              { hostname = "nixsun";  alias = "Living Room";  }
+              { hostname = "nixace";  alias = "Office Desk";  }
+              { hostname = "nixvat";  alias = "Server Rack";  }
+            ]
+          '';
+          description = ''
+            Fleet manifest. Each entry becomes a pre-populated address book entry
+            in RustDesk on every machine. IDs are derived from hostnames so no
+            manual ID lookup is ever needed.
+          '';
         };
 
         # ----------------------------------------------------------------------------
@@ -277,7 +411,6 @@
     # CONFIG
     # ============================================================================
     config = lib.mkIf cfg.enable {
-
       # --------------------------------------------------------------------------
       # SERVER: Dedicated system user + data directory
       # --------------------------------------------------------------------------
@@ -294,14 +427,13 @@
       users.users.${config.nixlab.mainUser}.extraGroups =
         lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) ["rustdesk"];
 
-      system.activationScripts.initRustdeskDir =
-        lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {
-          text = ''
-            mkdir -p "${cfg.dataDir}"
-            chown -R rustdesk:rustdesk "${cfg.dataDir}"
-            chmod 750 "${cfg.dataDir}"
-          '';
-        };
+      system.activationScripts.initRustdeskDir = lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {
+        text = ''
+          mkdir -p "${cfg.dataDir}"
+          chown -R rustdesk:rustdesk "${cfg.dataDir}"
+          chmod 750 "${cfg.dataDir}"
+        '';
+      };
 
       # --------------------------------------------------------------------------
       # SERVER: hbbs
@@ -405,7 +537,7 @@
       # CLIENT + REMOTE: Install the GUI package
       # --------------------------------------------------------------------------
       environment.systemPackages =
-        lib.optionals (cfg.remote.enable || cfg.client.enable) [ cfg.clientPackage ];
+        lib.optionals (cfg.remote.enable || cfg.client.enable) [cfg.clientPackage];
 
       # --------------------------------------------------------------------------
       # ACTIVATION: Write client configs
@@ -500,10 +632,9 @@
           ]
           ++ lib.optionals (cfg.domain != null) [80 443];
 
-        allowedUDPPorts =
-          lib.optionals cfg.hbbs.enable [
-            (cfg.hbbs.port + 1)
-          ];
+        allowedUDPPorts = lib.optionals cfg.hbbs.enable [
+          (cfg.hbbs.port + 1)
+        ];
       };
     };
   };
@@ -513,42 +644,62 @@
 USAGE EXAMPLES
 ================================================================================
 
-Every machine in your fleet (client + remote, server elsewhere):
-----------------------------------------------------------------
-# Set this once in a shared nixlab module, imported by all machines.
+Typical fleet setup — define once in a shared nixlab module:
+------------------------------------------------------------
+# One file imported by every machine. Each machine gets the full peer list,
+# filtered to exclude itself. IDs are derived from hostnames — no manual
+# lookup ever needed.
+
 services.rustdesk-nixlab = {
   enable = true;
-  # remote.enable and client.enable both default to true — nothing to set
+  # remote.enable = true (default) — every machine is connectable
+  # client.enable = true (default) — every machine can connect to others
 
   connection = {
-    idServer    = "192.168.1.10";   # IP of your dedicated server machine
+    idServer    = "192.168.1.10";   # your dedicated hbbs machine
     relayServer = "192.168.1.10";
-    autoKey     = false;            # server is remote, supply key manually
-    publicKey   = "your-key-here"; # from: cat /var/lib/rustdesk/id_ed25519.pub
+    autoKey     = false;
+    publicKey   = "your-key-here"; # cat /var/lib/rustdesk/id_ed25519.pub
   };
+
+  peers = [
+    { hostname = "nixsun";  alias = "Living Room";  }
+    { hostname = "nixace";  alias = "Office Desk";  }
+    { hostname = "nixvat";  alias = "Server Rack";  }
+  ];
 };
 
+# Each machine's RustDesk ID is derived from its hostname, e.g.:
+#   nixsun → hash → 483920174
+#   nixace → hash → 729401853
+#   nixvat → hash → 156738290
+# These are stable and consistent across all machines in the fleet.
 
-Dedicated server machine (hbbs + hbbr, also usable as a workstation):
-----------------------------------------------------------------------
+
+Dedicated server machine (hbbs + hbbr, also part of the fleet):
+----------------------------------------------------------------
 services.rustdesk-nixlab = {
   enable = true;
 
   hbbs.enable = true;
   hbbr.enable = true;
 
-  # autoKey = true (default): reads key from dataDir automatically.
-  # On first boot the key doesn't exist yet — rustdesk-keypopulate.service
-  # will write it after hbbs generates the keypair.
+  # autoKey = true (default) — reads key from dataDir automatically.
+  # On first boot rustdesk-keypopulate.service patches it in after hbbs runs.
   connection = {
     idServer    = "localhost";
     relayServer = "localhost";
   };
+
+  peers = [
+    { hostname = "nixsun";  alias = "Living Room";  }
+    { hostname = "nixace";  alias = "Office Desk";  }
+  ];
 };
 
 
-All-in-one single machine (server + client + remote on the same box):
----------------------------------------------------------------------
+All-in-one single machine (server + client + remote + peers):
+-------------------------------------------------------------
 services.rustdesk-nixlab = {
   enable       = true;
   openFirewall = true;
@@ -556,35 +707,24 @@ services.rustdesk-nixlab = {
   hbbs.enable = true;
   hbbr.enable = true;
 
-  # autoKey = true (default) — no publicKey needed, ever.
   connection = {
     idServer    = "localhost";
     relayServer = "localhost";
+    # autoKey = true (default) — no publicKey needed, ever
   };
+
+  peers = [
+    { hostname = "nixsun"; alias = "Living Room"; }
+    { hostname = "nixace"; alias = "Office Desk"; }
+  ];
 };
 
 
-Client-only machine pointing at a remote server:
-------------------------------------------------
-services.rustdesk-nixlab = {
-  enable = true;
-
-  connection = {
-    idServer    = "rustdesk.example.com";
-    relayServer = "rustdesk.example.com";
-    autoKey     = false;
-    publicKey   = "your-key-here";
-  };
-};
-# remote.enable = true  (default) — machine is also connectable
-# client.enable = true  (default) — machine can connect to others
-
-
-Remote-only (headless, no GUI client needed):
+Remote-only (headless server, no GUI client):
 --------------------------------------------
 services.rustdesk-nixlab = {
-  enable         = true;
-  client.enable  = false;
+  enable        = true;
+  client.enable = false;
 
   connection = {
     idServer    = "192.168.1.10";
@@ -592,5 +732,7 @@ services.rustdesk-nixlab = {
     autoKey     = false;
     publicKey   = "your-key-here";
   };
+  # No peers needed — headless machines don't use the address book
 };
 */
+

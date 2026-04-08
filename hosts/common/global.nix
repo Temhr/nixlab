@@ -54,6 +54,28 @@
         idServer = "${hostMeta.address}";
         relayServer = "${hostMeta.address}";
       };
+      peers = [
+        {
+          hostname = "nixace";
+          alias = "Nixace";
+        }
+        {
+          hostname = "nixsun";
+          alias = "Nixsun";
+        }
+        {
+          hostname = "nixtop";
+          alias = "Nixtop";
+        }
+        {
+          hostname = "nixvat";
+          alias = "Nixvat";
+        }
+        {
+          hostname = "nixzen";
+          alias = "Nixzen";
+        }
+      ];
     };
   };
 }
