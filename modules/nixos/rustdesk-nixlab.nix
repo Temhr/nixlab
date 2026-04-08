@@ -11,27 +11,10 @@
     # HELPERS
     # ============================================================================
 
-    # Builds RustDesk2.toml content.
-    # The KEY line is intentionally left as a shell variable reference so the
-    # activation scripts can substitute it at runtime (for autoKey support).
-    clientConfigTemplate = idServer: relayServer: ''
-      rendezvous_server = '${idServer}'
-      nat_type = 1
-      serial = 0
-
-      [options]
-      custom-rendezvous-server = '${idServer}'
-      relay-server = '${relayServer}'
-      api-server = ' '
-      key = '$RUSTDESK_KEY'
-      direct-server = 'Y'
-      direct-access-port = '21118'
-    '';
-
-    # Script fragment that resolves the public key into $RUSTDESK_KEY.
-    # - autoKey=true + server local:  read from dataDir at activation time
-    # - autoKey=true + key not yet generated: leave empty (re-run service fills it in)
-    # - autoKey=false: use the user-supplied publicKey value verbatim
+    # Script fragment that resolves the public key into $RUSTDESK_KEY at
+    # shell runtime (not Nix eval time), so autoKey can read the file on disk.
+    # - autoKey=true:  reads id_ed25519.pub from dataDir; empty string if not yet generated
+    # - autoKey=false: uses the publicKey option value verbatim
     resolveKeyScript =
       if cfg.connection.autoKey
       then ''
@@ -49,22 +32,30 @@
         RUSTDESK_KEY="${cfg.connection.publicKey}"
       '';
 
-    # Write RustDesk2.toml for a given user home dir.
-    # Always overwrites — autoKey makes the key a runtime value so we need to
-    # refresh it on every rebuild/activation to pick up any key rotation.
+    # Write RustDesk2.toml for a given user.
+    # Uses an unquoted heredoc so the shell expands $RUSTDESK_KEY inline —
+    # no sed substitution needed.
+    # Always overwrites so key/server changes propagate on every rebuild.
     writeConfigForUser = user: homeDir: ''
       CONFIG_DIR="${homeDir}/.config/rustdesk"
       mkdir -p "$CONFIG_DIR"
       cat > "$CONFIG_DIR/RustDesk2.toml" << RDEOF
-      ${clientConfigTemplate cfg.connection.idServer cfg.connection.relayServer}
+      rendezvous_server = '${cfg.connection.idServer}'
+      nat_type = 1
+      serial = 0
+
+      [options]
+      custom-rendezvous-server = '${cfg.connection.idServer}'
+      relay-server = '${cfg.connection.relayServer}'
+      api-server = ' '
+      key = '$RUSTDESK_KEY'
+      direct-server = 'Y'
+      direct-access-port = '21118'
       RDEOF
-      # Substitute the key we resolved above
-      ${pkgs.gnused}/bin/sed -i "s|key = '\\$RUSTDESK_KEY'|key = '$RUSTDESK_KEY'|" "$CONFIG_DIR/RustDesk2.toml"
       chown -R "${user}:" "$CONFIG_DIR"
       chmod 600 "$CONFIG_DIR/RustDesk2.toml"
       echo "rustdesk-nixlab: wrote config for ${user}"
     '';
-
   in {
     # ============================================================================
     # OPTIONS
