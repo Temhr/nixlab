@@ -84,6 +84,23 @@
           default = true;
           description = "Open firewall ports for HTTP/HTTPS";
         };
+        # OPTIONAL: sops-nix path to the decrypted Wiki.js session/JWT secret.
+        # If null, Wiki.js generates its own random secret on startup (non-persistent
+        # across restarts — all sessions are invalidated on each service restart).
+        # Set this to a stable secret so sessions survive restarts.
+        # In configuration.nix:
+        #   appSecretFile = config.sops.secrets.WIKIJS_SECRET.path;
+        appSecretFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/WIKIJS_SECRET";
+          description = ''
+            Path to sops-decrypted Wiki.js session secret (bare value, no KEY= prefix).
+            Declare in configuration.nix:
+              sops.secrets.WIKIJS_SECRET.sopsFile = ./secrets/wiki-js.yaml;
+            Then pass: config.sops.secrets.WIKIJS_SECRET.path
+          '';
+        };
       };
     };
 
@@ -151,23 +168,29 @@
           (baseNameOf cfg.dataDir);
 
         # Wiki.js application settings
-        settings = {
-          # Network configuration
-          port = cfg.port;
-          listenAddress = cfg.listenAddress;
+        settings =
+          {
+            # Network configuration
+            port = cfg.port;
+            listenAddress = cfg.listenAddress;
 
-          # Database configuration (PostgreSQL via Unix socket)
-          db = {
-            type = "postgres";
-            host = "/run/postgresql"; # Unix socket connection
-            db = "wiki-js";
-            user = "wiki-js";
+            # Database configuration (PostgreSQL via Unix socket)
+            db = {
+              type = "postgres";
+              host = "/run/postgresql"; # Unix socket connection
+              db = "wiki-js";
+              user = "wiki-js";
+            };
+
+            # Logging and high-availability settings
+            logLevel = "info";
+            ha = false; # High availability mode disabled (single instance)
+          }
+          // lib.optionalAttrs (cfg.appSecretFile != null) {
+            # Inline secret injection is not supported by the NixOS wiki-js module,
+            # so we write it via EnvironmentFile instead (see systemd.services.wiki-js
+            # override below).
           };
-
-          # Logging and high-availability settings
-          logLevel = "info";
-          ha = false; # High availability mode disabled (single instance)
-        };
       };
 
       # ----------------------------------------------------------------------------
@@ -179,25 +202,37 @@
         after = ["postgresql.service"];
 
         # Custom preStart script for uploads directory (only if custom path specified)
-        preStart = lib.mkIf (cfg.uploadsPath != null) (lib.mkAfter ''
-          # Ensure uploads directory exists
-          mkdir -p ${cfg.uploadsPath}
+        preStart =
+          lib.optionalString (cfg.appSecretFile != null) ''
+            echo "SESSION_SECRET=$(cat ${cfg.appSecretFile})" \
+              > /run/wiki-js-credentials.env
+            chown wiki-js:wiki-js /run/wiki-js-credentials.env
+            chmod 600 /run/wiki-js-credentials.env
+          ''
+          + lib.optionalString (cfg.uploadsPath != null) ''
+            # Ensure uploads directory exists
+            mkdir -p ${cfg.uploadsPath}
 
-          # Create symlink from default location to custom uploads path
-          if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
-            rm -rf "${cfg.dataDir}/data/uploads"
-            ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
-          fi
+            # Create symlink from default location to custom uploads path
+            if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
+              rm -rf "${cfg.dataDir}/data/uploads"
+              ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
+            fi
 
-          # Ensure proper ownership
-          chown -R wiki-js:wiki-js ${cfg.uploadsPath}
-        '');
+            # Ensure proper ownership
+            chown -R wiki-js:wiki-js ${cfg.uploadsPath}
+          '';
 
-        serviceConfig = {
-          # Restart on failure
-          Restart = "on-failure";
-          RestartSec = "10s";
-        };
+        serviceConfig =
+          {
+            # Restart on failure
+            Restart = "on-failure";
+            RestartSec = "10s";
+          }
+          // lib.optionalAttrs (cfg.appSecretFile != null) {
+            # Wiki.js reads SESSION_SECRET from the environment
+            EnvironmentFile = "/run/wiki-js-credentials.env";
+          };
       };
 
       # ----------------------------------------------------------------------------

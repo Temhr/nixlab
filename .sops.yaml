@@ -24,6 +24,15 @@ creation_rules:
         - *nixvat
         - *nixzen
 
+  - path_regex: hosts/common/optional/networking/networking\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
   - path_regex: modules/nixos/ollama/ollama\.yaml$
     key_groups:
       - age:
@@ -33,7 +42,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: hosts/common/optional/networking/networking\.yaml$
+  - path_regex: modules/nixos/wiki-js/wiki-js\.yaml$
     key_groups:
       - age:
         - *nixace
