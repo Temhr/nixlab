@@ -43,24 +43,16 @@
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
     services.rustdesk-nixlab = {
-      enable = true;
+      enable       = true;
       openFirewall = true;
-      dataDir = "/data/rustdesk";
-      client = {
-        enable = true;
-        connection = {
-          idServer = "${hostMeta.address}";
-          relayServer = "${hostMeta.address}";
-          publicKey = "your-public-key-here";
-        };
-      };
-      remote = {
-        enable = true;
-        connection = {
-          idServer = "${hostMeta.address}";
-          relayServer = "${hostMeta.address}";
-          publicKey = "your-public-key-here";
-        };
+
+      hbbs.enable = true;
+      hbbr.enable = true;
+
+      # autoKey = true (default) — no publicKey needed, ever.
+      connection = {
+        idServer    = "${hostMeta.address}";
+        relayServer = "${hostMeta.address}";
       };
     };
   };

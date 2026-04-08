@@ -7,47 +7,63 @@
   }: let
     cfg = config.services.rustdesk-nixlab;
 
-    # ----------------------------------------------------------------------------
+    # ============================================================================
     # HELPERS
-    # ----------------------------------------------------------------------------
+    # ============================================================================
 
-    # Builds the RustDesk client config file written to
-    # ~/.config/rustdesk/RustDesk2.toml — used by both `remote` and `client`.
-    mkClientConfig = connCfg: ''
-      rendezvous_server = '${connCfg.idServer}'
+    # Builds RustDesk2.toml content.
+    # The KEY line is intentionally left as a shell variable reference so the
+    # activation scripts can substitute it at runtime (for autoKey support).
+    clientConfigTemplate = idServer: relayServer: ''
+      rendezvous_server = '${idServer}'
       nat_type = 1
       serial = 0
 
       [options]
-      custom-rendezvous-server = '${connCfg.idServer}'
-      relay-server = '${connCfg.relayServer}'
+      custom-rendezvous-server = '${idServer}'
+      relay-server = '${relayServer}'
       api-server = ' '
-      key = '${connCfg.publicKey}'
+      key = '$RUSTDESK_KEY'
       direct-server = 'Y'
       direct-access-port = '21118'
     '';
 
-    # Shared connection sub-options reused by both `remote` and `client`
-    mkConnectionOptions = desc: {
-      idServer = lib.mkOption {
-        type = lib.types.str;
-        example = "192.168.1.10";
-        description = "IP or domain of the hbbs ID/rendezvous server. ${desc}";
-      };
-      relayServer = lib.mkOption {
-        type = lib.types.str;
-        example = "192.168.1.10";
-        description = "IP or domain of the hbbr relay server. ${desc}";
-      };
-      publicKey = lib.mkOption {
-        type = lib.types.str;
-        example = "abc123...";
-        description = ''
-          Public key from the server (contents of /var/lib/rustdesk/id_ed25519.pub).
-          ${desc}
-        '';
-      };
-    };
+    # Script fragment that resolves the public key into $RUSTDESK_KEY.
+    # - autoKey=true + server local:  read from dataDir at activation time
+    # - autoKey=true + key not yet generated: leave empty (re-run service fills it in)
+    # - autoKey=false: use the user-supplied publicKey value verbatim
+    resolveKeyScript =
+      if cfg.connection.autoKey
+      then ''
+        KEY_FILE="${cfg.dataDir}/id_ed25519.pub"
+        if [ -f "$KEY_FILE" ]; then
+          RUSTDESK_KEY="$(cat "$KEY_FILE")"
+        else
+          echo "rustdesk-nixlab: key file not yet present at $KEY_FILE (hbbs not run yet?)"
+          echo "                 Writing config without key — rustdesk-keypopulate.service"
+          echo "                 will fill it in after hbbs generates the keypair."
+          RUSTDESK_KEY=""
+        fi
+      ''
+      else ''
+        RUSTDESK_KEY="${cfg.connection.publicKey}"
+      '';
+
+    # Write RustDesk2.toml for a given user home dir.
+    # Always overwrites — autoKey makes the key a runtime value so we need to
+    # refresh it on every rebuild/activation to pick up any key rotation.
+    writeConfigForUser = user: homeDir: ''
+      CONFIG_DIR="${homeDir}/.config/rustdesk"
+      mkdir -p "$CONFIG_DIR"
+      cat > "$CONFIG_DIR/RustDesk2.toml" << RDEOF
+      ${clientConfigTemplate cfg.connection.idServer cfg.connection.relayServer}
+      RDEOF
+      # Substitute the key we resolved above
+      sed -i "s|key = '\\$RUSTDESK_KEY'|key = '$RUSTDESK_KEY'|" "$CONFIG_DIR/RustDesk2.toml"
+      chown -R "${user}:${user}" "$CONFIG_DIR"
+      chmod 600 "$CONFIG_DIR/RustDesk2.toml"
+      echo "rustdesk-nixlab: wrote config for ${user}"
+    '';
   in {
     # ============================================================================
     # OPTIONS
@@ -73,11 +89,66 @@
           description = "The RustDesk GUI client package";
         };
 
-        # OPTIONAL: Where server stores its keypair and relay state
+        # OPTIONAL: Where hbbs stores its keypair and relay state
         dataDir = lib.mkOption {
           type = lib.types.path;
           default = "/var/lib/rustdesk";
           description = "Directory for RustDesk server data (keys, relay state)";
+        };
+
+        # ----------------------------------------------------------------------------
+        # CONNECTION - Shared server details used by both remote and client roles.
+        # Only needs to be set once per machine.
+        # ----------------------------------------------------------------------------
+        connection = {
+          idServer = lib.mkOption {
+            type = lib.types.str;
+            default = "127.0.0.1";
+            example = "192.168.1.10";
+            description = ''
+              IP or domain of the hbbs ID/rendezvous server.
+              Defaults to localhost for all-in-one deployments.
+            '';
+          };
+
+          relayServer = lib.mkOption {
+            type = lib.types.str;
+            default = "127.0.0.1";
+            example = "192.168.1.10";
+            description = ''
+              IP or domain of the hbbr relay server.
+              Defaults to localhost for all-in-one deployments.
+            '';
+          };
+
+          autoKey = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = ''
+              Automatically read the server public key from dataDir at activation
+              time and inject it into all client configs on this machine.
+
+              This works out of the box when hbbs runs on the same machine.
+              For client-only machines pointed at a remote server, set this to
+              false and supply publicKey manually instead.
+
+              On first boot (before hbbs has generated its keypair), the config
+              is written without a key and rustdesk-keypopulate.service will
+              patch it in as soon as the key file appears.
+            '';
+          };
+
+          publicKey = lib.mkOption {
+            type = lib.types.str;
+            default = "";
+            example = "abc123...";
+            description = ''
+              Public key from the server (contents of /var/lib/rustdesk/id_ed25519.pub).
+              Only used when autoKey = false.
+              Leave empty to allow unauthenticated connections (not recommended
+              for internet-facing deployments).
+            '';
+          };
         };
 
         # ----------------------------------------------------------------------------
@@ -86,8 +157,8 @@
         hbbs = {
           enable = lib.mkOption {
             type = lib.types.bool;
-            default = true;
-            description = "Enable the hbbs rendezvous/ID server";
+            default = false;
+            description = "Enable the hbbs rendezvous/ID server on this machine";
           };
 
           port = lib.mkOption {
@@ -116,8 +187,8 @@
         hbbr = {
           enable = lib.mkOption {
             type = lib.types.bool;
-            default = true;
-            description = "Enable the hbbr relay server";
+            default = false;
+            description = "Enable the hbbr relay server on this machine";
           };
 
           port = lib.mkOption {
@@ -133,32 +204,25 @@
         # ----------------------------------------------------------------------------
         # REMOTE - Always-on controlled side (this machine can be connected TO)
         #
-        # Installs the RustDesk client and runs it as a persistent systemd user
-        # service so the machine is always reachable, even without an active
-        # interactive session. `loginctl enable-linger` is set automatically so
-        # the user service survives across logouts.
-        #
-        # Requires a graphical session (X11 or Wayland) to be available —
-        # RustDesk needs a display to share.
+        # Runs rustdesk --service as a persistent systemd user service so the
+        # machine is reachable even without an active interactive session.
+        # loginctl enable-linger is set automatically so it survives reboots.
+        # Requires a graphical session (X11 or Wayland) to share.
         # ----------------------------------------------------------------------------
         remote = {
           enable = lib.mkOption {
             type = lib.types.bool;
-            default = false;
+            default = true;
             description = ''
-              Enable always-on remote access for this machine.
-              Installs the RustDesk client and runs it as a persistent
-              systemd user service so the machine is always connectable.
+              Enable always-on remote access so this machine can be connected to.
+              Runs the RustDesk daemon as a persistent systemd user service.
             '';
           };
 
           user = lib.mkOption {
             type = lib.types.str;
             default = config.nixlab.mainUser;
-            description = ''
-              The user whose session is shared over remote access.
-              The RustDesk daemon runs under this user account.
-            '';
+            description = "The user whose desktop session will be shared";
           };
 
           autostart = lib.mkOption {
@@ -166,30 +230,22 @@
             default = true;
             description = "Automatically start the remote daemon on login / at boot";
           };
-
-          connection =
-            mkConnectionOptions
-            "Used to register this machine with your RustDesk server.";
         };
 
         # ----------------------------------------------------------------------------
         # CLIENT - Workstation side (this machine connects TO others)
         #
-        # Installs the RustDesk GUI app and pre-populates each specified user's
-        # config file so the app is pointed at your server immediately after
-        # deploy — no manual setup needed.
-        #
-        # The config file is only written if it doesn't already exist, so
-        # existing user customisations are never overwritten.
+        # Installs the RustDesk GUI app and pre-populates each user's config so
+        # the app is pointed at your server immediately after deploy.
         # ----------------------------------------------------------------------------
         client = {
           enable = lib.mkOption {
             type = lib.types.bool;
-            default = false;
+            default = true;
             description = ''
-              Install and pre-configure the RustDesk GUI client on this machine.
-              Writes server connection details for each user so the app is
-              ready to use immediately without manual configuration.
+              Install and pre-configure the RustDesk GUI client so this machine
+              can connect to other machines. Config is written on every activation
+              so server/key changes propagate automatically.
             '';
           };
 
@@ -198,10 +254,6 @@
             default = [config.nixlab.mainUser];
             description = "Users to pre-configure the RustDesk client for";
           };
-
-          connection =
-            mkConnectionOptions
-            "Pre-populated into each user's client config so the app is ready immediately.";
         };
 
         # ----------------------------------------------------------------------------
@@ -232,10 +284,10 @@
     # CONFIG
     # ============================================================================
     config = lib.mkIf cfg.enable {
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       # SERVER: Dedicated system user + data directory
-      # ----------------------------------------------------------------------------
-      users.users.rustdesk = {
+      # --------------------------------------------------------------------------
+      users.users.rustdesk = lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {
         isSystemUser = true;
         group = "rustdesk";
         home = cfg.dataDir;
@@ -243,21 +295,22 @@
         description = "RustDesk server daemon user";
       };
 
-      users.groups.rustdesk = {};
-      users.users.${config.nixlab.mainUser}.extraGroups = ["rustdesk"];
+      users.groups.rustdesk = lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {};
 
-      system.activationScripts.initRustdeskDir = {
+      users.users.${config.nixlab.mainUser}.extraGroups =
+        lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) ["rustdesk"];
+
+      system.activationScripts.initRustdeskDir = lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {
         text = ''
-          DATA_DIR="${cfg.dataDir}"
-          mkdir -p "$DATA_DIR"
-          chown -R rustdesk:rustdesk "$DATA_DIR"
-          chmod 750 "$DATA_DIR"
+          mkdir -p "${cfg.dataDir}"
+          chown -R rustdesk:rustdesk "${cfg.dataDir}"
+          chmod 750 "${cfg.dataDir}"
         '';
       };
 
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       # SERVER: hbbs
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       systemd.services.rustdesk-hbbs = lib.mkIf cfg.hbbs.enable {
         description = "RustDesk hbbs Rendezvous/ID Server";
         wantedBy = ["multi-user.target"];
@@ -282,9 +335,9 @@
         };
       };
 
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       # SERVER: hbbr
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       systemd.services.rustdesk-hbbr = lib.mkIf cfg.hbbr.enable {
         description = "RustDesk hbbr Relay Server";
         wantedBy = ["multi-user.target"];
@@ -295,42 +348,102 @@
           User = "rustdesk";
           Group = "rustdesk";
           WorkingDirectory = cfg.dataDir;
-
           ExecStart = "${cfg.package}/bin/hbbr -p ${toString cfg.hbbr.port}";
-
           Restart = "on-failure";
           RestartSec = "10s";
           ReadWritePaths = [cfg.dataDir];
         };
       };
 
-      # ----------------------------------------------------------------------------
-      # REMOTE: Install client + write config + enable linger + user service
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
+      # KEY POPULATE SERVICE
+      #
+      # On first boot hbbs hasn't run yet, so id_ed25519.pub doesn't exist when
+      # the activation script runs. This one-shot systemd service fires after
+      # hbbs starts (which generates the keypair), then re-writes every client
+      # config with the real key. It is a no-op on subsequent boots once the
+      # key file is stable.
+      # --------------------------------------------------------------------------
+      systemd.services.rustdesk-keypopulate = lib.mkIf (cfg.connection.autoKey && cfg.hbbs.enable) {
+        description = "Populate RustDesk client configs with server public key";
+        wantedBy = ["multi-user.target"];
 
-      system.activationScripts.rustdeskRemoteConfig = lib.mkIf cfg.remote.enable {
-        text = ''
-          REMOTE_USER="${cfg.remote.user}"
-          CONFIG_DIR="/home/$REMOTE_USER/.config/rustdesk"
-          mkdir -p "$CONFIG_DIR"
+        # Run after hbbs so the keypair exists
+        after = ["rustdesk-hbbs.service"];
+        requires = ["rustdesk-hbbs.service"];
 
-          cat > "$CONFIG_DIR/RustDesk2.toml" << 'RDEOF'
-          ${mkClientConfig cfg.remote.connection}
-          RDEOF
+        # Re-run on every boot so key rotations propagate automatically
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
 
-          chown -R "$REMOTE_USER:$REMOTE_USER" "$CONFIG_DIR"
-          chmod 600 "$CONFIG_DIR/RustDesk2.toml"
+        script = ''
+          KEY_FILE="${cfg.dataDir}/id_ed25519.pub"
+
+          # Wait up to 30s for hbbs to generate the keypair
+          TRIES=0
+          while [ ! -f "$KEY_FILE" ] && [ $TRIES -lt 30 ]; do
+            sleep 1
+            TRIES=$((TRIES + 1))
+          done
+
+          if [ ! -f "$KEY_FILE" ]; then
+            echo "rustdesk-keypopulate: timed out waiting for $KEY_FILE"
+            exit 1
+          fi
+
+          RUSTDESK_KEY="$(cat "$KEY_FILE")"
+
+          ${lib.optionalString cfg.remote.enable
+            (writeConfigForUser cfg.remote.user "/home/${cfg.remote.user}")}
+
+          ${lib.concatMapStrings
+            (user: writeConfigForUser user "/home/${user}")
+            (lib.optionals cfg.client.enable cfg.client.users)}
+
+          echo "rustdesk-keypopulate: all configs updated with key"
         '';
       };
 
-      # Enable linger so the user service starts at boot without an interactive login
+      # --------------------------------------------------------------------------
+      # CLIENT + REMOTE: Install the GUI package
+      # --------------------------------------------------------------------------
+      environment.systemPackages =
+        lib.optionals (cfg.remote.enable || cfg.client.enable) [cfg.clientPackage];
+
+      # --------------------------------------------------------------------------
+      # ACTIVATION: Write client configs
+      #
+      # Runs on every nixos-rebuild so server address or key changes propagate.
+      # resolveKeyScript sets $RUSTDESK_KEY — either from the key file (autoKey)
+      # or from the publicKey option value.
+      # --------------------------------------------------------------------------
+      system.activationScripts.rustdeskWriteConfigs = lib.mkIf (cfg.remote.enable || cfg.client.enable) {
+        # Must run after the server data dir is initialised (if server is local)
+        deps = lib.optionals (cfg.hbbs.enable || cfg.hbbr.enable) ["initRustdeskDir"];
+
+        text = ''
+          ${resolveKeyScript}
+
+          ${lib.optionalString cfg.remote.enable
+            (writeConfigForUser cfg.remote.user "/home/${cfg.remote.user}")}
+
+          ${lib.concatMapStrings
+            (user: writeConfigForUser user "/home/${user}")
+            (lib.optionals cfg.client.enable cfg.client.users)}
+        '';
+      };
+
+      # --------------------------------------------------------------------------
+      # REMOTE: Enable linger + systemd user service
+      # --------------------------------------------------------------------------
       system.activationScripts.rustdeskRemoteLinger = lib.mkIf cfg.remote.enable {
         text = ''
           loginctl enable-linger ${cfg.remote.user}
         '';
       };
 
-      # Persistent systemd user service — runs under cfg.remote.user's session
       systemd.user.services.rustdesk-remote = lib.mkIf cfg.remote.enable {
         description = "RustDesk Always-On Remote Daemon";
         wantedBy = ["default.target"];
@@ -348,39 +461,9 @@
         enable = cfg.remote.autostart;
       };
 
-      # ----------------------------------------------------------------------------
-      # REMOTE + CLIENT: Install GUI client when either role is enabled
-      # (single merged assignment avoids duplicate attribute error)
-      # ----------------------------------------------------------------------------
-      environment.systemPackages =
-        lib.optionals cfg.remote.enable [cfg.clientPackage]
-        ++ lib.optionals cfg.client.enable [cfg.clientPackage];
-
-      # CLIENT: Write per-user config (only if not already present)
-
-      system.activationScripts.rustdeskClientConfig = lib.mkIf cfg.client.enable {
-        text = ''
-          ${lib.concatMapStrings (user: ''
-                CLIENT_CONFIG_DIR="/home/${user}/.config/rustdesk"
-                mkdir -p "$CLIENT_CONFIG_DIR"
-
-                # Only write if config doesn't already exist — preserve user changes
-                if [ ! -f "$CLIENT_CONFIG_DIR/RustDesk2.toml" ]; then
-                  cat > "$CLIENT_CONFIG_DIR/RustDesk2.toml" << 'RDEOF'
-              ${mkClientConfig cfg.client.connection}
-              RDEOF
-                  chown -R "${user}:${user}" "$CLIENT_CONFIG_DIR"
-                  chmod 600 "$CLIENT_CONFIG_DIR/RustDesk2.toml"
-                  echo "RustDesk client configured for ${user}"
-                fi
-            '')
-            cfg.client.users}
-        '';
-      };
-
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       # NGINX REVERSE PROXY
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
       services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
@@ -400,7 +483,7 @@
         };
       };
 
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       # FIREWALL
       #
       #   hbbs: 21115 (TCP)       - NAT type test
@@ -408,22 +491,22 @@
       #         21118 (TCP)       - Web client (optional)
       #   hbbr: 21117 (TCP)       - Relay
       #         21119 (TCP)       - Web client relay (optional)
-      # ----------------------------------------------------------------------------
+      # --------------------------------------------------------------------------
       networking.firewall = lib.mkIf cfg.openFirewall {
         allowedTCPPorts =
           lib.optionals cfg.hbbs.enable [
-            cfg.hbbs.port # 21115 - NAT test
-            (cfg.hbbs.port + 1) # 21116 - ID server
-            (cfg.hbbs.port + 3) # 21118 - Web client
+            cfg.hbbs.port
+            (cfg.hbbs.port + 1)
+            (cfg.hbbs.port + 3)
           ]
           ++ lib.optionals cfg.hbbr.enable [
-            cfg.hbbr.port # 21117 - Relay
-            (cfg.hbbr.port + 2) # 21119 - Web client relay
+            cfg.hbbr.port
+            (cfg.hbbr.port + 2)
           ]
           ++ lib.optionals (cfg.domain != null) [80 443];
 
         allowedUDPPorts = lib.optionals cfg.hbbs.enable [
-          (cfg.hbbs.port + 1) # 21116 - hole-punching
+          (cfg.hbbs.port + 1)
         ];
       };
     };
@@ -434,103 +517,84 @@
 USAGE EXAMPLES
 ================================================================================
 
-1. Dedicated server machine (hbbs + hbbr only, no client):
------------------------------------------------------------
+Every machine in your fleet (client + remote, server elsewhere):
+----------------------------------------------------------------
+# Set this once in a shared nixlab module, imported by all machines.
 services.rustdesk-nixlab = {
   enable = true;
-};
-# After deploy: cat /var/lib/rustdesk/id_ed25519.pub
+  # remote.enable and client.enable both default to true — nothing to set
 
-
-2. Workstation — client only (connects to others, not reachable itself):
-------------------------------------------------------------------------
-services.rustdesk-nixlab = {
-  enable = true;
-  hbbs.enable = false;
-  hbbr.enable = false;
-
-  client = {
-    enable = true;
-    connection = {
-      idServer    = "192.168.1.10";
-      relayServer = "192.168.1.10";
-      publicKey   = "your-public-key-here";
-    };
+  connection = {
+    idServer    = "192.168.1.10";   # IP of your dedicated server machine
+    relayServer = "192.168.1.10";
+    autoKey     = false;            # server is remote, supply key manually
+    publicKey   = "your-key-here"; # from: cat /var/lib/rustdesk/id_ed25519.pub
   };
 };
 
 
-3. Headless machine — always-on remote (can be connected TO, no GUI client):
-----------------------------------------------------------------------------
+Dedicated server machine (hbbs + hbbr, also usable as a workstation):
+----------------------------------------------------------------------
 services.rustdesk-nixlab = {
   enable = true;
-  hbbs.enable = false;
-  hbbr.enable = false;
 
-  remote = {
-    enable    = true;
-    user      = "alice";
-    autostart = true;
-    connection = {
-      idServer    = "192.168.1.10";
-      relayServer = "192.168.1.10";
-      publicKey   = "your-public-key-here";
-    };
+  hbbs.enable = true;
+  hbbr.enable = true;
+
+  # autoKey = true (default): reads key from dataDir automatically.
+  # On first boot the key doesn't exist yet — rustdesk-keypopulate.service
+  # will write it after hbbs generates the keypair.
+  connection = {
+    idServer    = "localhost";
+    relayServer = "localhost";
   };
 };
 
 
-4. Full fleet machine — connects to others AND can be connected to:
--------------------------------------------------------------------
-services.rustdesk-nixlab = {
-  enable = true;
-  hbbs.enable = false;
-  hbbr.enable = false;
-
-  client = {
-    enable = true;
-    users  = [ "alice" "bob" ];   # pre-configure for multiple users
-    connection = {
-      idServer    = "192.168.1.10";
-      relayServer = "192.168.1.10";
-      publicKey   = "your-public-key-here";
-    };
-  };
-
-  remote = {
-    enable = true;
-    user   = "alice";             # whose desktop is shared
-    connection = {
-      idServer    = "192.168.1.10";
-      relayServer = "192.168.1.10";
-      publicKey   = "your-public-key-here";
-    };
-  };
-};
-
-
-5. All-in-one — server + client + remote on the same machine:
--------------------------------------------------------------
+All-in-one single machine (server + client + remote on the same box):
+---------------------------------------------------------------------
 services.rustdesk-nixlab = {
   enable       = true;
   openFirewall = true;
 
-  client = {
-    enable = true;
-    connection = {
-      idServer    = "localhost";
-      relayServer = "localhost";
-      publicKey   = "your-public-key-here";
-    };
-  };
+  hbbs.enable = true;
+  hbbr.enable = true;
 
-  remote = {
-    enable = true;
-    connection = {
-      idServer    = "localhost";
-      relayServer = "localhost";
-      publicKey   = "your-public-key-here";
-    };
+  # autoKey = true (default) — no publicKey needed, ever.
+  connection = {
+    idServer    = "localhost";
+    relayServer = "localhost";
+  };
+};
+
+
+Client-only machine pointing at a remote server:
+------------------------------------------------
+services.rustdesk-nixlab = {
+  enable = true;
+
+  connection = {
+    idServer    = "rustdesk.example.com";
+    relayServer = "rustdesk.example.com";
+    autoKey     = false;
+    publicKey   = "your-key-here";
+  };
+};
+# remote.enable = true  (default) — machine is also connectable
+# client.enable = true  (default) — machine can connect to others
+
+
+Remote-only (headless, no GUI client needed):
+--------------------------------------------
+services.rustdesk-nixlab = {
+  enable         = true;
+  client.enable  = false;
+
+  connection = {
+    idServer    = "192.168.1.10";
+    relayServer = "192.168.1.10";
+    autoKey     = false;
+    publicKey   = "your-key-here";
   };
 };
 */
