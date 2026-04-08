@@ -200,12 +200,12 @@ alias lsgpu='lspci | grep -i -E "vga|3d|display"'
 alias nsmi='watch -n1 nvidia-smi'
 
 ## get top process eating memory
-alias mem5='ps auxf | sort -nr -k 4 | head -5'
-alias mem10='ps auxf | sort -nr -k 4 | head -10'
+alias mem5='ps auxf | sort -nr -k 4 | head -n5'
+alias mem10='ps auxf | sort -nr -k 4 | head -n10'
 
 ## get top process eating cpu ##
-alias cpu5='ps auxf | sort -nr -k 3 | head -5'
-alias cpu10='ps auxf | sort -nr -k 3 | head -10'
+alias cpu5='ps auxf | sort -nr -k 3 | head -n5'
+alias cpu10='ps auxf | sort -nr -k 3 | head -n10'
 
 ## List largest directories (aka "ducks")
 alias dir5='du -cksh * | sort -hr | head -n 5'
