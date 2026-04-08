@@ -59,17 +59,19 @@
       ${clientConfigTemplate cfg.connection.idServer cfg.connection.relayServer}
       RDEOF
       # Substitute the key we resolved above
-      sed -i "s|key = '\\$RUSTDESK_KEY'|key = '$RUSTDESK_KEY'|" "$CONFIG_DIR/RustDesk2.toml"
+      ${pkgs.gnused}/bin/sed -i "s|key = '\\$RUSTDESK_KEY'|key = '$RUSTDESK_KEY'|" "$CONFIG_DIR/RustDesk2.toml"
       chown -R "${user}:" "$CONFIG_DIR"
       chmod 600 "$CONFIG_DIR/RustDesk2.toml"
       echo "rustdesk-nixlab: wrote config for ${user}"
     '';
+
   in {
     # ============================================================================
     # OPTIONS
     # ============================================================================
     options = {
       services.rustdesk-nixlab = {
+
         # REQUIRED: Enable the module
         enable = lib.mkEnableOption "RustDesk self-hosted remote desktop server";
 
@@ -251,7 +253,7 @@
 
           users = lib.mkOption {
             type = lib.types.listOf lib.types.str;
-            default = [config.nixlab.mainUser];
+            default = [ config.nixlab.mainUser ];
             description = "Users to pre-configure the RustDesk client for";
           };
         };
@@ -284,6 +286,7 @@
     # CONFIG
     # ============================================================================
     config = lib.mkIf cfg.enable {
+
       # --------------------------------------------------------------------------
       # SERVER: Dedicated system user + data directory
       # --------------------------------------------------------------------------
@@ -300,13 +303,14 @@
       users.users.${config.nixlab.mainUser}.extraGroups =
         lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) ["rustdesk"];
 
-      system.activationScripts.initRustdeskDir = lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {
-        text = ''
-          mkdir -p "${cfg.dataDir}"
-          chown -R rustdesk:rustdesk "${cfg.dataDir}"
-          chmod 750 "${cfg.dataDir}"
-        '';
-      };
+      system.activationScripts.initRustdeskDir =
+        lib.mkIf (cfg.hbbs.enable || cfg.hbbr.enable) {
+          text = ''
+            mkdir -p "${cfg.dataDir}"
+            chown -R rustdesk:rustdesk "${cfg.dataDir}"
+            chmod 750 "${cfg.dataDir}"
+          '';
+        };
 
       # --------------------------------------------------------------------------
       # SERVER: hbbs
@@ -410,7 +414,7 @@
       # CLIENT + REMOTE: Install the GUI package
       # --------------------------------------------------------------------------
       environment.systemPackages =
-        lib.optionals (cfg.remote.enable || cfg.client.enable) [cfg.clientPackage];
+        lib.optionals (cfg.remote.enable || cfg.client.enable) [ cfg.clientPackage ];
 
       # --------------------------------------------------------------------------
       # ACTIVATION: Write client configs
@@ -440,7 +444,7 @@
       # --------------------------------------------------------------------------
       system.activationScripts.rustdeskRemoteLinger = lib.mkIf cfg.remote.enable {
         text = ''
-          loginctl enable-linger ${cfg.remote.user}
+          ${pkgs.systemd}/bin/loginctl enable-linger ${cfg.remote.user}
         '';
       };
 
@@ -505,9 +509,10 @@
           ]
           ++ lib.optionals (cfg.domain != null) [80 443];
 
-        allowedUDPPorts = lib.optionals cfg.hbbs.enable [
-          (cfg.hbbs.port + 1)
-        ];
+        allowedUDPPorts =
+          lib.optionals cfg.hbbs.enable [
+            (cfg.hbbs.port + 1)
+          ];
       };
     };
   };
@@ -598,4 +603,3 @@ services.rustdesk-nixlab = {
   };
 };
 */
-
