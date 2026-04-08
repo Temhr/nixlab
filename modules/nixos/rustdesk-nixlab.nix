@@ -60,7 +60,7 @@
       RDEOF
       # Substitute the key we resolved above
       sed -i "s|key = '\\$RUSTDESK_KEY'|key = '$RUSTDESK_KEY'|" "$CONFIG_DIR/RustDesk2.toml"
-      chown -R "${user}:${user}" "$CONFIG_DIR"
+      chown -R "${user}:" "$CONFIG_DIR"
       chmod 600 "$CONFIG_DIR/RustDesk2.toml"
       echo "rustdesk-nixlab: wrote config for ${user}"
     '';

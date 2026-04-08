@@ -43,7 +43,7 @@
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
     services.rustdesk-nixlab = {
-      enable       = true;
+      enable = true;
       openFirewall = true;
 
       hbbs.enable = true;
@@ -51,7 +51,7 @@
 
       # autoKey = true (default) — no publicKey needed, ever.
       connection = {
-        idServer    = "${hostMeta.address}";
+        idServer = "${hostMeta.address}";
         relayServer = "${hostMeta.address}";
       };
     };
