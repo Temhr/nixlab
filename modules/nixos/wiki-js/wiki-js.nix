@@ -186,42 +186,61 @@
             logLevel = "info";
             ha = false; # High availability mode disabled (single instance)
           }
-          // lib.optionalAttrs (cfg.appSecretFile != null) {
-            # Inline secret injection is not supported by the NixOS wiki-js module,
-            # so we write it via EnvironmentFile instead (see systemd.services.wiki-js
-            # override below).
-          };
+        ;
       };
 
       # ----------------------------------------------------------------------------
       # SERVICE CUSTOMIZATION - Additional systemd service configuration
       # ----------------------------------------------------------------------------
+
+      # A dedicated oneshot that writes /run/wiki-js-credentials.env BEFORE
+      # wiki-js.service starts. This is necessary because systemd loads
+      # EnvironmentFile= *before* running preStart, so the file must already
+      # exist at unit-load time. A separate oneshot guarantees ordering.
+      systemd.services.wiki-js-secrets = lib.mkIf (cfg.appSecretFile != null) {
+        description = "Write Wiki.js credentials env file";
+        wantedBy = ["wiki-js.service"];
+        before = ["wiki-js.service"];
+        after = ["sops-nix.service"];
+
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          # Run as root so we can write to /run and chown to wiki-js
+          User = "root";
+        };
+
+        script = ''
+          echo "SESSION_SECRET=$(cat ${cfg.appSecretFile})" \
+            > /run/wiki-js-credentials.env
+          chown wiki-js:wiki-js /run/wiki-js-credentials.env
+          chmod 600 /run/wiki-js-credentials.env
+        '';
+      };
+
       systemd.services.wiki-js = {
         # Ensure PostgreSQL is running before Wiki.js starts
-        requires = ["postgresql.service"];
-        after = ["postgresql.service"];
+        requires =
+          ["postgresql.service"]
+          ++ lib.optionals (cfg.appSecretFile != null) ["wiki-js-secrets.service"];
+        after =
+          ["postgresql.service"]
+          ++ lib.optionals (cfg.appSecretFile != null) ["wiki-js-secrets.service"];
 
         # Custom preStart script for uploads directory (only if custom path specified)
-        preStart =
-          lib.optionalString (cfg.appSecretFile != null) ''
-            echo "SESSION_SECRET=$(cat ${cfg.appSecretFile})" \
-              > /run/wiki-js-credentials.env
-            chown wiki-js:wiki-js /run/wiki-js-credentials.env
-            chmod 600 /run/wiki-js-credentials.env
-          ''
-          + lib.optionalString (cfg.uploadsPath != null) ''
-            # Ensure uploads directory exists
-            mkdir -p ${cfg.uploadsPath}
+        preStart = lib.optionalString (cfg.uploadsPath != null) ''
+          # Ensure uploads directory exists
+          mkdir -p ${cfg.uploadsPath}
 
-            # Create symlink from default location to custom uploads path
-            if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
-              rm -rf "${cfg.dataDir}/data/uploads"
-              ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
-            fi
+          # Create symlink from default location to custom uploads path
+          if [ ! -L "${cfg.dataDir}/data/uploads" ]; then
+            rm -rf "${cfg.dataDir}/data/uploads"
+            ln -sf ${cfg.uploadsPath} "${cfg.dataDir}/data/uploads"
+          fi
 
-            # Ensure proper ownership
-            chown -R wiki-js:wiki-js ${cfg.uploadsPath}
-          '';
+          # Ensure proper ownership
+          chown -R wiki-js:wiki-js ${cfg.uploadsPath}
+        '';
 
         serviceConfig =
           {
@@ -230,7 +249,8 @@
             RestartSec = "10s";
           }
           // lib.optionalAttrs (cfg.appSecretFile != null) {
-            # Wiki.js reads SESSION_SECRET from the environment
+            # /run/wiki-js-credentials.env is written by wiki-js-secrets.service
+            # which is guaranteed to have completed before this unit starts.
             EnvironmentFile = "/run/wiki-js-credentials.env";
           };
       };
