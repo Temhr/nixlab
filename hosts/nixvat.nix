@@ -18,6 +18,7 @@
       self.nixosModules.servc--node-red-nixlab
       self.nixosModules.servc--syncthing-nixlab
       self.nixosModules.servc--wiki-js-nixlab
+      self.nixosModules.secrets--wiki-js
       self.nixosModules.servc--zola-nixlab
     ];
   };
