@@ -28,7 +28,7 @@ in {
     address = "192.168.0.200";
     ethIface = "enp0s31f6";
     wifiIface = "wlp3s0";
-    services = ["glance" "grafana" "prometheus" "loki" "home-assistant" "comfyui" "ollama-gpu"];
+    services = ["glance" "grafana" "prometheus" "loki" "bookstack" "comfyui" "ollama-gpu" "home-assistant"];
   };
   nixsun = mkHostMeta {
     address = "192.168.0.203";

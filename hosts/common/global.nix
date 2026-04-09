@@ -45,7 +45,7 @@
     services.rustdesk-nixlab = {
       enable = true;
       openFirewall = true;
-
+      dataDir = "/data/rustdesk";
       hbbs.enable = true;
       hbbr.enable = true;
 
