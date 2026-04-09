@@ -1,4 +1,6 @@
-HA_SECRETS_YAML: ENC[AES256_GCM,data:nq6duTay/xf/mKemIQ/xEV8qwN1KEsbu19peHBYNdyja2f6UW3I=,iv:sEQuDqcWG+pwkJYosQh4PPUt6wEs800uFoQ/I+niNNg=,tag:FhXZbk+RjPVvTg7osf9z2g==,type:str]
+HA_SECRETS_YAML: ""
+#ENC[AES256_GCM,data:uS9IoEMIlgm9ufZtPyWJ0jn+siNHKvUy,iv:9STygJuMMsCGgLcXj7TNOHTegYLigH5pOdMzg3jn6L8=,tag:Wu+LvGBxoSRMOUDmgo2NuA==,type:comment]
+#ENC[AES256_GCM,data:Xd5BHoKZy726ogt37yBfC1boDIE=,iv:jeGoyHtf9ihybjTFyr3wTih0E6mBMi65MA9ApFCibmY=,tag:zbK3C+iPkB3fjtOO7hM+NQ==,type:comment]
 sops:
     age:
         - recipient: age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332
@@ -46,7 +48,7 @@ sops:
             N0Z3aVpid0swV3pPUStkV3daV1RHNjAKcX33E/Rr9f6LdxFVXTM90KJUo6KUyNCl
             IMybqFhV2gM+sPa2OUCKCJgRX/rdEABYwdU6r6BFJUUYpL4T6PpH/g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-04-08T21:39:57Z"
-    mac: ENC[AES256_GCM,data:g5ty3g2cc2YjKQog+ej4lsUNGiwYBYQmSCk0+Q49eLAeBFLUZ/juC2IpgJpU1cxPYttP8aH8m/POQJNM5AHCwno1GqqLkFcAXyhC0oqgFhPiKa7GGmqpGzL13q8j4f06Jc5F5Jne2lT3I7IqrocL9EYePgOZaAAW2u5h/jkAKwU=,iv:k+K6ZeUIGKGxWngtaMSwSt5FmcrtpZ1MXX/mUVkxV2A=,tag:wFnphs5oIRyHwJ1Hzl4wlw==,type:str]
+    lastmodified: "2026-04-09T21:34:01Z"
+    mac: ENC[AES256_GCM,data:CEHcXE87k5eN985Fd0qLTUjbcz67LOCLVXA5DA09e/rajbyd/9TbqK/QBbxBSbrTuA8efk1EeHKoe4k26P8ppCp5T7s1jc8RbcuWGGzRtm3/yZxgxSs42m52NcMeHPZE/5MbcHbmBnV7bp5ulivTnp2gf3RnJqHG3SCumUlGbs8=,iv:QMZ0aTLWoS1wVy+1Px5j5863GkkavA4z0mEcvfKPAOs=,tag:RsPwVWJKdwIfQlRIEE/emg==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.12.1

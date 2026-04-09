@@ -76,6 +76,22 @@
           default = true;
           description = "Open firewall ports";
         };
+        # OPTIONAL: sops-nix path to a KEY=value env file for Glance API secrets.
+        # Glance supports ${ENV_VAR} substitution in glance.yml.
+        # Example env file content (KEY=value, one per line):
+        #   GLANCE_GITHUB_TOKEN=ghp_your_token_here
+        #   GLANCE_WEATHER_API_KEY=your_openweather_key
+        # Reference in _glance-pages.nix as ${GLANCE_GITHUB_TOKEN} etc.
+        secretsEnvFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/GLANCE_ENV";
+          description = ''
+            Path to a sops-decrypted KEY=value env file for Glance widget API keys.
+            Variables are available in glance.yml as ''${VAR_NAME}.
+            When null, no extra environment variables are injected.
+          '';
+        };
       };
     };
 
@@ -111,22 +127,26 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
 
-        serviceConfig = {
-          Type = "simple";
-          User = "glance";
-          Group = "glance";
-          WorkingDirectory = cfg.dataDir;
-          ExecStart = "${cfg.package}/bin/glance";
-          Restart = "on-failure";
-          RestartSec = "10s";
+        serviceConfig =
+          {
+            Type = "simple";
+            User = "glance";
+            Group = "glance";
+            WorkingDirectory = cfg.dataDir;
+            ExecStart = "${cfg.package}/bin/glance";
+            Restart = "on-failure";
+            RestartSec = "10s";
 
-          # Security hardening
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = [cfg.dataDir];
-        };
+            # Security hardening
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            ReadWritePaths = [cfg.dataDir];
+          }
+          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+            EnvironmentFile = cfg.secretsEnvFile;
+          };
 
         # Always regenerate glance.yml so the pages section stays in sync
         # with _glance-pages.nix on every rebuild.
