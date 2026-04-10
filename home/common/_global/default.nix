@@ -9,6 +9,7 @@
     ./config-git.nix
     ./config-virt-manager.nix
     ./ephemeral-apps.nix
+    ./system.nix
     ./utilities.nix
   ];
 }
