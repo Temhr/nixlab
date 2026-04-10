@@ -90,6 +90,22 @@
           default = true;
           description = "Open firewall ports for HTTP/HTTPS";
         };
+        # OPTIONAL: sops-nix path to a KEY=value env file for Homepage widget API keys.
+        # Homepage reads HOMEPAGE_VAR_* variables from the service environment and
+        # substitutes them into service/widget YAML as {{HOMEPAGE_VAR_NAME}}.
+        # Example env file:
+        #   HOMEPAGE_VAR_GRAFANA_PASSWORD=your-grafana-admin-password
+        #   HOMEPAGE_VAR_PROMETHEUS_PASSWORD=your-prometheus-password
+        environmentFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/HOMEPAGE_ENV";
+          description = ''
+            Path to a sops-decrypted KEY=value env file injected into the Homepage
+            service environment. Variables named HOMEPAGE_VAR_* are substituted
+            into widget/service YAML as {{HOMEPAGE_VAR_NAME}}.
+          '';
+        };
       };
     };
 
@@ -170,26 +186,30 @@
           rm -f ${settingsTmp}
         '';
 
-        serviceConfig = {
-          Type = "simple";
-          User = "homepage";
-          Group = "homepage";
-          ExecStart = "${cfg.package}/bin/homepage";
-          Restart = "on-failure";
-          RestartSec = "10s";
+        serviceConfig =
+          {
+            Type = "simple";
+            User = "homepage";
+            Group = "homepage";
+            ExecStart = "${cfg.package}/bin/homepage";
+            Restart = "on-failure";
+            RestartSec = "10s";
 
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem =
-            if lib.hasPrefix "/home/" cfg.dataDir
-            then "false"
-            else "strict";
-          ProtectHome =
-            if lib.hasPrefix "/home/" cfg.dataDir
-            then false
-            else true;
-          ReadWritePaths = [cfg.dataDir];
-        };
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            ProtectSystem =
+              if lib.hasPrefix "/home/" cfg.dataDir
+              then "false"
+              else "strict";
+            ProtectHome =
+              if lib.hasPrefix "/home/" cfg.dataDir
+              then false
+              else true;
+            ReadWritePaths = [cfg.dataDir];
+          }
+          // lib.optionalAttrs (cfg.environmentFile != null) {
+            EnvironmentFile = cfg.environmentFile;
+          };
       };
 
       # ----------------------------------------------------------------------------

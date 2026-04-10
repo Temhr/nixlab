@@ -42,6 +42,15 @@ creation_rules:
         - *nixvat
         - *nixzen
 
+  - path_regex: modules/nixos/homepage-dashboard/homepage\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
   - path_regex: hosts/common/optional/networking/networking\.yaml$
     key_groups:
       - age:
