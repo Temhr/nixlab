@@ -7,6 +7,16 @@
   }: let
     cfg = config.services.comfyui-p5000;
     modelsCfg = config.services.comfyui-models;
+
+    # Resolve the HuggingFace token source at script generation time.
+    # huggingFaceTokenFile takes priority; huggingFaceToken is the fallback.
+    # When neither is set this is an empty string (no HF auth configured).
+    hfTokenScript =
+      if modelsCfg.huggingFaceTokenFile != null
+      then ''HF_TOKEN="$(cat ${modelsCfg.huggingFaceTokenFile})"''
+      else if modelsCfg.huggingFaceToken != null
+      then ''HF_TOKEN="${modelsCfg.huggingFaceToken}"''
+      else "";
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -43,11 +53,30 @@
           description = "Download upscale models (ESRGAN, etc)";
         };
 
-        # OPTIONAL: Hugging Face token for gated models
+        # DEPRECATED: use huggingFaceTokenFile instead.
+        # Kept for backwards compatibility — if set, the value is used directly.
+        # The token will be visible in the Nix store; prefer huggingFaceTokenFile.
         huggingFaceToken = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
-          description = "Hugging Face API token for downloading gated models (store in secrets)";
+          description = ''
+            Hugging Face API token (plaintext string). Prefer huggingFaceTokenFile
+            with sops-nix so the token is never stored in the Nix store.
+          '';
+        };
+
+        # PREFERRED: sops-nix path to the decrypted HuggingFace API token.
+        huggingFaceTokenFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/HF_TOKEN";
+          description = ''
+            Path to a sops-decrypted file containing the HuggingFace API token
+            (bare value, no KEY= prefix). Takes priority over huggingFaceToken.
+            Declare in configuration.nix:
+              sops.secrets.HF_TOKEN.sopsFile = ./secrets/comfyui.yaml;
+            Then pass: config.sops.secrets.HF_TOKEN.path
+          '';
         };
 
         # OPTIONAL: Custom model URLs to download
@@ -133,6 +162,9 @@
           set -e
           MODELS_DIR="${cfg.dataDir}/models"
 
+          # Set HF_TOKEN from sops secret file (preferred) or plaintext option
+          ${hfTokenScript}
+
           # Ensure all model directories exist
           mkdir -p "$MODELS_DIR/checkpoints"
           mkdir -p "$MODELS_DIR/vae"
@@ -160,13 +192,23 @@
             echo "  from: $url"
             echo "  to: $output"
 
-            # Try with wget first (better resume support), fallback to curl
-            ${pkgs.wget}/bin/wget -c -O "$output.partial" "$url" || \
-            ${pkgs.curl}/bin/curl -L -C - -o "$output.partial" "$url" || {
-              echo "Error: Failed to download $model_name"
-              rm -f "$output.partial"
-              return 1
-            }
+            # Try with wget first (better resume support), fallback to curl.
+            # Pass HF_TOKEN as Authorization header when set (needed for gated models).
+            if [ -n "''${HF_TOKEN:-}" ]; then
+              ${pkgs.wget}/bin/wget -c --header="Authorization: Bearer ''${HF_TOKEN}" -O "$output.partial" "$url" || \
+              ${pkgs.curl}/bin/curl -L -C - -H "Authorization: Bearer ''${HF_TOKEN}" -o "$output.partial" "$url" || {
+                echo "Error: Failed to download $model_name"
+                rm -f "$output.partial"
+                return 1
+              }
+            else
+              ${pkgs.wget}/bin/wget -c -O "$output.partial" "$url" || \
+              ${pkgs.curl}/bin/curl -L -C - -o "$output.partial" "$url" || {
+                echo "Error: Failed to download $model_name"
+                rm -f "$output.partial"
+                return 1
+              }
+            fi
 
             # Move completed download
             mv "$output.partial" "$output"
