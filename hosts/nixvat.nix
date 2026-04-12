@@ -101,7 +101,8 @@
       dataDir = "/data/node-red";
     };
     services.zola-nixlab = {
-      enable = true;
+      enable = true;;
+    theme = "terminus";
       siteDir = "/data/www/myblog";
       listenAddress = "0.0.0.0";
       openFirewall = true;
