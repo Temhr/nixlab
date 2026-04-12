@@ -111,6 +111,11 @@
         theme = "terminus";
         compile_sass = true;
         build_search_index = true;
+        markdown = {
+          highlighting = {
+            style = "gruvbox-dark";
+          };
+        };
       };
       extraUsers = [config.nixlab.mainUser];
     };
