@@ -113,7 +113,7 @@
         markdown = {
           highlight_code = true;
           highlighting = {
-            style = "terminus";
+            style = "gruvbox-dark";
           };
         };
       };
