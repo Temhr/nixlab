@@ -102,12 +102,12 @@
     };
     services.zola-nixlab = {
       enable = true;
-      theme = "terminus";
       siteDir = "/data/www/myblog";
       listenAddress = "0.0.0.0";
       openFirewall = true;
       configToml = {
         title = "My Blog";
+        theme = "terminus";
         compile_sass = true;
         build_search_index = true;
         markdown = { highlight_code = true; };
