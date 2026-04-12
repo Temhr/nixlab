@@ -73,7 +73,7 @@ in {
     searchDescriptions = true;
     hideInternetSearch = false;
     showSearchSuggestions = true;
-    target = "_blank";
+    target = "";
   };
 
   log_level = "warn";
