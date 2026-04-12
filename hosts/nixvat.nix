@@ -105,6 +105,7 @@
       siteDir = "/data/www/myblog";
       listenAddress = "0.0.0.0";
       openFirewall = true;
+      extraUsers = [config.nixlab.mainUser];
     };
     services.ollama-stack = {
       enable = true;
