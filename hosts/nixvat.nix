@@ -108,82 +108,12 @@
       package = pkgs.unstable.zola;
       configToml = {
         title = "My Blog";
-        theme = "terminus";
         compile_sass = true;
-        generate_feeds = true;
-        taxonomies = [
-          {
-            name = "tags";
-            feed = true;
-          }
-          {
-            name = "categories";
-            feed = true;
-            paginate_by = 5;
-          }
-        ];
         build_search_index = true;
         markdown = {
-          render_emoji = true;
-          bottom_footnotes = true;
           highlighting = {
             style = "inline";
-            theme = "monokai";
           };
-        };
-        extra = {
-          close_responsive_menu_on_resize = true;
-          favicon_emoji = "👨‍💻";
-          layout = "center";
-          main_menu = [
-            {
-              name = "blog";
-              url = "blog";
-              trailing_slash = true;
-            }
-            {
-              name = "archive";
-              url = "archive";
-              trailing_slash = true;
-            }
-            {
-              name = "tags";
-              url = "tags";
-              trailing_slash = true;
-            }
-            {
-              name = "projects";
-              url = "projects";
-              trailing_slash = true;
-            }
-            {
-              name = "github";
-              url = "https://github.com/ebkalderon/terminus";
-              new_tab = true;
-            }
-          ];
-          socials = [
-            {
-              name = "email";
-              url = "mailto:hello@example.com";
-            }
-            {
-              name = "github";
-              url = "https://github.com/ebkalderon";
-            }
-            {
-              name = "linkedin";
-              url = "https://www.linkedin.com/in/ebkalderon";
-            }
-            {
-              name = "mastodon";
-              url = "https://hachyderm.io/@ebkalderon";
-            }
-            {
-              name = "keyoxide";
-              url = "https://keyoxide.org/d5ad5bd47835b0f0b0c3046c00ab4c0942dcba25";
-            }
-          ];
         };
       };
       extraUsers = [config.nixlab.mainUser];
