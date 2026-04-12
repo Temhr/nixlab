@@ -110,7 +110,12 @@
         theme = "terminus";
         compile_sass = true;
         build_search_index = true;
-        markdown = { highlight_code = true; };
+        markdown = {
+          highlight_code = true;
+          highlighting = {
+            style = "terminus";
+          };
+        };
       };
       extraUsers = [config.nixlab.mainUser];
     };
