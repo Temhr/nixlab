@@ -113,7 +113,8 @@
         build_search_index = true;
         markdown = {
           highlighting = {
-            style = "gruvbox-dark";
+            style = "inline";
+            theme = "monokai";
           };
         };
       };
