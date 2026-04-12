@@ -20,6 +20,22 @@
         else "http"
       }://${cfg.domain}"
       else "http://${cfg.listenAddress}:${toString cfg.port}";
+
+    # When configToml is set, serialise the merged attrset to a TOML file in
+    # the Nix store via pkgs.formats.toml (the same mechanism used by
+    # services.prometheus, services.grafana, etc.).
+    #
+    # base_url is always injected last so it matches effectiveBaseUrl regardless
+    # of what the user wrote in configToml — or didn't write at all.
+    #
+    # The store path is immutable and world-readable, safe to reference from
+    # ExecStartPre.  Only evaluated when configToml != null.
+    configFile =
+      if cfg.configToml != null
+      then
+        (pkgs.formats.toml {}).generate "zola-config.toml"
+        (cfg.configToml // {base_url = effectiveBaseUrl;})
+      else null;
   in {
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -123,6 +139,52 @@
           description = "Extra users to add to the zola group (allows siteDir access).";
         };
 
+        # OPTIONAL: Declarative config.toml as a Nix attribute set (default: null).
+        #
+        # When set, the module serialises this to TOML via pkgs.formats.toml and
+        # installs it into siteDir on every service start, fully replacing whatever
+        # config.toml is on disk. This is the recommended approach for reproducible,
+        # version-controlled site configuration.
+        #
+        # NOTE: base_url is always injected/overridden by the module using
+        # effectiveBaseUrl (derived from domain/enableSSL/baseUrl options).
+        # You do not need to set it here — any value you provide will be ignored.
+        #
+        # When null (default) the module does NOT manage config.toml at all.
+        # A config.toml must already exist in siteDir (e.g. created via `zola init`)
+        # or the preStart check will fail and the service will not start.
+        #
+        # Example:
+        #   configToml = {
+        #     title = "My Blog";
+        #     compile_sass = true;
+        #     build_search_index = true;
+        #     markdown = { highlight_code = true; };
+        #     extra = { author = "Alice"; };
+        #   };
+        #
+        #   Separate file:
+        #     configToml = import ./zola-config.nix;
+        #   where zola-config.nix contains:
+        #   { title = "My Blog"; markdown = { highlight_code = true; }; }
+        configToml = lib.mkOption {
+          type = lib.types.nullOr (lib.types.attrsOf lib.types.anything);
+          default = null;
+          description = "Declarative config.toml as a Nix attrset. base_url is always injected by the module and need not be set here.";
+        };
+
+        # OPTIONAL: Path to a file containing environment variables (default: null).
+        # The file is sourced into the zola service environment before start.
+        # Useful for secrets (API keys in theme templates, deploy hooks, etc.)
+        # that should not live in the Nix store.
+        # File format: KEY=value, one per line (systemd EnvironmentFile syntax).
+        secretsEnvFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/zola-env";
+          description = "Path to an EnvironmentFile with secrets injected into the zola service environment.";
+        };
+
         # OPTIONAL: Open firewall ports automatically (default: true).
         # When a domain is set, opens 80 + 443 for nginx.
         # When no domain, opens the Zola port only if listenAddress is not
@@ -173,29 +235,22 @@
       );
 
       # ----------------------------------------------------------------------------
-      # SITE SCAFFOLDING - Initialize a minimal Zola site on first activation
+      # SITE SCAFFOLDING - Only runs when configToml is NOT set
       # ----------------------------------------------------------------------------
-      system.activationScripts.initZolaSite = {
+      # When configToml is set the module fully manages config.toml via
+      # ExecStartPre (see the systemd service below), so activation-time
+      # scaffolding is not needed and would conflict.
+      #
+      # When configToml is null the user owns config.toml entirely. We still
+      # scaffold the directory structure on first activation so that a bare
+      # siteDir is usable immediately, but we never overwrite an existing file.
+      system.activationScripts.initZolaSite = lib.mkIf (cfg.configToml == null) {
         text = ''
                     SITE_DIR="${cfg.siteDir}"
 
-                    # Only scaffold if config.toml is absent — never overwrite an existing site.
                     if [ ! -f "$SITE_DIR/config.toml" ]; then
-                      echo "Initializing Zola site at $SITE_DIR..."
-
+                      echo "Initializing Zola site scaffold at $SITE_DIR..."
                       mkdir -p "$SITE_DIR"/{content,templates,static,themes}
-
-                      # Write config.toml, substituting the computed base_url so it
-                      # matches the scheme (http/https) and domain/address in use.
-                      cat > "$SITE_DIR/config.toml" << 'EOF'
-          base_url = "${effectiveBaseUrl}"
-          title = "My Blog"
-          compile_sass = true
-          build_search_index = false
-
-          [markdown]
-          highlight_code = true
-          EOF
 
                       cat > "$SITE_DIR/content/_index.md" << 'EOF'
           +++
@@ -204,7 +259,7 @@
 
           # Welcome!
 
-          This is my Zola site.
+          This is my Zola site. Edit siteDir and add a config.toml to get started.
           EOF
 
                       cat > "$SITE_DIR/templates/index.html" << 'EOF'
@@ -223,8 +278,7 @@
 
                       chown -R zola:zola "$SITE_DIR"
                       chmod -R 775 "$SITE_DIR"
-
-                      echo "Zola site initialized at $SITE_DIR"
+                      echo "Scaffold created. Add a config.toml or set services.zola-nixlab.configToml."
                     fi
         '';
       };
@@ -237,69 +291,87 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
 
-        # Guard against a missing config.toml — e.g. if siteDir was wiped or
-        # never mounted — rather than letting Zola produce a cryptic error.
-        preStart = ''
-          if [ ! -f "${cfg.siteDir}/config.toml" ]; then
-            echo "ERROR: No config.toml found at ${cfg.siteDir}."
-            echo "Run 'zola init ${cfg.siteDir}' or check that siteDir is mounted."
-            exit 1
-          fi
-        '';
+        serviceConfig =
+          {
+            Type = "simple";
+            User = "zola";
+            Group = "zola";
+            WorkingDirectory = cfg.siteDir;
 
-        serviceConfig = {
-          Type = "simple";
-          User = "zola";
-          Group = "zola";
-          WorkingDirectory = cfg.siteDir;
+            # ExecStartPre commands run before ExecStart in order.
+            #
+            # Step 1 (root, '+' prefix): install config.toml from the Nix store
+            # when configToml is set.  The '+' prefix runs this specific command
+            # as root regardless of User = zola above — the correct way to do a
+            # privileged pre-start action under systemd hardening without the
+            # deprecated PermissionsStartOnly.  Only present when configToml != null.
+            #
+            # Step 2 (zola user): guard against a missing config.toml.  Catches
+            # the case where configToml is null and the user hasn't created one,
+            # or where siteDir is a mount that isn't present yet.
+            ExecStartPre =
+              lib.optional (cfg.configToml != null)
+              "+${pkgs.coreutils}/bin/install -m 640 -o zola -g zola ${configFile} ${cfg.siteDir}/config.toml"
+              ++ [
+                # Runs as User = zola (no '+'), so this is inside the sandbox.
+                "${pkgs.bash}/bin/bash -c 'if [ ! -f ${cfg.siteDir}/config.toml ]; then echo \"ERROR: no config.toml at ${cfg.siteDir} — set configToml or create one manually\"; exit 1; fi'"
+              ];
 
-          # Build the serve command. watchMode = true → default zola serve
-          # behaviour (watch + rebuild). watchMode = false → pass --no-port-append
-          # (not a real flag) — actually zola has no "no-watch" flag, so we use
-          # the same command; the only effect is conceptual separation for users
-          # who want to reduce inotify usage (a future zola version may add --no-watch).
-          # The --base-url is derived from effectiveBaseUrl so it matches nginx.
-          ExecStart = lib.concatStringsSep " " (
-            [
-              "${cfg.package}/bin/zola"
-              "serve"
-              "--interface"
-              cfg.listenAddress
-              "--port"
-              (toString cfg.port)
-              "--base-url"
-              effectiveBaseUrl
-            ]
-            # watchMode = false: pass --watch-only so Zola watches for rebuilds
-            # but doesn't open its own dev server port (relies on nginx in front).
-            # watchMode = true (default): serve normally with live-reload.
-            ++ lib.optionals (!cfg.watchMode) ["--watch-only"]
-            ++ cfg.extraArgs
-          );
+            # The --base-url flag always mirrors effectiveBaseUrl so it stays in
+            # sync with whatever nginx / the domain options say, even if the
+            # on-disk config.toml has a different value.
+            ExecStart = lib.concatStringsSep " " (
+              [
+                "${cfg.package}/bin/zola"
+                "serve"
+                "--interface"
+                cfg.listenAddress
+                "--port"
+                (toString cfg.port)
+                "--base-url"
+                effectiveBaseUrl
+              ]
+              # watchMode = false: --watch-only tells Zola to rebuild on changes
+              # but not run its own HTTP server (hand off serving to nginx).
+              # watchMode = true (default): serve + live-reload normally.
+              ++ lib.optionals (!cfg.watchMode) ["--watch-only"]
+              ++ cfg.extraArgs
+            );
 
-          Restart = "on-failure";
-          RestartSec = "10s";
+            Restart = "on-failure";
+            RestartSec = "10s";
 
-          # Allow Zola read-write access to siteDir (for rebuilds/cache).
-          ReadWritePaths = [cfg.siteDir];
+            # Allow Zola read-write access to siteDir for rebuilds and cache.
+            ReadWritePaths = [cfg.siteDir];
 
-          # ---- Systemd hardening ----
-          # These options sandbox the process without affecting normal operation.
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          # "strict" makes the whole filesystem read-only except explicitly
-          # listed ReadWritePaths above.
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ProtectKernelTunables = true;
-          ProtectKernelModules = true;
-          ProtectControlGroups = true;
-          RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
-          RestrictNamespaces = true;
-          LockPersonality = true;
-          MemoryDenyWriteExecute = true;
-          SystemCallFilter = "@system-service";
-        };
+            # Inject secrets from an external file when provided.
+            # The file must be KEY=value lines (systemd EnvironmentFile syntax).
+            # It is NOT in the Nix store, so secrets stay out of /nix/store.
+          }
+          # Conditionally merge EnvironmentFile — lib.optionalAttrs keeps the
+          # attrset clean when no secrets file is configured.
+          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+            EnvironmentFile = cfg.secretsEnvFile;
+          }
+          # ---- Systemd hardening ------------------------------------------------
+          # These options constrain what the zola process can do at the OS level
+          # without affecting normal site-serving operation.
+          // {
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            # "strict" marks the whole filesystem read-only; only ReadWritePaths
+            # above are writable.
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            ProtectKernelTunables = true;
+            ProtectKernelModules = true;
+            ProtectControlGroups = true;
+            RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
+            RestrictNamespaces = true;
+            LockPersonality = true;
+            MemoryDenyWriteExecute = true;
+            SystemCallFilter = "@system-service";
+          };
       };
 
       # ----------------------------------------------------------------------------
@@ -355,24 +427,32 @@
 USAGE EXAMPLES
 ================================================================================
 
-Minimal (localhost only):
---------------------------
+Minimal (localhost only, user-managed config.toml):
+----------------------------------------------------
 services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";
+  # config.toml must already exist in siteDir (e.g. from `zola init`)
 };
 # Access at: http://localhost:3003
 
 
-Network access (no proxy):
---------------------------
+Declarative config.toml (recommended):
+---------------------------------------
 services.zola-nixlab = {
   enable = true;
   siteDir = "/var/www/my-blog";
-  listenAddress = "0.0.0.0";
-  openFirewall = true;
+  # base_url is always injected automatically — do not set it here.
+  configToml = {
+    title = "My Blog";
+    compile_sass = true;
+    build_search_index = true;
+    markdown = { highlight_code = true; };
+    extra = { author = "Alice"; };
+  };
 };
-# Access at: http://your-ip:3003
+# config.toml is written from the Nix store on every service start.
+# Rebuild and switch to update the live config.
 
 
 Full configuration with nginx + SSL:
@@ -384,12 +464,32 @@ services.zola-nixlab = {
   listenAddress = "127.0.0.1";  # nginx proxies; no need to expose directly
   watchMode = true;              # auto-rebuild on content changes
 
+  configToml = {
+    title = "My Blog";
+    compile_sass = true;
+    build_search_index = true;
+    markdown = { highlight_code = true; };
+  };
+
   domain = "blog.example.com";
   enableSSL = true;              # provisions a Let's Encrypt cert via ACME
   openFirewall = true;           # opens 80 + 443
 
   extraUsers = ["alice"];        # grant alice rw access to siteDir
+
+  secretsEnvFile = "/run/secrets/zola-env";  # KEY=value file, not in store
 };
+
+
+Network access without proxy:
+------------------------------
+services.zola-nixlab = {
+  enable = true;
+  siteDir = "/var/www/my-blog";
+  listenAddress = "0.0.0.0";
+  openFirewall = true;
+};
+# Access at: http://your-ip:3003
 
 
 Extra zola flags (e.g. include drafts in dev):
@@ -406,13 +506,13 @@ ZOLA SITE STRUCTURE
 ================================================================================
 
 Your siteDir must contain:
-  config.toml    - Site configuration (auto-scaffolded on first run if absent)
+  config.toml    - Managed by configToml option, or created manually
   content/       - Markdown content files
   templates/     - Tera HTML templates
   static/        - Static assets (images, CSS, JS)
   themes/        - Optional themes
 
-Create a site manually:
+Create a site manually (when not using configToml):
   zola init /var/www/my-blog
 
 
@@ -425,8 +525,24 @@ watchMode = true (default):
   - Ideal for development and content-heavy workflows.
 
 watchMode = false:
-  - Passes --watch-only; Zola watches and rebuilds but its dev server is
-    suppressed. Use with nginx serving public/ for a production setup.
+  - Passes --watch-only; Zola watches and rebuilds but its HTTP server is
+    suppressed. Pair with nginx serving public/ for a production setup.
+
+
+================================================================================
+DECLARATIVE vs MANUAL config.toml
+================================================================================
+
+configToml set:
+  - The Nix attrset is serialised to TOML in the store at build time.
+  - On every service start, ExecStartPre (as root) installs it into siteDir,
+    fully replacing whatever was there. Changes take effect after nixos-rebuild.
+  - base_url is always injected by the module; you never need to set it.
+
+configToml = null (default):
+  - The module does not touch config.toml. You own it entirely.
+  - A preStart check will refuse to start if config.toml is missing.
+  - Use `zola init /path/to/siteDir` to create an initial site.
 
 
 ================================================================================
