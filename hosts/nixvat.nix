@@ -111,7 +111,6 @@
         theme = "terminus";
         compile_sass = true;
         build_search_index = true;
-        };
       };
       extraUsers = [config.nixlab.mainUser];
     };
