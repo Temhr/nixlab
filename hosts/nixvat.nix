@@ -105,6 +105,7 @@
       siteDir = "/data/www/myblog";
       listenAddress = "0.0.0.0";
       openFirewall = true;
+      package = pkgs.unstable.zola;
       configToml = {
         title = "My Blog";
         theme = "terminus";
