@@ -17,148 +17,148 @@
   # On reboot   → increment exponent by 1, persist to backoffFile
   # ─────────────────────────────────────────────────────────────────
   PingWatchdogShellScript = pkgs.writeShellScript "ping-watchdog" ''
-    #!/usr/bin/env bash
-    set -u
+        #!/usr/bin/env bash
+        set -u
 
-    # ── Constants ────────────────────────────────────────────────────
-    PING_TARGETS=("8.8.8.8" "1.1.1.1" "9.9.9.9")
-    BASE_WINDOW_SECS=120      # 2-minute window on first boot
-    BASE_INTERVAL_SECS=10     # 10-second ping gap on first boot
-    INHIBIT_FILE="${inhibitFile}"
-    BACKOFF_FILE="${backoffFile}"
-    LOG_TAG="ping-watchdog"
-    REBOOT_WARN_SECS=60       # Broadcast warning this many seconds before rebooting
+        # ── Constants ────────────────────────────────────────────────────
+        PING_TARGETS=("8.8.8.8" "1.1.1.1" "9.9.9.9")
+        BASE_WINDOW_SECS=120      # 2-minute window on first boot
+        BASE_INTERVAL_SECS=10     # 10-second ping gap on first boot
+        INHIBIT_FILE="${inhibitFile}"
+        BACKOFF_FILE="${backoffFile}"
+        LOG_TAG="ping-watchdog"
+        REBOOT_WARN_SECS=60       # Broadcast warning this many seconds before rebooting
 
-    # ── Helpers ──────────────────────────────────────────────────────
-    log() {
-        logger -t "$LOG_TAG" "$*"
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
-    }
+        # ── Helpers ──────────────────────────────────────────────────────
+        log() {
+            logger -t "$LOG_TAG" "$*"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+        }
 
-    fmt_duration() {
-        local secs=$1
-        if   (( secs < 60  )); then echo "${secs}s"
-        elif (( secs < 3600 )); then echo "$(( secs / 60 ))m $(( secs % 60 ))s"
-        else echo "$(( secs / 3600 ))h $(( (secs % 3600) / 60 ))m"
-        fi
-    }
-
-    # Returns 0 if at least one target responds
-    ping_internet() {
-        for target in "''${PING_TARGETS[@]}"; do
-            if /run/current-system/sw/bin/ping -c 2 -W 4 "$target" > /dev/null 2>&1; then
-                log "  ✓ $target responded"
-                return 0
+        fmt_duration() {
+            local secs=$1
+            if   (( secs < 60  )); then echo "''${secs}s"
+            elif (( secs < 3600 )); then echo "''$(( secs / 60 ))m ''$(( secs % 60 ))s"
+            else echo "''$(( secs / 3600 ))h ''$(( (secs % 3600) / 60 ))m"
             fi
-            log "  ✗ No response from $target"
-        done
-        return 1
-    }
+        }
 
-    # ── Backoff exponent persistence ─────────────────────────────────
-    read_exponent() {
-        mkdir -p "$(dirname "$BACKOFF_FILE")"
-        if [ -f "$BACKOFF_FILE" ]; then
-            local val
-            val=$(cat "$BACKOFF_FILE" 2>/dev/null)
-            [[ "$val" =~ ^[0-9]+$ ]] && echo "$val" && return
-        fi
-        echo "0"
-    }
+        # Returns 0 if at least one target responds
+        ping_internet() {
+            for target in "''${PING_TARGETS[@]}"; do
+                if /run/current-system/sw/bin/ping -c 2 -W 4 "$target" > /dev/null 2>&1; then
+                    log "  ✓ $target responded"
+                    return 0
+                fi
+                log "  ✗ No response from $target"
+            done
+            return 1
+        }
 
-    write_exponent() {
-        mkdir -p "$(dirname "$BACKOFF_FILE")"
-        echo "$1" > "$BACKOFF_FILE"
-    }
+        # ── Backoff exponent persistence ─────────────────────────────────
+        read_exponent() {
+            mkdir -p "$(dirname "$BACKOFF_FILE")"
+            if [ -f "$BACKOFF_FILE" ]; then
+                local val
+                val=$(cat "$BACKOFF_FILE" 2>/dev/null)
+                [[ "$val" =~ ^[0-9]+$ ]] && echo "$val" && return
+            fi
+            echo "0"
+        }
 
-    # ── Main ─────────────────────────────────────────────────────────
-    main() {
+        write_exponent() {
+            mkdir -p "$(dirname "$BACKOFF_FILE")"
+            echo "$1" > "$BACKOFF_FILE"
+        }
 
-        # ── Inhibit check ────────────────────────────────────────────
-        if [ -f "$INHIBIT_FILE" ]; then
-            log "Inhibit file present ($INHIBIT_FILE) — watchdog disabled, exiting."
-            exit 0
-        fi
+        # ── Main ─────────────────────────────────────────────────────────
+        main() {
 
-        # ── Compute this cycle's timing from exponent ─────────────────
-        local exponent
-        exponent=$(read_exponent)
-
-        local multiplier=$(( 1 << exponent ))                        # 2^E
-        local window_secs=$(( BASE_WINDOW_SECS   * multiplier ))
-        local interval_secs=$(( BASE_INTERVAL_SECS * multiplier ))
-        local max_attempts=$(( window_secs / interval_secs ))        # ≈ 12
-
-        log "════════════════════════════════════════════════════════"
-        log "Ping watchdog starting"
-        log "  Cycle          : $exponent  (×$multiplier)"
-        log "  Window         : $(fmt_duration $window_secs)"
-        log "  Ping interval  : $(fmt_duration $interval_secs)"
-        log "  Max attempts   : $max_attempts"
-        log "  Targets        : ''${PING_TARGETS[*]}"
-        log "════════════════════════════════════════════════════════"
-
-        # ── Boot-settle grace period ──────────────────────────────────
-        # Only on cycle 0 (2-min window); longer windows don't need it
-        # because later cycles imply repeated failures — start immediately.
-        if (( exponent == 0 )); then
-            log "Cycle 0: waiting 15 s for network to settle after boot..."
-            sleep 15
-        fi
-
-        # ── Ping loop ─────────────────────────────────────────────────
-        for attempt in $(seq 1 "$max_attempts"); do
-            local elapsed_secs=$(( (attempt - 1) * interval_secs ))
-            local remaining_secs=$(( window_secs - elapsed_secs ))
-            log "Attempt $attempt/$max_attempts | elapsed $(fmt_duration $elapsed_secs) | $(fmt_duration $remaining_secs) left in window"
-
-            if ping_internet; then
-                log "Internet reachable — resetting backoff to cycle 0."
-                write_exponent 0
-                log "Watchdog complete, exiting cleanly."
+            # ── Inhibit check ────────────────────────────────────────────
+            if [ -f "$INHIBIT_FILE" ]; then
+                log "Inhibit file present ($INHIBIT_FILE) — watchdog disabled, exiting."
                 exit 0
             fi
 
-            log "All targets failed."
+            # ── Compute this cycle's timing from exponent ─────────────────
+            local exponent
+            exponent=$(read_exponent)
 
-            if (( attempt < max_attempts )); then
-                log "Next attempt in $(fmt_duration $interval_secs)..."
-                sleep "$interval_secs"
+            local multiplier=$(( 1 << exponent ))                        # 2^E
+            local window_secs=$(( BASE_WINDOW_SECS   * multiplier ))
+            local interval_secs=$(( BASE_INTERVAL_SECS * multiplier ))
+            local max_attempts=$(( window_secs / interval_secs ))        # ≈ 12
+
+            log "════════════════════════════════════════════════════════"
+            log "Ping watchdog starting"
+            log "  Cycle          : $exponent  (×$multiplier)"
+            log "  Window         : $(fmt_duration $window_secs)"
+            log "  Ping interval  : $(fmt_duration $interval_secs)"
+            log "  Max attempts   : $max_attempts"
+            log "  Targets        : ''${PING_TARGETS[*]}"
+            log "════════════════════════════════════════════════════════"
+
+            # ── Boot-settle grace period ──────────────────────────────────
+            # Only on cycle 0 (2-min window); longer windows don't need it
+            # because later cycles imply repeated failures — start immediately.
+            if (( exponent == 0 )); then
+                log "Cycle 0: waiting 15 s for network to settle after boot..."
+                sleep 15
             fi
-        done
 
-        # ── Reboot path ───────────────────────────────────────────────
-        local new_exponent=$(( exponent + 1 ))
-        local next_window=$(( window_secs * 2 ))
-        local next_interval=$(( interval_secs * 2 ))
-        write_exponent "$new_exponent"
+            # ── Ping loop ─────────────────────────────────────────────────
+            for attempt in $(seq 1 "$max_attempts"); do
+                local elapsed_secs=$(( (attempt - 1) * interval_secs ))
+                local remaining_secs=$(( window_secs - elapsed_secs ))
+                log "Attempt $attempt/$max_attempts | elapsed $(fmt_duration $elapsed_secs) | $(fmt_duration $remaining_secs) left in window"
 
-        log "Window exhausted after $(fmt_duration $window_secs) with no internet."
-        log "Next cycle: $new_exponent — window $(fmt_duration $next_window), interval $(fmt_duration $next_interval)"
-        log "Notifying users, rebooting in $(fmt_duration $REBOOT_WARN_SECS)..."
+                if ping_internet; then
+                    log "Internet reachable — resetting backoff to cycle 0."
+                    write_exponent 0
+                    log "Watchdog complete, exiting cleanly."
+                    exit 0
+                fi
 
-        /run/current-system/sw/bin/wall <<EOF
-[ping-watchdog] No internet detected after $(fmt_duration $window_secs).
-Rebooting in $(( REBOOT_WARN_SECS / 60 )) minute(s).  Next check window: $(fmt_duration $next_window).
-To cancel this reboot and disable the watchdog:
-  sudo touch ${inhibitFile} && sudo shutdown -c
-EOF
+                log "All targets failed."
 
-        sleep "$REBOOT_WARN_SECS"
+                if (( attempt < max_attempts )); then
+                    log "Next attempt in $(fmt_duration $interval_secs)..."
+                    sleep "$interval_secs"
+                fi
+            done
 
-        # ── Last-chance check after warning window ────────────────────
-        log "Final check before reboot..."
-        if ping_internet; then
-            log "Internet now reachable — aborting reboot, resetting to cycle 0."
-            write_exponent 0
-            exit 0
-        fi
+            # ── Reboot path ───────────────────────────────────────────────
+            local new_exponent=$(( exponent + 1 ))
+            local next_window=$(( window_secs * 2 ))
+            local next_interval=$(( interval_secs * 2 ))
+            write_exponent "$new_exponent"
 
-        log "Rebooting."
-        /run/current-system/sw/bin/reboot
-    }
+            log "Window exhausted after $(fmt_duration $window_secs) with no internet."
+            log "Next cycle: $new_exponent — window $(fmt_duration $next_window), interval $(fmt_duration $next_interval)"
+            log "Notifying users, rebooting in $(fmt_duration $REBOOT_WARN_SECS)..."
 
-    main "$@"
+            /run/current-system/sw/bin/wall <<EOF
+    [ping-watchdog] No internet detected after $(fmt_duration $window_secs).
+    Rebooting in $(( REBOOT_WARN_SECS / 60 )) minute(s).  Next check window: $(fmt_duration $next_window).
+    To cancel this reboot and disable the watchdog:
+      sudo touch ${inhibitFile} && sudo shutdown -c
+    EOF
+
+            sleep "$REBOOT_WARN_SECS"
+
+            # ── Last-chance check after warning window ────────────────────
+            log "Final check before reboot..."
+            if ping_internet; then
+                log "Internet now reachable — aborting reboot, resetting to cycle 0."
+                write_exponent 0
+                exit 0
+            fi
+
+            log "Rebooting."
+            /run/current-system/sw/bin/reboot
+        }
+
+        main "$@"
   '';
 
   # ─────────────────────────────────────────────────────────────────
@@ -181,8 +181,8 @@ EOF
     fmt_duration() {
         local secs=$1
         if   (( secs < 60   )); then echo "''${secs}s"
-        elif (( secs < 3600  )); then echo "$(( secs / 60 ))m $(( secs % 60 ))s"
-        else echo "$(( secs / 3600 ))h $(( (secs % 3600) / 60 ))m"
+        elif (( secs < 3600  )); then echo "''$(( secs / 60 ))m ''$(( secs % 60 ))s"
+        else echo "''$(( secs / 3600 ))h ''$(( (secs % 3600) / 60 ))m"
         fi
     }
 
@@ -221,17 +221,16 @@ EOF
                 echo "  State       : enabled"
             fi
 
-            local EXP=0
+            EXP=0
             if [ -f "$BACKOFF_FILE" ]; then
-                local val
                 val=$(cat "$BACKOFF_FILE" 2>/dev/null)
                 [[ "$val" =~ ^[0-9]+$ ]] && EXP=$val
             fi
 
-            local MULT=$(( 1 << EXP ))
-            local WINDOW=$(( BASE_WINDOW_SECS   * MULT ))
-            local INTV=$(( BASE_INTERVAL_SECS * MULT ))
-            local ATTEMPTS=$(( WINDOW / INTV ))
+            MULT=$(( 1 << EXP ))
+            WINDOW=$(( BASE_WINDOW_SECS   * MULT ))
+            INTV=$(( BASE_INTERVAL_SECS * MULT ))
+            ATTEMPTS=$(( WINDOW / INTV ))
 
             echo "  Backoff     : cycle $EXP  (×$MULT)"
             echo "  Window      : $(fmt_duration $WINDOW)"
@@ -255,19 +254,18 @@ EOF
             ;;
     esac
   '';
-
 in {
   # ── Systemd service ───────────────────────────────────────────────
   systemd.services.ping-watchdog = {
     description = "Ping watchdog — reboot if no internet, exponential backoff window";
-    after       = ["network.target" "network-online.target"];
-    wants       = ["network-online.target"];
-    wantedBy    = ["multi-user.target"];
+    after = ["network.target" "network-online.target"];
+    wants = ["network-online.target"];
+    wantedBy = ["multi-user.target"];
     serviceConfig = {
-      ExecStart       = PingWatchdogShellScript;
-      Type            = "oneshot";
-      User            = "root";
-      TimeoutStartSec = "infinity";  # Never kill mid-run, window can be hours
+      ExecStart = PingWatchdogShellScript;
+      Type = "oneshot";
+      User = "root";
+      TimeoutStartSec = "infinity"; # Never kill mid-run, window can be hours
     };
     path = [pkgs.iputils pkgs.util-linux];
   };

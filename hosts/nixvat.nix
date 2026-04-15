@@ -110,7 +110,7 @@
         title = "My Blog";
         compile_sass = true;
         build_search_index = true;
-        markdown = { };
+        markdown = {};
       };
       extraUsers = [config.nixlab.mainUser];
     };
