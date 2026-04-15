@@ -7,6 +7,7 @@
     ./auto-backup-home.nix
     ./auto-nix-gc.nix
     ./auto-nixos-upgrade.nix
+    ./auto-ping-watchdog.nix
     ./bluetooth.nix
     ./boot-loader.nix
     ./display-manager.nix
