@@ -64,6 +64,18 @@
       Categories=AudioVideo;Network;Video;Ephemeral-App;
     '';
 
+    ## discord-canary
+    ".local/share/applications/discord-canary.desktop".text = ''
+      [Desktop Entry]
+      Name=Discord Canary ⚡ 🫨
+      Comment=All-in-one cross-platform voice and text chat for gamers
+      Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#discord-canary & disown"
+      Icon=discord
+      Terminal=false
+      Type=Application
+      Categories=AudioVideo;Network;Video;Ephemeral-App;
+    '';
+
     ## Drawio
     ".local/share/applications/drawio.desktop".text = ''
       [Desktop Entry]
