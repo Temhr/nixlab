@@ -59,11 +59,6 @@
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/enhancer-for-youtube/latest.xpi";
           installation_mode = "force_installed";
         };
-        # floccus bookmarks sync:
-        "floccus@handmadeideas.org" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/latest/floccus/latest.xpi";
-          installation_mode = "force_installed";
-        };
         # KeePassXC-Browser:
         "keepassxc-browser@keepassxc.org" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/keepassxc-browser/latest.xpi";
@@ -77,11 +72,6 @@
         # Reddit Enhancement Suite:
         "jid1-xUfzOsOFlzSOXg@jetpack" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/reddit-enhancement-suite/latest.xpi";
-          installation_mode = "force_installed";
-        };
-        # To Google Translate:
-        "juanmauricioescobar@gmail.com" = {
-          install_url = "https://addons.mozilla.org/firefox/downloads/file/3798719/to_google_translate-4.2.0.xpi";
           installation_mode = "force_installed";
         };
         # Sort Bookmarks:
