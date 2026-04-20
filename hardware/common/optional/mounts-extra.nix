@@ -36,6 +36,32 @@
           default = false;
         };
       };
+      mount-4dz1 = {
+        enable = lib.mkEnableOption {
+          description = "mounts ZFS RaidZ1 pool with 4 disks";
+          default = false;
+        };
+        poolName = lib.mkOption {
+          type = lib.types.str;
+          default = "tank";
+          description = "Name of the ZFS pool";
+        };
+        devices = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [
+            "/dev/disk/by-id/disk1"
+            "/dev/disk/by-id/disk2"
+            "/dev/disk/by-id/disk3"
+            "/dev/disk/by-id/disk4"
+          ];
+          description = "List of 4 disk devices for RaidZ1";
+        };
+        mountPoint = lib.mkOption {
+          type = lib.types.str;
+          default = "/zpool";
+          description = "Mount point for the ZFS pool";
+        };
+      };
     };
 
     config = lib.mkMerge [
@@ -107,6 +133,37 @@
         systemd.network.wait-online.enable = true;
 
         systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} user"];
+      })
+
+      (lib.mkIf config.mount-4dz1.enable {
+        # Enable ZFS support
+        boot.supportedFilesystems = ["zfs"];
+        boot.zfs.forceImportRoot = false;
+
+        # ZFS services
+        services.zfs = {
+          autoScrub.enable = true;
+          autoScrub.interval = "weekly";
+          trim.enable = true;
+        };
+
+        # Import the pool
+        boot.zfs.extraPools = [config.mount-4dz1.poolName];
+
+        # Mount the pool
+        fileSystems."${config.mount-4dz1.mountPoint}" = {
+          device = config.mount-4dz1.poolName;
+          fsType = "zfs";
+        };
+
+        # Create mount point directory
+        systemd.tmpfiles.rules = [
+          "d ${config.mount-4dz1.mountPoint} 1755 ${config.nixlab.mainUser} user"
+        ];
+
+        # Note: The pool must be created manually before enabling this option:
+        # sudo zpool create -f ${config.mount-4dz1.poolName} raidz1 \
+        #   ${lib.concatStringsSep " " config.mount-4dz1.devices}
       })
     ];
   };
