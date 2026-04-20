@@ -30,6 +30,12 @@ in {
     wifiIface = "wlp3s0";
     services = ["glance" "grafana" "prometheus" "loki" "bookstack" "comfyui" "ollama-gpu" "home-assistant"];
   };
+  nixnas1 = mkHostMeta {
+    address = "192.168.0.205";
+    ethIface = "eno1";
+    wifiIface = "wlp3s0";
+    services = ["glance" "grafana" "prometheus" "loki"];
+  };
   nixsun = mkHostMeta {
     address = "192.168.0.203";
     ethIface = "enp0s25";
