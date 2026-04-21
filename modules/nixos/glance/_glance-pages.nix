@@ -28,6 +28,11 @@
                 icon = "si:homepage";
               }
               {
+                title = "nixnas1 services";
+                url = "http://${allHosts.nixnas1.address}:3000/";
+                icon = "si:homepage";
+              }
+              {
                 title = "nixsun services";
                 url = "http://${allHosts.nixsun.address}:3000/";
                 icon = "si:homepage";
@@ -62,7 +67,7 @@
             cache = "3h";
             feeds = [
               {
-                url = "https://feather.onl/feeds";
+                url = "https://feather.onl/feeds/all";
                 title = "Wing's stuff";
               }
               {
