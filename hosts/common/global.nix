@@ -43,7 +43,7 @@
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
     services.rustdesk-nixlab = {
-      enable = true;
+      enable = false;
       openFirewall = true;
       dataDir = "/data/rustdesk";
       hbbs.enable = true;
@@ -58,6 +58,10 @@
         {
           hostname = "nixace";
           alias = "Nixace";
+        }
+        {
+          hostname = "nixnas1";
+          alias = "Nixnas1";
         }
         {
           hostname = "nixsun";
