@@ -2,6 +2,11 @@
   imports = [
   ];
 
+  fileSystems."/home" = {
+    device = "/dev/disk/by-label/home";
+    fsType = "ext4";
+  };
+
   fileSystems."/" = {
     device = "/dev/disk/by-label/root";
     fsType = "ext4";

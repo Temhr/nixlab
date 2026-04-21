@@ -5,7 +5,6 @@
       self.nixosModules.hardw--c-optional--mounts-extra
     ];
 
-    mount-home.enable = true; #mounts home drive
     #mount-shelf.enable = true; #mounts shelf drive in home directory
     #mount-mirror.enable = true; #mounts mirror drive
     mount-mirk1.enable = true; #mounts mirk1 nfs
