@@ -97,14 +97,14 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-# sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
-# nix-shell -p sops --run "sops updatekeys \
-#  modules/nixos/bookstack/bookstack.yaml \
-#  modules/nixos/comfyui/comfyui.yaml \
-#  modules/nixos/glance/glance.yaml \
-#  modules/nixos/monitoring/grafana/grafana.yaml \
-#  modules/nixos/home-assistant/home-assistant.yaml \
-#  modules/nixos/homepage-dashboard/homepage.yaml \
-#  hosts/common/optional/networking/networking.yaml \
-#  modules/nixos/ollama/ollama.yaml \
-#  modules/nixos/wiki-js/wiki-js.yaml"
+#sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
+#nix-shell -p sops --run "sops updatekeys \
+#modules/nixos/bookstack/bookstack.yaml \
+#modules/nixos/comfyui/comfyui.yaml \
+#modules/nixos/glance/glance.yaml \
+#modules/nixos/monitoring/grafana/grafana.yaml \
+#modules/nixos/home-assistant/home-assistant.yaml \
+#modules/nixos/homepage-dashboard/homepage.yaml \
+#hosts/common/optional/networking/networking.yaml \
+#modules/nixos/ollama/ollama.yaml \
+#modules/nixos/wiki-js/wiki-js.yaml"
