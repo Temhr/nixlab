@@ -33,7 +33,7 @@ in {
   nixnas1 = mkHostMeta {
     address = "192.168.0.205";
     ethIface = "eno1";
-    wifiIface = "wlp3s0";
+    wifiIface = "wlp2s0";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixsun = mkHostMeta {
