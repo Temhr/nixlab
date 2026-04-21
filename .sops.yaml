@@ -1,5 +1,6 @@
 keys:
   - &nixace age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332
+  - &nixnas1 age1e6v58rl5epzkjyf4uk5y34qeu35h8xs38mhj500sak3eq6pplp0s88c6pm
   - &nixsun age1uc06xlk6sw8z3nzc9sxugvcdmsnyrapwdamewmxz03hfqqcc8d3q29ydjr
   - &nixtop age1c2x4u2et0trw8vvtchxvrw9z2fazmxeqe2keawkzjejtvp9x75msxg9tcj
   - &nixvat age10jn8vgw2896pp52z3vxmdadczt267wsaca4ct6n597djuvrccc7qtdjkx0
@@ -10,6 +11,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -19,6 +21,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -28,6 +31,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -37,6 +41,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -46,6 +51,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -55,6 +61,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -64,6 +71,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -73,6 +81,7 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
@@ -82,7 +91,20 @@ creation_rules:
     key_groups:
       - age:
         - *nixace
+        - *nixnas1
         - *nixsun
         - *nixtop
         - *nixvat
         - *nixzen
+
+# sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
+# nix-shell -p sops --run "sops updatekeys \
+#  modules/nixos/bookstack/bookstack.yaml \
+#  modules/nixos/comfyui/comfyui.yaml \
+#  modules/nixos/glance/glance.yaml \
+#  modules/nixos/monitoring/grafana/grafana.yaml \
+#  modules/nixos/home-assistant/home-assistant.yaml \
+#  modules/nixos/homepage-dashboard/homepage.yaml \
+#  hosts/common/optional/networking/networking.yaml \
+#  modules/nixos/ollama/ollama.yaml \
+#  modules/nixos/wiki-js/wiki-js.yaml"
