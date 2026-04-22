@@ -58,7 +58,7 @@
         };
         mountPoint = lib.mkOption {
           type = lib.types.str;
-          default = "/zmir";
+          default = "/zpool";
           description = "Mount point for the ZFS pool";
         };
       };
