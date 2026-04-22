@@ -6,6 +6,7 @@
     ];
 
     boot.supportedFilesystems = [ "zfs" ];
+    networking.hostId = "c6e98cd9";
 
     #mount-shelf.enable = true; #mounts shelf drive in home directory
     #mount-mirror.enable = true; #mounts mirror drive
