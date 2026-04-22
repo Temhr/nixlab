@@ -2,6 +2,7 @@
   flake.nixosModules.hardw--c-optional--mounts-extra = {
     config,
     lib,
+    pkgs,
     allHosts,
     ...
   }: {
@@ -161,8 +162,8 @@
             enableMail = config.mount-zfs-4dz1.enableMonitoring && (config.mount-zfs-4dz1.alertEmail != "");
             settings = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
               ZED_EMAIL_ADDR = lib.mkIf (config.mount-zfs-4dz1.alertEmail != "") config.mount-zfs-4dz1.alertEmail;
-              ZED_EMAIL_PROG = "${lib.getExe' config.boot.kernelPackages.zfs "zed"}";
-              ZED_EMAIL_OPTS = "@ADDRESS@";
+              ZED_EMAIL_PROG = "mail";
+              ZED_EMAIL_OPTS = "-s '@SUBJECT@' @ADDRESS@";
 
               # Alert on pool state changes
               ZED_NOTIFY_VERBOSE = true;
@@ -195,42 +196,33 @@
         # ZFS health monitoring service
         systemd.services.zfs-health-check = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
           description = "ZFS Pool Health Check";
+          path = [ config.boot.zfs.package ];
           serviceConfig = {
             Type = "oneshot";
-            ExecStart = let
-              healthCheckScript = lib.getExe (config.boot.kernelPackages.zfs.overrideAttrs (old: {
-                name = "zfs-health-check";
-                buildCommand = ''
-                  mkdir -p $out/bin
-                  cat > $out/bin/zfs-health-check <<'EOF'
-                  #!/bin/sh
-                  POOL="${config.mount-zfs-4dz1.poolName}"
+            ExecStart = toString (pkgs.writeShellScript "zfs-health-check" ''
+              POOL="${config.mount-zfs-4dz1.poolName}"
 
-                  # Check pool status
-                  STATUS=$(zpool status -x "$POOL")
+              # Check pool status
+              STATUS=$(zpool status -x "$POOL")
 
-                  if [ "$STATUS" != "all pools are healthy" ]; then
-                    echo "WARNING: ZFS pool $POOL is not healthy!"
-                    echo "$STATUS"
+              if [ "$STATUS" != "all pools are healthy" ]; then
+                echo "WARNING: ZFS pool $POOL is not healthy!"
+                echo "$STATUS"
 
-                    # Log to journal
-                    logger -t zfs-health-check "ZFS pool $POOL health issue detected"
+                # Log to journal
+                logger -t zfs-health-check "ZFS pool $POOL health issue detected"
 
-                    ${lib.optionalString (config.mount-zfs-4dz1.alertEmail != "") ''
-                      # Send email alert if configured
-                      echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${config.mount-zfs-4dz1.alertEmail}
-                    ''}
+                ${lib.optionalString (config.mount-zfs-4dz1.alertEmail != "") ''
+                  # Send email alert if configured
+                  echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${config.mount-zfs-4dz1.alertEmail}
+                ''}
 
-                    exit 1
-                  fi
+                exit 1
+              fi
 
-                  echo "ZFS pool $POOL is healthy"
-                  exit 0
-                  EOF
-                  chmod +x $out/bin/zfs-health-check
-                '';
-              }));
-            in "${healthCheckScript}/bin/zfs-health-check";
+              echo "ZFS pool $POOL is healthy"
+              exit 0
+            '');
           };
         };
 
