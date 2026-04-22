@@ -90,6 +90,18 @@
                 url = "https://blog.thefrenchghosty.me/index.xml";
                 title = "The French Ghosty's blog";
               }
+            ];
+          }
+          {
+            type = "rss";
+            limit = 50;
+            "collapse-after" = 4;
+            cache = "3h";
+            feeds = [
+              {
+                url = "https://frontrowcrew.com/geeknights/podcast-rss/";
+                title = "GeekNights (podcast)";
+              }
               {
                 url = "https://freebooters.uk/rss.xml";
                 title = "Freebooters (podcast)";
