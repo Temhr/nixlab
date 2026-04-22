@@ -49,10 +49,10 @@
         devices = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [
-            "/dev/disk/by-id/scsi-35000cca073b298e0"
-            "/dev/disk/by-id/scsi-35000cca073739368"
-            "/dev/disk/by-id/scsi-35000cca073b28880"
-            "/dev/disk/by-id/scsi-35000cca073b23fdc"
+            "/dev/disk/by-id/disk1"
+            "/dev/disk/by-id/disk2"
+            "/dev/disk/by-id/disk3"
+            "/dev/disk/by-id/disk4"
           ];
           description = "List of 4 disk devices for RaidZ1";
         };
@@ -60,6 +60,16 @@
           type = lib.types.str;
           default = "/zpool";
           description = "Mount point for the ZFS pool";
+        };
+        enableMonitoring = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Enable ZFS health monitoring and email alerts";
+        };
+        alertEmail = lib.mkOption {
+          type = lib.types.str;
+          default = "";
+          description = "Email address for ZFS health alerts (requires mail to be configured)";
         };
       };
     };
@@ -139,12 +149,33 @@
         # Enable ZFS support
         boot.supportedFilesystems = ["zfs"];
         boot.zfs.forceImportRoot = false;
-        
+
         # ZFS services
         services.zfs = {
           autoScrub.enable = true;
           autoScrub.interval = "weekly";
           trim.enable = true;
+
+          # Enable ZFS Event Daemon for monitoring and alerts
+          zed = {
+            enableMail = config.mount-zfs-4dz1.enableMonitoring && (config.mount-zfs-4dz1.alertEmail != "");
+            settings = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
+              ZED_EMAIL_ADDR = lib.mkIf (config.mount-zfs-4dz1.alertEmail != "") config.mount-zfs-4dz1.alertEmail;
+              ZED_EMAIL_PROG = "${lib.getExe' config.boot.kernelPackages.zfs "zed"}";
+              ZED_EMAIL_OPTS = "@ADDRESS@";
+
+              # Alert on pool state changes
+              ZED_NOTIFY_VERBOSE = true;
+
+              # Specific events to monitor
+              ZED_NOTIFY_DATA = true;  # Data errors
+              ZED_NOTIFY_IO_ERRORS = true;  # I/O errors
+              ZED_NOTIFY_RESILVER = true;  # Resilver (rebuild) events
+
+              # Send email on these events
+              ZED_EMAIL_INTERVAL_SECS = 3600;  # Minimum 1 hour between emails
+            };
+          };
         };
 
         # Import the pool
@@ -161,10 +192,63 @@
           "d ${config.mount-zfs-4dz1.mountPoint} 1755 ${config.nixlab.mainUser} user"
         ];
 
+        # ZFS health monitoring service
+        systemd.services.zfs-health-check = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
+          description = "ZFS Pool Health Check";
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = let
+              healthCheckScript = lib.getExe (config.boot.kernelPackages.zfs.overrideAttrs (old: {
+                name = "zfs-health-check";
+                buildCommand = ''
+                  mkdir -p $out/bin
+                  cat > $out/bin/zfs-health-check <<'EOF'
+                  #!/bin/sh
+                  POOL="${config.mount-zfs-4dz1.poolName}"
+
+                  # Check pool status
+                  STATUS=$(zpool status -x "$POOL")
+
+                  if [ "$STATUS" != "all pools are healthy" ]; then
+                    echo "WARNING: ZFS pool $POOL is not healthy!"
+                    echo "$STATUS"
+
+                    # Log to journal
+                    logger -t zfs-health-check "ZFS pool $POOL health issue detected"
+
+                    ${lib.optionalString (config.mount-zfs-4dz1.alertEmail != "") ''
+                      # Send email alert if configured
+                      echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${config.mount-zfs-4dz1.alertEmail}
+                    ''}
+
+                    exit 1
+                  fi
+
+                  echo "ZFS pool $POOL is healthy"
+                  exit 0
+                  EOF
+                  chmod +x $out/bin/zfs-health-check
+                '';
+              }));
+            in "${healthCheckScript}/bin/zfs-health-check";
+          };
+        };
+
+        # Run health check daily
+        systemd.timers.zfs-health-check = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
+          description = "Daily ZFS Pool Health Check";
+          wantedBy = ["timers.target"];
+          timerConfig = {
+            OnCalendar = "daily";
+            Persistent = true;
+            Unit = "zfs-health-check.service";
+          };
+        };
+
         # IMPORTANT: You must also set networking.hostId in your main configuration!
         # Generate one with: head -c 8 /etc/machine-id
         # Then add to your config: networking.hostId = "a1b2c3d4";
-        
+
         # Note: The pool must be created manually before enabling this option:
         # sudo zpool create -f ${config.mount-zfs-4dz1.poolName} raidz1 \
         #   ${lib.concatStringsSep " " config.mount-zfs-4dz1.devices}
