@@ -36,7 +36,7 @@
           default = false;
         };
       };
-      mount-zfs-raidz1 = {
+      mount-zfs-4dz1 = {
         enable = lib.mkEnableOption {
           description = "mounts ZFS RaidZ1 pool with 4 disks";
           default = false;
@@ -58,7 +58,7 @@
         };
         mountPoint = lib.mkOption {
           type = lib.types.str;
-          default = "/zpool";
+          default = "/zmir";
           description = "Mount point for the ZFS pool";
         };
       };
@@ -135,7 +135,7 @@
         systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} user"];
       })
 
-      (lib.mkIf config.mount-zfs-raidz1.enable {
+      (lib.mkIf config.mount-zfs-4dz1.enable {
         # Enable ZFS support
         boot.supportedFilesystems = ["zfs"];
         boot.zfs.forceImportRoot = false;
@@ -148,17 +148,17 @@
         };
 
         # Import the pool
-        boot.zfs.extraPools = [config.mount-zfs-raidz1.poolName];
+        boot.zfs.extraPools = [config.mount-zfs-4dz1.poolName];
 
         # Mount the pool
-        fileSystems."${config.mount-zfs-raidz1.mountPoint}" = {
-          device = config.mount-zfs-raidz1.poolName;
+        fileSystems."${config.mount-zfs-4dz1.mountPoint}" = {
+          device = config.mount-zfs-4dz1.poolName;
           fsType = "zfs";
         };
 
         # Create mount point directory
         systemd.tmpfiles.rules = [
-          "d ${config.mount-zfs-raidz1.mountPoint} 1755 ${config.nixlab.mainUser} user"
+          "d ${config.mount-zfs-4dz1.mountPoint} 1755 ${config.nixlab.mainUser} user"
         ];
 
         # IMPORTANT: You must also set networking.hostId in your main configuration!
@@ -166,8 +166,8 @@
         # Then add to your config: networking.hostId = "a1b2c3d4";
         
         # Note: The pool must be created manually before enabling this option:
-        # sudo zpool create -f ${config.mount-zfs-raidz1.poolName} raidz1 \
-        #   ${lib.concatStringsSep " " config.mount-zfs-raidz1.devices}
+        # sudo zpool create -f ${config.mount-zfs-4dz1.poolName} raidz1 \
+        #   ${lib.concatStringsSep " " config.mount-zfs-4dz1.devices}
       })
     ];
   };
