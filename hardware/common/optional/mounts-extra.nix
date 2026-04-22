@@ -45,7 +45,7 @@
         poolName = lib.mkOption {
           type = lib.types.str;
           default = "tank";
-          description = "Name of the ZFS pool";
+          description = "Name of the ZFS pool (also used as mountpoint, e.g. 'tank' mounts to /tank)";
         };
         devices = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -56,11 +56,6 @@
             "/dev/disk/by-id/disk4"
           ];
           description = "List of 4 disk devices for RaidZ1";
-        };
-        mountPoint = lib.mkOption {
-          type = lib.types.str;
-          default = "/zpool";
-          description = "Mount point for the ZFS pool";
         };
         enableMonitoring = lib.mkOption {
           type = lib.types.bool;
@@ -146,7 +141,9 @@
         systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} user"];
       })
 
-      (lib.mkIf config.mount-zfs-4dz1.enable {
+      (lib.mkIf config.mount-zfs-4dz1.enable (let
+        mountPoint = "/${config.mount-zfs-4dz1.poolName}";
+      in {
         # Enable ZFS support
         boot.supportedFilesystems = ["zfs"];
         boot.zfs.forceImportRoot = false;
@@ -182,15 +179,15 @@
         # Import the pool
         boot.zfs.extraPools = [config.mount-zfs-4dz1.poolName];
 
-        # Mount the pool
-        fileSystems."${config.mount-zfs-4dz1.mountPoint}" = {
+        # Mount the pool (using poolName as mountpoint, e.g. tank -> /tank)
+        fileSystems."${mountPoint}" = {
           device = config.mount-zfs-4dz1.poolName;
           fsType = "zfs";
         };
 
         # Create mount point directory
         systemd.tmpfiles.rules = [
-          "d ${config.mount-zfs-4dz1.mountPoint} 1755 ${config.nixlab.mainUser} user"
+          "d ${mountPoint} 1755 ${config.nixlab.mainUser} user"
         ];
 
         # ZFS health monitoring service
@@ -244,7 +241,8 @@
         # Note: The pool must be created manually before enabling this option:
         # sudo zpool create -f ${config.mount-zfs-4dz1.poolName} raidz1 \
         #   ${lib.concatStringsSep " " config.mount-zfs-4dz1.devices}
-      })
+        # This will automatically mount at ${mountPoint}
+      }))
     ];
   };
 }
