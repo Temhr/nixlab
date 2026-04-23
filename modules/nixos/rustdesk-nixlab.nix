@@ -352,7 +352,7 @@
             options = {
               hostname = lib.mkOption {
                 type = lib.types.str;
-                example = "nixsun";
+                example = "nix1";
                 description = ''
                   The NixOS hostname of the peer (config.networking.hostName).
                   Used to derive a stable RustDesk ID via hostname hash.
@@ -371,9 +371,8 @@
           default = [];
           example = lib.literalExpression ''
             [
-              { hostname = "nixsun";  alias = "Living Room";  }
-              { hostname = "nixace";  alias = "Office Desk";  }
-              { hostname = "nixvat";  alias = "Server Rack";  }
+              { hostname = "nix1";  alias = "Living Room";  }
+              { hostname = "nix2";  alias = "Office Desk";  }
             ]
           '';
           description = ''
@@ -663,16 +662,14 @@ services.rustdesk-nixlab = {
   };
 
   peers = [
-    { hostname = "nixsun";  alias = "Living Room";  }
-    { hostname = "nixace";  alias = "Office Desk";  }
-    { hostname = "nixvat";  alias = "Server Rack";  }
+    { hostname = "nix1";  alias = "Living Room";  }
+    { hostname = "nix2";  alias = "Office Desk";  }
   ];
 };
 
 # Each machine's RustDesk ID is derived from its hostname, e.g.:
-#   nixsun → hash → 483920174
-#   nixace → hash → 729401853
-#   nixvat → hash → 156738290
+#   nix1 → hash → 483920174
+#   nix2 → hash → 729401853
 # These are stable and consistent across all machines in the fleet.
 
 
@@ -692,8 +689,8 @@ services.rustdesk-nixlab = {
   };
 
   peers = [
-    { hostname = "nixsun";  alias = "Living Room";  }
-    { hostname = "nixace";  alias = "Office Desk";  }
+    { hostname = "nix1";  alias = "Living Room";  }
+    { hostname = "nix2";  alias = "Office Desk";  }
   ];
 };
 
@@ -714,8 +711,8 @@ services.rustdesk-nixlab = {
   };
 
   peers = [
-    { hostname = "nixsun"; alias = "Living Room"; }
-    { hostname = "nixace"; alias = "Office Desk"; }
+    { hostname = "nix1"; alias = "Living Room"; }
+    { hostname = "nix2"; alias = "Office Desk"; }
   ];
 };
 
