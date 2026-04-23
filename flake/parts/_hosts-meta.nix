@@ -25,36 +25,42 @@ let
   };
 in {
   nixace = mkHostMeta {
+    name = "nixace";
     address = "192.168.0.200";
     ethIface = "enp0s31f6";
     wifiIface = "wlp3s0";
     services = ["glance" "grafana" "prometheus" "loki" "bookstack" "comfyui" "ollama-gpu" "home-assistant"];
   };
   nixnas1 = mkHostMeta {
+    name = "nixnas1";
     address = "192.168.0.205";
     ethIface = "eno1";
     wifiIface = "wlp2s0";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixsun = mkHostMeta {
+    name = "nixsun";
     address = "192.168.0.203";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixtop = mkHostMeta {
+    name = "nixtop";
     address = "192.168.0.202";
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixvat = mkHostMeta {
+    name = "nixvat";
     address = "192.168.0.201";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
     services = ["glance" "grafana" "prometheus" "loki" "ollama-cpu" "syncthing-nixvat" "wikijs" "zola"];
   };
   nixzen = mkHostMeta {
+    name = "nixzen";
     address = "192.168.0.204";
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
