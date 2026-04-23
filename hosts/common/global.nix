@@ -15,7 +15,6 @@
       self.nixosModules.servc--homepage-nixlab
       self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.systm--networking
-      self.nixosModules.servc--rustdesk-nixlab
     ];
 
     services.ignoreLid = {
@@ -41,45 +40,6 @@
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.systemd = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
-    };
-    services.rustdesk-nixlab = {
-      enable = false;
-      openFirewall = true;
-      dataDir = "/data/rustdesk";
-      hbbs.enable = true;
-      hbbr.enable = true;
-
-      # autoKey = true (default) — no publicKey needed, ever.
-      connection = {
-        idServer = "${hostMeta.address}";
-        relayServer = "${hostMeta.address}";
-      };
-      peers = [
-        {
-          hostname = "nixace";
-          alias = "Nixace";
-        }
-        {
-          hostname = "nixnas1";
-          alias = "Nixnas1";
-        }
-        {
-          hostname = "nixsun";
-          alias = "Nixsun";
-        }
-        {
-          hostname = "nixtop";
-          alias = "Nixtop";
-        }
-        {
-          hostname = "nixvat";
-          alias = "Nixvat";
-        }
-        {
-          hostname = "nixzen";
-          alias = "Nixzen";
-        }
-      ];
     };
   };
 }

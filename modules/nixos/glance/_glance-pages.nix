@@ -23,7 +23,7 @@
             title = "Homepage";
             sites = [
               {
-                title = "${allHosts.nixace.name} services";
+                title = "nixace services";
                 url = "http://${allHosts.nixace.address}:3000/";
                 icon = "si:homepage";
               }
