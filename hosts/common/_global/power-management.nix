@@ -3,11 +3,14 @@
   pkgs,
   ...
 }: {
-  # Disable WD HDD power management (already have this)
+  # Disable WD HDD power management (conditional on drive existence)
   systemd.services.disable-hdd-apm = {
     description = "Disable APM on data drive";
     wantedBy = ["multi-user.target"];
     before = ["local-fs.target"];
+    unitConfig = {
+      ConditionPathExists = "/dev/disk/by-label/data";
+    };
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.hdparm}/bin/hdparm -B 255 -S 0 /dev/disk/by-label/data";
