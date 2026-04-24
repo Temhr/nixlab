@@ -324,7 +324,7 @@
           echo "Starting model cleanup..."
 
           # Get list of installed models (skip header line)
-          installed_models=$(${resolvedPackage}/bin/ollama list | tail -n +2 | awk '{print $1}')
+          installed_models=$(${resolvedPackage}/bin/ollama list | ${pkgs.coreutils}/bin/tail -n +2 | ${pkgs.gawk}/bin/awk '{print $1}')
 
           # Whitelisted models
           whitelist=(${lib.concatStringsSep " " (map (m: ''"${m}"'') cfg.models)})
