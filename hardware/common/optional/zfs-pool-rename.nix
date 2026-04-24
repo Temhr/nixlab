@@ -106,27 +106,18 @@
                 ;;
             esac
           done < <(
-            zpool import 2>/dev/null | while IFS= read -r raw; do
-              case "$raw" in
-                *"pool: "*)
-                  # Extract pool name token after "pool: "
-                  name="''${raw##*pool: }"
-                  name="''${name%% *}"
-                  printf 'POOL:%s\n' "$name"
+            # Use default IFS word-splitting (read -r tok rest) so leading tabs
+            # AND spaces are consumed. zpool import indents device lines with tabs,
+            # which [! ] space-only stripping cannot handle.
+            zpool import 2>/dev/null | while read -r tok rest; do
+              case "$tok" in
+                "pool:")
+                  printf 'POOL:%s\n' "$rest"
                   ;;
-                *)
-                  # Strip leading whitespace to get first token
-                  tok="''${raw#"''${raw%%[! ]*}"}"
-                  tok="''${tok%% *}"
-                  # Emit as DEV if it looks like a device (contains '-') and is
-                  # not a known vdev group keyword or status word
-                  case "$tok" in
-                    raidz*|mirror-*|spare*|log*|cache*|""|ONLINE|DEGRADED|FAULTED|OFFLINE|REMOVED|UNAVAIL)
-                      : ;;
-                    *-*)
-                      printf 'DEV:%s\n' "$tok"
-                      ;;
-                  esac
+                raidz*|mirror-*|spare*|log*|cache*|config:|action:|state:|id:|""|ONLINE|DEGRADED|FAULTED|OFFLINE|REMOVED|UNAVAIL)
+                  : ;;
+                *-*)
+                  printf 'DEV:%s\n' "$tok"
                   ;;
               esac
             done
