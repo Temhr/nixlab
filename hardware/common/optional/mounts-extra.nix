@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.hardw--c-optional--mounts-extra = {
     config,
     lib,
@@ -6,6 +6,9 @@
     allHosts,
     ...
   }: {
+    imports = [
+      self.nixosModules.hardw--c-optional--zfs-pool-rename
+    ];
     options = {
       mount-home = {
         enable = lib.mkEnableOption {
@@ -45,7 +48,16 @@
         poolName = lib.mkOption {
           type = lib.types.str;
           default = "tank";
-          description = "Name of the ZFS pool (also used as mountpoint, e.g. 'tank' mounts to /tank)";
+          description = ''
+            Desired name of the ZFS pool. On each boot, if no pool with this
+            name is found but exactly one other importable pool exists, it will
+            be automatically renamed to this name.
+          '';
+        };
+        mountPoint = lib.mkOption {
+          type = lib.types.str;
+          default = "/${config.mount-zfs-4dz1.poolName}";
+          description = "Filesystem path to mount the ZFS pool root dataset. Defaults to /<poolName>.";
         };
         devices = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -142,7 +154,8 @@
       })
 
       (lib.mkIf config.mount-zfs-4dz1.enable (let
-        mountPoint = "/${config.mount-zfs-4dz1.poolName}";
+        cfg        = config.mount-zfs-4dz1;
+        mountPoint = cfg.mountPoint;
       in {
         # Enable ZFS support
         boot.supportedFilesystems = ["zfs"];
@@ -156,9 +169,9 @@
 
           # Enable ZFS Event Daemon for monitoring and alerts
           zed = {
-            enableMail = config.mount-zfs-4dz1.enableMonitoring && (config.mount-zfs-4dz1.alertEmail != "");
-            settings = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
-              ZED_EMAIL_ADDR = lib.mkIf (config.mount-zfs-4dz1.alertEmail != "") config.mount-zfs-4dz1.alertEmail;
+            enableMail = cfg.enableMonitoring && (cfg.alertEmail != "");
+            settings = lib.mkIf cfg.enableMonitoring {
+              ZED_EMAIL_ADDR = lib.mkIf (cfg.alertEmail != "") cfg.alertEmail;
               ZED_EMAIL_PROG = "mail";
               ZED_EMAIL_OPTS = "-s '@SUBJECT@' @ADDRESS@";
 
@@ -176,12 +189,12 @@
           };
         };
 
-        # Import the pool
-        boot.zfs.extraPools = [config.mount-zfs-4dz1.poolName];
+        # Import the pool by its desired name (rename service ensures this name is correct)
+        boot.zfs.extraPools = [cfg.poolName];
 
-        # Mount the pool (using poolName as mountpoint, e.g. tank -> /tank)
+        # Mount the pool root dataset at the configured mountpoint
         fileSystems."${mountPoint}" = {
-          device = config.mount-zfs-4dz1.poolName;
+          device = cfg.poolName;
           fsType = "zfs";
         };
 
@@ -190,14 +203,26 @@
           "d ${mountPoint} 1755 ${config.nixlab.mainUser} user"
         ];
 
+        # Delegate pool rename to the dedicated module, passing poolName + devices
+        # as the fingerprint. The module is a no-op if the pool is already correctly named.
+        zfs-pool-rename = {
+          enable   = true;
+          poolName = cfg.poolName;
+          devices  = cfg.devices;
+        };
+
+        # fileSystems must wait for the rename service so the import sees the right name
+        fileSystems."${mountPoint}".options =
+          ["x-systemd.after=zfs-pool-rename.service"];
+
         # ZFS health monitoring service
-        systemd.services.zfs-health-check = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
+        systemd.services.zfs-health-check = lib.mkIf cfg.enableMonitoring {
           description = "ZFS Pool Health Check";
           path = [ config.boot.zfs.package ];
           serviceConfig = {
             Type = "oneshot";
             ExecStart = toString (pkgs.writeShellScript "zfs-health-check" ''
-              POOL="${config.mount-zfs-4dz1.poolName}"
+              POOL="${cfg.poolName}"
 
               # Check pool status
               STATUS=$(zpool status -x "$POOL")
@@ -209,9 +234,9 @@
                 # Log to journal
                 logger -t zfs-health-check "ZFS pool $POOL health issue detected"
 
-                ${lib.optionalString (config.mount-zfs-4dz1.alertEmail != "") ''
+                ${lib.optionalString (cfg.alertEmail != "") ''
                   # Send email alert if configured
-                  echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${config.mount-zfs-4dz1.alertEmail}
+                  echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${cfg.alertEmail}
                 ''}
 
                 exit 1
@@ -224,7 +249,7 @@
         };
 
         # Run health check daily
-        systemd.timers.zfs-health-check = lib.mkIf config.mount-zfs-4dz1.enableMonitoring {
+        systemd.timers.zfs-health-check = lib.mkIf cfg.enableMonitoring {
           description = "Daily ZFS Pool Health Check";
           wantedBy = ["timers.target"];
           timerConfig = {
@@ -239,9 +264,11 @@
         # Then add to your config: networking.hostId = "a1b2c3d4";
 
         # Note: The pool must be created manually before enabling this option:
-        # sudo zpool create -f ${config.mount-zfs-4dz1.poolName} raidz1 \
-        #   ${lib.concatStringsSep " " config.mount-zfs-4dz1.devices}
-        # This will automatically mount at ${mountPoint}
+        # sudo zpool create -f ${cfg.poolName} raidz1 \
+        #   ${lib.concatStringsSep " " cfg.devices}
+        # It will be mounted at ${mountPoint}
+        # To rename: just change poolName — the rename service will detect the
+        # old name automatically on next boot and rename it in place.
       }))
     ];
   };

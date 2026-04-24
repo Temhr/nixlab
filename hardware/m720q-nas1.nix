@@ -10,6 +10,7 @@
     mount-zfs-4dz1 = {
       enable = true;
       poolName = "tank";
+      mountPoint = "/mirror";
       devices = [
         "/dev/disk/by-id/scsi-35000cca073b298e0"
         "/dev/disk/by-id/scsi-35000cca073739368"
