@@ -192,10 +192,12 @@
         # Import the pool by its desired name (rename service ensures this name is correct)
         boot.zfs.extraPools = [cfg.poolName];
 
-        # Mount the pool root dataset at the configured mountpoint
+        # Mount the pool root dataset at the configured mountpoint.
+        # Must wait for the rename service so the import sees the correct name.
         fileSystems."${mountPoint}" = {
-          device = cfg.poolName;
-          fsType = "zfs";
+          device  = cfg.poolName;
+          fsType  = "zfs";
+          options = ["x-systemd.after=zfs-pool-rename.service"];
         };
 
         # Create mount point directory
@@ -210,10 +212,6 @@
           poolName = cfg.poolName;
           devices  = cfg.devices;
         };
-
-        # fileSystems must wait for the rename service so the import sees the right name
-        fileSystems."${mountPoint}".options =
-          ["x-systemd.after=zfs-pool-rename.service"];
 
         # ZFS health monitoring service
         systemd.services.zfs-health-check = lib.mkIf cfg.enableMonitoring {
