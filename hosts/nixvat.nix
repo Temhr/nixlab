@@ -5,11 +5,6 @@
       self.nixosModules.hosts--nixvat
       self.nixosModules.hosts--c-global
       self.nixosModules.hardw--zb17g1-k3
-      self.nixosModules.servc--bookstack-nixlab
-      self.nixosModules.secrets--bookstack
-      self.nixosModules.servc--comfyui-p5000
-      self.nixosModules.servc--comfyui-extensions
-      self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--glance-nixlab
       self.nixosModules.servc--ollama
       self.nixosModules.secrets--ollama
@@ -81,24 +76,6 @@
       listenAddress = "0.0.0.0";
       dataDir = "/data/wiki-js";
       openFirewall = true;
-    };
-    services.bookstack-nixlab = {
-      enable = false;
-      listenAddress = "0.0.0.0";
-      openFirewall = true;
-      dataDir = "/data/bookstack";
-    };
-    services.homeassistant-custom = {
-      enable = false;
-      listenAddress = "0.0.0.0";
-      openFirewall = true;
-      dataDir = "/data/homeassistant";
-    };
-    services.nodered-service = {
-      enable = false;
-      listenAddress = "0.0.0.0";
-      openFirewall = true;
-      dataDir = "/data/node-red";
     };
     services.zola-nixlab = {
       enable = true;

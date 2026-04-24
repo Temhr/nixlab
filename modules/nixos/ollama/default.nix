@@ -303,6 +303,63 @@
       };
 
       # --------------------------------------------------------------------------
+      # MODEL CLEANUP
+      # --------------------------------------------------------------------------
+      systemd.services.ollama-cleanup = lib.mkIf (cfg.models != []) {
+        description = "Clean up non-whitelisted Ollama Models";
+        wantedBy = ["multi-user.target"];
+        after = ["ollama-models.service"];
+        requires = ["ollama-models.service"];
+
+        environment.OLLAMA_HOST = "${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
+
+        serviceConfig = {
+          Type = "oneshot";
+          User = "ollama";
+          Group = "ollama";
+          RemainAfterExit = true;
+        };
+
+        script = ''
+          echo "Starting model cleanup..."
+
+          # Get list of installed models (skip header line)
+          installed_models=$(${resolvedPackage}/bin/ollama list | tail -n +2 | awk '{print $1}')
+
+          # Whitelisted models
+          whitelist=(${lib.concatStringsSep " " (map (m: ''"${m}"'') cfg.models)})
+
+          # Check each installed model
+          for model in $installed_models; do
+            # Skip if model is empty or just whitespace
+            if [ -z "$model" ] || [ "$model" = " " ]; then
+              continue
+            fi
+
+            # Check if model is in whitelist
+            is_whitelisted=false
+            for allowed in "''${whitelist[@]}"; do
+              if [ "$model" = "$allowed" ]; then
+                is_whitelisted=true
+                break
+              fi
+            done
+
+            # Remove if not whitelisted
+            if [ "$is_whitelisted" = false ]; then
+              echo "Removing non-whitelisted model: $model"
+              ${resolvedPackage}/bin/ollama rm "$model" \
+                || echo "Warning: failed to remove $model"
+            else
+              echo "Keeping whitelisted model: $model"
+            fi
+          done
+
+          echo "Model cleanup complete"
+        '';
+      };
+
+      # --------------------------------------------------------------------------
       # OPEN WEBUI SERVICE
       # --------------------------------------------------------------------------
       systemd.services.open-webui = {
