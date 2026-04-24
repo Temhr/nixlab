@@ -208,9 +208,10 @@
         # Delegate pool rename to the dedicated module, passing poolName + devices
         # as the fingerprint. The module is a no-op if the pool is already correctly named.
         zfs-pool-rename = {
-          enable   = true;
-          poolName = cfg.poolName;
-          devices  = cfg.devices;
+          enable     = true;
+          poolName   = cfg.poolName;
+          mountPoint = cfg.mountPoint;
+          devices    = cfg.devices;
         };
 
         # ZFS health monitoring service

@@ -16,6 +16,17 @@
         description = "The desired pool name. If a pool with this name is already imported, the service exits immediately.";
       };
 
+      mountPoint = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+          The desired ZFS mountpoint property for the pool root dataset.
+          After import/rename the service will reconcile the pool's stored
+          mountpoint property to this value if it differs, so changing
+          mountPoint in config takes effect on the next boot without any
+          manual zfs-set commands.
+        '';
+      };
+
       devices = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         description = ''
@@ -29,107 +40,125 @@
     config = lib.mkIf config.zfs-pool-rename.enable (let
       cfg = config.zfs-pool-rename;
 
-      # Build a newline-separated literal list of expected devices for the shell
-      # script to compare against. Sorted so order doesn't matter at match time.
-      expectedDevices = lib.concatStringsSep "\n" (builtins.sort builtins.lessThan cfg.devices);
-
       renameScript = pkgs.writeShellScript "zfs-pool-rename" ''
         set -euo pipefail
         DESIRED="${cfg.poolName}"
+        DESIRED_MP="${cfg.mountPoint}"
 
         # ── Step 1 ────────────────────────────────────────────────────────────
-        # If the pool is already imported under the right name, nothing to do.
+        # If the pool is already imported under the right name, skip straight
+        # to mountpoint reconciliation (Step 6).
         if zpool list "$DESIRED" > /dev/null 2>&1; then
-          echo "zfs-pool-rename: pool '$DESIRED' already present — skipping."
-          exit 0
-        fi
+          echo "zfs-pool-rename: pool '$DESIRED' already present — skipping rename."
+        else
 
-        # ── Step 2 ────────────────────────────────────────────────────────────
-        # Build the expected device fingerprint (sorted, one per line).
-        EXPECTED=$(printf '%s\n' ${lib.escapeShellArgs cfg.devices} | sort)
+          # ── Step 2 ──────────────────────────────────────────────────────────
+          # Build the expected device fingerprint: sorted, one path per line.
+          # Baked in at eval time from the Nix devices list.
+          EXPECTED=$(printf '%s\n' ${lib.escapeShellArgs cfg.devices} | sort)
 
-        # ── Step 3 ────────────────────────────────────────────────────────────
-        # Scan all importable (not currently imported) pools and collect their
-        # device lists. `zpool import -v` output looks like:
-        #
-        #    pool: oldname
-        #      id: 1234567890
-        #   state: ONLINE
-        #  action: Online all devices with the pool or fix errors...
-        #  config:
-        #          oldname     ONLINE
-        #            /dev/disk/by-id/scsi-abc  ONLINE
-        #            /dev/disk/by-id/scsi-def  ONLINE
-        #            ...
-        #
-        # We parse it into per-pool blocks and extract the device paths.
+          # ── Step 3 ──────────────────────────────────────────────────────────
+          # Scan all importable (not currently imported) pools and collect their
+          # device lists. `zpool import -v` produces output like:
+          #
+          #    pool: oldname
+          #      id: 1234567890
+          #   state: ONLINE
+          #  config:
+          #          oldname           ONLINE
+          #            /dev/disk/by-id/scsi-abc  ONLINE
+          #            /dev/disk/by-id/scsi-def  ONLINE
+          #
+          # Pure-shell parser — no awk or grep; only builtins + sort/sed from
+          # coreutils (guaranteed in PATH via the service's path= setting).
 
-        MATCH_POOL=""
+          MATCH_POOL=""
+          CURRENT_POOL=""
+          CURRENT_DEVS=""
 
-        # Use awk to emit "POOL:<name>" headers and "DEV:<path>" lines, then
-        # process them pool-by-pool in the shell.
-        while IFS= read -r line; do
-          case "$line" in
-            POOL:*)
-              # Flush previous pool if we have one accumulated
-              if [ -n "''${CURRENT_POOL:-}" ] && [ -n "''${CURRENT_DEVS:-}" ]; then
-                SORTED_DEVS=$(printf '%s\n' $CURRENT_DEVS | sort)
-                if [ "$SORTED_DEVS" = "$EXPECTED" ]; then
-                  MATCH_POOL="$CURRENT_POOL"
-                fi
+          # Flush the device list accumulated for CURRENT_POOL and check for match.
+          flush_pool() {
+            if [ -n "$CURRENT_POOL" ] && [ -n "$CURRENT_DEVS" ]; then
+              SORTED_DEVS=$(printf '%s\n' $CURRENT_DEVS | sort)
+              if [ "$SORTED_DEVS" = "$EXPECTED" ]; then
+                MATCH_POOL="$CURRENT_POOL"
               fi
-              CURRENT_POOL="''${line#POOL:}"
-              CURRENT_DEVS=""
-              ;;
-            DEV:*)
-              CURRENT_DEVS="''${CURRENT_DEVS} ''${line#DEV:}"
-              ;;
-          esac
-        done < <(
-          zpool import -v 2>/dev/null | awk '
-            /^   pool:/ { print "POOL:" $2 }
-            /\/dev\//   { print "DEV:"  $1 }
-          '
-        )
+            fi
+          }
 
-        # Flush the last pool
-        if [ -n "''${CURRENT_POOL:-}" ] && [ -n "''${CURRENT_DEVS:-}" ]; then
-          SORTED_DEVS=$(printf '%s\n' $CURRENT_DEVS | sort)
-          if [ "$SORTED_DEVS" = "$EXPECTED" ]; then
-            MATCH_POOL="$CURRENT_POOL"
+          while IFS= read -r line; do
+            case "$line" in
+              POOL:*)
+                flush_pool
+                CURRENT_POOL="''${line#POOL:}"
+                CURRENT_DEVS=""
+                ;;
+              DEV:*)
+                CURRENT_DEVS="''${CURRENT_DEVS} ''${line#DEV:}"
+                ;;
+            esac
+          done < <(
+            # Inline pure-shell tokeniser: emit POOL:<n> and DEV:<path> tokens.
+            zpool import -v 2>/dev/null | while IFS= read -r raw; do
+              case "$raw" in
+                *"pool: "*)
+                  name="''${raw##*pool: }"
+                  name="''${name%% *}"
+                  printf 'POOL:%s\n' "$name"
+                  ;;
+                *"/dev/"*)
+                  dev="''${raw#"''${raw%%[! ]*}"}"  # strip leading spaces
+                  dev="''${dev%% *}"                 # take first token only
+                  printf 'DEV:%s\n' "$dev"
+                  ;;
+              esac
+            done
+          )
+          flush_pool  # flush the final pool block
+
+          # ── Step 4 ────────────────────────────────────────────────────────
+          if [ -z "$MATCH_POOL" ]; then
+            echo "zfs-pool-rename: ERROR — no importable pool matched the expected device set:"
+            printf '%s\n' ${lib.escapeShellArgs cfg.devices} | sort | sed 's/^/  /'
+            echo "zfs-pool-rename: cannot proceed; pool '$DESIRED' will not be imported."
+            exit 1
           fi
+
+          # ── Step 5 ────────────────────────────────────────────────────────
+          if [ "$MATCH_POOL" = "$DESIRED" ]; then
+            # Pool is importable under the correct name — just import it.
+            echo "zfs-pool-rename: importing pool '$DESIRED'..."
+            zpool import "$DESIRED"
+          else
+            # Device-matched pool found under a different name — rename on import.
+            echo "zfs-pool-rename: matched pool '$MATCH_POOL' by device fingerprint."
+            echo "zfs-pool-rename: renaming '$MATCH_POOL' -> '$DESIRED'..."
+            zpool import "$MATCH_POOL" "$DESIRED"
+          fi
+          echo "zfs-pool-rename: import complete."
+
+        fi  # end of rename block
+
+        # ── Step 6 ────────────────────────────────────────────────────────────
+        # Reconcile the pool's stored mountpoint property with the configured
+        # value. This makes mountPoint changes in Nix config self-healing on
+        # next boot without any manual zfs-set commands.
+        CURRENT_MP=$(zfs get -H -o value mountpoint "$DESIRED")
+        if [ "$CURRENT_MP" != "$DESIRED_MP" ]; then
+          echo "zfs-pool-rename: updating mountpoint: '$CURRENT_MP' -> '$DESIRED_MP'"
+          zfs set mountpoint="$DESIRED_MP" "$DESIRED"
+        else
+          echo "zfs-pool-rename: mountpoint '$DESIRED_MP' already correct — skipping."
         fi
-
-        # ── Step 4 ────────────────────────────────────────────────────────────
-        # Evaluate the match result.
-
-        if [ -z "$MATCH_POOL" ]; then
-          echo "zfs-pool-rename: ERROR — no importable pool matched the expected device set:"
-          printf '%s\n' ${lib.escapeShellArgs cfg.devices} | sort | sed 's/^/  /'
-          echo "Cannot proceed; pool '$DESIRED' will not be imported."
-          exit 1
-        fi
-
-        if [ "$MATCH_POOL" = "$DESIRED" ]; then
-          # Shouldn't reach here (caught in Step 1), but be safe.
-          echo "zfs-pool-rename: pool '$DESIRED' already has the correct name — skipping."
-          exit 0
-        fi
-
-        # ── Step 5 ────────────────────────────────────────────────────────────
-        # Exactly one device-matched pool found under a different name — rename it.
-        echo "zfs-pool-rename: matched pool '$MATCH_POOL' by device fingerprint."
-        echo "zfs-pool-rename: renaming '$MATCH_POOL' -> '$DESIRED'..."
-        zpool import "$MATCH_POOL" "$DESIRED"
-        echo "zfs-pool-rename: rename complete."
       '';
     in {
       systemd.services.zfs-pool-rename = {
-        description = "Rename ZFS pool to '${cfg.poolName}' by device fingerprint";
+        description = "Import/rename ZFS pool '${cfg.poolName}' and reconcile mountpoint";
         wantedBy    = ["zfs-import.target"];
         before      = ["zfs-import-${cfg.poolName}.service" "zfs-import.target"];
         after       = ["systemd-udev-settle.service"];
-        path        = [config.boot.zfs.package];
+        # coreutils provides sort and sed used in the script
+        path        = [config.boot.zfs.package pkgs.coreutils];
         serviceConfig = {
           Type            = "oneshot";
           RemainAfterExit = true;
