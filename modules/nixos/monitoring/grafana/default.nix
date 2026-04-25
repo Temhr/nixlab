@@ -93,7 +93,7 @@
           default = null;
           description = ''
             Path to a file containing GF_SECURITY_ADMIN_PASSWORD=<value>.
-            Set automatically by importing the sops--grafana module.
+            Set automatically by importing the nsops--grafana module.
             If null, no credentials file is loaded (service will use Grafana defaults).
           '';
         };

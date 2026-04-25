@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sops--glance = {
+  flake.nixosModules.nsops--glance = {
     config,
     lib,
     ...

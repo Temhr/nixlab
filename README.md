@@ -153,10 +153,10 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───hosts--nixtop: NixOS module
 │   ├───hosts--nixvat: NixOS module
 │   ├───hosts--nixzen: NixOS module
-│   ├───sops--bookstack: NixOS module
-│   ├───sops--grafana: NixOS module
-│   ├───sops--networking: NixOS module
-│   ├───sops--ollama: NixOS module
+│   ├───nsops--bookstack: NixOS module
+│   ├───nsops--grafana: NixOS module
+│   ├───nsops--networking: NixOS module
+│   ├───nsops--ollama: NixOS module
 │   ├───servc--bookstack-nixlab: NixOS module
 │   ├───servc--comfyui-extensions: NixOS module
 │   ├───servc--comfyui-models: NixOS module

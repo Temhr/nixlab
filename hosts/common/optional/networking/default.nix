@@ -53,7 +53,7 @@
     '';
   in {
     imports = [
-      self.nixosModules.sops--networking
+      self.nixosModules.nsops--networking
     ];
     networking.useDHCP = false;
     networking.nameservers = hostMeta.nameservers;

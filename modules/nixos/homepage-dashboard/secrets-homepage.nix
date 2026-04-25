@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sops--homepage = {
+  flake.nixosModules.nsops--homepage = {
     config,
     lib,
     ...

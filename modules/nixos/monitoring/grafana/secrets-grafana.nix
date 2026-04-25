@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sops--grafana = {
+  flake.nixosModules.nsops--grafana = {
     config,
     lib,
     ...

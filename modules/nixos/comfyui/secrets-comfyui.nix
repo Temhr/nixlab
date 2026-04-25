@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sops--comfyui = {
+  flake.nixosModules.nsops--comfyui = {
     config,
     lib,
     ...

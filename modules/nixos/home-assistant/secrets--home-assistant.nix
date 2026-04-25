@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.sops--home-assistant = {
+  flake.nixosModules.nsops--home-assistant = {
     config,
     lib,
     ...
