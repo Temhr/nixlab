@@ -163,14 +163,14 @@
     in {
       systemd.services.zfs-pool-rename = {
         description = "Import/rename ZFS pool '${cfg.poolName}' and reconcile mountpoint";
-        wantedBy    = ["zfs-import.target"];
-        before      = ["zfs-import-${cfg.poolName}.service" "zfs-import.target"];
-        after       = ["systemd-udev-settle.service"];
-        path        = [config.boot.zfs.package pkgs.coreutils];
+        wantedBy = ["zfs-import.target"];
+        before = ["zfs-import-${cfg.poolName}.service" "zfs-import.target"];
+        after = ["systemd-udev-settle.service"];
+        path = [config.boot.zfs.package pkgs.coreutils];
         serviceConfig = {
-          Type            = "oneshot";
+          Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart       = toString renameScript;
+          ExecStart = toString renameScript;
         };
       };
     });

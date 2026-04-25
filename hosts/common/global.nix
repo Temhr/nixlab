@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--c-global = {hostMeta, ...}: {
+  flake.nixosModules.hosts--c-global = {...}: {
     imports = [
       ./_global
       self.nixosModules.hosts--c-optional--development

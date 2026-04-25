@@ -154,7 +154,7 @@
       })
 
       (lib.mkIf config.mount-zfs-4dz1.enable (let
-        cfg        = config.mount-zfs-4dz1;
+        cfg = config.mount-zfs-4dz1;
         mountPoint = cfg.mountPoint;
       in {
         # Enable ZFS support
@@ -179,12 +179,12 @@
               ZED_NOTIFY_VERBOSE = true;
 
               # Specific events to monitor
-              ZED_NOTIFY_DATA = true;  # Data errors
-              ZED_NOTIFY_IO_ERRORS = true;  # I/O errors
-              ZED_NOTIFY_RESILVER = true;  # Resilver (rebuild) events
+              ZED_NOTIFY_DATA = true; # Data errors
+              ZED_NOTIFY_IO_ERRORS = true; # I/O errors
+              ZED_NOTIFY_RESILVER = true; # Resilver (rebuild) events
 
               # Send email on these events
-              ZED_EMAIL_INTERVAL_SECS = 3600;  # Minimum 1 hour between emails
+              ZED_EMAIL_INTERVAL_SECS = 3600; # Minimum 1 hour between emails
             };
           };
         };
@@ -195,8 +195,8 @@
         # Mount the pool root dataset at the configured mountpoint.
         # Must wait for the rename service so the import sees the correct name.
         fileSystems."${mountPoint}" = {
-          device  = cfg.poolName;
-          fsType  = "zfs";
+          device = cfg.poolName;
+          fsType = "zfs";
           options = ["x-systemd.after=zfs-pool-rename.service"];
         };
 
@@ -208,16 +208,16 @@
         # Delegate pool rename to the dedicated module, passing poolName + devices
         # as the fingerprint. The module is a no-op if the pool is already correctly named.
         zfs-pool-rename = {
-          enable     = true;
-          poolName   = cfg.poolName;
+          enable = true;
+          poolName = cfg.poolName;
           mountPoint = cfg.mountPoint;
-          devices    = cfg.devices;
+          devices = cfg.devices;
         };
 
         # ZFS health monitoring service
         systemd.services.zfs-health-check = lib.mkIf cfg.enableMonitoring {
           description = "ZFS Pool Health Check";
-          path = [ config.boot.zfs.package ];
+          path = [config.boot.zfs.package];
           serviceConfig = {
             Type = "oneshot";
             ExecStart = toString (pkgs.writeShellScript "zfs-health-check" ''
@@ -234,9 +234,9 @@
                 logger -t zfs-health-check "ZFS pool $POOL health issue detected"
 
                 ${lib.optionalString (cfg.alertEmail != "") ''
-                  # Send email alert if configured
-                  echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${cfg.alertEmail}
-                ''}
+                # Send email alert if configured
+                echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${cfg.alertEmail}
+              ''}
 
                 exit 1
               fi

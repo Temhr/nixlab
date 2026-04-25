@@ -55,7 +55,6 @@
 
     ## SELF-HOSTED SERVICES
 
-
     # Define your Flatpak packages here
     flatpakPackages = [
       #"com.usebottles.bottles"
