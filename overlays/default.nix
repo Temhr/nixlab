@@ -1,4 +1,3 @@
-# This file imports and combines all overlays
 {inputs, ...}: {
   flake.overlays = {
     additions = final: _prev: import ../pkgs final.pkgs;
@@ -6,20 +5,17 @@
     modifications = final: prev: let
       ollamaOverlay =
         import ./_ollama-p5000.nix {
-          unstableNixpkgs = inputs.nixpkgs-unstable;
-          stableNixpkgs = inputs.nixpkgs-stable;
+          nixpkgs-ollama = inputs.nixpkgs-ollama; # Changed from unstableNixpkgs/stableNixpkgs
           system = final.stdenv.hostPlatform.system;
         }
         final
         prev;
-      open-webuiOverlay = import ./_open-webui.nix final prev;
+      # Remove the open-webui overlay since it's now in _ollama-p5000.nix
       comfyuiOverlay = import ./_comfyui-p5000.nix final prev;
     in
-      ollamaOverlay // open-webuiOverlay // comfyuiOverlay;
+      ollamaOverlay // comfyuiOverlay; # Removed open-webuiOverlay
 
-    # The separate unstable/stable overlays are now only needed if other
-    # parts of your config use pkgs.unstable / pkgs.stable directly.
-    # Keep them if so, remove if not.
+    # Keep these if other parts of your config use pkgs.unstable / pkgs.stable
     unstable-packages = final: _prev: {
       unstable = import inputs.nixpkgs-unstable {
         system = final.stdenv.hostPlatform.system;

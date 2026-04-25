@@ -374,7 +374,7 @@
             DATA_DIR = cfg.webuiDataDir;
             ENV = "prod";
             STATIC_DIR = "${cfg.webuiDataDir}/static";
-            FRONTEND_BUILD_DIR = "${pkgs.unstable.open-webui}/share/open-webui";
+            FRONTEND_BUILD_DIR = "${pkgs.open-webui}/share/open-webui";
           }
           (lib.mkIf (cfg.webuiSecretKeyFile == null) {
             WEBUI_SECRET_KEY = "change-me-set-webuiSecretKeyFile";
@@ -385,7 +385,7 @@
           User = "open-webui";
           Group = "open-webui";
           WorkingDirectory = cfg.webuiDataDir;
-          ExecStart = "${pkgs.unstable.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
+          ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
           Restart = "on-failure";
           RestartSec = "10s";
           TimeoutStartSec = "120s";
