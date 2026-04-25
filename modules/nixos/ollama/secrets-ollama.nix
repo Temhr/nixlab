@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.secrets--ollama = {
+  flake.nixosModules.sops--ollama = {
     config,
     lib,
     ...
@@ -21,7 +21,7 @@
       assertions = [
         {
           assertion = config.services.ollama-stack ? enable;
-          message = "secrets--ollama requires servc--ollama to also be imported";
+          message = "sops--ollama requires servc--ollama to also be imported";
         }
       ];
       sops.age.keyFile = "/var/lib/sops-nix/key.txt";

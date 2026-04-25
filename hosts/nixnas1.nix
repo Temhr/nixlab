@@ -2,9 +2,13 @@
   flake.nixosConfigurations.nixnas1 = self.lib.mkHost {
     name = "nixnas1";
     modules = [
+      # Hardware
+      self.nixosModules.hardw--m720q-nas1
+      # Host config
       self.nixosModules.hosts--nixnas1
       self.nixosModules.hosts--c-global
-      self.nixosModules.hardw--m720q-nas1
+      # Home manager
+      # Services
     ];
   };
   flake.nixosModules.hosts--nixnas1 = {

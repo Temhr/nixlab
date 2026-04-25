@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.secrets--bookstack = {
+  flake.nixosModules.sops--bookstack = {
     config,
     lib,
     ...

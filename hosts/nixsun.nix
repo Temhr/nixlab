@@ -2,9 +2,13 @@
   flake.nixosConfigurations.nixsun = self.lib.mkHost {
     name = "nixsun";
     modules = [
+      # Hardware
+      self.nixosModules.hardw--zb17g1-k4
+      # Host config
       self.nixosModules.hosts--nixsun
       self.nixosModules.hosts--c-global
-      self.nixosModules.hardw--zb17g1-k4
+      # Home manager
+      # Services
     ];
   };
   flake.nixosModules.hosts--nixsun = {

@@ -2,9 +2,13 @@
   flake.nixosConfigurations.nixtop = self.lib.mkHost {
     name = "nixtop";
     modules = [
+      # Hardware
+      self.nixosModules.hardw--zb17g2-k5
+      # Host config
       self.nixosModules.hosts--nixtop
       self.nixosModules.hosts--c-global
-      self.nixosModules.hardw--zb17g2-k5
+      # Home manager
+      # Services
       self.nixosModules.servc--waydroid-nixlab
     ];
   };

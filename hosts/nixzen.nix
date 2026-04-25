@@ -2,9 +2,13 @@
   flake.nixosConfigurations.nixzen = self.lib.mkHost {
     name = "nixzen";
     modules = [
+      # Hardware
+      self.nixosModules.hardw--zb15g2-k1
+      # Host config
       self.nixosModules.hosts--nixzen
       self.nixosModules.hosts--c-global
-      self.nixosModules.hardw--zb15g2-k1
+      # Home manager
+      # Services
       self.nixosModules.systm--auto-backup-phone-media
       self.nixosModules.servc--syncthing-nixlab
     ];

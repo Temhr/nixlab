@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.secrets--wiki-js = {
+  flake.nixosModules.sops--wiki-js = {
     config,
     lib,
     ...

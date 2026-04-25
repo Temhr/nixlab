@@ -2,16 +2,20 @@
   flake.nixosConfigurations.nixace = self.lib.mkHost {
     name = "nixace";
     modules = [
+      # Hardware
+      self.nixosModules.hardw--zb17g4-p5
+      # Host config
       self.nixosModules.hosts--nixace
       self.nixosModules.hosts--c-global
-      self.nixosModules.hardw--zb17g4-p5
+      # Home manager
+      # Services
       self.nixosModules.servc--bookstack-nixlab
-      self.nixosModules.secrets--bookstack
+      self.nixosModules.sops--bookstack
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--ollama
-      self.nixosModules.secrets--ollama
+      self.nixosModules.sops--ollama
     ];
   };
   flake.nixosModules.hosts--nixace = {

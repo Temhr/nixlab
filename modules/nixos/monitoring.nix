@@ -8,7 +8,7 @@
   in {
     imports = [
       self.nixosModules.servc--grafana-nixlab
-      self.nixosModules.secrets--grafana
+      self.nixosModules.sops--grafana
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab
     ];

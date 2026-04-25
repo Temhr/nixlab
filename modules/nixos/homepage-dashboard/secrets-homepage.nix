@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.secrets--homepage = {
+  flake.nixosModules.sops--homepage = {
     config,
     lib,
     ...

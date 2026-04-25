@@ -2,18 +2,22 @@
   flake.nixosConfigurations.nixvat = self.lib.mkHost {
     name = "nixvat";
     modules = [
+      # Hardware
+      self.nixosModules.hardw--zb17g1-k3
+      # Host config
       self.nixosModules.hosts--nixvat
       self.nixosModules.hosts--c-global
-      self.nixosModules.hardw--zb17g1-k3
+      # Home manager
+      # Services
       self.nixosModules.servc--glance-nixlab
       self.nixosModules.servc--ollama
-      self.nixosModules.secrets--ollama
+      self.nixosModules.sops--ollama
       self.nixosModules.servc--gotosocial-nixlab
       self.nixosModules.servc--home-assistant-nixlab
       self.nixosModules.servc--node-red-nixlab
       self.nixosModules.servc--syncthing-nixlab
       self.nixosModules.servc--wiki-js-nixlab
-      self.nixosModules.secrets--wiki-js
+      self.nixosModules.sops--wiki-js
       self.nixosModules.servc--zola-nixlab
     ];
   };
