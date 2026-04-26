@@ -5,29 +5,33 @@
     modifications = final: prev: let
       ollamaOverlay =
         import ./_ollama-p5000.nix {
-          nixpkgs-ollama = inputs.nixpkgs-ollama; # Changed from unstableNixpkgs/stableNixpkgs
+          nixpkgs-ollama = inputs.nixpkgs-ollama;
           system = final.stdenv.hostPlatform.system;
         }
         final
         prev;
-      # Remove the open-webui overlay since it's now in _ollama-p5000.nix
+
+      pytorchOverlay = import ./_pytorch-p5000.nix final prev;
+
       comfyuiOverlay = import ./_comfyui-p5000.nix final prev;
     in
-      ollamaOverlay // comfyuiOverlay; # Removed open-webuiOverlay
+      ollamaOverlay // pytorchOverlay // comfyuiOverlay;
 
-    # Keep these if other parts of your config use pkgs.unstable / pkgs.stable
     unstable-packages = final: _prev: {
       unstable = import inputs.nixpkgs-unstable {
         system = final.stdenv.hostPlatform.system;
         config.allowUnfree = true;
         config.cudaSupport = true;
+        config.cudaCapabilities = ["6.1"];
       };
     };
+
     stable-packages = final: _prev: {
       stable = import inputs.nixpkgs-stable {
         system = final.stdenv.hostPlatform.system;
         config.allowUnfree = true;
         config.cudaSupport = true;
+        config.cudaCapabilities = ["6.1"];
       };
     };
   };

@@ -16,9 +16,9 @@
     # import-tree recursively discovers every .nix file
     import-tree.url = "github:vic/import-tree";
 
-    # Version Pinned Apps (April 25th).
+    # Version Pinned Apps (2026-04-22).
     # nix flake metadata nixpkgs-unstable | grep "Revision"
-    nixpkgs-ollama.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-ollama.url = "github:nixos/nixpkgs/0726a0ecb6d4e08f6adced58726b95db924cef57";
     # ComfyUI Pin is in nixlab/overlays/_comfyui-p5000.nix
 
     # User environment management

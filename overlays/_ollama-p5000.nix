@@ -19,7 +19,7 @@ in {
 
   ollama = pinnedPkgs.ollama;
   open-webui = pinnedPkgs.open-webui;
-/*
+  /*
   # Python fixes from _open-webui.nix
   ctranslate2 = prev.ctranslate2.overrideAttrs (oldAttrs: {
     postPatch =
@@ -36,5 +36,5 @@ in {
       extract-msg = pyprev.extract-msg.overridePythonAttrs (_: {dontCheckRuntimeDeps = true;});
     };
   };
-*/
+  */
 }
