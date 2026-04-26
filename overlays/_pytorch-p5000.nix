@@ -8,10 +8,11 @@ _final: prev: {
       };
 
       # pytorch-bin might also need this if it exists
-      pytorch-bin = python-prev.pytorch-bin.override (old: {
+      # Fix the 'or' syntax error by wrapping in parentheses
+      pytorch-bin = (python-prev.pytorch-bin.override (old: {
         cudaCapabilities = [ "6.1" ];
         cudaSupport = true;
-      }) or python-prev.pytorch-bin;
+      })) or python-prev.pytorch-bin;
     };
   };
 
@@ -22,6 +23,12 @@ _final: prev: {
         cudaCapabilities = [ "6.1" ];
         cudaSupport = true;
       };
+
+      # Fix the same syntax error here
+      pytorch-bin = (python-prev.pytorch-bin.override (old: {
+        cudaCapabilities = [ "6.1" ];
+        cudaSupport = true;
+      })) or python-prev.pytorch-bin;
     };
   };
 }
