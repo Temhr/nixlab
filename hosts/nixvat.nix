@@ -96,7 +96,7 @@
       extraUsers = [config.nixlab.mainUser];
     };
     services.ollama-stack = {
-      enable = true;
+      enable = false;
       acceleration = "cpu";
       extraUsers = [config.nixlab.mainUser];
       ollamaListenAddress = "0.0.0.0";
