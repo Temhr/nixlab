@@ -75,10 +75,6 @@
                 title = "Chris Were's stuff";
               }
               {
-                url = "https://thepolarbear.co.uk";
-                title = "Hamish's stuff";
-              }
-              {
                 url = "https://friendo.monster/rss.xml";
                 title = "Drew's blog";
               }
@@ -117,6 +113,10 @@
               {
                 url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=1344";
                 title = "Fedi Player One (Chris Were's Peertube)";
+              }
+              {
+                url = "https://video.fedihost.co/feeds/videos.xml?videoChannelId=8";
+                title = "FediHost Podcast (Peertube)";
               }
             ];
           }
