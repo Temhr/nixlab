@@ -95,6 +95,19 @@
       };
       extraUsers = [config.nixlab.mainUser];
     };
+    services.ollama-stack = {
+      enable = true;
+      acceleration = "cpu";
+      extraUsers = [config.nixlab.mainUser];
+      ollamaListenAddress = "0.0.0.0";
+      webuiListenAddress = "0.0.0.0";
+      # Data directories
+      ollamaDataDir = "/data/ollama";
+      webuiDataDir = "/data/open-webui";
+      # Pre-download models
+      models = ["llama2" "mistral" "codellama"];
+      openFirewall = true;
+    };
     services.syncthing-nixlab = {
       enable = true;
       user = "${config.nixlab.mainUser}";

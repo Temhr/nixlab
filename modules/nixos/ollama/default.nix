@@ -10,13 +10,13 @@
     # Choose packages based on acceleration mode
     defaultPackage =
       if cfg.acceleration == "cpu"
-      then pkgs.ollama-cpu  # From stable
-      else pkgs.ollama-cuda-p5000;  # From nixpkgs-ollama
+      then pkgs.ollama-cpu # From stable
+      else pkgs.ollama-cuda-p5000; # From nixpkgs-ollama
 
     defaultWebUI =
       if cfg.acceleration == "cpu"
-      then pkgs.open-webui-stable  # From stable
-      else pkgs.open-webui-cuda;  # From nixpkgs-ollama
+      then pkgs.open-webui-stable # From stable
+      else pkgs.open-webui-cuda; # From nixpkgs-ollama
 
     resolvedPackage =
       if cfg.package != null
@@ -381,7 +381,7 @@
             DATA_DIR = cfg.webuiDataDir;
             ENV = "prod";
             STATIC_DIR = "${cfg.webuiDataDir}/static";
-            FRONTEND_BUILD_DIR = "${resolvedWebUI}/share/open-webui";  # Changed
+            FRONTEND_BUILD_DIR = "${resolvedWebUI}/share/open-webui"; # Changed
           }
           (lib.mkIf (cfg.webuiSecretKeyFile == null) {
             WEBUI_SECRET_KEY = "change-me-set-webuiSecretKeyFile";

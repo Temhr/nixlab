@@ -20,7 +20,7 @@ in {
   # CUDA-optimized Ollama for P5000
   ollama-cuda-p5000 =
     (cudaPkgs.ollama-cuda.override {
-      cudaArches = ["sm_61"];  # ONLY P5000
+      cudaArches = ["sm_61"]; # ONLY P5000
     }).overrideAttrs (old: {
       pname = "ollama-cuda-p5000";
       name = "ollama-cuda-p5000-${old.version}";
