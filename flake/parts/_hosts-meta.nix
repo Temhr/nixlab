@@ -52,7 +52,7 @@ in {
     address = "192.168.0.201";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
-    services = ["glance" "grafana" "prometheus" "loki" "ollama-cpu" "syncthing-nixvat" "wikijs" "zola"];
+    services = ["glance" "grafana" "prometheus" "loki" "syncthing-nixvat" "wikijs" "zola"];
   };
   nixzen = mkHostMeta {
     address = "192.168.0.204";
