@@ -6,12 +6,11 @@
     inherit system;
     config.allowUnfree = true;
     config.cudaSupport = true;
-    config.cudaCapabilities = ["6.1"]; # Add this here too
   };
 in {
   ollama-cuda-p5000 =
     (pinnedPkgs.ollama-cuda.override {
-      cudaArches = ["sm_61" "sm_75" "sm_80" "sm_86" "sm_89" "sm_90"]; # ONLY P5000 - was building 6 architectures!
+      cudaArches = ["sm_61"]; # ONLY P5000 - was building 6 architectures!
     }).overrideAttrs (old: {
       pname = "ollama-cuda-p5000";
       name = "ollama-cuda-p5000-${old.version}";
