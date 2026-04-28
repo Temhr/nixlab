@@ -10,12 +10,6 @@
       self.nixosModules.hardw--c-optional--zfs-pool-rename
     ];
     options = {
-      mount-home = {
-        enable = lib.mkEnableOption {
-          description = "mounts home drive";
-          default = false;
-        };
-      };
       mount-shelf = {
         enable = lib.mkEnableOption {
           description = "mounts shelf drive in home directory";
@@ -83,12 +77,6 @@
     };
 
     config = lib.mkMerge [
-      (lib.mkIf config.mount-home.enable {
-        fileSystems."/home" = {
-          device = "/dev/disk/by-label/home";
-          fsType = "ext4";
-        };
-      })
       (lib.mkIf config.mount-shelf.enable {
         fileSystems."/data" = {
           device = "/dev/disk/by-label/data";

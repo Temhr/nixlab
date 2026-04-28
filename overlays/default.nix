@@ -6,6 +6,7 @@
       ollamaOverlay =
         import ./_ollama-p5000.nix {
           nixpkgs-ollama = inputs.nixpkgs-ollama;
+          nixpkgs-stable = inputs.nixpkgs-stable;
           system = final.stdenv.hostPlatform.system;
         }
         final
@@ -24,8 +25,7 @@
           allowUnfree = true;
           cudaSupport = true;
           cudaCapabilities = ["6.1"];
-          # Optimize CUDA builds
-          cudaForwardCompat = false; # Don't build forward-compat
+          cudaForwardCompat = false;
         };
       };
     };
