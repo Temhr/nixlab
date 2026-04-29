@@ -9,34 +9,26 @@
     config.allowUnfree = true;
   };
 
-  # For CUDA: Use a minimal import just for Ollama, disable problematic packages
+  # Import JUST for getting ollama source/version, use prev's CUDA packages
   ollamaPkgs = import nixpkgs-ollama {
     inherit system;
-    config = {
-      allowUnfree = true;
-      cudaSupport = true;
-      cudaCapabilities = ["6.1"];
-      cudaForwardCompat = false;  # Disable the broken cuda_compat
-    };
+    config.allowUnfree = true;
   };
 in {
-  # CUDA-optimized Ollama for P5000 - built from ollamaPkgs
-  ollama-cuda-p5000 = (ollamaPkgs.ollama-cuda.override {
+  # Build Ollama using YOUR nixpkgs CUDA packages (which work)
+  ollama-cuda-p5000 = (prev.ollama-cuda.override {
     cudaArches = ["sm_61"];
-    # Use CUDA packages from prev (your existing nixpkgs) instead of ollamaPkgs
-    # This avoids the cuda_compat issue
-    inherit (prev.cudaPackages) cudatoolkit;
   }).overrideAttrs (old: {
     pname = "ollama-cuda-p5000";
     name = "ollama-cuda-p5000-${old.version}";
-    vendorHash = "sha256-Lc1Ktdqtv2VhJQssk8K1UOimeEjVNvDWePE9WkamCos=";
+    # You may need to update this hash if the version changed
+    # vendorHash = "sha256-Lc1Ktdqtv2VhJQssk8K1UOimeEjVNvDWePE9WkamCos=";
   });
 
   # CPU-only Ollama from stable
   ollama-cpu = stablePkgs.ollama;
 
-  # Use Open WebUI from your existing nixpkgs (prev) to avoid CUDA issues
-  # It will use the already-compiled PyTorch from your 33-hour build
+  # Use Open WebUI from stable/your existing nixpkgs
   open-webui-stable = stablePkgs.open-webui;
-  open-webui-cuda = prev.open-webui;  # Use your existing nixpkgs, not ollamaPkgs
+  open-webui-cuda = prev.open-webui;  # Your already-built PyTorch!
 }
