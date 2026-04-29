@@ -6,6 +6,7 @@
       ollamaOverlay =
         import ./_ollama-p5000.nix {
           nixpkgs-ollama = inputs.nixpkgs-ollama;
+          nixpkgs-stable = inputs.nixpkgs-stable;
           system = final.stdenv.hostPlatform.system;
         }
         final

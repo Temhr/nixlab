@@ -1,11 +1,17 @@
 {
   nixpkgs-ollama,
+  nixpkgs-stable,
   system,
 }: _: prev: let
   pinnedPkgs = import nixpkgs-ollama {
     inherit system;
     config.allowUnfree = true;
     config.cudaSupport = true;
+  };
+
+  stablePkgs = import nixpkgs-stable {
+    inherit system;
+    config.allowUnfree = true;
   };
 in {
   ollama-cuda-p5000 =
@@ -17,6 +23,9 @@ in {
       vendorHash = "sha256-Lc1Ktdqtv2VhJQssk8K1UOimeEjVNvDWePE9WkamCos=";
     });
 
-  ollama = pinnedPkgs.ollama;
-  open-webui = pinnedPkgs.open-webui;
+  # CPU-only ollama from stable
+  ollama = stablePkgs.ollama;
+
+  # Open WebUI from stable for CPU mode
+  open-webui = stablePkgs.open-webui;
 }
