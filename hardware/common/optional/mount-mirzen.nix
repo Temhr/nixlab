@@ -1,10 +1,10 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--mount-nfszen = {
+  flake.nixosModules.hardw--c-optional--mount-mirzen = {
     allHosts,
     config,
     ...
   }: {
-    fileSystems."/mnt/nfszen" = {
+    fileSystems."/mnt/mirzen" = {
       device = "${allHosts.nixzen.address}:/mirror";
       fsType = "nfs";
       options = [

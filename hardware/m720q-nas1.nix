@@ -3,8 +3,8 @@
     imports = [
       self.nixosModules.hardw--c-global
       self.nixosModules.hardw--c-optional--mounts-extra
-      self.nixosModules.hardw--c-optional--mount-nfsvat
-      self.nixosModules.hardw--c-optional--mount-nfszen
+      self.nixosModules.hardw--c-optional--mount-mirvat
+      self.nixosModules.hardw--c-optional--mount-mirzen
     ];
 
     networking.hostId = "c6e98cd9";

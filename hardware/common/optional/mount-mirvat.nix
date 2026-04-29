@@ -1,10 +1,10 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--mount-nfsvat = {
+  flake.nixosModules.hardw--c-optional--mount-mirvat = {
     allHosts,
     config,
     ...
   }: {
-    fileSystems."/mnt/nfsvat" = {
+    fileSystems."/mnt/mirvat" = {
       device = "${allHosts.nixvat.address}:/mirror";
       fsType = "nfs";
       options = [
