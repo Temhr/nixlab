@@ -16,7 +16,7 @@
 in {
   ollama-cuda-p5000 =
     (pinnedPkgs.ollama-cuda.override {
-      cudaArches = ["sm_61"];
+      cudaArches = ["sm_61" "sm_75" "sm_80" "sm_86" "sm_89" "sm_90"];
     }).overrideAttrs (old: {
       pname = "ollama-cuda-p5000";
       name = "ollama-cuda-p5000-${old.version}";
