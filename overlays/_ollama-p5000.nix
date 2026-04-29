@@ -8,9 +8,10 @@
     inherit system;
     config = {
       allowUnfree = true;
-      allowUnsupportedSystem = true;  # Add this
+      allowUnsupportedSystem = true;
       cudaSupport = true;
       cudaCapabilities = ["6.1"];
+      cudaForwardCompat = false; # Disable forward compat to skip cuda_compat
     };
   };
 
@@ -24,6 +25,12 @@ in {
   ollama-cuda-p5000 =
     (cudaPkgs.ollama-cuda.override {
       cudaArches = ["sm_61"]; # ONLY P5000
+      # Also try disabling cuda_compat at the package level
+      cudaPackages =
+        cudaPkgs.cudaPackages
+        // {
+          cuda_compat = null;
+        };
     }).overrideAttrs (old: {
       pname = "ollama-cuda-p5000";
       name = "ollama-cuda-p5000-${old.version}";
