@@ -6,7 +6,6 @@
       ollamaOverlay =
         import ./_ollama-p5000.nix {
           nixpkgs-ollama = inputs.nixpkgs-ollama;
-          nixpkgs-stable = inputs.nixpkgs-stable;
           system = final.stdenv.hostPlatform.system;
         }
         final
@@ -21,24 +20,18 @@
     unstable-packages = final: _prev: {
       unstable = import inputs.nixpkgs-unstable {
         system = final.stdenv.hostPlatform.system;
-        config = {
-          allowUnfree = true;
-          cudaSupport = true;
-          cudaCapabilities = ["6.1"];
-          cudaForwardCompat = false;
-        };
+        config.allowUnfree = true;
+        config.cudaSupport = true;
+        config.cudaCapabilities = ["6.1"];
       };
     };
 
     stable-packages = final: _prev: {
       stable = import inputs.nixpkgs-stable {
         system = final.stdenv.hostPlatform.system;
-        config = {
-          allowUnfree = true;
-          cudaSupport = true;
-          cudaCapabilities = ["6.1"];
-          cudaForwardCompat = false;
-        };
+        config.allowUnfree = true;
+        config.cudaSupport = true;
+        config.cudaCapabilities = ["6.1"];
       };
     };
   };

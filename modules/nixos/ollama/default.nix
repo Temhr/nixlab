@@ -7,23 +7,16 @@
   }: let
     cfg = config.services.ollama-stack;
 
-    # Choose packages based on acceleration mode
+    # Resolved package: if user didn't override, pick based on acceleration
     defaultPackage =
       if cfg.acceleration == "cpu"
-      then pkgs.ollama-cpu  # From stable
-      else pkgs.ollama-cuda-p5000;  # From nixpkgs-ollama
-
-    defaultWebUI =
-      if cfg.acceleration == "cpu"
-      then pkgs.open-webui-stable  # From stable
-      else pkgs.open-webui-cuda;  # From nixpkgs-ollama
+      then pkgs.ollama
+      else pkgs.ollama-cuda-p5000;
 
     resolvedPackage =
       if cfg.package != null
       then cfg.package
       else defaultPackage;
-
-    resolvedWebUI = defaultWebUI;
   in {
     # ============================================================================
     # OPTIONS
@@ -381,7 +374,7 @@
             DATA_DIR = cfg.webuiDataDir;
             ENV = "prod";
             STATIC_DIR = "${cfg.webuiDataDir}/static";
-            FRONTEND_BUILD_DIR = "${resolvedWebUI}/share/open-webui";  # Changed
+            FRONTEND_BUILD_DIR = "${pkgs.open-webui}/share/open-webui";
           }
           (lib.mkIf (cfg.webuiSecretKeyFile == null) {
             WEBUI_SECRET_KEY = "change-me-set-webuiSecretKeyFile";
@@ -392,7 +385,7 @@
           User = "open-webui";
           Group = "open-webui";
           WorkingDirectory = cfg.webuiDataDir;
-          ExecStart = "${resolvedWebUI}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
+          ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
           Restart = "on-failure";
           RestartSec = "10s";
           TimeoutStartSec = "120s";
