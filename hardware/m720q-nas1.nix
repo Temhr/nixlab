@@ -2,13 +2,12 @@
   flake.nixosModules.hardw--m720q-nas1 = {...}: {
     imports = [
       self.nixosModules.hardw--c-global
-      self.nixosModules.hardw--c-optional--mounts-extra
+      self.nixosModules.hardw--c-optional--mount-4dz1
       self.nixosModules.hardw--c-optional--mount-mirvat
       self.nixosModules.hardw--c-optional--mount-mirzen
     ];
 
     networking.hostId = "c6e98cd9";
-    #mount-shelf.enable = true; #mounts shelf drive in home directory
     mount-zfs-4dz1 = {
       enable = true;
       poolName = "tanks";
@@ -22,6 +21,5 @@
       enableMonitoring = true;
       #alertEmail = "your-email@example.com";  # Optional: for email alerts
     };
-    #mount-mirror.enable = true; #mounts mirror drive
   };
 }
