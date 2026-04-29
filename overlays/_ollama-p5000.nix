@@ -6,9 +6,12 @@
   # CUDA packages from pinned nixpkgs-ollama
   cudaPkgs = import nixpkgs-ollama {
     inherit system;
-    config.allowUnfree = true;
-    config.cudaSupport = true;
-    config.cudaCapabilities = ["6.1"];
+    config = {
+      allowUnfree = true;
+      allowUnsupportedSystem = true;  # Add this
+      cudaSupport = true;
+      cudaCapabilities = ["6.1"];
+    };
   };
 
   # CPU packages from stable
