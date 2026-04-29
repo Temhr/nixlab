@@ -7,6 +7,7 @@
   cudaPkgs = import nixpkgs-ollama {
     inherit system;
     config.allowUnfree = true;
+    config.allowUnsupportedSystem = true;
     config.cudaSupport = true;
     config.cudaCapabilities = ["6.1"];
   };
