@@ -18,7 +18,7 @@
 
     # Version Pinned Apps (2026-04-22).
     # nix flake metadata nixpkgs-unstable | grep "Revision"
-    nixpkgs-ollama.url = "github:nixos/nixpkgs/0726a0ecb6d4e08f6adced58726b95db924cef57";
+    nixpkgs-ollama.url = "github:nixos/nixpkgs/1c3fe55ad329cbcb28471bb30f05c9827f724c76";
     # ComfyUI Pin is in nixlab/overlays/_comfyui-p5000.nix
 
     # User environment management
