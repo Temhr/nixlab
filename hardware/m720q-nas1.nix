@@ -3,6 +3,8 @@
     imports = [
       self.nixosModules.hardw--c-global
       self.nixosModules.hardw--c-optional--mounts-extra
+      self.nixosModules.hardw--c-optional--mount-nfsvat
+      self.nixosModules.hardw--c-optional--mount-nfszen
     ];
 
     networking.hostId = "c6e98cd9";
@@ -21,7 +23,5 @@
       #alertEmail = "your-email@example.com";  # Optional: for email alerts
     };
     #mount-mirror.enable = true; #mounts mirror drive
-    mount-mirk1.enable = true; #mounts mirk1 nfs
-    mount-mirk3.enable = true; #mounts mirk3 nfs
   };
 }

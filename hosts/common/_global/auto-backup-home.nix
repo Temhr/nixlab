@@ -10,14 +10,22 @@
     SOURCE_DIR="/home/temhr/"
     BACKUP_DESTINATIONS=(
         "/mirror"
-        "/mnt/mirk1"
-        "/mnt/mirk3"
+        "/mnt/nfsace"
+        "/mnt/nfssun"
+        "/mnt/nfstop"
+        "/mnt/nfsvat"
+        "/mnt/nfszen"
+        "/mnt/nfsnas1"
     )
 
     # NFS mount points (destinations that require mount verification)
     NFS_MOUNTS=(
-        "/mnt/mirk3"
-        "/mnt/mirk1"
+        "/mnt/nfsace"
+        "/mnt/nfssun"
+        "/mnt/nfstop"
+        "/mnt/nfsvat"
+        "/mnt/nfszen"
+        "/mnt/nfsnas1"
     )
 
     # Rsync options
