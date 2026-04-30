@@ -7,7 +7,7 @@ keys:
   - &nixzen age1mt0jjfq5wp2wx49aj8a9l5k2ejz8xlgnd5jp3e7ysze8jkwa8c9qj2w4ng
 
 creation_rules:
-  - path_regex: secrets/bookstack\.yaml$
+  - path_regex: modules/nixos/bookstack/bookstack\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -17,7 +17,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/comfyui\.yaml$
+  - path_regex: modules/nixos/comfyui/comfyui\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -27,7 +27,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/glance\.yaml$
+  - path_regex: modules/nixos/glance/glance\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -37,7 +37,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/grafana\.yaml$
+  - path_regex: modules/nixos/monitoring/grafana/grafana\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -47,7 +47,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/home-assistant\.yaml$
+  - path_regex: modules/nixos/home-assistant/home-assistant\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -57,7 +57,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/homepage\.yaml$
+  - path_regex: modules/nixos/homepage-dashboard/homepage\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -67,7 +67,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/networking\.yaml$
+  - path_regex: hosts/common/optional/networking/networking\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -77,7 +77,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/ollama\.yaml$
+  - path_regex: modules/nixos/ollama/ollama\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -87,7 +87,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: secrets/wiki-js\.yaml$
+  - path_regex: modules/nixos/wiki-js/wiki-js\.yaml$
     key_groups:
       - age:
         - *nixace
