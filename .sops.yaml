@@ -7,7 +7,7 @@ keys:
   - &nixzen age1mt0jjfq5wp2wx49aj8a9l5k2ejz8xlgnd5jp3e7ysze8jkwa8c9qj2w4ng
 
 creation_rules:
-  - path_regex: modules/nixos/bookstack/bookstack\.yaml$
+  - path_regex: sops/bookstack\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -17,7 +17,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/comfyui/comfyui\.yaml$
+  - path_regex: sops/comfyui\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -27,7 +27,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/glance/glance\.yaml$
+  - path_regex: sops/glance\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -37,7 +37,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/monitoring/grafana/grafana\.yaml$
+  - path_regex: sops/grafana\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -47,7 +47,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/home-assistant/home-assistant\.yaml$
+  - path_regex: sops/home-assistant\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -57,7 +57,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/homepage-dashboard/homepage\.yaml$
+  - path_regex: sops/homepage\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -77,7 +77,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/ollama/ollama\.yaml$
+  - path_regex: sops/ollama\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -87,7 +87,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: modules/nixos/wiki-js/wiki-js\.yaml$
+  - path_regex: sops/wiki-js\.yaml$
     key_groups:
       - age:
         - *nixace
@@ -98,13 +98,4 @@ creation_rules:
         - *nixzen
 
 #sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
-#nix-shell -p sops --run "sops updatekeys \
-#modules/nixos/bookstack/bookstack.yaml \
-#modules/nixos/comfyui/comfyui.yaml \
-#modules/nixos/glance/glance.yaml \
-#modules/nixos/monitoring/grafana/grafana.yaml \
-#modules/nixos/home-assistant/home-assistant.yaml \
-#modules/nixos/homepage-dashboard/homepage.yaml \
-#hosts/common/optional/networking/networking.yaml \
-#modules/nixos/ollama/ollama.yaml \
-#modules/nixos/wiki-js/wiki-js.yaml"
+#nix-shell -p sops --run "sops updatekeys sops/*.yaml"
