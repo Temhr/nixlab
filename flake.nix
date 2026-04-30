@@ -67,6 +67,7 @@
         (inputs.import-tree ./modules)
         (inputs.import-tree ./overlays)
         (inputs.import-tree ./shells)
+        (inputs.import-tree ./sops)
       ];
     };
 }
