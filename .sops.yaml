@@ -7,7 +7,7 @@ keys:
   - &nixzen age1mt0jjfq5wp2wx49aj8a9l5k2ejz8xlgnd5jp3e7ysze8jkwa8c9qj2w4ng
 
 creation_rules:
-  - path_regex: modules/nixos/bookstack/bookstack\.yaml$
+  - path_regex: secrets/bookstack\.yaml$
     key_groups:
       - age:
         - *nixace
