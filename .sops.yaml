@@ -67,7 +67,7 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  - path_regex: hosts/common/optional/networking/networking\.yaml$
+  - path_regex: secrets/networking\.yaml$
     key_groups:
       - age:
         - *nixace
