@@ -3,7 +3,6 @@
     config,
     lib,
     pkgs,
-    allHosts,
     ...
   }: {
     imports = [

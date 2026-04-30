@@ -3,7 +3,7 @@
   nixpkgs-open-webui,
   nixpkgs-stable,
   system,
-}: _: prev: let
+}: _: _: let
   pinnedPkgs = import nixpkgs-ollama {
     inherit system;
     config.allowUnfree = true;
