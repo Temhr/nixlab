@@ -2,11 +2,12 @@
   flake.nixosModules.hardw--m720q-nas1 = {...}: {
     imports = [
       self.nixosModules.hardw--c-global
-      self.nixosModules.hardw--c-optional--mount-4dz1
+      #self.nixosModules.hardw--c-optional--mount-4dz1
       self.nixosModules.hardw--c-optional--mount-mirvat
       self.nixosModules.hardw--c-optional--mount-mirzen
     ];
 
+/*
     networking.hostId = "c6e98cd9";
     mount-zfs-4dz1 = {
       enable = true;
@@ -21,5 +22,6 @@
       enableMonitoring = true;
       #alertEmail = "your-email@example.com";  # Optional: for email alerts
     };
+*/
   };
 }
