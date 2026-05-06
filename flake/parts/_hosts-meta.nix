@@ -33,6 +33,12 @@ in {
   nixnas1 = mkHostMeta {
     address = "192.168.0.205";
     ethIface = "eno1";
+    wifiIface = "";
+    services = ["glance" "grafana" "prometheus" "loki"];
+  };
+  nixnas2 = mkHostMeta {
+    address = "192.168.0.206";
+    ethIface = "eno1";
     wifiIface = "wlp2s0";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
