@@ -7,7 +7,7 @@
       self.nixosModules.hardw--c-optional--mount-mirzen
     ];
 
-/*
+    /*
     mount-zfs-4dz1 = {
       enable = true;
       poolName = "tanks";
@@ -21,6 +21,6 @@
       enableMonitoring = true;
       #alertEmail = "your-email@example.com";  # Optional: for email alerts
     };
-*/
+    */
   };
 }
