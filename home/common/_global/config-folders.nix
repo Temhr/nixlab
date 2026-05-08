@@ -9,9 +9,9 @@
     XDG_VIDEOS_DIR = "$HOME/shelf/default/Videos"; # Video and media files
     XDG_TEMPLATES_DIR = "$HOME/shelf/default/Templates"; # Document templates
     XDG_PUBLICSHARE_DIR = "$HOME/shelf/default/Public"; # Files for public sharing
+    XDG_PROJECTS_DIR = "$HOME/shelf/default/projects"; # Personal or exploratory work
 
     # Development Directories (custom extensions)
-    XDG_PROJECTS_DIR = "$HOME/shelf/projects"; # Personal or exploratory work
     XDG_CODE_DIR = "$HOME/shelf/code"; # Long-term or serious repositories
     XDG_QEMU_DIR = "$HOME/shelf/qemu"; # VM's and Containers
   };
@@ -31,7 +31,7 @@
       "$XDG_BASE/default/Videos"
       "$XDG_BASE/default/Templates"
       "$XDG_BASE/default/Public"
-      "$XDG_BASE/projects"
+      "$XDG_BASE/default/projects"
       "$XDG_BASE/code"
       "$XDG_BASE/qemu"
     )

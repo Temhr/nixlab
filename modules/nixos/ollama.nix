@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--ollama = {
     config,
     lib,
@@ -18,6 +18,9 @@
       then cfg.package
       else defaultPackage;
   in {
+    imports = [
+      self.nixosModules.nsops--ollama
+    ];
     # ============================================================================
     # OPTIONS
     # ============================================================================

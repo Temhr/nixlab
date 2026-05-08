@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--node-red-nixlab = {
     config,
     lib,
@@ -7,6 +7,9 @@
   }: let
     cfg = config.services.nodered-service;
   in {
+    imports = [
+      self.nixosModules.nsops--node-red
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
@@ -60,6 +63,18 @@
           default = false;
           description = "Open firewall ports";
         };
+
+        # OPTIONAL: Path to credential encryption secret
+        credentialSecretFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          example = "/run/secrets/NODE_RED_CREDENTIAL_SECRET";
+          description = ''
+            Path to file containing Node-RED credential encryption key.
+            This key encrypts passwords and API keys stored in flows.
+            Generate with: openssl rand -base64 32
+          '';
+        };
       };
     };
 
@@ -101,6 +116,41 @@
         # Make Node.js available to the service
         path = with pkgs; [nodejs];
 
+        # Add preStart to create settings.js with credential secret
+        preStart = lib.mkIf (cfg.credentialSecretFile != null) ''
+          CREDENTIAL_SECRET=$(cat ${cfg.credentialSecretFile})
+
+          # Create or update settings.js
+          cat > ${cfg.dataDir}/settings.js << 'SETTINGSEOF'
+          module.exports = {
+            uiPort: ${toString cfg.port},
+            uiHost: "${cfg.listenAddress}",
+
+            // Credential encryption
+            credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
+
+            // Enable projects feature
+            editorTheme: {
+              projects: {
+                enabled: true
+              }
+            },
+
+            // Logging
+            logging: {
+              console: {
+                level: "info",
+                metrics: false,
+                audit: false
+              }
+            }
+          };
+          SETTINGSEOF
+
+          chown node-red:node-red ${cfg.dataDir}/settings.js
+          chmod 640 ${cfg.dataDir}/settings.js
+        '';
+
         serviceConfig = {
           Type = "simple";
           User = "node-red";
@@ -111,6 +161,11 @@
           # Restart on failure
           Restart = "on-failure";
           RestartSec = "10s";
+
+          # Add environment variable for credential secret
+          Environment = lib.mkIf (cfg.credentialSecretFile != null) [
+            "NODE_RED_CREDENTIAL_SECRET=$(cat ${cfg.credentialSecretFile})"
+          ];
 
           # Security hardening
           NoNewPrivileges = true; # Prevent privilege escalation

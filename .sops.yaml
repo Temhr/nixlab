@@ -77,6 +77,16 @@ creation_rules:
         - *nixvat
         - *nixzen
 
+  - path_regex: sops/node-red\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixnas1
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
   - path_regex: sops/ollama\.yaml$
     key_groups:
       - age:

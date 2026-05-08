@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--bookstack-nixlab = {
     config,
     lib,
@@ -7,6 +7,9 @@
   }: let
     cfg = config.services.bookstack-nixlab;
   in {
+    imports = [
+      self.nixosModules.nsops--bookstack
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
