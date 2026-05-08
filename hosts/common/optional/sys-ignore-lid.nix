@@ -32,12 +32,13 @@
         targets."hybrid-sleep".enable = false;
         targets."suspend-then-hibernate".enable = false;
 
-      sleep.settings.Sleep = {
-        AllowSuspend = "no";
-        AllowHibernation = "no";
-        AllowSuspendThenHibernate = "no";
-        AllowHybridSleep = "no";
-      };
+        sleep.extraConfig = ''
+          [Sleep]
+          AllowSuspend=no
+          AllowHibernation=no
+          AllowSuspendThenHibernate=no
+          AllowHybridSleep=no
+        '';
       };
 
       # Prevent UPower from auto-suspending on critical battery
