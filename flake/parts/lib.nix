@@ -50,6 +50,10 @@
           ++ modules
           ++ [
             {networking.hostName = name;}
+            # Conditionally add hostId if it exists in meta
+            (lib.mkIf (meta.hostId != null) {
+              networking.hostId = meta.hostId;
+            })
           ];
       };
 in {

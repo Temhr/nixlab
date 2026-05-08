@@ -7,7 +7,6 @@
       self.nixosModules.hardw--c-optional--mount-mirzen
     ];
 
-    networking.hostId = "c6e98cd9";
     mount-zfs-4dz1 = {
       enable = true;
       poolName = "tanks";

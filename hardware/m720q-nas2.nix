@@ -7,7 +7,6 @@
       self.nixosModules.hardw--c-optional--mount-mirzen
     ];
 
-    networking.hostId = "23d031fa";
 /*
     mount-zfs-4dz1 = {
       enable = true;
