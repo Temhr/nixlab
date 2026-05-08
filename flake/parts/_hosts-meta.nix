@@ -45,7 +45,7 @@ in {
   nixnas2 = mkHostMeta {
     address = "192.168.0.206";
     ethIface = "eno1";
-    wifiIface = "wlp2s0";
+    wifiIface = "wlp1s0";
     hostId = "23d031fa";
     nixpkgsInput = "nixpkgs-stable";
     services = ["glance" "grafana" "prometheus" "loki"];
