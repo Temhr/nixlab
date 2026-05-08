@@ -22,7 +22,6 @@
         hardware.graphics = {
           enable = true;
         };
-        nixpkgs.config.nvidia.acceptLicense = true;
         services.xserver.videoDrivers = ["nvidia"];
         boot.blacklistedKernelModules = ["nouveau"];
         hardware.nvidia = {

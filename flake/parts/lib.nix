@@ -1,4 +1,3 @@
-# flake/parts/lib.nix
 {
   self,
   inputs,
@@ -14,8 +13,7 @@
     self.overlays.modifications
   ];
 
-  # Build common modules with a specific nixpkgs input
-  mkCommonModules = nixpkgsSource: [
+  mkCommonModules = [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.systm--home-manager-config
     {nixpkgs.overlays = allOverlays;}
@@ -53,7 +51,7 @@
             };
         };
         modules =
-          (mkCommonModules nixpkgsSource)
+          mkCommonModules
           ++ modules
           ++ [
             {networking.hostName = name;}
@@ -61,11 +59,15 @@
             (lib.mkIf (meta.hostId != null) {
               networking.hostId = meta.hostId;
             })
-            # Override nixpkgs to use the selected input
+            # Override nixpkgs source while preserving config from modules
             {
               nixpkgs.pkgs = lib.mkForce (import nixpkgsSource {
                 inherit (meta) system;
-                config.allowUnfree = true;
+                config = {
+                  allowUnfree = true;
+                  # Nvidia license acceptance (if nvidia driver is enabled)
+                  nvidia.acceptLicense = true;
+                };
                 overlays = allOverlays;
               });
             }
