@@ -39,6 +39,14 @@
           AllowSuspendThenHibernate=no
           AllowHybridSleep=no
         '';
+        /*
+        sleep.settings.Sleep = {
+          AllowSuspend = "no";
+          AllowHibernation = "no";
+          AllowSuspendThenHibernate = "no";
+          AllowHybridSleep = "no";
+        };
+        */
       };
 
       # Prevent UPower from auto-suspending on critical battery
