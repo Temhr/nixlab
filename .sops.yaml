@@ -1,6 +1,7 @@
 keys:
   - &nixace age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332
   - &nixnas1 age1e6v58rl5epzkjyf4uk5y34qeu35h8xs38mhj500sak3eq6pplp0s88c6pm
+  - &nixnas2 age1e6v58rl5epzkjyf4uk5y34qeu35h8xs38mhj500sak3eq6pplp0s88c6pm
   - &nixsun age1uc06xlk6sw8z3nzc9sxugvcdmsnyrapwdamewmxz03hfqqcc8d3q29ydjr
   - &nixtop age1c2x4u2et0trw8vvtchxvrw9z2fazmxeqe2keawkzjejtvp9x75msxg9tcj
   - &nixvat age10jn8vgw2896pp52z3vxmdadczt267wsaca4ct6n597djuvrccc7qtdjkx0
@@ -12,6 +13,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -22,6 +24,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -32,6 +35,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -42,6 +46,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -52,6 +57,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -62,6 +68,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -72,6 +79,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -82,6 +90,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -92,6 +101,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
@@ -102,6 +112,7 @@ creation_rules:
       - age:
         - *nixace
         - *nixnas1
+        - *nixnas2
         - *nixsun
         - *nixtop
         - *nixvat
