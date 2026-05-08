@@ -24,7 +24,7 @@
         sopsFile = cfg.secretsFile;
         # homepage-dashboard runs as a dedicated system user; adjust if yours differs
         owner = "homepage";
-        restartUnits = ["homepage-dashboard.service"];
+        restartUnits = ["homepage.service"];
       };
 
       services.homepage-nixlab.environmentFile =
