@@ -14,7 +14,8 @@
     self.overlays.modifications
   ];
 
-  commonModules = [
+  # Build common modules with a specific nixpkgs input
+  mkCommonModules = nixpkgsSource: [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.systm--home-manager-config
     {nixpkgs.overlays = allOverlays;}
@@ -25,10 +26,14 @@
     modules,
   }: let
     meta = hostsMeta.${name};
+    nixpkgsSource = inputs.${meta.nixpkgsInput}; # Select the nixpkgs input based on meta
   in
     assert lib.assertMsg
     (builtins.hasAttr name hostsMeta)
     "mkHost: no hostsMeta entry found for '${name}' — add it to the hostsMeta attrset in flake/parts/lib.nix";
+    assert lib.assertMsg
+    (builtins.hasAttr meta.nixpkgsInput inputs)
+    "mkHost: nixpkgsInput '${meta.nixpkgsInput}' not found in flake inputs for host '${name}'";
       lib.nixosSystem {
         system = meta.system;
         specialArgs = {
@@ -37,6 +42,8 @@
           flakePath = self;
           allHosts = hostsMeta;
           hostMeta = meta;
+          # Pass the selected nixpkgs for reference
+          nixpkgsSource = nixpkgsSource;
           self' =
             self.packages.${meta.system}
             // {
@@ -46,7 +53,7 @@
             };
         };
         modules =
-          commonModules
+          (mkCommonModules nixpkgsSource)
           ++ modules
           ++ [
             {networking.hostName = name;}
@@ -54,6 +61,14 @@
             (lib.mkIf (meta.hostId != null) {
               networking.hostId = meta.hostId;
             })
+            # Override nixpkgs to use the selected input
+            {
+              nixpkgs.pkgs = lib.mkForce (import nixpkgsSource {
+                inherit (meta) system;
+                config.allowUnfree = true;
+                overlays = allOverlays;
+              });
+            }
           ];
       };
 in {
