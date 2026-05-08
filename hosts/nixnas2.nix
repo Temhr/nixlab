@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosConfigurations.nixnas1 = self.lib.mkHost {
+  flake.nixosConfigurations.nixnas2 = self.lib.mkHost {
     name = "nixnas2";
     modules = [
       # Hardware

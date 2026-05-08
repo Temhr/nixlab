@@ -33,6 +33,11 @@
                 icon = "si:homepage";
               }
               {
+                title = "nixnas2 services";
+                url = "http://${allHosts.nixnas2.address}:3000/";
+                icon = "si:homepage";
+              }
+              {
                 title = "nixsun services";
                 url = "http://${allHosts.nixsun.address}:3000/";
                 icon = "si:homepage";
