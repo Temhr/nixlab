@@ -174,50 +174,27 @@
         #   2. Convert _glance-pages.nix → JSON → YAML via remarshal
         #   3. Append the pages YAML to the server block
         preStart = ''
-          set -euo pipefail
-
-          # Validate directory permissions
-          if [ ! -w ${cfg.dataDir} ]; then
-            echo "ERROR: ${cfg.dataDir} is not writable by ${cfg.user}"
-            exit 1
-          fi
-
-          # Write server configuration
-          cat > ${cfg.dataDir}/glance.yml << 'SERVEREOF' || {
-            echo "ERROR: Failed to write glance.yml"
-            exit 1
-          }
+          # ── 1. Write the server block ──────────────────────────────────────
+          cat > ${cfg.dataDir}/glance.yml << 'SERVEREOF'
           server:
             port: ${toString cfg.port}
             host: "${cfg.listenAddress}"
 
           SERVEREOF
 
-          # Convert pages JSON to YAML
-          if ! ${pkgs.remarshal}/bin/remarshal \
+          # ── 2. Convert pages JSON → YAML ───────────────────────────────────
+          ${pkgs.remarshal}/bin/remarshal \
             -i ${pagesJsonFile} \
             -o /tmp/glance-pages.yaml.tmp \
             -if json \
-            -of yaml; then
-              echo "ERROR: Failed to convert pages configuration"
-              rm -f /tmp/glance-pages.yaml.tmp
-              exit 1
-          fi
+            -of yaml
 
-          # Append pages configuration
-          cat /tmp/glance-pages.yaml.tmp >> ${cfg.dataDir}/glance.yml || {
-            echo "ERROR: Failed to append pages configuration"
-            rm -f /tmp/glance-pages.yaml.tmp
-            exit 1
-          }
-
+          # ── 3. Append pages YAML to the server block ───────────────────────
+          cat /tmp/glance-pages.yaml.tmp >> ${cfg.dataDir}/glance.yml
           rm -f /tmp/glance-pages.yaml.tmp
 
-          # Set ownership and permissions
           chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/glance.yml
           chmod 660 ${cfg.dataDir}/glance.yml
-
-          echo "✓ Glance configuration generated successfully"
         '';
       };
 
