@@ -1,21 +1,56 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.nsops--node-red = {
     config,
     lib,
     ...
-  }: let
-    cfg = config.services.nodered-service;
-  in {
-    sops.secrets.NODE_RED_CREDENTIAL_SECRET = lib.mkIf cfg.enable {
-      sopsFile = self + /secrets/node-red.yaml;
-      owner = "node-red";
-      group = "node-red";
-      mode = "0440";
+  }: {
+    # ══════════════════════════════════════════════════════════════════════════
+    # OPTIONS
+    # ══════════════════════════════════════════════════════════════════════════
+    options.secrets.node-red = {
+      enable = lib.mkEnableOption "Node-RED secrets management" // {
+        default = config.services.nodered-service.enable;
+      };
     };
 
-    # Wire the secret to the service
-    services.nodered-service = lib.mkIf cfg.enable {
-      credentialSecretFile = config.sops.secrets.NODE_RED_CREDENTIAL_SECRET.path;
+    # ══════════════════════════════════════════════════════════════════════════
+    # CONFIG
+    # ══════════════════════════════════════════════════════════════════════════
+    config = lib.mkIf config.secrets.node-red.enable {
+      # ────────────────────────────────────────────────────────────────────────
+      # Declare secrets
+      # ────────────────────────────────────────────────────────────────────────
+      sops.secrets = lib.genAttrs
+        ["NODE_RED_CREDENTIAL_SECRET"]
+        (_: {sopsFile = ./node-red.yaml;});
+
+      # ────────────────────────────────────────────────────────────────────────
+      # Build env file from secrets
+      # ────────────────────────────────────────────────────────────────────────
+      systemd.services.node-red-secrets = {
+        description = "Write Node-RED credentials env file";
+        wantedBy = ["node-red.service"];
+        before = ["node-red.service"];
+        after = ["sops-nix.service"];
+
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          User = "root";
+        };
+
+        script = ''
+          echo "NODE_RED_CREDENTIAL_SECRET=$(cat ${config.sops.secrets.NODE_RED_CREDENTIAL_SECRET.path})" \
+            > /run/node-red-credentials.env
+          chown node-red:node-red /run/node-red-credentials.env
+          chmod 600 /run/node-red-credentials.env
+        '';
+      };
+
+      # ────────────────────────────────────────────────────────────────────────
+      # Wire env file to service
+      # ────────────────────────────────────────────────────────────────────────
+      services.nodered-service.credentialsEnvFile = "/run/node-red-credentials.env";
     };
   };
 }

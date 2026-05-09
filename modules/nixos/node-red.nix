@@ -64,15 +64,15 @@
           description = "Open firewall ports";
         };
 
-        # OPTIONAL: Path to credential encryption secret
-        credentialSecretFile = lib.mkOption {
+        # OPTIONAL: Path to credentials environment file
+        credentialsEnvFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
           default = null;
-          example = "/run/secrets/NODE_RED_CREDENTIAL_SECRET";
+          example = "/run/node-red-credentials.env";
           description = ''
-            Path to file containing Node-RED credential encryption key.
-            This key encrypts passwords and API keys stored in flows.
-            Generate with: openssl rand -base64 32
+            Path to environment file containing NODE_RED_CREDENTIAL_SECRET.
+            Set automatically by importing the nsops--node-red module.
+            If null, Node-RED will generate its own credential secret.
           '';
         };
       };
@@ -117,39 +117,40 @@
         path = with pkgs; [nodejs];
 
         # Add preStart to create settings.js with credential secret
-        preStart = lib.mkIf (cfg.credentialSecretFile != null) ''
-          CREDENTIAL_SECRET=$(cat ${cfg.credentialSecretFile})
+        preStart = ''
+            mkdir -p ${cfg.dataDir}
 
-          # Create or update settings.js
-          cat > ${cfg.dataDir}/settings.js << 'SETTINGSEOF'
-          module.exports = {
-            uiPort: ${toString cfg.port},
-            uiHost: "${cfg.listenAddress}",
+            cat > ${cfg.dataDir}/settings.js << 'SETTINGSEOF'
+        module.exports = {
+          uiPort: ${toString cfg.port},
+          uiHost: "${cfg.listenAddress}",
 
-            // Credential encryption
-            credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
+          ${lib.optionalString (cfg.credentialsEnvFile != null) ''
+          // Credential encryption from sops-nix
+          credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
+          ''}
 
-            // Enable projects feature
-            editorTheme: {
-              projects: {
-                enabled: true
-              }
-            },
-
-            // Logging
-            logging: {
-              console: {
-                level: "info",
-                metrics: false,
-                audit: false
-              }
+          // Enable projects feature
+          editorTheme: {
+            projects: {
+              enabled: true
             }
-          };
-          SETTINGSEOF
+          },
 
-          chown node-red:node-red ${cfg.dataDir}/settings.js
-          chmod 640 ${cfg.dataDir}/settings.js
-        '';
+          // Logging
+          logging: {
+            console: {
+              level: "info",
+              metrics: false,
+              audit: false
+            }
+          }
+        };
+        SETTINGSEOF
+
+            chown node-red:node-red ${cfg.dataDir}/settings.js
+            chmod 640 ${cfg.dataDir}/settings.js
+          '';
 
         serviceConfig = {
           Type = "simple";
@@ -162,17 +163,15 @@
           Restart = "on-failure";
           RestartSec = "10s";
 
-          # Add environment variable for credential secret
-          Environment = lib.mkIf (cfg.credentialSecretFile != null) [
-            "NODE_RED_CREDENTIAL_SECRET=$(cat ${cfg.credentialSecretFile})"
-          ];
-
           # Security hardening
           NoNewPrivileges = true; # Prevent privilege escalation
           PrivateTmp = true; # Use private /tmp directory
           ProtectSystem = "strict"; # Make most of filesystem read-only
           ProtectHome = true; # Make /home inaccessible
           ReadWritePaths = [cfg.dataDir]; # Only allow writes to data directory
+        }
+        // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
+          EnvironmentFile = cfg.credentialsEnvFile;
         };
       };
 
