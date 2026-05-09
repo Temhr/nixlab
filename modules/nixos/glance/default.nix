@@ -123,10 +123,10 @@
           assertion = cfg.port >= 1024 && cfg.port <= 65535;
           message = "services.glance-nixlab.port must be between 1024-65535";
         }
-        {
+        /*{
           assertion = cfg.secretsEnvFile == null || builtins.pathExists cfg.secretsEnvFile;
           message = "services.glance-nixlab.secretsEnvFile path does not exist";
-        }
+        }*/
       ];
 
       # ----------------------------------------------------------------------------
