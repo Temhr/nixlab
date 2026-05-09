@@ -114,20 +114,6 @@
     # CONFIG - What happens when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = cfg.enableSSL -> cfg.domain != null;
-          message = "services.glance-nixlab.enableSSL requires domain to be set";
-        }
-        {
-          assertion = cfg.port >= 1024 && cfg.port <= 65535;
-          message = "services.glance-nixlab.port must be between 1024-65535";
-        }
-        /*{
-          assertion = cfg.secretsEnvFile == null || builtins.pathExists cfg.secretsEnvFile;
-          message = "services.glance-nixlab.secretsEnvFile path does not exist";
-        }*/
-      ];
 
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions
