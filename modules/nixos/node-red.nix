@@ -118,61 +118,62 @@
 
         # Add preStart to create settings.js with credential secret
         preStart = ''
-            mkdir -p ${cfg.dataDir}
+              mkdir -p ${cfg.dataDir}
 
-            cat > ${cfg.dataDir}/settings.js << 'SETTINGSEOF'
-        module.exports = {
-          uiPort: ${toString cfg.port},
-          uiHost: "${cfg.listenAddress}",
+              cat > ${cfg.dataDir}/settings.js << 'SETTINGSEOF'
+          module.exports = {
+            uiPort: ${toString cfg.port},
+            uiHost: "${cfg.listenAddress}",
 
-          ${lib.optionalString (cfg.credentialsEnvFile != null) ''
-          // Credential encryption from sops-nix
-          credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
+            ${lib.optionalString (cfg.credentialsEnvFile != null) ''
+            // Credential encryption from sops-nix
+            credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
           ''}
 
-          // Enable projects feature
-          editorTheme: {
-            projects: {
-              enabled: true
-            }
-          },
+            // Enable projects feature
+            editorTheme: {
+              projects: {
+                enabled: true
+              }
+            },
 
-          // Logging
-          logging: {
-            console: {
-              level: "info",
-              metrics: false,
-              audit: false
+            // Logging
+            logging: {
+              console: {
+                level: "info",
+                metrics: false,
+                audit: false
+              }
             }
+          };
+          SETTINGSEOF
+
+              chown node-red:node-red ${cfg.dataDir}/settings.js
+              chmod 640 ${cfg.dataDir}/settings.js
+        '';
+
+        serviceConfig =
+          {
+            Type = "simple";
+            User = "node-red";
+            Group = "node-red";
+            WorkingDirectory = cfg.dataDir;
+            # Start Node-RED with specified settings
+            ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
+            # Restart on failure
+            Restart = "on-failure";
+            RestartSec = "10s";
+
+            # Security hardening
+            NoNewPrivileges = true; # Prevent privilege escalation
+            PrivateTmp = true; # Use private /tmp directory
+            ProtectSystem = "strict"; # Make most of filesystem read-only
+            ProtectHome = true; # Make /home inaccessible
+            ReadWritePaths = [cfg.dataDir]; # Only allow writes to data directory
           }
-        };
-        SETTINGSEOF
-
-            chown node-red:node-red ${cfg.dataDir}/settings.js
-            chmod 640 ${cfg.dataDir}/settings.js
-          '';
-
-        serviceConfig = {
-          Type = "simple";
-          User = "node-red";
-          Group = "node-red";
-          WorkingDirectory = cfg.dataDir;
-          # Start Node-RED with specified settings
-          ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
-          # Restart on failure
-          Restart = "on-failure";
-          RestartSec = "10s";
-
-          # Security hardening
-          NoNewPrivileges = true; # Prevent privilege escalation
-          PrivateTmp = true; # Use private /tmp directory
-          ProtectSystem = "strict"; # Make most of filesystem read-only
-          ProtectHome = true; # Make /home inaccessible
-          ReadWritePaths = [cfg.dataDir]; # Only allow writes to data directory
-        }
-        // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
-          EnvironmentFile = cfg.credentialsEnvFile;
-        };
+          // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
+            EnvironmentFile = cfg.credentialsEnvFile;
+          };
       };
 
       # ----------------------------------------------------------------------------

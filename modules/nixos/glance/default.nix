@@ -73,6 +73,18 @@
           description = "The Glance package to use";
         };
 
+        user = lib.mkOption {
+          type = lib.types.str;
+          default = "glance";
+          description = "User to run Glance as";
+        };
+
+        group = lib.mkOption {
+          type = lib.types.str;
+          default = "glance";
+          description = "Group to run Glance as";
+        };
+
         # OPTIONAL: Auto-open firewall ports (default: true)
         openFirewall = lib.mkOption {
           type = lib.types.bool;
@@ -102,25 +114,40 @@
     # CONFIG - What happens when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = cfg.enableSSL -> cfg.domain != null;
+          message = "services.glance-nixlab.enableSSL requires domain to be set";
+        }
+        {
+          assertion = cfg.port >= 1024 && cfg.port <= 65535;
+          message = "services.glance-nixlab.port must be between 1024-65535";
+        }
+        {
+          assertion = cfg.secretsEnvFile == null || builtins.pathExists cfg.secretsEnvFile;
+          message = "services.glance-nixlab.secretsEnvFile path does not exist";
+        }
+      ];
+
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
-        "d ${cfg.dataDir} 0770 glance glance -"
+        "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
       ];
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Glance
       # ----------------------------------------------------------------------------
-      users.users.glance = {
+      users.users.${cfg.user} = {
         isSystemUser = true;
-        group = "glance";
+        group = cfg.group;
         home = cfg.dataDir;
         description = "Glance dashboard user";
       };
 
-      users.groups.glance = {};
-      users.users.${config.nixlab.mainUser}.extraGroups = ["glance"];
+      users.groups.${cfg.group} = {};
+      users.users.${config.nixlab.mainUser}.extraGroups = [cfg.group];
 
       # ----------------------------------------------------------------------------
       # GLANCE SERVICE - Configure the systemd service
@@ -133,12 +160,14 @@
         serviceConfig =
           {
             Type = "simple";
-            User = "glance";
-            Group = "glance";
+            User = cfg.user;
+            Group = cfg.group;
             WorkingDirectory = cfg.dataDir;
             ExecStart = "${cfg.package}/bin/glance";
             Restart = "on-failure";
             RestartSec = "10s";
+            TimeoutStartSec = "60s";
+            TimeoutStopSec = "30s";
 
             # Security hardening
             NoNewPrivileges = true;
@@ -159,27 +188,50 @@
         #   2. Convert _glance-pages.nix → JSON → YAML via remarshal
         #   3. Append the pages YAML to the server block
         preStart = ''
-          # ── 1. Write the server block ──────────────────────────────────────
-          cat > ${cfg.dataDir}/glance.yml << 'SERVEREOF'
+          set -euo pipefail
+
+          # Validate directory permissions
+          if [ ! -w ${cfg.dataDir} ]; then
+            echo "ERROR: ${cfg.dataDir} is not writable by ${cfg.user}"
+            exit 1
+          fi
+
+          # Write server configuration
+          cat > ${cfg.dataDir}/glance.yml << 'SERVEREOF' || {
+            echo "ERROR: Failed to write glance.yml"
+            exit 1
+          }
           server:
             port: ${toString cfg.port}
             host: "${cfg.listenAddress}"
 
           SERVEREOF
 
-          # ── 2. Convert pages JSON → YAML ───────────────────────────────────
-          ${pkgs.remarshal}/bin/remarshal \
+          # Convert pages JSON to YAML
+          if ! ${pkgs.remarshal}/bin/remarshal \
             -i ${pagesJsonFile} \
             -o /tmp/glance-pages.yaml.tmp \
             -if json \
-            -of yaml
+            -of yaml; then
+              echo "ERROR: Failed to convert pages configuration"
+              rm -f /tmp/glance-pages.yaml.tmp
+              exit 1
+          fi
 
-          # ── 3. Append pages YAML to the server block ───────────────────────
-          cat /tmp/glance-pages.yaml.tmp >> ${cfg.dataDir}/glance.yml
+          # Append pages configuration
+          cat /tmp/glance-pages.yaml.tmp >> ${cfg.dataDir}/glance.yml || {
+            echo "ERROR: Failed to append pages configuration"
+            rm -f /tmp/glance-pages.yaml.tmp
+            exit 1
+          }
+
           rm -f /tmp/glance-pages.yaml.tmp
 
-          chown glance:glance ${cfg.dataDir}/glance.yml
+          # Set ownership and permissions
+          chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/glance.yml
           chmod 660 ${cfg.dataDir}/glance.yml
+
+          echo "✓ Glance configuration generated successfully"
         '';
       };
 

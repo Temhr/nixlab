@@ -8,9 +8,11 @@
     # OPTIONS
     # ══════════════════════════════════════════════════════════════════════════
     options.secrets.node-red = {
-      enable = lib.mkEnableOption "Node-RED secrets management" // {
-        default = config.services.nodered-service.enable;
-      };
+      enable =
+        lib.mkEnableOption "Node-RED secrets management"
+        // {
+          default = config.services.nodered-service.enable;
+        };
     };
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -20,7 +22,8 @@
       # ────────────────────────────────────────────────────────────────────────
       # Declare secrets
       # ────────────────────────────────────────────────────────────────────────
-      sops.secrets = lib.genAttrs
+      sops.secrets =
+        lib.genAttrs
         ["NODE_RED_CREDENTIAL_SECRET"]
         (_: {sopsFile = ./node-red.yaml;});
 
