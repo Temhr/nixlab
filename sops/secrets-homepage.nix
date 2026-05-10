@@ -18,6 +18,13 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.homepage-nixlab ? enable;
+          message = "nsops--homepage requires servc--homepage-nixlab to also be imported";
+        }
+      ];
+
       sops.secrets.HOMEPAGE_ENV = {
         sopsFile = cfg.secretsFile;
         # homepage-dashboard runs as a dedicated system user; adjust if yours differs

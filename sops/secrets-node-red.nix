@@ -19,6 +19,13 @@
     # CONFIG
     # ══════════════════════════════════════════════════════════════════════════
     config = lib.mkIf config.secrets.node-red.enable {
+      assertions = [
+        {
+          assertion = config.services.nodered-service ? enable;
+          message = "nsops--node-red requires servc--node-red-nixlab to also be imported";
+        }
+      ];
+
       # ────────────────────────────────────────────────────────────────────────
       # Declare secrets
       # ────────────────────────────────────────────────────────────────────────

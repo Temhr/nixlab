@@ -18,6 +18,13 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.bookstack-nixlab ? enable;
+          message = "nsops--bookstack requires servc--bookstack-nixlab to also be imported";
+        }
+      ];
+
       sops.secrets =
         lib.genAttrs
         ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"]

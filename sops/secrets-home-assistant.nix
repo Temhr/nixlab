@@ -18,6 +18,13 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.homeassistant-custom ? enable;
+          message = "nsops--home-assistant requires servc--home-assistant-nixlab to also be imported";
+        }
+      ];
+
       sops.secrets.HA_SECRETS_YAML = {
         sopsFile = cfg.secretsFile;
         owner = "hass";

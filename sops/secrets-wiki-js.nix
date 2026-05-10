@@ -18,6 +18,13 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.wikijs-custom ? enable;
+          message = "nsops--wiki-js requires servc--wiki-js-nixlab to also be imported";
+        }
+      ];
+
       sops.secrets.WIKIJS_SECRET = {
         sopsFile = cfg.secretsFile;
         owner = "wiki-js";

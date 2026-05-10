@@ -19,6 +19,12 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.glance-nixlab ? enable;
+          message = "nsops--glance requires servc--glance-nixlab to also be imported";
+        }
+      ];
       sops.secrets.GLANCE_ENV = {
         sopsFile = cfg.secretsFile;
         owner = "glance";
