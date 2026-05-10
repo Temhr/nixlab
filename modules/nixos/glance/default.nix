@@ -114,7 +114,6 @@
     # CONFIG - What happens when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
-
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions
       # ----------------------------------------------------------------------------
