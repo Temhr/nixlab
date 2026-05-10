@@ -59,8 +59,10 @@ nixlab uses **flake-parts** as its orchestration layer, structured around the **
 ### flake-parts Orchestration
 
 <details>
-<summary>[flake-parts](https://github.com/hercules-ci/flake-parts) is a NixOS community library that structures flake outputs as composable modules called **parts**. Instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes. <i>(click to expand)</i></summary>
+<summary>A NixOS community library that structures flake outputs as composable modules called **parts** <i>(click to expand)</i></summary>
 <p></p>
+
+With [flake-parts](https://github.com/hercules-ci/flake-parts), instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes.
 
 The `flake.nix` root is a thin entry point that uses [import-tree](https://github.com/vic/import-tree) to auto-discover all part files across multiple directories:
 
@@ -91,7 +93,9 @@ outputs = inputs @ { flake-parts, ... }:
 
 ### The Dendritic Pattern
 
-The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**. The name comes from the branching, self-similar structure where each part of the config is independent and composable.
+<details>
+<summary>The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**. The name comes from the branching, self-similar structure where each part of the config is independent and composable. <i>(click to expand)</i></summary>
+<p></p>
 
 **The key shift** is in the axis of composition: instead of asking _"what does this machine need?"_ and building outward from a hostname, you ask _"which features does this machine require?"_ and assemble inward from capabilities.
 
@@ -101,9 +105,13 @@ In practice:
 - **Adding a new host** means writing three small files (host, home, hardware) — no deep knowledge of filesystem layout required
 - **Changing a feature** happens in one place and propagates to every host that selects it
 
+</details>
+
 ### Self-Exporting Module Schema
 
-Every file in this flake is a **flake-parts module** — a function that takes `{ self, inputs, ... }` and registers its own outputs directly into the flake. There is no central registry. Each file is fully self-sufficient:
+<details>
+<summary>Every file in this flake is a **flake-parts module** — a function that takes `{ self, inputs, ... }` and registers its own outputs directly into the flake. There is no central registry. Each file is fully self-sufficient: <i>(click to expand)</i></summary>
+<p></p>
 
 ```nix
 # modules/nixos/glance/default.nix
@@ -144,9 +152,13 @@ Every file in this flake is a **flake-parts module** — a function that takes `
 - A single file can emit multiple related outputs (e.g., a service module + its custom package)
 - The name is the contract, not the path
 
+</details>
+
 ### nixosModules Namespace
 
-All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern. Module names use a double-dash separator to create a readable hierarchy:
+<details>
+<summary>All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern. Module names use a double-dash separator to create a readable hierarchy:  <i>(click to expand)</i></summary>
+<p></p>
 
 **Naming convention:**
 - `hardw--<identifier>`: Hardware configurations
@@ -176,9 +188,13 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 
 Run `nix flake show` to see the complete module tree.
 
+</details>
+
 ### Central Orchestration Files
 
-A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules. Additionally, the `sops/` directory contains self-registering secret modules that are auto-discovered alongside service modules.
+<details>
+<summary>A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules. Additionally, the `sops/` directory contains self-registering secret modules that are auto-discovered alongside service modules.  <i>(click to expand)</i></summary>
+<p></p>
 
 | File | Responsibility | Output namespace |
 |------|---------------|------------------|
@@ -197,9 +213,15 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 - **Centralized overlays**: All four overlays are applied uniformly across all configurations
 - **Metadata-driven networking**: IP addresses and interface names are centralized for easier network management
 
+</details>
+
 ### Secrets Management
 
-Secrets are managed with [sops-nix](https://github.com/Mic92/sops-nix) using age encryption. All secrets-related files are centralized in the `sops/` directory:
+<details>
+<summary>Secrets are managed with sops-nix using age encryption. <i>(click to expand)</i></summary>
+<p></p>
+
+All [sops-nix](https://github.com/Mic92/sops-nix) secrets-related files are centralized in the `sops/` directory:
 
 - **Encrypted secrets**: Each service has a dedicated `.yaml` file (e.g., `sops/glance.yaml`, `sops/grafana.yaml`)
 - **Secret modules**: Corresponding `secrets-<service>.nix` files declare which keys to decrypt and wire them to services
@@ -287,6 +309,8 @@ sops -d sops/<service>.yaml
 ```
 
 The `.sops.yaml` file in the repository root defines which age keys can decrypt which secrets. Each host must have its age key (typically stored at `/var/lib/sops-nix/key.txt`) listed in `.sops.yaml` to decrypt secrets assigned to it.
+
+</details>
 
 ---
 
