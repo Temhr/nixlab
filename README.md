@@ -56,7 +56,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 nixlab uses **flake-parts** as its orchestration layer, structured around the **Dendritic Pattern** and a **self-exporting module schema** where every file registers its own outputs directly into the flake — no central registry required.
 
-- ### flake-parts Orchestration
+- ### <ins>flake-parts Orchestration</ins>
 
 <details>
 <summary>A NixOS community library that structures flake outputs as composable modules called **parts**.  <i>(click to expand)</i></summary>
@@ -91,7 +91,7 @@ outputs = inputs @ { flake-parts, ... }:
 
 </details>
 
-- ### The Dendritic Pattern
+- ### <ins>The Dendritic Pattern</ins>
 
 <details>
 <summary>The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**.  <i>(click to expand)</i></summary>
@@ -109,7 +109,7 @@ In practice:
 
 </details>
 
-- ### Self-Exporting Module Schema
+- ### <ins>Self-Exporting Module Schema</ins>
 
 <details>
 <summary>Almost every file in this flake is a **flake-parts module**.  <i>(click to expand)</i></summary>
@@ -158,7 +158,7 @@ A **flake-parts module** is a function that takes `{ self, inputs, ... }` and re
 
 </details>
 
-- ### nixosModules Namespace
+- ### <ins>nixosModules Namespace</ins>
 
 <details>
 <summary>All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern.  <i>(click to expand)</i></summary>
@@ -196,7 +196,7 @@ Run `nix flake show` to see the complete module tree.
 
 </details>
 
-- ### Central Orchestration Files
+- ### <ins>Central Orchestration Files</ins>
 
 <details>
 <summary>A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules.  <i>(click to expand)</i></summary>
@@ -223,7 +223,7 @@ Additionally, the `sops/` directory contains self-registering secret modules tha
 
 </details>
 
-- ### Secrets Management
+- ### <ins>Secrets Management</ins>
 
 <details>
 <summary>Secrets are managed with sops-nix using age encryption.  <i>(click to expand)</i></summary>
@@ -392,7 +392,7 @@ nixlab/
 
 ## Usage
 
-- ### First Install on a New Machine
+- ### <ins>First Install on a New Machine</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
@@ -429,7 +429,7 @@ sudo reboot
 
 </details>
 
-- ### Daily Commands
+- ### <ins>Daily Commands</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
@@ -472,7 +472,7 @@ sudo nix-collect-garbage --delete-older-than 7d
 
 </details>
 
-- ### Adding a New Host
+- ### <ins>Adding a New Host</ins>
 
 <details><summary><i>(click to expand)</i></summary>
 <p></p>
@@ -597,7 +597,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 
 </details>
 
-- ### Adding a New Service Module
+- ### <ins>Adding a New Service Module</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
