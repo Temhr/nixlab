@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.servc--glance-nixlab = {
     config,
     lib,
@@ -17,7 +17,6 @@
       (builtins.toJSON {pages = pagesConfig;});
   in {
     imports = [
-      self.nixosModules.nsops--glance
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured

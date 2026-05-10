@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.servc--homepage-nixlab = {
     config,
     lib,
@@ -23,7 +23,6 @@
       builtins.toFile "settings.json" (builtins.toJSON settingsConfig);
   in {
     imports = [
-      self.nixosModules.nsops--homepage
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured

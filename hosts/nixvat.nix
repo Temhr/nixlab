@@ -10,11 +10,12 @@
       # Home manager
       # Services
       self.nixosModules.servc--glance-nixlab
+      self.nixosModules.nsops--glance
       self.nixosModules.servc--ollama
-      self.nixosModules.servc--home-assistant-nixlab
-      self.nixosModules.servc--node-red-nixlab
+      self.nixosModules.nsops--ollama
       self.nixosModules.servc--syncthing-nixlab
       self.nixosModules.servc--wiki-js-nixlab
+      self.nixosModules.nsops--wiki-js
       self.nixosModules.servc--zola-nixlab
     ];
   };

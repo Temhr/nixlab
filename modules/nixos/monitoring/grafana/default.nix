@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.servc--grafana-nixlab = {
     config,
     lib,
@@ -20,7 +20,6 @@
       else "localhost";
   in {
     imports = [
-      self.nixosModules.nsops--grafana
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured

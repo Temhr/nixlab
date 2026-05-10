@@ -13,6 +13,7 @@
       self.nixosModules.systm--gui-shells
       self.nixosModules.systm--home-manager-config
       self.nixosModules.servc--homepage-nixlab
+      self.nixosModules.nsops--homepage
       self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.systm--networking
     ];
