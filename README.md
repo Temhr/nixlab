@@ -41,7 +41,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
   - **Nixpkgs**: A large, community-maintained repository of Expressions defining thousands of software packages, libraries, development tools, and NixOS modules
   - **Nix Store**: An immutable, content-addressed filesystem (typically `/nix/store`) that stores all build outputs and dependencies, ensuring isolation and reproducibility
 - **NixOS**: A Linux distribution whose entire system configuration — packages, services, users, kernel options — is defined declaratively using the Nix language and built via the Nix Package Manager
-- **Flakes**: A standardized schema for writing, referencing, and sharing Nix Expressions. A flake is a filesystem tree containing a `flake.nix` at its root that declares:
+- **Flakes**: A standardised schema for writing, referencing, and sharing Nix Expressions. A flake is a filesystem tree containing a `flake.nix` at its root that declares:
   - **inputs**: external dependencies (other flakes, nixpkgs channels, etc.)
   - **outputs**: what the flake produces (NixOS configurations, packages, modules, dev shells, etc.)
   - **flake.lock**: a version-pinning file that records exact revisions of all inputs for reproducibility
@@ -92,7 +92,7 @@ The Dendritic Pattern organizes NixOS configuration around **features rather tha
 **The key shift** is in the axis of composition: instead of asking _"what does this machine need?"_ and building outward from a hostname, you ask _"which features does this machine require?"_ and assemble inward from capabilities.
 
 In practice:
-- **Shared behavior** lives in `*/common/global/` (applied universally) or `*/common/optional/` (selectable features)
+- **Shared behaviour** lives in `*/common/global/` (applied universally) or `*/common/optional/` (selectable features)
 - **Host files** become pure feature manifests — short declarations like `services.glance.enable = true`
 - **Adding a new host** means writing three small files (host, home, hardware) — no deep knowledge of filesystem layout required
 - **Changing a feature** happens in one place and propagates to every host that selects it
