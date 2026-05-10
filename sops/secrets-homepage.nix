@@ -27,8 +27,8 @@
 
       sops.secrets.HOMEPAGE_ENV = {
         sopsFile = cfg.secretsFile;
-        # homepage-dashboard runs as a dedicated system user; adjust if yours differs
-        owner = "homepage";
+        owner = cfg.user;
+        group = cfg.group;
         restartUnits = ["homepage.service"];
       };
 

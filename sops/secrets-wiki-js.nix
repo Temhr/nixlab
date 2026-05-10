@@ -27,7 +27,8 @@
 
       sops.secrets.WIKIJS_SECRET = {
         sopsFile = cfg.secretsFile;
-        owner = "wiki-js";
+        owner = cfg.user;
+        group = cfg.group;
         restartUnits = ["wiki-js.service"];
       };
 
