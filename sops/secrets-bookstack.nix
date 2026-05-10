@@ -18,7 +18,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
       sops.secrets =
         lib.genAttrs
         ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"]
