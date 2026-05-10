@@ -29,6 +29,7 @@
         sopsFile = cfg.secretsFile;
         owner = cfg.user;
         group = cfg.group;
+        restartUnits = ["grafana.service"];
       };
     };
   };
