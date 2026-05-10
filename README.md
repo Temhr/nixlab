@@ -56,10 +56,10 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 nixlab uses **flake-parts** as its orchestration layer, structured around the **Dendritic Pattern** and a **self-exporting module schema** where every file registers its own outputs directly into the flake — no central registry required.
 
-### flake-parts Orchestration
+1. ### flake-parts Orchestration
 
 <details>
-- <summary>A NixOS community library that structures flake outputs as composable modules called **parts** <i>(click to expand)</i></summary>
+<summary>A NixOS community library that structures flake outputs as composable modules called **parts**.  <i>(click to expand)</i></summary>
 <p></p>
 
 With [flake-parts](https://github.com/hercules-ci/flake-parts), instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes.
@@ -91,11 +91,13 @@ outputs = inputs @ { flake-parts, ... }:
 
 </details>
 
-### The Dendritic Pattern
+2. ### The Dendritic Pattern
 
 <details>
-<summary>The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**. The name comes from the branching, self-similar structure where each part of the config is independent and composable. <i>(click to expand)</i></summary>
+<summary>The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**.  <i>(click to expand)</i></summary>
 <p></p>
+
+The name comes from the branching, self-similar structure where each part of the config is independent and composable. 
 
 **The key shift** is in the axis of composition: instead of asking _"what does this machine need?"_ and building outward from a hostname, you ask _"which features does this machine require?"_ and assemble inward from capabilities.
 
@@ -107,11 +109,13 @@ In practice:
 
 </details>
 
-### Self-Exporting Module Schema
+3. ### Self-Exporting Module Schema
 
 <details>
-<summary>Every file in this flake is a **flake-parts module** — a function that takes `{ self, inputs, ... }` and registers its own outputs directly into the flake. There is no central registry. Each file is fully self-sufficient: <i>(click to expand)</i></summary>
+<summary>Almost every file in this flake is a **flake-parts module**.  <i>(click to expand)</i></summary>
 <p></p>
+
+A **flake-parts module** is a function that takes `{ self, inputs, ... }` and registers its own outputs directly into the flake. There is no central registry. Each file is fully self-sufficient:
 
 ```nix
 # modules/nixos/glance/default.nix
@@ -154,11 +158,13 @@ In practice:
 
 </details>
 
-### nixosModules Namespace
+4. ### nixosModules Namespace
 
 <details>
-<summary>All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern. Module names use a double-dash separator to create a readable hierarchy:  <i>(click to expand)</i></summary>
+<summary>All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern.  <i>(click to expand)</i></summary>
 <p></p>
+
+Module names use a double-dash separator to create a readable hierarchy: 
 
 **Naming convention:**
 - `hardw--<identifier>`: Hardware configurations
@@ -190,11 +196,13 @@ Run `nix flake show` to see the complete module tree.
 
 </details>
 
-### Central Orchestration Files
+5. ### Central Orchestration Files
 
 <details>
-<summary>A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules. Additionally, the `sops/` directory contains self-registering secret modules that are auto-discovered alongside service modules.  <i>(click to expand)</i></summary>
+<summary>A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules.  <i>(click to expand)</i></summary>
 <p></p>
+
+Additionally, the `sops/` directory contains self-registering secret modules that are auto-discovered alongside service modules.
 
 | File | Responsibility | Output namespace |
 |------|---------------|------------------|
@@ -215,10 +223,10 @@ Run `nix flake show` to see the complete module tree.
 
 </details>
 
-### Secrets Management
+6. ### Secrets Management
 
 <details>
-<summary>Secrets are managed with sops-nix using age encryption. <i>(click to expand)</i></summary>
+<summary>Secrets are managed with sops-nix using age encryption.  <i>(click to expand)</i></summary>
 <p></p>
 
 All [sops-nix](https://github.com/Mic92/sops-nix) secrets-related files are centralized in the `sops/` directory:
