@@ -331,11 +331,11 @@ nixlab/
 │
 ├── flake/                      # Orchestration-level flake-parts configs
 │   └── parts/
-│       ├── _hosts-meta.nix     # Static per-host metadata: IPs, interfaces, services, nixpkgs selection
+│       ├── _hosts-meta.nix     # Static per-host metadata: IPs, interfaces, services, nixpkgs
 │       ├── apps.nix            # build-all app: validates every nixosConfiguration
 │       ├── checks.nix          # Pre-commit hooks (alejandra, deadnix, guards) + formatter
 │       ├── lib.nix             # mkHost constructor; reads hostsMeta; wires modules + overlays
-│       ├── nixpkgs.nix         # Configures pkgs instance (allowUnfree + overlays) for perSystem
+│       ├── nixpkgs.nix         # Configs pkgs instance (allowUnfree + overlays) for perSystem
 │       ├── options-home.nix    # Declares flake.homeModules as mergeable lazyAttrsOf option
 │       └── packages.nix        # Imports pkgs/ into perSystem.packages
 │
