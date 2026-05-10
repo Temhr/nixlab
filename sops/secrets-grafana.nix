@@ -27,6 +27,8 @@
 
       sops.secrets.GF_SECURITY_ADMIN_PASSWORD = {
         sopsFile = cfg.secretsFile;
+        owner = cfg.user;
+        group = cfg.group;
       };
     };
   };

@@ -89,6 +89,18 @@
           description = "Allow anonymous read-only access to dashboards";
         };
 
+        user = lib.mkOption {
+          type = lib.types.str;
+          default = "grafana";
+          description = "User to run Grafana as";
+        };
+
+        group = lib.mkOption {
+          type = lib.types.str;
+          default = "grafana";
+          description = "Group to run Grafana as";
+        };
+
         # Credentials File
         credentialsFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
@@ -185,31 +197,31 @@
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules =
         [
-          "d ${cfg.dataDir} 0750 grafana grafana -"
-          "d ${cfg.dataDir}/data 0750 grafana grafana -"
-          "d ${cfg.dataDir}/logs 0750 grafana grafana -"
-          "d ${cfg.dataDir}/plugins 0750 grafana grafana -"
-          "d ${cfg.dataDir}/dashboards 0755 grafana grafana -"
+          "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/data 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/logs 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/plugins 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/dashboards 0775 ${cfg.user} ${cfg.group} -"
         ]
         ++ lib.flatten (lib.mapAttrsToList (name: _: [
-            "d ${cfg.dataDir}/dashboards/${name} 0755 grafana grafana -"
+            "d ${cfg.dataDir}/dashboards/${name} 0775 ${cfg.user} ${cfg.group} -"
           ])
           cfg.dashboards);
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Grafana
       # ----------------------------------------------------------------------------
-      users.users.grafana = {
+      users.users.${cfg.user} = {
         isSystemUser = true;
-        group = "grafana";
+        group = cfg.group;
         home = cfg.dataDir;
         description = "Grafana service user";
       };
 
-      users.groups.grafana = {};
+      users.groups.${cfg.group} = {};
 
       users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter ["grafana"];
+        lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # GRAFANA SERVICE - Configure the systemd service
@@ -239,8 +251,8 @@
         serviceConfig =
           {
             Type = "simple";
-            User = "grafana";
-            Group = "grafana";
+            User = cfg.user;
+            Group = cfg.group;
             WorkingDirectory = cfg.dataDir;
             ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
             Restart = "on-failure";
@@ -259,13 +271,13 @@
           lib.optionalString (cfg.credentialsFile != null) ''
             echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
               > /run/grafana-credentials.env
-            chown grafana:grafana /run/grafana-credentials.env
+            chown ${cfg.user}:${cfg.group} /run/grafana-credentials.env
             chmod 600 /run/grafana-credentials.env
           ''
           + ''
             # Set up provisioning directories
             mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
-            chown -R grafana:grafana ${cfg.dataDir}/provisioning
+            chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}/provisioning
 
             # ┌─────────────────────────────────────────────────────────┐
             # │ PROVISION ALL DASHBOARDS                                │
@@ -273,11 +285,11 @@
             ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
                 # Setup dashboard: ${name}
                 mkdir -p ${cfg.dataDir}/dashboards/${name}
-                chown grafana:grafana ${cfg.dataDir}/dashboards/${name}
+                chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/dashboards/${name}
 
                 # Copy dashboard JSON if it exists
                 if [ -f ${dashboard.path} ]; then
-                  install -m 644 -o grafana -g grafana ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
+                  install -m 644 -o ${cfg.user} -g ${cfg.group} ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
                 else
                   echo "Warning: Dashboard file not found: ${dashboard.path}"
                 fi
@@ -297,7 +309,7 @@
                       path: ${cfg.dataDir}/dashboards/${name}
                       foldersFromFilesStructure: false
                 DASHEOF
-                chown grafana:grafana ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
+                chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
               '')
               cfg.dashboards)}
           ''
