@@ -58,7 +58,9 @@ nixlab uses **flake-parts** as its orchestration layer, structured around the **
 
 ### flake-parts Orchestration
 
-[flake-parts](https://github.com/hercules-ci/flake-parts) is a NixOS community library that structures flake outputs as composable modules called **parts**. Instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes. 
+<details>
+<summary>[flake-parts](https://github.com/hercules-ci/flake-parts) is a NixOS community library that structures flake outputs as composable modules called **parts**. Instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes. <i>(click to expand)</i></summary>
+<p></p>
 
 The `flake.nix` root is a thin entry point that uses [import-tree](https://github.com/vic/import-tree) to auto-discover all part files across multiple directories:
 
@@ -84,6 +86,8 @@ outputs = inputs @ { flake-parts, ... }:
 - `perSystem` is called automatically for each supported system
 - Architecture-independent outputs use the `flake.` namespace
 - Files prefixed with `_` are leaf files excluded from import-tree discovery
+
+</details>
 
 ### The Dendritic Pattern
 
