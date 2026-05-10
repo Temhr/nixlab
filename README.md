@@ -2,7 +2,7 @@
 
 Modular NixOS configuration for Linux laptops, desktops, and homelab servers. Built on the **Dendritic Pattern** using **flake-parts** for composable, self-registering modules where every file declares its own outputs.
 
-Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs) with inspiration from [EmergentMind](https://www.youtube.com/watch?v=YHm7e3f87iY&list=PLAWyx2BxU4OyERRTbzNAaRHK08DQ0DD_l&index=1), [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the broader NixOS community. Written almost entirely by Claude.
+Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs) with inspiration from [EmergentMind](https://www.youtube.com/watch?v=YHm7e3f87iY&list=PLAWyx2BxU4OyERRTbzNAaRHK08DQ0DD_l&index=1), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the broader NixOS community. Written almost entirely by Claude.
 
 ---
 
@@ -694,6 +694,5 @@ sudo nixos-rebuild switch --flake .#<hostname>
 - [Misterio77](https://github.com/Misterio77/nix-starter-configs) - Base configuration structure
 - [EmergentMind](https://www.youtube.com/@EmergentMind) - Educational video series
 - [Vimjoyer](https://www.youtube.com/@vimjoyer) - Educational video series
-- [8bitbuddhism](https://code.8bitbuddhism.com/aires/nix-configuration) - Configuration inspiration
 - The NixOS community for extensive documentation and support
 - Little, by little, by a lot: rewritten almost entirely with Claude
