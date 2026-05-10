@@ -59,7 +59,7 @@ nixlab uses **flake-parts** as its orchestration layer, structured around the **
 ### flake-parts Orchestration
 
 <details>
-<summary>A NixOS community library that structures flake outputs as composable modules called **parts** <i>(click to expand)</i></summary>
+- <summary>A NixOS community library that structures flake outputs as composable modules called **parts** <i>(click to expand)</i></summary>
 <p></p>
 
 With [flake-parts](https://github.com/hercules-ci/flake-parts), instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes.
