@@ -94,50 +94,53 @@
         # REQUIRED: sops-nix path to the decrypted MariaDB root password.
         # sops-nix decrypts secrets to bare values (just the password, no KEY= prefix).
         # The module handles wrapping it correctly — you just point it at the secret path.
-        # In your secrets YAML file this key should be named: MYSQL_ROOT_PASSWORD
-        # In configuration.nix:  dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
+        # In your secrets YAML file this key should be named: BOOKSTACK_MYSQL_ROOT_PASSWORD
+        # In configuration.nix:  dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
         dbRootPasswordFile = lib.mkOption {
           type = lib.types.path;
-          example = "/run/secrets/MYSQL_ROOT_PASSWORD";
+          default = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
+          example = "/run/secrets/BOOKSTACK_MYSQL_ROOT_PASSWORD";
           description = ''
             Path to sops-decrypted MariaDB root password (bare value, no KEY= prefix).
             Declare in configuration.nix:
-              sops.secrets.MYSQL_ROOT_PASSWORD.sopsFile = ./secrets/bookstack.yaml;
-            Then pass: config.sops.secrets.MYSQL_ROOT_PASSWORD.path
+              sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.sopsFile = ./secrets/bookstack.yaml;
+            Then pass: config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path
           '';
         };
 
         # REQUIRED: sops-nix path to the decrypted BookStack database user password.
-        # Used for both MariaDB (MYSQL_PASSWORD) and BookStack (DB_PASSWORD).
-        # In your secrets YAML file this key should be named: MYSQL_PASSWORD
-        # In configuration.nix:  dbPasswordFile = config.sops.secrets.MYSQL_PASSWORD.path;
+        # Used for both MariaDB (BOOKSTACK_MYSQL_PASSWORD) and BookStack (BOOKSTACK_DB_PASSWORDWORD).
+        # In your secrets YAML file this key should be named: BOOKSTACK_MYSQL_PASSWORD
+        # In configuration.nix:  dbPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
         dbPasswordFile = lib.mkOption {
           type = lib.types.path;
-          example = "/run/secrets/MYSQL_PASSWORD";
+          default = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
+          example = "/run/secrets/BOOKSTACK_MYSQL_PASSWORD";
           description = ''
             Path to sops-decrypted BookStack DB user password (bare value, no KEY= prefix).
             Declare in configuration.nix:
-              sops.secrets.MYSQL_PASSWORD.sopsFile = ./secrets/bookstack.yaml;
-            Then pass: config.sops.secrets.MYSQL_PASSWORD.path
+              sops.secrets.BOOKSTACK_MYSQL_PASSWORD.sopsFile = ./secrets/bookstack.yaml;
+            Then pass: config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path
           '';
         };
 
-        # REQUIRED: sops-nix path to the decrypted BookStack APP_KEY.
+        # REQUIRED: sops-nix path to the decrypted BookStack BOOKSTACK_APP_KEY.
         # This is a Laravel encryption key used to secure sessions and encrypted data.
         # Generate it once with:
         #   sudo podman run -it --rm --entrypoint /bin/bash \
         #     lscr.io/linuxserver/bookstack:latest appkey
-        # Store the output (base64:...) as the APP_KEY value in your secrets YAML.
+        # Store the output (base64:...) as the BOOKSTACK_APP_KEY value in your secrets YAML.
         # WARNING: Never change this after first setup — doing so invalidates all sessions.
-        # In configuration.nix:  appKeyFile = config.sops.secrets.APP_KEY.path;
+        # In configuration.nix:  appKeyFile = config.sops.secrets.BOOKSTACK_APP_KEY.path;
         appKeyFile = lib.mkOption {
           type = lib.types.path;
-          example = "/run/secrets/APP_KEY";
+          default = config.sops.secrets.BOOKSTACK_APP_KEY.path;
+          example = "/run/secrets/BOOKSTACK_APP_KEY";
           description = ''
-            Path to sops-decrypted BookStack APP_KEY (bare value, no KEY= prefix).
+            Path to sops-decrypted BookStack BOOKSTACK_APP_KEY (bare value, no KEY= prefix).
             Declare in configuration.nix:
-              sops.secrets.APP_KEY.sopsFile = ./secrets/bookstack.yaml;
-            Then pass: config.sops.secrets.APP_KEY.path
+              sops.secrets.BOOKSTACK_APP_KEY.sopsFile = ./secrets/bookstack.yaml;
+            Then pass: config.sops.secrets.BOOKSTACK_APP_KEY.path
           '';
         };
 
@@ -223,8 +226,8 @@
         requires = ["bookstack-init-dirs.service"];
         # Build the env file from bare sops secret values before the container starts
         preStart = lib.mkBefore ''
-          echo "MYSQL_ROOT_PASSWORD=$(cat ${cfg.dbRootPasswordFile})" >  /run/bookstack-db.env
-          echo "MYSQL_PASSWORD=$(cat ${cfg.dbPasswordFile})"          >> /run/bookstack-db.env
+          echo "BOOKSTACK_MYSQL_ROOT_PASSWORD=$(cat ${cfg.dbRootPasswordFile})" >  /run/bookstack-db.env
+          echo "BOOKSTACK_MYSQL_PASSWORD=$(cat ${cfg.dbPasswordFile})"          >> /run/bookstack-db.env
           chmod 600 /run/bookstack-db.env
         '';
       };
@@ -281,12 +284,12 @@
         requires = ["bookstack-init-dirs.service"];
         preStart = lib.mkBefore ''
                   # Read bare secret values
-                  DB_PASS_VAL=$(cat ${cfg.dbPasswordFile})
-                  APP_KEY_VAL=$(cat ${cfg.appKeyFile})
+                  BOOKSTACK_DB_PASSWORD_VAL=$(cat ${cfg.dbPasswordFile})
+                  BOOKSTACK_APP_KEY_VAL=$(cat ${cfg.appKeyFile})
 
-                  # Write container env file (DB_PASS and APP_KEY in KEY=value format)
-                  echo "DB_PASS=$DB_PASS_VAL" >  /run/bookstack-app.env
-                  echo "APP_KEY=$APP_KEY_VAL" >> /run/bookstack-app.env
+                  # Write container env file (BOOKSTACK_DB_PASSWORD and BOOKSTACK_APP_KEY in KEY=value format)
+                  echo "BOOKSTACK_DB_PASSWORD=$BOOKSTACK_DB_PASSWORD_VAL" >  /run/bookstack-app.env
+                  echo "BOOKSTACK_APP_KEY=$BOOKSTACK_APP_KEY_VAL" >> /run/bookstack-app.env
                   chmod 600 /run/bookstack-app.env
 
                   # Write the BookStack .env config file before the container starts.
@@ -296,13 +299,13 @@
                   # start to ensure it always reflects current secrets and settings.
                   mkdir -p ${cfg.dataDir}/bookstack/www
                   cat > ${cfg.dataDir}/bookstack/www/.env <<ENVEOF
-          APP_KEY=$APP_KEY_VAL
+          BOOKSTACK_APP_KEY=$BOOKSTACK_APP_KEY_VAL
           APP_URL=${cfg.appURL}
           DB_HOST=host.containers.internal
           DB_PORT=3306
           DB_DATABASE=bookstack
           DB_USERNAME=bookstack
-          DB_PASSWORD=$DB_PASS_VAL
+          BOOKSTACK_DB_PASSWORDWORD=$BOOKSTACK_DB_PASSWORD_VAL
           STORAGE_TYPE=local
           MAIL_DRIVER=smtp
           MAIL_FROM_NAME="BookStack"
@@ -367,11 +370,11 @@ SECRETS FILE SETUP
 Your secrets/bookstack.yaml should contain these four keys.
 The values are plain strings — sops encrypts the file, not individual values.
 
-  MYSQL_ROOT_PASSWORD: your_mariadb_root_password
-  MYSQL_PASSWORD: your_bookstack_db_password
-  APP_KEY: base64:your_generated_app_key_here=
+  BOOKSTACK_MYSQL_ROOT_PASSWORD: your_mariadb_root_password
+  BOOKSTACK_MYSQL_PASSWORD: your_bookstack_db_password
+  BOOKSTACK_APP_KEY: base64:your_generated_app_key_here=
 
-Generate APP_KEY once with:
+Generate BOOKSTACK_APP_KEY once with:
   sudo podman run -it --rm --entrypoint /bin/bash \
     lscr.io/linuxserver/bookstack:latest appkey
 
@@ -381,7 +384,7 @@ Encrypt the file:
 
 Edit it later with the same command.
 
-WARNING: Never change APP_KEY after first setup — it invalidates all user sessions.
+WARNING: Never change BOOKSTACK_APP_KEY after first setup — it invalidates all user sessions.
 
 
 ================================================================================
@@ -391,7 +394,7 @@ CONFIGURATION.NIX WIRING
 Declare secrets (elegant shorthand using lib.genAttrs):
 
   sops.secrets = lib.genAttrs
-    [ "MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "APP_KEY" ]
+    [ "BOOKSTACK_MYSQL_ROOT_PASSWORD" "BOOKSTACK_MYSQL_PASSWORD" "BOOKSTACK_APP_KEY" ]
     (_: { sopsFile = self + "/secrets/bookstack.yaml"; });
 
 Wire the module:
@@ -399,9 +402,9 @@ Wire the module:
   services.bookstack-nixlab = {
     enable             = true;
     appURL             = "http://192.168.1.50:6875";   # your LAN IP
-    dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
-    dbPasswordFile     = config.sops.secrets.MYSQL_PASSWORD.path;
-    appKeyFile         = config.sops.secrets.APP_KEY.path;
+    dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
+    dbPasswordFile     = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
+    appKeyFile         = config.sops.secrets.BOOKSTACK_APP_KEY.path;
   };
 
 With dataDir on a separate drive:
@@ -411,9 +414,9 @@ With dataDir on a separate drive:
     appURL             = "http://192.168.1.50:6875";
     dataDir            = "/data/bookstack";
     dataMountUnit      = "data.mount";   # /data -> data.mount
-    dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
-    dbPasswordFile     = config.sops.secrets.MYSQL_PASSWORD.path;
-    appKeyFile         = config.sops.secrets.APP_KEY.path;
+    dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
+    dbPasswordFile     = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
+    appKeyFile         = config.sops.secrets.BOOKSTACK_APP_KEY.path;
   };
 
   # dataMountUnit name = mount path with slashes -> dashes, drop leading dash
@@ -432,9 +435,9 @@ With mDNS .local hostname (no domain registrar needed):
   services.bookstack-nixlab = {
     enable             = true;
     appURL             = "http://bookstack.local";
-    dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
-    dbPasswordFile     = config.sops.secrets.MYSQL_PASSWORD.path;
-    appKeyFile         = config.sops.secrets.APP_KEY.path;
+    dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
+    dbPasswordFile     = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
+    appKeyFile         = config.sops.secrets.BOOKSTACK_APP_KEY.path;
   };
   # Works on Linux, macOS, iOS. Windows needs Bonjour (comes with iTunes).
 
@@ -447,9 +450,9 @@ With nginx reverse proxy (LAN domain via Pi-hole or router DNS):
     enableSSL          = false;   # only enable for publicly resolvable domains
     dataDir            = "/data/bookstack";
     dataMountUnit      = "data.mount";
-    dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
-    dbPasswordFile     = config.sops.secrets.MYSQL_PASSWORD.path;
-    appKeyFile         = config.sops.secrets.APP_KEY.path;
+    dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
+    dbPasswordFile     = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
+    appKeyFile         = config.sops.secrets.BOOKSTACK_APP_KEY.path;
   };
 
 

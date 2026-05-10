@@ -52,8 +52,8 @@
         script = ''
           echo "NODE_RED_CREDENTIAL_SECRET=$(cat ${config.sops.secrets.NODE_RED_CREDENTIAL_SECRET.path})" \
             > /run/node-red-credentials.env
-          chown node-red:node-red /run/node-red-credentials.env
-          chmod 600 /run/node-red-credentials.env
+          chown ${cfg.user}:${cfg.group} /run/node-red-credentials.env
+          chmod 660 /run/node-red-credentials.env
         '';
       };
 

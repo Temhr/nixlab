@@ -27,7 +27,7 @@
 
       sops.secrets =
         lib.genAttrs
-        ["MYSQL_ROOT_PASSWORD" "MYSQL_PASSWORD" "DB_PASS" "APP_KEY"]
+        ["BOOKSTACK_MYSQL_ROOT_PASSWORD" "BOOKSTACK_MYSQL_PASSWORD" "BOOKSTACK_DB_PASSWORD" "BOOKSTACK_APP_KEY"]
         (_: {
           sopsFile = cfg.secretsFile;
           restartUnits = ["bookstack.service"];

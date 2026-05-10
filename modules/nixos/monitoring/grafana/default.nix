@@ -106,7 +106,7 @@
           type = lib.types.nullOr lib.types.path;
           default = null;
           description = ''
-            Path to a file containing GF_SECURITY_ADMIN_PASSWORD=<value>.
+            Path to a file containing GRAFANA_ADMIN_PASSWORD=<value>.
             Set automatically by importing the nsops--grafana module.
             If null, no credentials file is loaded (service will use Grafana defaults).
           '';
@@ -269,7 +269,7 @@
 
         preStart = lib.mkBefore (
           lib.optionalString (cfg.credentialsFile != null) ''
-            echo "GF_SECURITY_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
+            echo "GRAFANA_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
               > /run/grafana-credentials.env
             chown ${cfg.user}:${cfg.group} /run/grafana-credentials.env
             chmod 600 /run/grafana-credentials.env
