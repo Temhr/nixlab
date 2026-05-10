@@ -56,7 +56,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 nixlab uses **flake-parts** as its orchestration layer, structured around the **Dendritic Pattern** and a **self-exporting module schema** where every file registers its own outputs directly into the flake — no central registry required.
 
-1. ### flake-parts Orchestration
+- ### flake-parts Orchestration
 
 <details>
 <summary>A NixOS community library that structures flake outputs as composable modules called **parts**.  <i>(click to expand)</i></summary>
@@ -91,7 +91,7 @@ outputs = inputs @ { flake-parts, ... }:
 
 </details>
 
-2. ### The Dendritic Pattern
+- ### The Dendritic Pattern
 
 <details>
 <summary>The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**.  <i>(click to expand)</i></summary>
@@ -109,7 +109,7 @@ In practice:
 
 </details>
 
-3. ### Self-Exporting Module Schema
+- ### Self-Exporting Module Schema
 
 <details>
 <summary>Almost every file in this flake is a **flake-parts module**.  <i>(click to expand)</i></summary>
@@ -158,7 +158,7 @@ A **flake-parts module** is a function that takes `{ self, inputs, ... }` and re
 
 </details>
 
-4. ### nixosModules Namespace
+- ### nixosModules Namespace
 
 <details>
 <summary>All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern.  <i>(click to expand)</i></summary>
@@ -196,7 +196,7 @@ Run `nix flake show` to see the complete module tree.
 
 </details>
 
-5. ### Central Orchestration Files
+- ### Central Orchestration Files
 
 <details>
 <summary>A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules.  <i>(click to expand)</i></summary>
@@ -223,7 +223,7 @@ Additionally, the `sops/` directory contains self-registering secret modules tha
 
 </details>
 
-6. ### Secrets Management
+- ### Secrets Management
 
 <details>
 <summary>Secrets are managed with sops-nix using age encryption.  <i>(click to expand)</i></summary>
@@ -392,7 +392,11 @@ nixlab/
 
 ## Usage
 
-### First Install on a New Machine
+- ### First Install on a New Machine
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
 
 ```bash
 # 1. Boot NixOS installer, partition drives, mount at /mnt
@@ -423,8 +427,14 @@ sudo nixos-rebuild boot \
 sudo reboot
 ```
 
-### Daily Commands
+</details>
 
+- ### Daily Commands
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+  
 ```bash
 # Rebuild and switch current host
 sudo nixos-rebuild switch --flake /home/temhr/nixlab
@@ -460,8 +470,13 @@ nix flake show /home/temhr/nixlab
 sudo nix-collect-garbage --delete-older-than 7d
 ```
 
-### Adding a New Host
+</details>
 
+- ### Adding a New Host
+
+<details><summary><i>(click to expand)</i></summary>
+<p></p>
+  
 Adding a new host requires creating three self-registering files and one metadata entry:
 
 #### 1. Add host metadata to `flake/parts/_hosts-meta.nix`
@@ -580,7 +595,13 @@ nix flake check
 sudo nixos-rebuild switch --flake .#<hostname>
 ```
 
-### Adding a New Service Module
+</details>
+
+- ### Adding a New Service Module
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
 
 Service modules follow the self-exporting pattern and live in `modules/nixos/<service>/`. Secrets are managed separately in the `sops/` directory.
 
@@ -724,6 +745,8 @@ nix flake check
 # Deploy to specific host
 sudo nixos-rebuild switch --flake .#<hostname>
 ```
+
+</details>
 
 ## Acknowledgments
 
