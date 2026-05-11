@@ -18,18 +18,8 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.grafana-nixlab ? enable;
-          message = "nsops--grafana requires servc--grafana-nixlab to also be imported";
-        }
-      ];
-
-      sops.secrets.GRAFANA_ADMIN_PASSWORD = {
+      sops.secrets.GF_SECURITY_ADMIN_PASSWORD = {
         sopsFile = cfg.secretsFile;
-        owner = cfg.user;
-        group = cfg.group;
-        restartUnits = ["grafana.service"];
       };
     };
   };

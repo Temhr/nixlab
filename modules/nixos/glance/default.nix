@@ -131,8 +131,7 @@
       };
 
       users.groups.${cfg.group} = {};
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
+      users.users.${config.nixlab.mainUser}.extraGroups = [cfg.group];
 
       # ----------------------------------------------------------------------------
       # GLANCE SERVICE - Configure the systemd service

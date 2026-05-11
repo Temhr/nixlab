@@ -1,4 +1,4 @@
-GRAFANA_ADMIN_PASSWORD: ENC[AES256_GCM,data:co5DaIP3J9yRHgGl,iv:zspPxb0+IHahFPQ7yey5lKtkd1mVfc29kvxAxIBFYzE=,tag:AVkZSTTWalZQba+N+iaz0A==,type:str]
+GF_SECURITY_ADMIN_PASSWORD: ENC[AES256_GCM,data:lXoPOu4wuoPYMaYi,iv:MtyZdJ5iVdBc9HcsHcGn3UeBZ48f3z+LMIN7uYB8OyI=,tag:UrFm557RZ3+vLozJ475bIg==,type:str]
 sops:
     age:
         - recipient: age1492d3ceqx25evj5a469lxakw3j0v96aycuj7gyu07yr3777kgssstes332
@@ -64,7 +64,7 @@ sops:
             dlVBTHEraTE2dHBQcjZ2ZWM1S2o4VlUK8M6KtWME9AN6+QYqZSQYZNidCKWX26rB
             ybpnNKtm0ckgkZaJEZxIn4RIc0WEGU9HpPEzI99bFjOss9WSn6Wb7g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-05-10T21:50:34Z"
-    mac: ENC[AES256_GCM,data:zhTaWpmtaqIgUD2NQn2qU6YrDKn//pe23BcYDo558BkAO/ejbVzb4oPgEGvvduLicul0WP/1iLTss4A0mSQag1E1PG5YSciQUTfTIW/GoG4edVHLXroz+iu2ZQ3XhUBosbjY5kws3INKbZJhkM1xCf8ARpBD4GLIuOGr8dujAts=,iv:SQWE5O4GaDPyjLiLNsctzIswVAx6HZDmYTBgj+aqyZE=,tag:oh2QqWh7ve4wfFSavWrYTg==,type:str]
+    lastmodified: "2026-03-26T15:09:20Z"
+    mac: ENC[AES256_GCM,data:UGNroaPxRoCetPsKSzFolOm3IwAaG1+3xEhxWUZg2BqMBvNDf/6vIytRLLQ6FQEi+Ia/jLd64O8UxkbtqwxOh0HyWEN08DlMxJtuRxf1WvM3UwbnJmjZaoUHrBEbSIHcgzDXlTfZiDzFTiJ9tvRCzvh03pSZ81RJqKgDwot3BWk=,iv:47ax65BwGhTdiIgcg3S654JJ2mkvGtJn0Ak7OqhoWcU=,tag:hdCAUgDqikOAsuDoQd5K2A==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.12.1

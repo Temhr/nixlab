@@ -60,18 +60,6 @@
           description = "Domain name for nginx reverse proxy (optional)";
         };
 
-        user = lib.mkOption {
-          type = lib.types.str;
-          default = "comfyui";
-          description = "User to run Comfyui as";
-        };
-
-        group = lib.mkOption {
-          type = lib.types.str;
-          default = "comfyui";
-          description = "Group to run Comfyui as";
-        };
-
         # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
         enableSSL = lib.mkOption {
           type = lib.types.bool;
@@ -89,27 +77,27 @@
       # DIRECTORY SETUP - Create necessary directories with proper permissions
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
-        "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
-        "d ${cfg.dataDir}/models 0770 ${cfg.user} ${cfg.group} -"
-        "d ${cfg.dataDir}/output 0770 ${cfg.user} ${cfg.group} -"
-        "d ${cfg.dataDir}/input 0770 ${cfg.user} ${cfg.group} -"
-        "d ${cfg.dataDir}/temp 0770 ${cfg.user} ${cfg.group} -"
-        "d ${cfg.dataDir}/user 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir} 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/output 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/input 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/temp 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/user 0770 comfyui comfyui -"
       ];
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
+      users.users.comfyui = {
         isSystemUser = true;
-        group = cfg.group;
+        group = "comfyui";
         home = cfg.dataDir;
         description = "ComfyUI service user";
       };
-      users.groups.${cfg.group} = {};
+      users.groups.comfyui = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
+      # Allow current user to access comfyui data
+      users.users.${config.nixlab.mainUser}.extraGroups = ["comfyui"];
 
       # ----------------------------------------------------------------------------
       # COMFYUI PATCH - Fix PyTorch 2.2 compatibility
@@ -122,8 +110,8 @@
 
         serviceConfig = {
           Type = "oneshot";
-          User = cfg.user;
-          Group = cfg.group;
+          User = "comfyui";
+          Group = "comfyui";
           RemainAfterExit = true;
         };
 
@@ -195,8 +183,8 @@
 
         serviceConfig = {
           Type = "oneshot";
-          User = cfg.user;
-          Group = cfg.group;
+          User = "comfyui";
+          Group = "comfyui";
           RemainAfterExit = true;
           WorkingDirectory = cfg.dataDir;
         };
@@ -305,8 +293,8 @@
 
         serviceConfig = {
           Type = "simple";
-          User = cfg.user;
-          Group = cfg.group;
+          User = "comfyui";
+          Group = "comfyui";
           WorkingDirectory = cfg.dataDir;
           # Ensure user directory exists before starting
           ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";

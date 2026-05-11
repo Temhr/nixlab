@@ -63,18 +63,6 @@
           description = "Open firewall ports";
         };
 
-        user = lib.mkOption {
-          type = lib.types.str;
-          default = "node-red";
-          description = "User to run Node-Red as";
-        };
-
-        group = lib.mkOption {
-          type = lib.types.str;
-          default = "node-red";
-          description = "Group to run Node-Red as";
-        };
-
         # OPTIONAL: Path to credentials environment file
         credentialsEnvFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
@@ -98,23 +86,21 @@
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
         # Create data directory for Node-RED flows and configuration
-        "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir} 0770 node-red node-red -"
       ];
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Node-RED
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
+      users.users.node-red = {
         isSystemUser = true;
-        group = cfg.group;
+        group = "node-red";
         home = cfg.dataDir;
-        description = "Node-Red service user";
       };
 
-      users.groups.${cfg.group} = {};
+      users.groups.node-red = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
+      users.users.${config.nixlab.mainUser}.extraGroups = ["node-red"];
 
       # ----------------------------------------------------------------------------
       # NODE-RED SERVICE - Configure the systemd service
@@ -161,15 +147,15 @@
           };
           SETTINGSEOF
 
-              chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/settings.js
+              chown node-red:node-red ${cfg.dataDir}/settings.js
               chmod 640 ${cfg.dataDir}/settings.js
         '';
 
         serviceConfig =
           {
             Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
+            User = "node-red";
+            Group = "node-red";
             WorkingDirectory = cfg.dataDir;
             # Start Node-RED with specified settings
             ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";

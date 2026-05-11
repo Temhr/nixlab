@@ -90,18 +90,6 @@
           description = "Enable Grafana Alloy to collect system logs";
         };
 
-        user = lib.mkOption {
-          type = lib.types.str;
-          default = "loki";
-          description = "User to run Loki as";
-        };
-
-        group = lib.mkOption {
-          type = lib.types.str;
-          default = "loki";
-          description = "Group to run Loki as";
-        };
-
         # Maintenance monitoring options
         maintenance = {
           enable = lib.mkEnableOption "maintenance task logging integration";
@@ -129,10 +117,10 @@
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules =
         [
-          "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/chunks 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/index 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/wal 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir} 0750 loki loki -"
+          "d ${cfg.dataDir}/chunks 0750 loki loki -"
+          "d ${cfg.dataDir}/index 0750 loki loki -"
+          "d ${cfg.dataDir}/wal 0750 loki loki -"
         ]
         ++ lib.optionals cfg.enableAlloy [
           "d /var/lib/alloy 0750 alloy alloy -"
@@ -145,14 +133,14 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system users
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
+      users.users.loki = {
         isSystemUser = true;
-        group = cfg.group;
+        group = "loki";
         home = cfg.dataDir;
         description = "Loki service user";
       };
 
-      users.groups.${cfg.group} = {};
+      users.groups.loki = {};
 
       users.users.alloy = lib.mkIf cfg.enableAlloy {
         isSystemUser = true;
@@ -164,7 +152,7 @@
       users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
       users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group "alloy"];
+        lib.mkAfter ["loki" "alloy"];
 
       # ----------------------------------------------------------------------------
       # LOKI SERVICE - Configure the systemd service
@@ -176,8 +164,8 @@
 
         serviceConfig = {
           Type = "simple";
-          User = cfg.user;
-          Group = cfg.group;
+          User = "loki";
+          Group = "loki";
           ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
           Restart = "on-failure";
           RestartSec = "10s";
@@ -286,10 +274,10 @@
             -if json \
             -of yaml
 
-          install -m 660 -o ${cfg.user} -g ${cfg.group} ${yamlTmp} ${cfg.dataDir}/loki.yaml
+          install -m 660 -o loki -g loki ${yamlTmp} ${cfg.dataDir}/loki.yaml
 
           mkdir -p ${cfg.dataDir}/data ${cfg.dataDir}/chunks ${cfg.dataDir}/wal ${cfg.dataDir}/compactor
-          chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}
+          chown -R loki:loki ${cfg.dataDir}
         '';
       };
 

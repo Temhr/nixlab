@@ -92,19 +92,6 @@
           default = true;
           description = "Open firewall ports for HTTP/HTTPS";
         };
-
-        user = lib.mkOption {
-          type = lib.types.str;
-          default = "homepage";
-          description = "User to run Homepage as";
-        };
-
-        group = lib.mkOption {
-          type = lib.types.str;
-          default = "homepage";
-          description = "Group to run Homepage as";
-        };
-
         # OPTIONAL: sops-nix path to a KEY=value env file for Homepage widget API keys.
         # Homepage reads HOMEPAGE_VAR_* variables from the service environment and
         # substitutes them into service/widget YAML as {{HOMEPAGE_VAR_NAME}}.
@@ -131,23 +118,22 @@
       # ----------------------------------------------------------------------------
       # USER SETUP
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
+      users.users.homepage = {
         isSystemUser = true;
-        group = cfg.group;
+        group = "homepage";
         home = cfg.dataDir;
         extraGroups = ["users"];
       };
 
-      users.groups.${cfg.group} = {};
+      users.groups.homepage = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
+      users.users.${config.nixlab.mainUser}.extraGroups = ["homepage"];
 
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
-        "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir} 0770 homepage homepage -"
       ];
 
       # ----------------------------------------------------------------------------
@@ -171,7 +157,7 @@
           settingsTmp = "/tmp/homepage-settings.yaml.tmp";
         in ''
           [ -d "${cfg.dataDir}/config" ] || mkdir -p "${cfg.dataDir}/config"
-          chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/config/
+          chown homepage:homepage ${cfg.dataDir}/config/
           chmod 0770 ${cfg.dataDir}/config/
 
           # services.yaml
@@ -205,8 +191,8 @@
         serviceConfig =
           {
             Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
+            User = "homepage";
+            Group = "homepage";
             ExecStart = "${cfg.package}/bin/homepage";
             Restart = "on-failure";
             RestartSec = "10s";

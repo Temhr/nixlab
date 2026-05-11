@@ -27,9 +27,8 @@
 
       sops.secrets.WEBUI_SECRET_KEY = {
         sopsFile = cfg.secretsFile;
-        owner = cfg.webuiUser;
-        group = cfg.webuiGroup;
-        restartUnits = ["open-webui.service"];
+        owner = "open-webui";
+        restartUnits = ["open-webui.service"]; # restart webui when secret rotates
       };
 
       services.ollama-stack.webuiSecretKeyFile =
