@@ -58,6 +58,7 @@
     ## Secret/Encryption
     age # Simple, modern file encryption tool
     sops # Simple and flexible tool for managing secrets
+    ssh-to-age # Convert ssh private keys in ed25519 format to age keys
 
     ## System Resource Monitors
     atop # Advanced system and process resource monitor

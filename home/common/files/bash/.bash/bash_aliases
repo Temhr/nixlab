@@ -75,8 +75,6 @@ alias ports='netstat -tulanp'
 alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
 alias traceroute='traceroute -I'
 alias weather='curl wttr.in'
-alias mirk1='sudo systemctl reset-failed mnt-mirk1.automount && sudo systemctl start mnt-mirk1.automount'
-alias mirk3='sudo systemctl reset-failed mnt-mirk3.automount && sudo systemctl start mnt-mirk3.automount'
 
 # 7. 🔥 System Monitoring - Processes, memory, load, services
 alias cpu='lscpu'
@@ -205,7 +203,6 @@ alias cpup10='ps -eo pid,ppid,%cpu,comm --sort=-%cpu | head -n11'
     ## get top executable eating cpu ##
 alias cpu5='ps -eo pid,user,ppid,%mem,%cpu,exe --sort=-%cpu | head -n6'
 alias cpu10='ps -eo pid,user,ppid,%mem,%cpu,exe --sort=-%cpu | head -n11'
-
 
 ## List largest directories (aka "ducks")
 alias dir5='du -cksh * | sort -hr | head -n 5'

@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   BackupHomeShellScript = pkgs.writeShellScript "auto-backup-home" ''
     #!/usr/bin/env bash
 
@@ -7,7 +11,7 @@
 
     # Configuration
     HOSTNAME=$(/run/current-system/sw/bin/hostname)
-    SOURCE_DIR="/home/temhr/"
+    SOURCE_DIR="/home/${config.nixlab.mainUser}/"
     BACKUP_DESTINATIONS=(
         "/mirror"
         "/mnt/mirace"
@@ -16,6 +20,7 @@
         "/mnt/mirvat"
         "/mnt/mirzen"
         "/mnt/mirnas1"
+        "/mnt/mirnas2"
     )
 
     # NFS mount points (destinations that require mount verification)
@@ -26,6 +31,7 @@
         "/mnt/mirvat"
         "/mnt/mirzen"
         "/mnt/mirnas1"
+        "/mnt/mirnas2"
     )
 
     # Rsync options
