@@ -182,15 +182,6 @@ alias scrcpy-e1='scrcpy -s 192.168.0.191:5555 --tcpip --video-codec=h265 --max-s
 alias scrcpy-e3='scrcpy -s 192.168.0.193:5555 --tcpip --video-codec=h265 --max-size=1080 --max-fps=30 --no-audio --turn-screen-off --stay-awake --always-on-top --render-driver=opengl'
 alias scrcpycam='scrcpy --video-source=camera --camera-size=1920x1080 -e --render-driver=opengl'
 
-##SSH Shortcuts
-alias nixace='ssh temhr@192.168.0.200'
-alias nixnas1='ssh temhr@192.168.0.205'
-alias nixnas2='ssh temhr@192.168.0.206'
-alias nixsun='ssh temhr@192.168.0.203'
-alias nixtop='ssh temhr@192.168.0.202'
-alias nixvat='ssh temhr@192.168.0.201'
-alias nixzen='ssh temhr@192.168.0.204'
-
 ##ctl Shortcuts
 alias jctl='journalctl -u'
 alias sctl='systemctl'

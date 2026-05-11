@@ -1,6 +1,8 @@
 {
+  allHosts,
   flakePath,
   lib,
+  pkgs,
   ...
 }: {
   home.file = {
@@ -8,8 +10,23 @@
     ".bash_profile".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash_profile";
     ".bashrc".source = lib.mkForce "${flakePath}/home/common/files/bash/.bashrc";
 
+    # Custom append to existing bash file
+    ".bash/bash_aliases".source = lib.mkForce (
+      pkgs.writeText "bash_aliases" ''
+        ${builtins.readFile "${flakePath}/home/common/files/bash/.bash/bash_aliases"}
+
+        ##SSH Shortcuts - Dynamically generated from allHosts
+        alias nixace='ssh temhr@${allHosts.nixace.address}'
+        alias nixnas1='ssh temhr@${allHosts.nixnas1.address}'
+        alias nixnas2='ssh temhr@${allHosts.nixnas2.address}'
+        alias nixsun='ssh temhr@${allHosts.nixsun.address}'
+        alias nixtop='ssh temhr@${allHosts.nixtop.address}'
+        alias nixvat='ssh temhr@${allHosts.nixvat.address}'
+        alias nixzen='ssh temhr@${allHosts.nixzen.address}'
+      ''
+    );
+
     # Files from the .bash/ subdirectory in your source
-    ".bash/bash_aliases".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_aliases";
     ".bash/bash_functions".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_functions";
     ".bash/bash_prompt".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_prompt";
     ".bash/emoticons".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/emoticons";
