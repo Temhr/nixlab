@@ -5,10 +5,25 @@
 let
   # Define a shell script using Nix's `writeShellScript`.
   # This creates an executable script named "auto-git-pull" in the Nix store,
-  # whose contents are read from your local file at ../files/scripts/auto-git-pull.sh.
-  GitPullShellScript = pkgs.writeShellScript "auto-git-pull" (
-    builtins.readFile ../files/scripts/auto-git-pull.sh
-  );
+  # with the script content embedded directly in this file.
+  GitPullShellScript = pkgs.writeShellScript "auto-git-pull" ''
+    #!/usr/bin/env bash
+
+    ## Exit on error
+    set -e
+
+    # 1) Navigates to the Flake directory
+    # 2) Pulls the latest changes from the Git repository using the specified user
+
+    ## Git Repository Updates
+    cd "/home/temhr/nixlab" || exit 1
+
+    echo "Pulling the latest version of the repository..."
+    /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="/run/current-system/sw/bin/ssh -i /home/temhr/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
+
+    ## Exit on Success
+    exit 0
+  '';
 in {
   # Define a systemd user timer named `git-pull`.
   systemd.user.timers.git-pull = {
@@ -49,6 +64,6 @@ in {
     };
   };
 }
-#below to check status of .timer or .service
-#systemctl --user status git-pull.timer
-
+# Below to check status of .timer or .service:
+# systemctl --user status git-pull.timer
+# systemctl --user status git-pull.service
