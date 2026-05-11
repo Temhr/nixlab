@@ -30,7 +30,9 @@
         ["BOOKSTACK_MYSQL_ROOT_PASSWORD" "BOOKSTACK_MYSQL_PASSWORD" "BOOKSTACK_DB_PASSWORD" "BOOKSTACK_APP_KEY"]
         (_: {
           sopsFile = cfg.secretsFile;
-          restartUnits = ["bookstack.service"];
+          owner = "root";
+          group = "root";
+          restartUnits = ["podman-bookstack.service" "podman-bookstack-db.service"];
         });
     };
   };

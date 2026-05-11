@@ -128,6 +128,19 @@
           If null, a placeholder is used — NOT suitable for production.
         '';
       };
+
+      webuiUser = lib.mkOption {
+        type = lib.types.str;
+        default = "open-webui";
+        description = "User to run Open WebUI as";
+      };
+
+      webuiGroup = lib.mkOption {
+        type = lib.types.str;
+        default = "open-webui";
+        description = "Group to run Open WebUI as";
+      };
+
       # NEW: allow opting out of the mainUser group membership
       # without coupling to a specific external option name
       extraUsers = lib.mkOption {
@@ -177,9 +190,9 @@
             home = cfg.ollamaDataDir;
             description = "Ollama service user";
           };
-          open-webui = {
+          ${cfg.webuiUser} = {
             isSystemUser = true;
-            group = "open-webui";
+            group = cfg.webuiGroup;
             home = cfg.webuiDataDir;
             description = "Open WebUI service user";
           };

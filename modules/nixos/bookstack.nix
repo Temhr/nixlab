@@ -98,13 +98,11 @@
         # In configuration.nix:  dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
         dbRootPasswordFile = lib.mkOption {
           type = lib.types.path;
-          default = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
           example = "/run/secrets/BOOKSTACK_MYSQL_ROOT_PASSWORD";
           description = ''
             Path to sops-decrypted MariaDB root password (bare value, no KEY= prefix).
-            Declare in configuration.nix:
-              sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.sopsFile = ./secrets/bookstack.yaml;
-            Then pass: config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path
+            In your host config:
+              dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
           '';
         };
 
@@ -114,7 +112,6 @@
         # In configuration.nix:  dbPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
         dbPasswordFile = lib.mkOption {
           type = lib.types.path;
-          default = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
           example = "/run/secrets/BOOKSTACK_MYSQL_PASSWORD";
           description = ''
             Path to sops-decrypted BookStack DB user password (bare value, no KEY= prefix).
@@ -134,7 +131,6 @@
         # In configuration.nix:  appKeyFile = config.sops.secrets.BOOKSTACK_APP_KEY.path;
         appKeyFile = lib.mkOption {
           type = lib.types.path;
-          default = config.sops.secrets.BOOKSTACK_APP_KEY.path;
           example = "/run/secrets/BOOKSTACK_APP_KEY";
           description = ''
             Path to sops-decrypted BookStack BOOKSTACK_APP_KEY (bare value, no KEY= prefix).
@@ -305,7 +301,7 @@
           DB_PORT=3306
           DB_DATABASE=bookstack
           DB_USERNAME=bookstack
-          BOOKSTACK_DB_PASSWORDWORD=$BOOKSTACK_DB_PASSWORD_VAL
+          DB_PASSWORD=$BOOKSTACK_DB_PASSWORD_VAL
           STORAGE_TYPE=local
           MAIL_DRIVER=smtp
           MAIL_FROM_NAME="BookStack"

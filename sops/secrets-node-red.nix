@@ -9,18 +9,16 @@
     # ══════════════════════════════════════════════════════════════════════════
     # OPTIONS
     # ══════════════════════════════════════════════════════════════════════════
-    options.secrets.node-red = {
-      enable =
-        lib.mkEnableOption "Node-RED secrets management"
-        // {
-          default = config.services.nodered-service.enable;
-        };
+    options.services.nodered-service.secretsFile = lib.mkOption {
+      type = lib.types.path;
+      default = ./node-red.yaml;
+      description = "Path to sops-encrypted secrets file";
     };
 
     # ══════════════════════════════════════════════════════════════════════════
     # CONFIG
     # ══════════════════════════════════════════════════════════════════════════
-    config = lib.mkIf config.secrets.node-red.enable {
+    config = lib.mkIf cfg.enable {
       assertions = [
         {
           assertion = config.services.nodered-service ? enable;
@@ -34,7 +32,12 @@
       sops.secrets =
         lib.genAttrs
         ["NODE_RED_CREDENTIAL_SECRET"]
-        (_: {sopsFile = ./node-red.yaml;});
+        (_: {
+          sopsFile = cfg.secretsFile;
+          owner = cfg.user;
+          group = cfg.group;
+          restartUnits = ["node-red.service"];
+        });
 
       # ────────────────────────────────────────────────────────────────────────
       # Build env file from secrets

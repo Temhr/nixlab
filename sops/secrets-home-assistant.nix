@@ -27,7 +27,8 @@
 
       sops.secrets.HA_SECRETS_YAML = {
         sopsFile = cfg.secretsFile;
-        owner = "hass";
+        owner = config.users.users.hass.name;
+        group = config.users.groups.hass.name;
         restartUnits = ["home-assistant.service"];
       };
 
