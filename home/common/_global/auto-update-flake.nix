@@ -1,9 +1,34 @@
 {pkgs, ...}:
 # Import the package set (pkgs) and any other module arguments.
 let
-  flakeAutoUpdate = pkgs.writeShellScript "flakeAutoUpdate" (
-    builtins.readFile ../files/scripts/auto-update-flake.sh
-  );
+  flakeAutoUpdateShellScript = pkgs.writeShellScript "flakeAutoUpdate" ''
+    #!/usr/bin/env bash
+
+    ## Exit on error
+    set -e
+
+    # 1) Navigates to the Flake directory
+    # 2) Pulls the latest changes from the Git repository using the specified user
+
+    ## Git Repository Updates
+    cd "/home/temhr/nixlab" || exit 1
+
+    echo "Pulling the latest version of the repository..."
+    /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i /home/temhr/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
+
+    # Update flake
+    /run/wrappers/bin/sudo -u "temhr" nix flake update --flake /home/temhr/nixlab
+
+    # Commit and push if there are changes
+    if ! /run/current-system/sw/bin/git diff --quiet flake.lock; then
+        /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git add flake.lock
+        /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git commit -m "$(hostname) - update flake.lock - $(date)"
+        /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i /home/temhr/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git push
+    fi
+
+    ## Exit on Success
+    exit 0
+  '';
 in {
   # Define a systemd user timer named `flake-auto-update`.
   systemd.user.timers.flake-auto-update = {
@@ -32,7 +57,7 @@ in {
     };
     Service = {
       # Set the command to run.
-      ExecStart = "${flakeAutoUpdate}";
+      ExecStart = "${flakeAutoUpdateShellScript}";
       Type = "oneshot";
 
       # ⏲ Add a timeout: stop after 5 minutes (adjust as needed)
