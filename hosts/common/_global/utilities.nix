@@ -57,6 +57,7 @@
 
     ## Secret/Encryption
     age # Simple, modern file encryption tool
+    sops # Simple and flexible tool for managing secrets
 
     ## System Resource Monitors
     atop # Advanced system and process resource monitor
