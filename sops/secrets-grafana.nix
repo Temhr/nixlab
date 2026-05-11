@@ -18,6 +18,8 @@
     };
 
     config = lib.mkIf cfg.enable {
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
       sops.secrets.GF_SECURITY_ADMIN_PASSWORD = {
         sopsFile = cfg.secretsFile;
       };

@@ -19,6 +19,8 @@
     };
 
     config = lib.mkIf cfg.enable {
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
       sops.secrets.GLANCE_ENV = {
         sopsFile = cfg.secretsFile;
         owner = "glance";

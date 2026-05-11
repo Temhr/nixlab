@@ -18,6 +18,8 @@
     };
 
     config = lib.mkIf cfg.enable {
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
       sops.secrets.HOMEPAGE_ENV = {
         sopsFile = cfg.secretsFile;
         # homepage-dashboard runs as a dedicated system user; adjust if yours differs

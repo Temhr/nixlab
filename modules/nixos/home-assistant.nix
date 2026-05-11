@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--home-assistant-nixlab = {
     config,
     lib,
@@ -7,6 +7,7 @@
     cfg = config.services.homeassistant-custom;
   in {
     imports = [
+      self.nixosModules.nsops--home-assistant
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured

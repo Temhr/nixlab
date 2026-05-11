@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--wiki-js-nixlab = {
     config,
     lib,
@@ -7,6 +7,7 @@
     cfg = config.services.wikijs-custom;
   in {
     imports = [
+      self.nixosModules.nsops--wiki-js
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured

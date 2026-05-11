@@ -24,6 +24,7 @@
           message = "nsops--ollama requires servc--ollama to also be imported";
         }
       ];
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
       sops.secrets.WEBUI_SECRET_KEY = {
         sopsFile = cfg.secretsFile;

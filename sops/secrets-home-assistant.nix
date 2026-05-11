@@ -18,6 +18,8 @@
     };
 
     config = lib.mkIf cfg.enable {
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
       sops.secrets.HA_SECRETS_YAML = {
         sopsFile = cfg.secretsFile;
         owner = "hass";

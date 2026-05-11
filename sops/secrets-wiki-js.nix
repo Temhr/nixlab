@@ -18,6 +18,8 @@
     };
 
     config = lib.mkIf cfg.enable {
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
       sops.secrets.WIKIJS_SECRET = {
         sopsFile = cfg.secretsFile;
         owner = "wiki-js";
