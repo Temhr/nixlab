@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.servc--wiki-js-nixlab = {
     config,
     lib,
@@ -7,7 +7,6 @@
     cfg = config.services.wikijs-custom;
   in {
     imports = [
-      self.nixosModules.nsops--wiki-js
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -87,6 +86,18 @@
           default = true;
           description = "Open firewall ports for HTTP/HTTPS";
         };
+
+        user = lib.mkOption {
+          type = lib.types.str;
+          default = "wiki-js";
+          description = "User to run Wiki-js as";
+        };
+
+        group = lib.mkOption {
+          type = lib.types.str;
+          default = "wiki-js";
+          description = "Group to run Wiki-js as";
+        };
         # OPTIONAL: sops-nix path to the decrypted Wiki.js session/JWT secret.
         # If null, Wiki.js generates its own random secret on startup (non-persistent
         # across restarts — all sessions are invalidated on each service restart).
@@ -114,16 +125,17 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Glance
       # ----------------------------------------------------------------------------
-      users.users.wiki-js = {
+      users.users.${cfg.user} = {
         isSystemUser = true;
-        group = "wiki-js";
+        group = cfg.group;
         home = cfg.dataDir;
         description = "wiki-js user";
       };
 
-      users.groups.wiki-js = {};
+      users.groups.${cfg.group} = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups = ["postgres" "wiki-js"];
+      users.users.${config.nixlab.mainUser}.extraGroups =
+        lib.mkAfter [cfg.group "postgres"];
 
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions
@@ -131,11 +143,11 @@
       systemd.tmpfiles.rules =
         [
           # Create main data directory owned by wiki-js user
-          "d ${cfg.dataDir} 0770 wiki-js wiki-js -"
+          "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
         ]
         # Create custom uploads directory if specified
         ++ lib.optionals (cfg.uploadsPath != null) [
-          "d ${cfg.uploadsPath} 0770 wiki-js wiki-js -"
+          "d ${cfg.uploadsPath} 0770 ${cfg.user} ${cfg.group} -"
         ]
         # Create backup directory if specified (owned by postgres user)
         ++ lib.optionals (cfg.backupPath != null) [
@@ -152,7 +164,7 @@
         # Create 'wiki-js' user with ownership of the database
         ensureUsers = [
           {
-            name = "wiki-js";
+            name = cfg.user;
             ensureDBOwnership = true;
           }
         ];
@@ -214,7 +226,7 @@
         script = ''
           echo "SESSION_SECRET=$(cat ${cfg.appSecretFile})" \
             > /run/wiki-js-credentials.env
-          chown wiki-js:wiki-js /run/wiki-js-credentials.env
+          chown ${cfg.user}:${cfg.group} /run/wiki-js-credentials.env
           chmod 600 /run/wiki-js-credentials.env
         '';
       };
@@ -240,7 +252,7 @@
           fi
 
           # Ensure proper ownership
-          chown -R wiki-js:wiki-js ${cfg.uploadsPath}
+          chown -R ${cfg.user}:${cfg.group} ${cfg.uploadsPath}
         '';
 
         serviceConfig =

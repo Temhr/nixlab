@@ -18,10 +18,18 @@
     };
 
     config = lib.mkIf cfg.enable {
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+      assertions = [
+        {
+          assertion = config.services.grafana-nixlab ? enable;
+          message = "nsops--grafana requires servc--grafana-nixlab to also be imported";
+        }
+      ];
 
-      sops.secrets.GF_SECURITY_ADMIN_PASSWORD = {
+      sops.secrets.GRAFANA_ADMIN_PASSWORD = {
         sopsFile = cfg.secretsFile;
+        owner = cfg.user;
+        group = cfg.group;
+        restartUnits = ["grafana.service"];
       };
     };
   };

@@ -18,11 +18,17 @@
     };
 
     config = lib.mkIf cfg.enable {
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+      assertions = [
+        {
+          assertion = config.services.wikijs-custom ? enable;
+          message = "nsops--wiki-js requires servc--wiki-js-nixlab to also be imported";
+        }
+      ];
 
       sops.secrets.WIKIJS_SECRET = {
         sopsFile = cfg.secretsFile;
-        owner = "wiki-js";
+        owner = cfg.user;
+        group = cfg.group;
         restartUnits = ["wiki-js.service"];
       };
 

@@ -10,10 +10,12 @@
       # Home manager
       # Services
       self.nixosModules.servc--bookstack-nixlab
+      self.nixosModules.nsops--bookstack
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--ollama
+      self.nixosModules.nsops--ollama
     ];
   };
   flake.nixosModules.hosts--nixace = {
@@ -148,9 +150,9 @@
       dataDir = "/data/bookstack";
       dataMountUnit = "data.mount";
       openFirewall = true;
-      dbRootPasswordFile = config.sops.secrets.MYSQL_ROOT_PASSWORD.path;
-      dbPasswordFile = config.sops.secrets.DB_PASS.path;
-      appKeyFile = config.sops.secrets.APP_KEY.path;
+      dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
+      dbPasswordFile = config.sops.secrets.BOOKSTACK_DB_PASSWORD.path;
+      appKeyFile = config.sops.secrets.BOOKSTACK_APP_KEY.path;
     };
 
     # Define your Flatpak packages here

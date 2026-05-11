@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.servc--glance-nixlab = {
     config,
     lib,
@@ -17,7 +17,6 @@
       (builtins.toJSON {pages = pagesConfig;});
   in {
     imports = [
-      self.nixosModules.nsops--glance
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -132,7 +131,8 @@
       };
 
       users.groups.${cfg.group} = {};
-      users.users.${config.nixlab.mainUser}.extraGroups = [cfg.group];
+      users.users.${config.nixlab.mainUser}.extraGroups =
+        lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # GLANCE SERVICE - Configure the systemd service

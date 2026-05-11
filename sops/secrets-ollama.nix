@@ -24,12 +24,12 @@
           message = "nsops--ollama requires servc--ollama to also be imported";
         }
       ];
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
       sops.secrets.WEBUI_SECRET_KEY = {
         sopsFile = cfg.secretsFile;
-        owner = "open-webui";
-        restartUnits = ["open-webui.service"]; # restart webui when secret rotates
+        owner = cfg.webuiUser;
+        group = cfg.webuiGroup;
+        restartUnits = ["open-webui.service"];
       };
 
       services.ollama-stack.webuiSecretKeyFile =

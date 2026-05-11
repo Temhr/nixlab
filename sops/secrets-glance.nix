@@ -19,11 +19,16 @@
     };
 
     config = lib.mkIf cfg.enable {
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-
+      assertions = [
+        {
+          assertion = config.services.glance-nixlab ? enable;
+          message = "nsops--glance requires servc--glance-nixlab to also be imported";
+        }
+      ];
       sops.secrets.GLANCE_ENV = {
         sopsFile = cfg.secretsFile;
-        owner = "glance";
+        owner = cfg.user;
+        group = cfg.group;
         # sops-nix decrypts this as a bare multi-line string; the preStart
         # wrapper below converts it to a proper KEY=value env file format.
         restartUnits = ["glance.service"];

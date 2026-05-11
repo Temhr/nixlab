@@ -18,12 +18,17 @@
     };
 
     config = lib.mkIf cfg.enable {
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+      assertions = [
+        {
+          assertion = config.services.homepage-nixlab ? enable;
+          message = "nsops--homepage requires servc--homepage-nixlab to also be imported";
+        }
+      ];
 
       sops.secrets.HOMEPAGE_ENV = {
         sopsFile = cfg.secretsFile;
-        # homepage-dashboard runs as a dedicated system user; adjust if yours differs
-        owner = "homepage";
+        owner = cfg.user;
+        group = cfg.group;
         restartUnits = ["homepage.service"];
       };
 

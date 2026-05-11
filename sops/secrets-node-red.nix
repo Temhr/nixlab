@@ -3,29 +3,41 @@
     config,
     lib,
     ...
-  }: {
+  }: let
+    cfg = config.services.nodered-service;
+  in {
     # ══════════════════════════════════════════════════════════════════════════
     # OPTIONS
     # ══════════════════════════════════════════════════════════════════════════
-    options.secrets.node-red = {
-      enable =
-        lib.mkEnableOption "Node-RED secrets management"
-        // {
-          default = config.services.nodered-service.enable;
-        };
+    options.services.nodered-service.secretsFile = lib.mkOption {
+      type = lib.types.path;
+      default = ./node-red.yaml;
+      description = "Path to sops-encrypted secrets file";
     };
 
     # ══════════════════════════════════════════════════════════════════════════
     # CONFIG
     # ══════════════════════════════════════════════════════════════════════════
-    config = lib.mkIf config.secrets.node-red.enable {
+    config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = config.services.nodered-service ? enable;
+          message = "nsops--node-red requires servc--node-red-nixlab to also be imported";
+        }
+      ];
+
       # ────────────────────────────────────────────────────────────────────────
       # Declare secrets
       # ────────────────────────────────────────────────────────────────────────
       sops.secrets =
         lib.genAttrs
         ["NODE_RED_CREDENTIAL_SECRET"]
-        (_: {sopsFile = ./node-red.yaml;});
+        (_: {
+          sopsFile = cfg.secretsFile;
+          owner = cfg.user;
+          group = cfg.group;
+          restartUnits = ["node-red.service"];
+        });
 
       # ────────────────────────────────────────────────────────────────────────
       # Build env file from secrets
@@ -45,8 +57,8 @@
         script = ''
           echo "NODE_RED_CREDENTIAL_SECRET=$(cat ${config.sops.secrets.NODE_RED_CREDENTIAL_SECRET.path})" \
             > /run/node-red-credentials.env
-          chown node-red:node-red /run/node-red-credentials.env
-          chmod 600 /run/node-red-credentials.env
+          chown ${cfg.user}:${cfg.group} /run/node-red-credentials.env
+          chmod 660 /run/node-red-credentials.env
         '';
       };
 

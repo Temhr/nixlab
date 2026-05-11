@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.servc--node-red-nixlab = {
     config,
     lib,
@@ -8,7 +8,6 @@
     cfg = config.services.nodered-service;
   in {
     imports = [
-      self.nixosModules.nsops--node-red
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured
@@ -64,6 +63,18 @@
           description = "Open firewall ports";
         };
 
+        user = lib.mkOption {
+          type = lib.types.str;
+          default = "node-red";
+          description = "User to run Node-Red as";
+        };
+
+        group = lib.mkOption {
+          type = lib.types.str;
+          default = "node-red";
+          description = "Group to run Node-Red as";
+        };
+
         # OPTIONAL: Path to credentials environment file
         credentialsEnvFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
@@ -87,21 +98,23 @@
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
         # Create data directory for Node-RED flows and configuration
-        "d ${cfg.dataDir} 0770 node-red node-red -"
+        "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
       ];
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Node-RED
       # ----------------------------------------------------------------------------
-      users.users.node-red = {
+      users.users.${cfg.user} = {
         isSystemUser = true;
-        group = "node-red";
+        group = cfg.group;
         home = cfg.dataDir;
+        description = "Node-Red service user";
       };
 
-      users.groups.node-red = {};
+      users.groups.${cfg.group} = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups = ["node-red"];
+      users.users.${config.nixlab.mainUser}.extraGroups =
+        lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # NODE-RED SERVICE - Configure the systemd service
@@ -148,15 +161,15 @@
           };
           SETTINGSEOF
 
-              chown node-red:node-red ${cfg.dataDir}/settings.js
+              chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/settings.js
               chmod 640 ${cfg.dataDir}/settings.js
         '';
 
         serviceConfig =
           {
             Type = "simple";
-            User = "node-red";
-            Group = "node-red";
+            User = cfg.user;
+            Group = cfg.group;
             WorkingDirectory = cfg.dataDir;
             # Start Node-RED with specified settings
             ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
