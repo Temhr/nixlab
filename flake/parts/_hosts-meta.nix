@@ -26,6 +26,22 @@ let
     ];
   };
 in {
+  nixnas1 = mkHostMeta {
+    address = "192.168.0.251";
+    ethIface = "eno1";
+    wifiIface = "";
+    hostId = "c6e98cd9";
+    nixpkgsInput = "nixpkgs-stable";
+    services = ["glance" "grafana" "prometheus" "loki"];
+  };
+  nixnas2 = mkHostMeta {
+    address = "192.168.0.252";
+    ethIface = "eno1";
+    wifiIface = "wlp1s0";
+    hostId = "23d031fa";
+    nixpkgsInput = "nixpkgs-stable";
+    services = ["glance" "grafana" "prometheus" "loki"];
+  };
   nixace = mkHostMeta {
     address = "192.168.0.200";
     ethIface = "enp0s31f6";
@@ -34,24 +50,8 @@ in {
     nixpkgsInput = "nixpkgs-stable";
     services = ["glance" "grafana" "prometheus" "loki" "bookstack" "comfyui" "ollama-gpu" "home-assistant"];
   };
-  nixnas1 = mkHostMeta {
-    address = "192.168.0.205";
-    ethIface = "eno1";
-    wifiIface = "";
-    hostId = "c6e98cd9";
-    nixpkgsInput = "nixpkgs-stable";
-    services = ["glance" "grafana" "prometheus" "loki"];
-  };
-  nixnas2 = mkHostMeta {
-    address = "192.168.0.206";
-    ethIface = "eno1";
-    wifiIface = "wlp1s0";
-    hostId = "23d031fa";
-    nixpkgsInput = "nixpkgs-stable";
-    services = ["glance" "grafana" "prometheus" "loki"];
-  };
   nixsun = mkHostMeta {
-    address = "192.168.0.203";
+    address = "192.168.0.201";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
     hostId = "eba785f1";
@@ -67,7 +67,7 @@ in {
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixvat = mkHostMeta {
-    address = "192.168.0.201";
+    address = "192.168.0.203";
     ethIface = "enp0s25";
     wifiIface = "wlo1";
     hostId = "5845aa8d";
