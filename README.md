@@ -214,7 +214,7 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 | `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) and formatter configuration | `perSystem.checks`, `perSystem.formatter` |
 | `apps.nix` | Defines the `build-all` app that validates all `nixosConfiguration` outputs | `perSystem.apps.build-all` |
 
-**Secrets modules in `sops/`**: Self-registering modules (e.g., `secrets-glance.nix`, `secrets-grafana.nix`) are auto-discovered by import-tree and register as `flake.nixosModules.nsops--<service>`.
+**Secrets modules in `sops/`**: Self-registering modules (e.g., `sops/glance.nix`, `sops/grafana.nix`) are auto-discovered by import-tree and register as `flake.nixosModules.nsops--<service>`.
 
 **Key orchestration features:**
 - **Per-host nixpkgs selection**: `_hosts-meta.nix` allows different hosts to use different nixpkgs inputs (stable, unstable, or pinned versions)
@@ -232,7 +232,7 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 Secrets are managed with sops-nix using age encryption. All [sops-nix](https://github.com/Mic92/sops-nix) secrets-related files are centralized in the `sops/` directory:
 
 - **Encrypted secrets**: Each service has a dedicated `.yaml` file (e.g., `sops/glance.yaml`, `sops/grafana.yaml`)
-- **Secret modules**: Corresponding `secrets-<service>.nix` files declare which keys to decrypt and wire them to services
+- **Secret modules**: Corresponding `sops/<service>.nix` files declare which keys to decrypt and wire them to services
 - **Self-registering**: Secret modules follow the flake-parts pattern, registering as `flake.nixosModules.nsops--<service>`
 - **File-based options**: Service modules accept `*File` path options (not plaintext strings)
 - **Runtime decryption**: Decrypted paths are passed via `config.sops.secrets.<KEY>.path`
@@ -248,13 +248,13 @@ Secrets are managed with sops-nix using age encryption. All [sops-nix](https://g
 ```
 sops/
 ├── glance.yaml              # Encrypted secrets for glance
-├── secrets-glance.nix       # Declares nsops--glance module
+├── glance.nix               # Declares nsops--glance module
 ├── grafana.yaml             # Encrypted secrets for grafana
-├── secrets-grafana.nix      # Declares nsops--grafana module
+├── grafana.nix              # Declares nsops--grafana module
 └── networking.yaml          # Shared networking secrets (wifi credentials)
 ```
 
-**Example secret module** (`sops/secrets-glance.nix`):
+**Example secret module** (`sops/glance.nix`):
 ```nix
 {...}: {
   flake.nixosModules.nsops--glance = { config, lib, ... }:
@@ -369,7 +369,7 @@ nixlab/
 │
 ├── sops/                       # Centralized secrets management
 │   ├── <service>.yaml          # Encrypted secrets per service (e.g., glance.yaml)
-│   ├── secrets-<service>.nix   # Secret module declarations (e.g., secrets-glance.nix)
+│   ├── <service>.nix           # Secret module declarations (e.g., sops/glance.nix)
 │   └── networking.yaml         # Shared secrets (wifi credentials, etc.)
 │
 ├── overlays/                   # nixpkgs modifications and channel pinning
@@ -678,7 +678,7 @@ api_key: your-api-key-here
 secret_key: your-secret-here
 ```
 
-**`sops/secrets-<service>.nix`** (self-registering secret module):
+**`sops/<service>.nix`** (self-registering secret module):
 ```nix
 {...}: {
   flake.nixosModules.nsops--<service> = { config, lib, ... }:
