@@ -9,6 +9,7 @@
       self.nixosModules.hosts--c-global
       # Home manager
       # Services
+      self.nixosModules.nsops--ssh-keys
     ];
   };
   flake.nixosModules.hosts--nixnas1 = {

@@ -19,7 +19,7 @@ let
     cd "/home/temhr/nixlab" || exit 1
 
     echo "Pulling the latest version of the repository..."
-    /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="/run/current-system/sw/bin/ssh -i /home/temhr/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
+    /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="/run/current-system/sw/bin/ssh -i /run/secrets/ssh_key_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
 
     ## Exit on Success
     exit 0

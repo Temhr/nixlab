@@ -14,7 +14,7 @@ let
     cd "/home/temhr/nixlab" || exit 1
 
     echo "Pulling the latest version of the repository..."
-    /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i /home/temhr/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
+    /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i /run/secrets/ssh_key_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
 
     # Update flake
     /run/wrappers/bin/sudo -u "temhr" nix flake update --flake /home/temhr/nixlab
@@ -23,7 +23,7 @@ let
     if ! /run/current-system/sw/bin/git diff --quiet flake.lock; then
         /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git add flake.lock
         /run/wrappers/bin/sudo -u "temhr" /run/current-system/sw/bin/git commit -m "$(hostname) - update flake.lock - $(date)"
-        /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i /home/temhr/.ssh/id_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git push
+        /run/wrappers/bin/sudo -u "temhr" GIT_SSH_COMMAND="ssh -i /run/secrets/ssh_key_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git push
     fi
 
     ## Exit on Success
