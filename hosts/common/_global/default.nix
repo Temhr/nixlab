@@ -5,9 +5,11 @@
     ./users
     ./audio.nix
     ./auto-backup-home.nix
+    ./auto-git-pull.nix
     ./auto-nix-gc.nix
     ./auto-nixos-upgrade.nix
     ./auto-ping-watchdog.nix
+    ./auto-update-flake.nix
     ./bluetooth.nix
     ./boot-loader.nix
     ./display-manager.nix
