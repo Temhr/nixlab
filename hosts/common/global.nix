@@ -16,6 +16,9 @@
       self.nixosModules.nsops--homepage
       self.nixosModules.servc--monitoring-nixlab
       self.nixosModules.systm--networking
+      self.nixosModules.nsops--ssh-keys
+      self.nixosModules.systm--auto-flake-update
+      self.nixosModules.systm--auto-nixlab-gpull
     ];
 
     services.ignoreLid = {
