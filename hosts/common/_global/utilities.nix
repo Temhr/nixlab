@@ -67,6 +67,7 @@
     iotop # Monitor disk I/O usage by process
     htop # Interactive process viewer and manager
     lm_sensors # Read hardware sensor data (temps, fan speeds, etc.)
+    memtester # Userspace utility for testing the memory subsystem for faults
     nvtopPackages.intel # GPU usage monitor for Intel graphics
     nvtopPackages.nvidia # GPU usage monitor for NVIDIA graphics
     perf-tools # Scripts and tools built on Linux perf events
