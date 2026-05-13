@@ -29,7 +29,7 @@
     # Define a systemd system timer named `nixlab-gpull`.
     systemd.timers.nixlab-gpull = {
       description = "Run git pull every hour";
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         # Start 1 minute after boot.
         OnBootSec = "1min";
@@ -59,7 +59,7 @@
     };
   };
 }
-
 # Below to check status of .timer or .service:
 # systemctl status nixlab-gpull.timer
 # systemctl status nixlab-gpull.service
+

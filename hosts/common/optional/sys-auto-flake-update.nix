@@ -34,7 +34,7 @@
     # Define a systemd system timer named `flake-update`.
     systemd.timers.flake-update = {
       description = "Timer for flake auto-update";
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
         # Run daily at times
         OnCalendar = "23:40";
@@ -64,7 +64,6 @@
     };
   };
 }
-
 # Commands to check status:
 # systemctl status flake-update.timer
 # systemctl status flake-update.service
@@ -74,3 +73,4 @@
 #
 # To manually trigger the service:
 # systemctl start flake-update.service
+
