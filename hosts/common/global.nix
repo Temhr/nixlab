@@ -45,5 +45,10 @@
       prometheus.maintenance.exporters.systemd = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
+
+    # Define your Flatpak packages here
+    flatpakPackages = [
+      "net.davidotek.pupgui2" # ProtonUp-Qt Install Wine- and Proton-based compatibility tools
+    ];
   };
 }

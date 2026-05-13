@@ -57,7 +57,7 @@
 
     # Define your Flatpak packages here
     flatpakPackages = [
-      #"com.usebottles.bottles"
+      "com.discordapp.Discord" # Discord Talk, play, hang out
     ];
 
     ## List packages installed in system profile. To search, run:
