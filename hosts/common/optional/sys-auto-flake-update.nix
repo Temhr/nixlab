@@ -1,5 +1,9 @@
-{config, ...}: {
-  flake.nixosModules.systm--auto-flake-update = {pkgs, ...}:
+{...}: {
+  flake.nixosModules.systm--auto-flake-update = {
+    config,
+    pkgs,
+    ...
+  }:
   # Import the package set (pkgs) and any other module arguments.
   let
     flakeUpdateShellScript = pkgs.writeShellScript "flakeUpdate" ''

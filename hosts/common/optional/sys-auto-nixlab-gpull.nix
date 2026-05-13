@@ -1,7 +1,11 @@
 # This is a Nix module that sets up a systemd system service + timer
 # to automatically run a git pull every hour.
-{config, ...}: {
-  flake.nixosModules.systm--auto-nixlab-gpull = {pkgs, ...}:
+{...}: {
+  flake.nixosModules.systm--auto-nixlab-gpull = {
+    config,
+    pkgs,
+    ...
+  }:
   # Import the package set (pkgs) and any other module arguments.
   let
     # Define a shell script using Nix's `writeShellScript`.
