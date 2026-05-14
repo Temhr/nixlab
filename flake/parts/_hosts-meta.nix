@@ -9,7 +9,7 @@ let
     prefixLength ? 24,
     nameservers ? ["1.1.1.1" "9.9.9.9"],
     hostId ? null,
-    nixpkgsInput ? "nixpkgs", # defaults to stable
+    nixpkgsInput ? "nixpkgs-stable", # defaults to stable
   }: {
     inherit address system gateway prefixLength nameservers services hostId nixpkgsInput;
     interfaces = [

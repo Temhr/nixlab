@@ -1,4 +1,5 @@
 # Self-registering secret module for SSH private keys
+# Manages GitHub SSH key for nixlab repository access
 {...}: {
   flake.nixosModules.nsops--ssh-keys = {
     config,
@@ -23,11 +24,17 @@
         description = "Path to sops-encrypted SSH keys file";
       };
 
-      flakeUpdateKey = {
+      githubNixlabKey = {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;
-          description = "Deploy the flake update SSH key";
+          description = "Deploy the GitHub nixlab repository SSH key";
+        };
+
+        symlinkToHome = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Create symlink in ~/.ssh/ for interactive git use";
         };
       };
 
@@ -35,7 +42,7 @@
         enable = lib.mkOption {
           type = lib.types.bool;
           default = false;
-          description = "Deploy the GitHub SSH key";
+          description = "Deploy a separate GitHub SSH key (for other repos)";
         };
       };
 
@@ -52,19 +59,17 @@
       # Configure sops-nix age key location
       sops.age.keyFile = "/var/lib/sops-nix/key.txt";
 
-      # Flake update SSH key
-      sops.secrets."ssh-keys/id_flake_update" = lib.mkIf config.nixlab.ssh-keys.flakeUpdateKey.enable {
+      # GitHub nixlab repository key (main key for accessing temhr/nixlab)
+      sops.secrets."ssh-keys/id_github_nixlab" = lib.mkIf config.nixlab.ssh-keys.githubNixlabKey.enable {
         sopsFile = config.nixlab.ssh-keys.secretsFile;
-        key = "id_flake_update";
-        path = "/run/secrets/ssh_key_flake_update";
+        key = "id_github_nixlab";
+        path = "/run/secrets/ssh_key_github_nixlab";
         owner = mainUser;
         group = userConfig.group;
         mode = "0400";
-        # Restart git-pull service when key changes (if it exists)
-        restartUnits = lib.optional (config.systemd.user.services ? git-pull) "git-pull.service";
       };
 
-      # GitHub SSH key (optional)
+      # GitHub key (optional, for other GitHub repos)
       sops.secrets."ssh-keys/id_github" = lib.mkIf config.nixlab.ssh-keys.githubKey.enable {
         sopsFile = config.nixlab.ssh-keys.secretsFile;
         key = "id_github";
@@ -84,9 +89,11 @@
         mode = "0400";
       };
 
-      # Ensure the secrets directory exists
-      systemd.tmpfiles.rules = [
+      # Create symlink in ~/.ssh/ for interactive git operations
+      # This allows "git pull" to work from the command line
+      systemd.tmpfiles.rules = lib.mkIf (config.nixlab.ssh-keys.githubNixlabKey.enable && config.nixlab.ssh-keys.githubNixlabKey.symlinkToHome) [
         "d /run/secrets 0755 root root -"
+        "L+ /home/${mainUser}/.ssh/id_github_nixlab - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github_nixlab"
       ];
     };
   };

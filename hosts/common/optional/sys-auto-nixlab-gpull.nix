@@ -24,7 +24,9 @@
       cd "/home/${config.nixlab.mainUser}/nixlab" || exit 1
 
       echo "Pulling the latest version of the repository..."
-      GIT_SSH_COMMAND="/run/current-system/sw/bin/ssh -i /run/secrets/ssh_key_flake_update -o BatchMode=yes -o StrictHostKeyChecking=no" /run/current-system/sw/bin/git pull --rebase
+      # Use the sops-managed GitHub nixlab key
+      GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github_nixlab -o BatchMode=yes -o StrictHostKeyChecking=no" \
+        ${pkgs.git}/bin/git pull --rebase
 
       ## Exit on Success
       exit 0
@@ -47,6 +49,8 @@
     # Define the systemd system service that the timer triggers.
     systemd.services.nixlab-gpull = {
       description = "Hourly nixlab git pull (system service)";
+      # Ensure secrets are available before running
+      after = ["sops-nix.service"];
       serviceConfig = {
         # Set the command to run.
         # We reference the script we defined earlier, which Nix has built and stored in its store.
@@ -57,8 +61,8 @@
         User = config.nixlab.mainUser;
         # Set the working directory
         WorkingDirectory = "/home/${config.nixlab.mainUser}/nixlab";
-        # Add PATH so ssh and other commands are available
-        Environment = "PATH=/run/current-system/sw/bin";
+        # Add PATH so commands are available
+        Environment = "PATH=${pkgs.lib.makeBinPath [pkgs.git pkgs.openssh]}";
       };
     };
   };

@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   home.packages = with pkgs; [
     git
     unstable.git-cola #Sleek and powerful Git GUI
@@ -7,4 +12,25 @@
   ];
   programs.git.enable = true; #Distributed version control system
   programs.lazygit.enable = true; #A simple terminal UI for git commands
+
+  programs.ssh = {
+    enable = true;
+
+    # Configure SSH to use the sops-managed key for GitHub
+    matchBlocks = {
+      "github.com" = {
+        identityFile = "~/.ssh/id_github_nixlab";
+        identitiesOnly = true;
+        extraOptions = {
+          AddKeysToAgent = "yes";
+        };
+      };
+    };
+  };
+
+  # Ensure .ssh directory exists with correct permissions
+  home.file.".ssh/.keep".text = "";
+  home.file.".ssh/.keep".onChange = ''
+    chmod 700 ~/.ssh
+  '';
 }
