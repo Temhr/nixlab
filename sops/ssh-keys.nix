@@ -9,6 +9,7 @@
     # Get the main user from nixlab.mainUser option
     mainUser = config.nixlab.mainUser;
     userConfig = config.users.users.${mainUser};
+    cfg = config.nixlab.ssh-keys;
   in {
     # Define options for SSH key management
     options.nixlab.ssh-keys = {
@@ -24,6 +25,7 @@
         description = "Path to sops-encrypted SSH keys file";
       };
 
+      # Nixlab's github key options
       githubNixlabKey = {
         enable = lib.mkOption {
           type = lib.types.bool;
@@ -55,46 +57,43 @@
       };
     };
 
-    config = lib.mkIf config.nixlab.ssh-keys.enable {
-      # Configure sops-nix age key location
-      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+    # Global sops-nix configuration (only when module is enabled)
+    config.sops.age.keyFile = lib.mkIf cfg.enable "/var/lib/sops-nix/key.txt";
 
-      # GitHub nixlab repository key (main key for accessing temhr/nixlab)
-      sops.secrets."ssh-keys/id_github_nixlab" = lib.mkIf config.nixlab.ssh-keys.githubNixlabKey.enable {
-        sopsFile = config.nixlab.ssh-keys.secretsFile;
-        key = "id_github_nixlab";
-        path = "/run/secrets/ssh_key_github_nixlab";
-        owner = mainUser;
-        group = userConfig.group;
-        mode = "0400";
-      };
+    # GitHub nixlab repository key - encapsulated config
+    config.sops.secrets."ssh-keys/id_github_nixlab" = lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable) {
+      sopsFile = cfg.secretsFile;
+      key = "id_github_nixlab";
+      path = "/run/secrets/ssh_key_github_nixlab";
+      owner = mainUser;
+      group = userConfig.group;
+      mode = "0400";
+    };
 
-      # GitHub key (optional, for other GitHub repos)
-      sops.secrets."ssh-keys/id_github" = lib.mkIf config.nixlab.ssh-keys.githubKey.enable {
-        sopsFile = config.nixlab.ssh-keys.secretsFile;
-        key = "id_github";
-        path = "/run/secrets/ssh_key_github";
-        owner = mainUser;
-        group = userConfig.group;
-        mode = "0400";
-      };
+    # Symlink for nixlab key - encapsulated config
+    config.systemd.tmpfiles.rules = lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable && cfg.githubNixlabKey.symlinkToHome) [
+      "d /run/secrets 0755 root root -"
+      "L+ /home/${mainUser}/.ssh/id_github_nixlab - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github_nixlab"
+    ];
 
-      # Backup SSH key (optional)
-      sops.secrets."ssh-keys/id_backup" = lib.mkIf config.nixlab.ssh-keys.backupKey.enable {
-        sopsFile = config.nixlab.ssh-keys.secretsFile;
-        key = "id_backup";
-        path = "/run/secrets/ssh_key_backup";
-        owner = mainUser;
-        group = userConfig.group;
-        mode = "0400";
-      };
+    # GitHub key (optional, for other GitHub repos) - encapsulated config
+    config.sops.secrets."ssh-keys/id_github" = lib.mkIf (cfg.enable && cfg.githubKey.enable) {
+      sopsFile = cfg.secretsFile;
+      key = "id_github";
+      path = "/run/secrets/ssh_key_github";
+      owner = mainUser;
+      group = userConfig.group;
+      mode = "0400";
+    };
 
-      # Create symlink in ~/.ssh/ for interactive git operations
-      # This allows "git pull" to work from the command line
-      systemd.tmpfiles.rules = lib.mkIf (config.nixlab.ssh-keys.githubNixlabKey.enable && config.nixlab.ssh-keys.githubNixlabKey.symlinkToHome) [
-        "d /run/secrets 0755 root root -"
-        "L+ /home/${mainUser}/.ssh/id_github_nixlab - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github_nixlab"
-      ];
+    # Backup SSH key (optional) - encapsulated config
+    config.sops.secrets."ssh-keys/id_backup" = lib.mkIf (cfg.enable && cfg.backupKey.enable) {
+      sopsFile = cfg.secretsFile;
+      key = "id_backup";
+      path = "/run/secrets/ssh_key_backup";
+      owner = mainUser;
+      group = userConfig.group;
+      mode = "0400";
     };
   };
 }

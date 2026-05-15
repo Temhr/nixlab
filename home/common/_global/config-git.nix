@@ -15,8 +15,9 @@
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
 
-    # Configure SSH to use the sops-managed key for GitHub
+    # Configure SSH to use the sops-managed nixlab-github key (symlinked here)
     matchBlocks = {
       "github.com" = {
         identityFile = "~/.ssh/id_github_nixlab";
