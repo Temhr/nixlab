@@ -1,5 +1,4 @@
 # Self-registering secret module for SSH private keys
-# Manages GitHub SSH key for nixlab repository access
 {...}: {
   flake.nixosModules.nsops--ssh-keys = {
     config,
@@ -25,12 +24,12 @@
         description = "Path to sops-encrypted SSH keys file";
       };
 
-      # Nixlab's github key options
+      # GitHub nixlab repository automation key
       githubNixlabKey = {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;
-          description = "Deploy the GitHub nixlab repository SSH key";
+          description = "Deploy the GitHub nixlab repository SSH key for automation";
         };
 
         symlinkToHome = lib.mkOption {
@@ -40,60 +39,103 @@
         };
       };
 
-      githubKey = {
+      # Personal client key for SSH into remote servers
+      clientPrivateKey = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = false;
-          description = "Deploy a separate GitHub SSH key (for other repos)";
+          default = true;
+          description = "Deploy personal SSH private key for accessing remote servers";
         };
-      };
 
-      backupKey = {
-        enable = lib.mkOption {
+        symlinkToHome = lib.mkOption {
           type = lib.types.bool;
-          default = false;
-          description = "Deploy the backup SSH key";
+          default = true;
+          description = "Create symlink in ~/.ssh/ for OpenSSH client usage";
+        };
+
+        # Optional: key name in secrets file (defaults to id_ed25519)
+        secretName = lib.mkOption {
+          type = lib.types.str;
+          default = "id_ed25519";
+          description = "Name of the key in the sops secrets file";
+        };
+
+        # Optional: symlink name (defaults to id_ed25519)
+        symlinkName = lib.mkOption {
+          type = lib.types.str;
+          default = "id_ed25519";
+          description = "Name for the symlink in ~/.ssh/ (e.g., id_ed25519, id_rsa)";
+        };
+
+        # Optional: SSH config entries for this key
+        sshConfig = lib.mkOption {
+          type = lib.types.lines;
+          default = "";
+          example = ''
+            Host homeserver
+              HostName 192.168.1.100
+              User admin
+              IdentityFile ~/.ssh/id_ed25519
+
+            Host *.myservers.com
+              User myusername
+              IdentityFile ~/.ssh/id_ed25519
+          '';
+          description = "SSH client config entries for hosts using this key";
         };
       };
     };
 
-    # Global sops-nix configuration (only when module is enabled)
-    config.sops.age.keyFile = lib.mkIf cfg.enable "/var/lib/sops-nix/key.txt";
+    config = lib.mkMerge [
+      # Global sops-nix configuration
+      (lib.mkIf cfg.enable {
+        sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+      })
 
-    # GitHub nixlab repository key - encapsulated config
-    config.sops.secrets."ssh-keys/id_github_nixlab" = lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable) {
-      sopsFile = cfg.secretsFile;
-      key = "id_github_nixlab";
-      path = "/run/secrets/ssh_key_github_nixlab";
-      owner = mainUser;
-      group = userConfig.group;
-      mode = "0400";
-    };
+      # GitHub nixlab repository key
+      (lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable) {
+        sops.secrets."ssh-keys/id_github_nixlab" = {
+          sopsFile = cfg.secretsFile;
+          key = "id_github_nixlab";
+          path = "/run/secrets/ssh_key_github_nixlab";
+          owner = mainUser;
+          group = userConfig.group;
+          mode = "0400";
+        };
+      })
 
-    # Symlink for nixlab key - encapsulated config
-    config.systemd.tmpfiles.rules = lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable && cfg.githubNixlabKey.symlinkToHome) [
-      "d /run/secrets 0755 root root -"
-      "L+ /home/${mainUser}/.ssh/id_github_nixlab - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github_nixlab"
+      # Symlink for nixlab key
+      (lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable && cfg.githubNixlabKey.symlinkToHome) {
+        systemd.tmpfiles.rules = [
+          "d /run/secrets 0755 root root -"
+          "L+ /home/${mainUser}/.ssh/id_github_nixlab - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github_nixlab"
+        ];
+      })
+
+      # Personal client SSH private key
+      (lib.mkIf (cfg.enable && cfg.clientPrivateKey.enable) {
+        sops.secrets."ssh-keys/${cfg.clientPrivateKey.secretName}" = {
+          sopsFile = cfg.secretsFile;
+          key = cfg.clientPrivateKey.secretName;
+          path = "/run/secrets/ssh_key_${cfg.clientPrivateKey.secretName}";
+          owner = mainUser;
+          group = userConfig.group;
+          mode = "0400";
+        };
+      })
+
+      # Symlink for client private key
+      (lib.mkIf (cfg.enable && cfg.clientPrivateKey.enable && cfg.clientPrivateKey.symlinkToHome) {
+        systemd.tmpfiles.rules = [
+          "d /run/secrets 0755 root root -"
+          "L+ /home/${mainUser}/.ssh/${cfg.clientPrivateKey.symlinkName} - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_${cfg.clientPrivateKey.secretName}"
+        ];
+      })
+
+      # SSH client config for the personal key
+      (lib.mkIf (cfg.enable && cfg.clientPrivateKey.enable && cfg.clientPrivateKey.sshConfig != "") {
+        programs.ssh.extraConfig = cfg.clientPrivateKey.sshConfig;
+      })
     ];
-
-    # GitHub key (optional, for other GitHub repos) - encapsulated config
-    config.sops.secrets."ssh-keys/id_github" = lib.mkIf (cfg.enable && cfg.githubKey.enable) {
-      sopsFile = cfg.secretsFile;
-      key = "id_github";
-      path = "/run/secrets/ssh_key_github";
-      owner = mainUser;
-      group = userConfig.group;
-      mode = "0400";
-    };
-
-    # Backup SSH key (optional) - encapsulated config
-    config.sops.secrets."ssh-keys/id_backup" = lib.mkIf (cfg.enable && cfg.backupKey.enable) {
-      sopsFile = cfg.secretsFile;
-      key = "id_backup";
-      path = "/run/secrets/ssh_key_backup";
-      owner = mainUser;
-      group = userConfig.group;
-      mode = "0400";
-    };
   };
 }
