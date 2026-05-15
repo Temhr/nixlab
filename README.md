@@ -171,7 +171,7 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 - `hosts--<identifier>`: Host configurations and feature selections
 - `servc--<identifier>`: Service modules
 - `systm--<identifier>`: System-level utilities
-- `nsops--<identifier>`: NixOps-related modules
+- `nsops--<identifier>`: sops-nix secret modules (auto-discovered from `sops/` directory)
 
 **Example output tree:**
 ```
@@ -189,6 +189,9 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   ├───servc--glance-nixlab: NixOS module
 │   ├───servc--grafana-nixlab: NixOS module
 │   ├───systm--home-manager-config: NixOS module
+│   ├───nsops--glance: NixOS module
+│   ├───nsops--grafana: NixOS module
+│   ├───nsops--ssh-keys: NixOS module
 │   └───...
 ```
 
@@ -231,7 +234,7 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 
 Secrets are managed with sops-nix using age encryption. All [sops-nix](https://github.com/Mic92/sops-nix) secrets-related files are centralized in the `sops/` directory:
 
-- **Encrypted secrets**: Each service has a dedicated `.yaml` file (e.g., `sops/glance.yaml`, `sops/grafana.yaml`)
+- **Encrypted secrets**: Each service has a dedicated `.yaml` file (e.g., `sops/glance.yaml`, `sops/grafana.yaml`, `sops/ssh-keys.yaml`)
 - **Secret modules**: Corresponding `sops/<service>.nix` files declare which keys to decrypt and wire them to services
 - **Self-registering**: Secret modules follow the flake-parts pattern, registering as `flake.nixosModules.nsops--<service>`
 - **File-based options**: Service modules accept `*File` path options (not plaintext strings)
@@ -247,14 +250,55 @@ Secrets are managed with sops-nix using age encryption. All [sops-nix](https://g
 **Example structure:**
 ```
 sops/
-├── glance.yaml              # Encrypted secrets for glance
 ├── glance.nix               # Declares nsops--glance module
-├── grafana.yaml             # Encrypted secrets for grafana
-├── grafana.nix              # Declares nsops--grafana module
+├── glance.yaml              # Encrypted secrets for glance
+├── ssh-keys.nix             # Declares nsops--ssh-keys module
+├── ssh-keys.yaml            # Encrypted SSH private keys
+├── networking.nix           # Declares nsops--networking module
 └── networking.yaml          # Shared networking secrets (wifi credentials)
 ```
 
-**Example secret module** (`sops/glance.nix`):
+**SSH Key Management:**
+
+SSH private keys (like the GitHub nixlab repository key) are managed declaratively through sops-nix:
+
+- **Encrypted storage**: Private keys stored in `sops/ssh-keys.yaml` (safe to commit)
+- **Runtime decryption**: Keys decrypted to `/run/secrets/ssh_key_*` at boot with proper permissions (0400, user ownership)
+- **Interactive use**: Symlinks created at `~/.ssh/id_*` pointing to decrypted secrets for command-line operations
+- **Service use**: Systemd services reference `/run/secrets/ssh_key_*` directly via `GIT_SSH_COMMAND`
+
+This dual-access pattern enables both interactive `git pull` from the command line and automated git operations by services, using the same encrypted private key managed by sops-nix.
+
+**Example SSH key module** (`sops/ssh-keys.nix`):
+```nix
+{...}: {
+  flake.nixosModules.nsops--ssh-keys = { config, lib, ... }: {
+    options.nixlab.ssh-keys = {
+      githubNixlabKey.enable = lib.mkEnableOption "..." // { default = true; };
+      githubNixlabKey.symlinkToHome = lib.mkEnableOption "..." // { default = true; };
+    };
+    
+    config = lib.mkIf config.nixlab.ssh-keys.enable {
+      sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+      
+      sops.secrets."ssh-keys/id_github_nixlab" = {
+        sopsFile = ./ssh-keys.yaml;
+        key = "id_github_nixlab";
+        path = "/run/secrets/ssh_key_github_nixlab";
+        owner = config.nixlab.mainUser;
+        mode = "0400";
+      };
+      
+      # Create symlink in ~/.ssh/ for interactive git use
+      systemd.tmpfiles.rules = lib.mkIf config.nixlab.ssh-keys.githubNixlabKey.symlinkToHome [
+        "L+ /home/${config.nixlab.mainUser}/.ssh/id_github_nixlab - ${config.nixlab.mainUser} users - /run/secrets/ssh_key_github_nixlab"
+      ];
+    };
+  };
+}
+```
+
+**Example service module** (`sops/glance.nix`):
 ```nix
 {...}: {
   flake.nixosModules.nsops--glance = { config, lib, ... }:
@@ -298,6 +342,8 @@ The codebase demonstrates several approaches to handling secrets:
 
 5. **Shared secrets** (`networking`): Common credentials (WiFi SSID/password) used across multiple hosts
 
+6. **SSH private keys** (`ssh-keys`): Encrypted private keys with dual access via `/run/secrets/` (services) and `~/.ssh/` symlinks (interactive)
+
 **The `nixlab.mainUser` option** (declared in `hosts/common/global/users/main-user.nix`) provides the primary system username to all modules, eliminating hardcoded usernames throughout the configuration.
 
 **Encrypting and managing secrets:**
@@ -309,14 +355,22 @@ sops sops/<service>.yaml
 # Edit encrypted secrets
 sops sops/<service>.yaml
 
-# Rotate age keys (after generating new keys)
-sops updatekeys sops/<service>.yaml
+# Update all secrets after modifying .sops.yaml
+sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
+  nix-shell -p sops --run "sops updatekeys sops/*.yaml"
 
 # View decrypted content (does not modify)
 sops -d sops/<service>.yaml
 ```
 
 The `.sops.yaml` file in the repository root defines which age keys can decrypt which secrets. Each host must have its age key (typically stored at `/var/lib/sops-nix/key.txt`) listed in `.sops.yaml` to decrypt secrets assigned to it.
+
+**Secret paths at runtime:**
+
+| Secret Type | Encrypted Location | Decrypted Location | Interactive Access |
+|-------------|-------------------|-------------------|-------------------|
+| Service secrets | `sops/service.yaml` | `/run/secrets/SERVICE_*` | N/A |
+| SSH keys | `sops/ssh-keys.yaml` | `/run/secrets/ssh_key_*` | `~/.ssh/id_*` (symlink) |
 
 </details>
 
@@ -368,8 +422,11 @@ nixlab/
 │   └── home-manager/           # User-level service modules
 │
 ├── sops/                       # Centralized secrets management
-│   ├── <service>.yaml          # Encrypted secrets per service (e.g., glance.yaml)
 │   ├── <service>.nix           # Secret module declarations (e.g., sops/glance.nix)
+│   ├── <service>.yaml          # Encrypted secrets per service (e.g., glance.yaml)
+│   ├── ssh-keys.nix            # SSH key secret module (nsops--ssh-keys)
+│   ├── ssh-keys.yaml           # Encrypted SSH private keys
+│   ├── networking.nix          # Networking secret module
 │   └── networking.yaml         # Shared secrets (wifi credentials, etc.)
 │
 ├── overlays/                   # nixpkgs modifications and channel pinning
@@ -437,37 +494,45 @@ sudo reboot
   
 ```bash
 # Rebuild and switch current host
-sudo nixos-rebuild switch --flake /home/temhr/nixlab
+sudo nixos-rebuild switch --flake ~/nixlab
 
 # Rebuild a specific host
-sudo nixos-rebuild switch --flake /home/temhr/nixlab#<hostname>
+sudo nixos-rebuild switch --flake ~/nixlab#<hostname>
 
 # Test configuration without switching
-sudo nixos-rebuild test --flake /home/temhr/nixlab#<hostname>
+sudo nixos-rebuild test --flake ~/nixlab#<hostname>
 
 # Update all flake inputs
-nix flake update --flake /home/temhr/nixlab
+nix flake update --flake ~/nixlab
 
 # Update a single input
-nix flake update <input-name> --flake /home/temhr/nixlab
+nix flake update <input-name> --flake ~/nixlab
 
 # Format all nix files
-nix fmt /home/temhr/nixlab
+nix fmt ~/nixlab
 
 # Run checks (formatting, dead code, merge conflicts)
-nix flake check /home/temhr/nixlab
+nix flake check ~/nixlab
 
 # Validate all host configurations (CI-style)
-nix run /home/temhr/nixlab#build-all
+nix run ~/nixlab#build-all
 
 # Enter a dev shell
-nix develop /home/temhr/nixlab#<shell-name>
+nix develop ~/nixlab#<shell-name>
 
 # Show all flake outputs
-nix flake show /home/temhr/nixlab
+nix flake show ~/nixlab
 
 # Garbage collect old generations
 sudo nix-collect-garbage --delete-older-than 7d
+
+# Manage encrypted secrets (SSH keys, API tokens, passwords)
+sops sops/<service>.yaml                    # Edit encrypted secrets
+sops -d sops/<service>.yaml                 # View decrypted (read-only)
+
+# Update all secrets after modifying .sops.yaml
+sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
+  nix-shell -p sops --run "sops updatekeys sops/*.yaml"
 ```
 
 </details>
@@ -583,7 +648,7 @@ Adding a new host requires creating three self-registering files and one metadat
 #### 5. Deploy the new host
 
 ```bash
-cd /home/temhr/nixlab
+cd ~/nixlab
 
 # Stage all new files (flakes only see git-tracked files)
 git add -A
