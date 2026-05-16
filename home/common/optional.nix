@@ -1,3 +1,7 @@
-{...}: {
-  flake.homeModules.home--c-optional = import ./_optional;
+{self, ...}: {
+  flake.homeModules.home--c-optional = {...}: {
+    imports = [
+      ./_optional
+    ];
+  };
 }
