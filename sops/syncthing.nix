@@ -23,6 +23,15 @@
           assertion = config.services.syncthing-nixlab ? enable;
           message = "nsops--syncthing requires servc--syncthing-nixlab to also be imported";
         }
+        {
+          assertion = cfg.enableGuiAuth;
+          message = ''
+            nsops--syncthing is imported but GUI authentication is disabled.
+            Either:
+            1. Set services.syncthing-nixlab.enableGuiAuth = true;
+            2. Remove the nsops--syncthing module import (no secrets needed)
+          '';
+        }
       ];
 
       # Declare individual secrets

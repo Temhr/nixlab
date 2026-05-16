@@ -31,6 +31,18 @@
           description = "Group for Syncthing user";
         };
 
+        # OPTIONAL: Enable GUI authentication
+        enableGuiAuth = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = ''
+            Enable GUI authentication with username/password.
+            When false, the GUI is accessible without credentials.
+            Only enable authentication if exposing the GUI externally.
+            Requires the nsops--syncthing module when enabled.
+          '';
+        };
+
         # OPTIONAL: Web GUI port
         guiPort = lib.mkOption {
           type = lib.types.port;
@@ -194,7 +206,7 @@
           description = "Enable global device discovery";
         };
 
-        # Environment file for secrets (populated by nsops module)
+        # NEW: Environment file for secrets (populated by nsops module)
         secretsEnvFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
           default = null;
@@ -204,17 +216,6 @@
             Contains: SYNCTHING_GUI_USER, SYNCTHING_GUI_PASSWORD_HASH, SYNCTHING_API_KEY
           '';
         };
-
-        # Option to disable GUI authentication
-        enableGuiAuth = lib.mkOption {
-          type = lib.types.bool;
-          default = false;  # Default to no auth for declarative-only setups
-          description = ''
-            Enable GUI authentication with username/password.
-            Set to false for local-only or reverse-proxy-protected access.
-            When disabled, anyone who can access the GUI has full control.
-          '';
-        };
       };
     };
 
@@ -222,6 +223,25 @@
     # CONFIG - What happens when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
+      # ----------------------------------------------------------------------------
+      # ASSERTIONS - Verify configuration is valid
+      # ----------------------------------------------------------------------------
+      assertions = [
+        {
+          assertion = cfg.enableGuiAuth -> (cfg.secretsEnvFile != null);
+          message = ''
+            Syncthing GUI authentication is enabled but no secretsEnvFile is provided.
+            Either:
+            1. Set enableGuiAuth = false; (no authentication)
+            2. Import the nsops--syncthing module to provide secrets
+          '';
+        }
+        {
+          assertion = cfg.enableSSL -> (cfg.domain != null);
+          message = "Syncthing enableSSL requires a domain to be set";
+        }
+      ];
+
       # ----------------------------------------------------------------------------
       # USER SETUP - Create Syncthing user and configure access
       # ----------------------------------------------------------------------------
@@ -251,23 +271,22 @@
         actualDataDir =
           if cfg.dataDir != null
           then cfg.dataDir
-          else
-            (
-              if cfg.user == "syncthing"
-              then "/var/lib/syncthing"
-              else "/home/${cfg.user}/.config/syncthing"
-            );
+          else (
+            if cfg.user == "syncthing"
+            then "/var/lib/syncthing"
+            else "/home/${cfg.user}/.config/syncthing"
+          );
       in [
         "d ${actualDataDir} 0770 ${cfg.user} ${cfg.group} -"
       ];
 
       # ----------------------------------------------------------------------------
-      # SECRETS PREPARATION SERVICE
+      # SECRETS PREPARATION SERVICE (only if GUI auth is enabled)
       # ----------------------------------------------------------------------------
       # A dedicated oneshot that writes /run/syncthing-credentials.env BEFORE
       # syncthing.service starts. This ensures the environment file exists at
       # unit-load time.
-      systemd.services.syncthing-secrets = lib.mkIf (cfg.secretsEnvFile != null) {
+      systemd.services.syncthing-secrets = lib.mkIf (cfg.enableGuiAuth && cfg.secretsEnvFile != null) {
         description = "Write Syncthing credentials env file";
         wantedBy = ["syncthing.service"];
         before = ["syncthing.service"];
@@ -310,12 +329,11 @@
         dataDir =
           if cfg.dataDir != null
           then cfg.dataDir
-          else
-            (
-              if cfg.user == "syncthing"
-              then "/var/lib/syncthing"
-              else "/home/${cfg.user}/.config/syncthing"
-            );
+          else (
+            if cfg.user == "syncthing"
+            then "/var/lib/syncthing"
+            else "/home/${cfg.user}/.config/syncthing"
+          );
 
         # Config directory (where config.xml is stored)
         configDir = cfg.configDir;
@@ -345,14 +363,15 @@
             startBrowser = false;
           };
 
-          # Configure GUI authentication only if enabled
-          gui = lib.mkIf cfg.enableGuiAuth (
-            lib.mkIf (cfg.secretsEnvFile != null) {
+          # Configure GUI authentication only if enabled AND secrets are provided
+          gui =
+            if cfg.enableGuiAuth && cfg.secretsEnvFile != null
+            then {
               user = "$SYNCTHING_GUI_USER";
               password = "$SYNCTHING_GUI_PASSWORD_HASH";
               apikey = "$SYNCTHING_API_KEY";
             }
-          );
+            else {};
 
           # Configure devices if specified
           devices =
@@ -383,9 +402,9 @@
       # SERVICE CUSTOMIZATION - Additional systemd service configuration
       # ----------------------------------------------------------------------------
       systemd.services.syncthing = {
-        # Ensure secrets are ready before starting
-        requires = lib.optionals (cfg.secretsEnvFile != null) ["syncthing-secrets.service"];
-        after = lib.optionals (cfg.secretsEnvFile != null) ["syncthing-secrets.service"];
+        # Ensure secrets are ready before starting (only if GUI auth enabled)
+        requires = lib.optionals (cfg.enableGuiAuth && cfg.secretsEnvFile != null) ["syncthing-secrets.service"];
+        after = lib.optionals (cfg.enableGuiAuth && cfg.secretsEnvFile != null) ["syncthing-secrets.service"];
 
         serviceConfig =
           {
@@ -393,8 +412,8 @@
             Restart = "on-failure";
             RestartSec = "10s";
           }
-          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
-            # Load environment file with secrets
+          // lib.optionalAttrs (cfg.enableGuiAuth && cfg.secretsEnvFile != null) {
+            # Load environment file with secrets (only if auth enabled)
             EnvironmentFile = cfg.secretsEnvFile;
           };
       };
