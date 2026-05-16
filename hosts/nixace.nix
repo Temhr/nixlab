@@ -80,7 +80,7 @@
       gpuDevice = 0; # First GPU
       gpuLayers = -1; # Offload all layers to GPU (-1 = auto)
       # Pre-download models
-      models = ["qwen3.5:35b" "gemma4:31b" "qwen3.6:35b" "qwen3.6:35b-a3b-coding-mxfp8"];
+      models = ["qwen3.5:35b" "gemma4:31b" "qwen3.6:35b" ""];
       openFirewall = true;
     };
     services.comfyui-p5000 = {

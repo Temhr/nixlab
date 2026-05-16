@@ -118,8 +118,18 @@ creation_rules:
         - *nixvat
         - *nixzen
 
-  # SSH private keys - all hosts can decrypt
   - path_regex: sops/ssh-keys\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixnas1
+        - *nixnas2
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
+  - path_regex: sops/syncthing\.yaml$
     key_groups:
       - age:
         - *nixace
