@@ -16,7 +16,7 @@
     # import-tree recursively discovers every .nix file
     import-tree.url = "github:vic/import-tree";
 
-    # Version Pinned Apps (2026-04-27).
+    # Version Pinned Apps (2026-05-16).
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ol/ollama/package.nix
     # https://github.com/NixOS/nixpkgs/commit/e3f72fe8fcc5dc84df51ebf17876dcf479e289da
     nixpkgs-ollama.url = "github:nixos/nixpkgs/e3f72fe8fcc5dc84df51ebf17876dcf479e289da";
