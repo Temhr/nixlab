@@ -194,7 +194,7 @@
           description = "Enable global device discovery";
         };
 
-        # NEW: Environment file for secrets (populated by nsops module)
+        # Environment file for secrets (populated by nsops module)
         secretsEnvFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
           default = null;
@@ -202,6 +202,17 @@
             Path to environment file with Syncthing secrets.
             Automatically set by nsops--syncthing module.
             Contains: SYNCTHING_GUI_USER, SYNCTHING_GUI_PASSWORD_HASH, SYNCTHING_API_KEY
+          '';
+        };
+
+        # Option to disable GUI authentication
+        enableGuiAuth = lib.mkOption {
+          type = lib.types.bool;
+          default = false;  # Default to no auth for declarative-only setups
+          description = ''
+            Enable GUI authentication with username/password.
+            Set to false for local-only or reverse-proxy-protected access.
+            When disabled, anyone who can access the GUI has full control.
           '';
         };
       };
@@ -334,12 +345,14 @@
             startBrowser = false;
           };
 
-          # Configure GUI authentication if secrets are provided
-          gui = lib.mkIf (cfg.secretsEnvFile != null) {
-            user = "$SYNCTHING_GUI_USER";
-            password = "$SYNCTHING_GUI_PASSWORD_HASH";
-            apikey = "$SYNCTHING_API_KEY";
-          };
+          # Configure GUI authentication only if enabled
+          gui = lib.mkIf cfg.enableGuiAuth (
+            lib.mkIf (cfg.secretsEnvFile != null) {
+              user = "$SYNCTHING_GUI_USER";
+              password = "$SYNCTHING_GUI_PASSWORD_HASH";
+              apikey = "$SYNCTHING_API_KEY";
+            }
+          );
 
           # Configure devices if specified
           devices =

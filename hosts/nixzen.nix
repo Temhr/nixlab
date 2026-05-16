@@ -59,6 +59,7 @@
     ## SELF-HOSTED SERVICES
     services.syncthing-nixlab = {
       enable = true;
+      enableGuiAuth = false;  # No username/password prompt
       user = "${config.nixlab.mainUser}";
       group = "users";
       guiAddress = "0.0.0.0";
