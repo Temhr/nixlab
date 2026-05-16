@@ -11,7 +11,7 @@
       # Services
       self.nixosModules.systm--auto-backup-phone-media
       self.nixosModules.servc--syncthing-nixlab
-      self.nixosModules.nsops--syncthing
+      #self.nixosModules.nsops--syncthing
     ];
   };
   flake.nixosModules.hosts--nixzen = {

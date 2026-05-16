@@ -14,7 +14,7 @@
       self.nixosModules.servc--ollama
       self.nixosModules.nsops--ollama
       self.nixosModules.servc--syncthing-nixlab
-      self.nixosModules.nsops--syncthing
+      #self.nixosModules.nsops--syncthing
       self.nixosModules.servc--wiki-js-nixlab
       self.nixosModules.nsops--wiki-js
       self.nixosModules.servc--zola-nixlab
