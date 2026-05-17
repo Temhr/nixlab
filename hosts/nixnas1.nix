@@ -54,6 +54,53 @@
     #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
+    services.syncthing-nixlab = {
+      enable = true;
+      enableGuiAuth = true;  # No username/password prompt
+      user = "${config.nixlab.mainUser}";
+      group = "users";
+      guiAddress = "0.0.0.0";
+      configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
+      openFirewall = true;
+      devices = {
+        "nixvat" = {
+          id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP";
+          addresses = ["dynamic"];
+          introducer = false;
+        };
+        "Pixel XL" = {
+          id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4";
+          addresses = ["dynamic"];
+        };
+        "Pixel 3a XL" = {
+          id = "4CCPARZ-D55MZPY-OMRVLQL-YAQJFKY-5RZXAFQ-MZJ4VSC-E5ZS7VQ-VRCFGAY";
+          addresses = ["dynamic"];
+        };
+      };
+      folders = {
+        "mirror" = {
+          path = "/mirror";
+          id = "mirror";
+          label = "mirror";
+          devices = ["nixvat"];
+          type = "receiveonly"; # or "sendonly" or "receiveonly"
+        };
+        "Phone media" = {
+          path = "/mirror/phshare/photos";
+          id = "Phone media";
+          label = "Phone media";
+          devices = ["Pixel XL" "Pixel 3a XL"];
+          type = "receiveonly"; # or "sendonly" or "receiveonly"
+        };
+        "Docs" = {
+          path = "/mirror/phshare/docs";
+          id = "Docs";
+          label = "Docs";
+          devices = ["Pixel XL" "Pixel 3a XL"];
+          type = "receiveonly"; # or "sendonly" or "receiveonly"
+        };
+      };
+    };
 
     # Define your Flatpak packages here
     flatpakPackages = [
