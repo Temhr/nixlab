@@ -9,6 +9,7 @@
       self.nixosModules.hosts--c-global
       # Home manager
       # Services
+      self.nixosModules.servc--syncthing-nixlab
     ];
   };
   flake.nixosModules.hosts--nixnas1 = {
