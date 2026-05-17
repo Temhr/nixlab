@@ -122,6 +122,11 @@
           addresses = ["dynamic"];
           introducer = false;
         };
+        "nixzen" = {
+          id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
+          addresses = ["dynamic"];
+          introducer = false;
+        };
         */
       };
       folders = {
@@ -129,7 +134,7 @@
           path = "/mirror";
           id = "mirror";
           label = "mirror";
-          devices = ["nixzen"];
+          devices = [];
           type = "sendreceive";
         };
       };

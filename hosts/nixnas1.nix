@@ -83,7 +83,7 @@
           path = "/mirror";
           id = "mirror";
           label = "mirror";
-          devices = ["nixvat"];
+          devices = ["nixzen"];
           type = "receiveonly"; # or "sendonly" or "receiveonly"
         };
         "Phone media" = {

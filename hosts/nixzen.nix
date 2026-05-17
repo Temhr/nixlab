@@ -85,7 +85,7 @@
           path = "/mirror";
           id = "mirror";
           label = "mirror";
-          devices = ["nixvat"];
+          devices = ["nixnas1"];
           type = "sendreceive"; # or "sendonly" or "receiveonly"
         };
         "Phone media" = {
