@@ -271,11 +271,12 @@
         actualDataDir =
           if cfg.dataDir != null
           then cfg.dataDir
-          else (
-            if cfg.user == "syncthing"
-            then "/var/lib/syncthing"
-            else "/home/${cfg.user}/.config/syncthing"
-          );
+          else
+            (
+              if cfg.user == "syncthing"
+              then "/var/lib/syncthing"
+              else "/home/${cfg.user}/.config/syncthing"
+            );
       in [
         "d ${actualDataDir} 0770 ${cfg.user} ${cfg.group} -"
       ];
@@ -329,11 +330,12 @@
         dataDir =
           if cfg.dataDir != null
           then cfg.dataDir
-          else (
-            if cfg.user == "syncthing"
-            then "/var/lib/syncthing"
-            else "/home/${cfg.user}/.config/syncthing"
-          );
+          else
+            (
+              if cfg.user == "syncthing"
+              then "/var/lib/syncthing"
+              else "/home/${cfg.user}/.config/syncthing"
+            );
 
         # Config directory (where config.xml is stored)
         configDir = cfg.configDir;

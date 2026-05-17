@@ -109,20 +109,20 @@
     };
     services.syncthing-nixlab = {
       enable = true;
-      enableGuiAuth = false;  # No username/password prompt
+      enableGuiAuth = false; # No username/password prompt
       user = "${config.nixlab.mainUser}";
       group = "users";
       guiAddress = "0.0.0.0";
       configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;
       devices = {
-      /*
+        /*
         "nixnas1" = {
           id = "FLLLT4M-KQYRPWS-Q6F2RNK-FW4LQ3E-ENZKNBI-VP3PJ4Q-HYWCKP3-2RQM3AB";
           addresses = ["dynamic"];
           introducer = false;
         };
-      */
+        */
       };
       folders = {
         "mirror" = {
