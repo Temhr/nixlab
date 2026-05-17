@@ -131,18 +131,8 @@
     };
 
     # ── Sync and Storage ─────────────────────────────────────────────────────
-    "syncthing-nixvat" = {
-      "Syncthing nixvat" = {
-        href = "http://${hostMeta.address}:8384";
-        icon = "syncthing";
-        description = "Main sync node — peer-to-peer file synchronisation";
-        ping = "http://${hostMeta.address}:8384";
-        statusStyle = "dot";
-      };
-    };
-
-    "syncthing-nixzen" = {
-      "Syncthing nixzen" = {
+    "syncthing" = {
+      "Syncthing" = {
         href = "http://${hostMeta.address}:8384";
         icon = "syncthing";
         description = "Secondary sync node — peer-to-peer file synchronisation";
