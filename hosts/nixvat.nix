@@ -135,7 +135,7 @@
           id = "mirror";
           label = "mirror";
           devices = [];
-          type = "sendreceive";
+          type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
       };
     };

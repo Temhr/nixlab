@@ -84,21 +84,21 @@
           id = "mirror";
           label = "mirror";
           devices = ["nixzen"];
-          type = "receiveonly"; # or "sendonly" or "receiveonly"
+          type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
         "Phone media" = {
           path = "/mirror/phshare/photos";
           id = "Phone media";
           label = "Phone media";
           devices = ["Pixel XL" "Pixel 3a XL"];
-          type = "receiveonly"; # or "sendonly" or "receiveonly"
+          type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
         "Docs" = {
           path = "/mirror/phshare/docs";
           id = "Docs";
           label = "Docs";
           devices = ["Pixel XL" "Pixel 3a XL"];
-          type = "receiveonly"; # or "sendonly" or "receiveonly"
+          type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
       };
     };
