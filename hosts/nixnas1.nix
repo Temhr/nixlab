@@ -64,8 +64,8 @@
       configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;
       devices = {
-        "nixvat" = {
-          id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP";
+        "nixzen" = {
+          id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
           addresses = ["dynamic"];
           introducer = false;
         };
