@@ -17,8 +17,7 @@
     "loki" = "Monitoring & Logs";
     "home-assistant" = "Home & Automation";
     "node-red" = "Home & Automation";
-    "syncthing-nixvat" = "Sync and Storage";
-    "syncthing-nixzen" = "Sync and Storage";
+    "syncthing" = "Sync and Storage";
     "gotosocial" = "Social & Feeds";
     "glance" = "Social & Feeds";
   };
