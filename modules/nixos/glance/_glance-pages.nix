@@ -155,6 +155,10 @@
                 url = "https://xeiaso.net/blog.rss";
                 title = "Xe's (blog)";
               }
+              {
+                url = "https://fabionatali.com/rss.xml";
+                title = "Fabio Natali (guix)";
+              }
             ];
           }
         ];
