@@ -52,8 +52,8 @@
           enable = lib.mkEnableOption "NFS server to export the ZFS pool";
           exportPath = lib.mkOption {
             type = lib.types.str;
-            default = cfg.mountPoint;
-            description = "Path to export via NFS. Defaults to the ZFS mount point.";
+            default = "";
+            description = "Path to export via NFS. Leave empty to use the ZFS mount point.";
           };
           allowedNetwork = lib.mkOption {
             type = lib.types.str;
@@ -191,16 +191,18 @@
         };
 
         # NFS server configuration
-        services.nfs.server = lib.mkIf cfg.nfs.enable {
+        services.nfs.server = lib.mkIf cfg.nfs.enable (let
+          nfsExportPath = if cfg.nfs.exportPath != "" then cfg.nfs.exportPath else cfg.mountPoint;
+        in {
           enable = true;
           exports = ''
-            ${cfg.nfs.exportPath} ${cfg.nfs.allowedNetwork}(${cfg.nfs.exportOptions})
+            ${nfsExportPath} ${cfg.nfs.allowedNetwork}(${cfg.nfs.exportOptions})
           '';
           lockdPort = cfg.nfs.lockdPort;
           mountdPort = cfg.nfs.mountdPort;
           statdPort = cfg.nfs.statdPort;
           extraNfsdConfig = "";
-        };
+        });
 
         # Open firewall ports for NFS
         networking.firewall = lib.mkIf cfg.nfs.enable {
