@@ -66,7 +66,7 @@
       openFirewall = true;
       devices = {
         "nixnas2" = {
-          id = "5KHDLOC-2FKYN27-2FADIS5-FQTKXOE-B63AEEZ-BYDWKPJ-B24GQUC-6JXTAQP";
+          id = "2PZM5WE-FIU62B2-HABKBHT-5D6S2KW-U2YDFGH-5OIM4I3-PC4OOZI-YGBVHAQ";
           addresses = ["dynamic"];
           introducer = false;
         };
