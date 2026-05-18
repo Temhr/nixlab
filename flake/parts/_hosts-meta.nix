@@ -40,7 +40,7 @@ in {
     wifiIface = "wlp1s0";
     hostId = "23d031fa";
     nixpkgsInput = "nixpkgs-stable";
-    services = ["glance" "grafana" "prometheus" "loki"];
+    services = ["glance" "grafana" "prometheus" "loki" "syncthing"];
   };
   nixace = mkHostMeta {
     address = "192.168.0.200";
@@ -72,7 +72,7 @@ in {
     wifiIface = "wlo1";
     hostId = "5845aa8d";
     nixpkgsInput = "nixpkgs-stable";
-    services = ["glance" "grafana" "prometheus" "loki" "ollama-cpu" "syncthing" "wikijs" "zola"];
+    services = ["glance" "grafana" "prometheus" "loki" "ollama-cpu" "wikijs" "zola" "syncthing"];
   };
   nixzen = mkHostMeta {
     address = "192.168.0.204";
