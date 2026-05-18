@@ -10,8 +10,6 @@
       # Home manager
       # Services
       self.nixosModules.systm--auto-backup-phone-media
-      self.nixosModules.servc--syncthing-nixlab
-      #self.nixosModules.nsops--syncthing
     ];
   };
   flake.nixosModules.hosts--nixzen = {
@@ -57,53 +55,6 @@
     #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
-    services.syncthing-nixlab = {
-      enable = true;
-      enableGuiAuth = false; # No username/password prompt
-      user = "${config.nixlab.mainUser}";
-      group = "users";
-      guiAddress = "0.0.0.0";
-      configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
-      openFirewall = true;
-      devices = {
-        "nixnas1" = {
-          id = "FLLLT4M-KQYRPWS-Q6F2RNK-FW4LQ3E-ENZKNBI-VP3PJ4Q-HYWCKP3-2RQM3AB";
-          addresses = ["dynamic"];
-          introducer = false;
-        };
-        "Pixel XL" = {
-          id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4";
-          addresses = ["dynamic"];
-        };
-        "Pixel 3a XL" = {
-          id = "4CCPARZ-D55MZPY-OMRVLQL-YAQJFKY-5RZXAFQ-MZJ4VSC-E5ZS7VQ-VRCFGAY";
-          addresses = ["dynamic"];
-        };
-      };
-      folders = {
-        "mirror" = {
-          path = "/mirror";
-          id = "mirror";
-          label = "mirror";
-          devices = ["nixnas1"];
-          type = "sendreceive"; # or "sendonly" or "receiveonly"
-        };
-        "Phone media" = {
-          path = "/mirror/phshare/photos";
-          id = "Phone media";
-          label = "Phone media";
-          devices = ["Pixel XL" "Pixel 3a XL"];
-          type = "sendreceive"; # or "sendonly" or "receiveonly"
-        };
-        "Docs" = {
-          path = "/mirror/phshare/docs";
-          id = "Docs";
-          label = "Docs";
-          devices = ["Pixel XL" "Pixel 3a XL"];
-          type = "sendreceive"; # or "sendonly" or "receiveonly"
-        };
-      };
-    };
 
     # Define your Flatpak packages here
     flatpakPackages = [
