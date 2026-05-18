@@ -65,8 +65,8 @@
       configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;
       devices = {
-        "nixzen" = {
-          id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
+        "nixnas2" = {
+          id = "ZPBUX5R-OP4O66P-566W5LC-6MLELNA-4OH2ZJF-PXO2CT2-PQFXLBC-U6GLFQV";
           addresses = ["dynamic"];
           introducer = false;
         };
@@ -84,7 +84,7 @@
           path = "/mirror";
           id = "mirror";
           label = "mirror";
-          devices = ["nixzen"];
+          devices = ["nixnas2"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
         "Phone media" = {

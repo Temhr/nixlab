@@ -4,8 +4,8 @@
       self.nixosModules.hardw--c-global
       self.nixosModules.hardw--c-optional--driver-nvidia
       self.nixosModules.hardw--c-optional--mount-data
-      self.nixosModules.hardw--c-optional--mount-mirror
-      self.nixosModules.hardw--c-optional--mount-mirzen
+      self.nixosModules.hardw--c-optional--mount-mirnas1
+      self.nixosModules.hardw--c-optional--mount-mirnas2
     ];
     # Choose between these choices: "none" "k" "p"
     driver-nvidia.quadro = "k";

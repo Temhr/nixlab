@@ -3,8 +3,7 @@
     imports = [
       self.nixosModules.hardw--c-global
       self.nixosModules.hardw--c-optional--mount-4dz1
-      self.nixosModules.hardw--c-optional--mount-mirvat
-      self.nixosModules.hardw--c-optional--mount-mirzen
+      self.nixosModules.hardw--c-optional--mount-mirnas2
     ];
 
     mount-zfs-4dz1 = {
