@@ -8,6 +8,7 @@
 
     mount-zfs-4dz1 = {
       enable = true;
+      nfs.enable = true;
       poolName = "tanks";
       mountPoint = "/mirror";
       devices = [

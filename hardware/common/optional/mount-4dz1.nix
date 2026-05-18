@@ -48,6 +48,39 @@
           default = "";
           description = "Email address for ZFS health alerts (requires mail to be configured)";
         };
+        nfs = {
+          enable = lib.mkEnableOption "NFS server to export the ZFS pool";
+          exportPath = lib.mkOption {
+            type = lib.types.str;
+            default = cfg.mountPoint;
+            description = "Path to export via NFS. Defaults to the ZFS mount point.";
+          };
+          allowedNetwork = lib.mkOption {
+            type = lib.types.str;
+            default = "192.168.0.0/255.255.255.0";
+            description = "Network CIDR to allow NFS access (e.g., 192.168.0.0/255.255.255.0)";
+          };
+          exportOptions = lib.mkOption {
+            type = lib.types.str;
+            default = "rw,no_root_squash,fsid=0,no_subtree_check";
+            description = "NFS export options";
+          };
+          lockdPort = lib.mkOption {
+            type = lib.types.int;
+            default = 4001;
+            description = "Fixed port for rpc.lockd";
+          };
+          mountdPort = lib.mkOption {
+            type = lib.types.int;
+            default = 4002;
+            description = "Fixed port for rpc.mountd";
+          };
+          statdPort = lib.mkOption {
+            type = lib.types.int;
+            default = 4000;
+            description = "Fixed port for rpc.statd";
+          };
+        };
       };
     };
 
@@ -157,6 +190,24 @@
           };
         };
 
+        # NFS server configuration
+        services.nfs.server = lib.mkIf cfg.nfs.enable {
+          enable = true;
+          exports = ''
+            ${cfg.nfs.exportPath} ${cfg.nfs.allowedNetwork}(${cfg.nfs.exportOptions})
+          '';
+          lockdPort = cfg.nfs.lockdPort;
+          mountdPort = cfg.nfs.mountdPort;
+          statdPort = cfg.nfs.statdPort;
+          extraNfsdConfig = "";
+        };
+
+        # Open firewall ports for NFS
+        networking.firewall = lib.mkIf cfg.nfs.enable {
+          allowedTCPPorts = [111 2049 cfg.nfs.statdPort cfg.nfs.lockdPort cfg.nfs.mountdPort 20048];
+          allowedUDPPorts = [111 2049 cfg.nfs.statdPort cfg.nfs.lockdPort cfg.nfs.mountdPort 20048];
+        };
+
         # IMPORTANT: You must also set networking.hostId in your main configuration!
         # Generate one with: head -c 8 /etc/machine-id
         # Then add to your config: networking.hostId = "a1b2c3d4";
@@ -167,6 +218,9 @@
         # It will be mounted at ${mountPoint}
         # To rename: just change poolName — the rename service will detect the
         # old name automatically on next boot and rename it in place.
+        #
+        # To enable NFS export, set mount-zfs-4dz1.nfs.enable = true;
+        # This will export ${mountPoint} to the configured network with NFS.
       }))
     ];
   };
