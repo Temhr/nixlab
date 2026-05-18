@@ -9,6 +9,8 @@
       self.nixosModules.hosts--c-global
       # Home manager
       # Services
+      self.nixosModules.servc--syncthing-nixlab
+      #self.nixosModules.nsops--syncthing
     ];
   };
   flake.nixosModules.hosts--nixnas2 = {
@@ -54,6 +56,38 @@
     #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
+    services.syncthing-nixlab = {
+      enable = true;
+      enableGuiAuth = false; # No username/password prompt
+      user = "${config.nixlab.mainUser}";
+      group = "users";
+      guiAddress = "0.0.0.0";
+      configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
+      openFirewall = true;
+      devices = {
+        /*
+        "nixnas1" = {
+          id = "FLLLT4M-KQYRPWS-Q6F2RNK-FW4LQ3E-ENZKNBI-VP3PJ4Q-HYWCKP3-2RQM3AB";
+          addresses = ["dynamic"];
+          introducer = false;
+        };
+        "nixzen" = {
+          id = "ZBEUAV6-DMJ4XD5-JYHK54G-U67C76K-V43FXHB-TWNAKA4-MQY7VSM-45LNDQH";
+          addresses = ["dynamic"];
+          introducer = false;
+        };
+        */
+      };
+      folders = {
+        "mirror" = {
+          path = "/mirror";
+          id = "mirror";
+          label = "mirror";
+          devices = [];
+          type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
+        };
+      };
+    };
 
     # Define your Flatpak packages here
     flatpakPackages = [
