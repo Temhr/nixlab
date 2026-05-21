@@ -81,5 +81,6 @@
     kdePackages.partitionmanager # GUI for managing partitions and filesystems
     usbimager # Very minimal GUI app that can write compressed disk images to USB drives
     gparted # Graphical disk partitioning tool
+    gnome-disk-utility # Udisks graphical front-end
   ];
 }
