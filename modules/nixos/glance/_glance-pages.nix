@@ -159,6 +159,10 @@
                 url = "https://fabionatali.com/rss.xml";
                 title = "Fabio Natali (guix)";
               }
+              {
+                url = "https://nixos.org/blog/announcements-rss.xml";
+                title = "Nixos.org/blog/ (announcements)";
+              }
             ];
           }
         ];
