@@ -112,8 +112,8 @@
                 title = "Freebooters (Peertube)";
               }
               {
-                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=2";
-                title = "PolarBear TV (Hamish's Peertube)";
+                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=1268";
+                title = "Space Virgins (Peertube)";
               }
               {
                 url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=1344";
