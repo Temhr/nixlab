@@ -192,7 +192,10 @@
 
         # NFS server configuration
         services.nfs.server = lib.mkIf cfg.nfs.enable (let
-          nfsExportPath = if cfg.nfs.exportPath != "" then cfg.nfs.exportPath else cfg.mountPoint;
+          nfsExportPath =
+            if cfg.nfs.exportPath != ""
+            then cfg.nfs.exportPath
+            else cfg.mountPoint;
         in {
           enable = true;
           exports = ''
