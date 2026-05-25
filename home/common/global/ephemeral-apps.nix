@@ -197,6 +197,18 @@
         Categories=Network;FileTransfer;Ephemeral-App;
       '';
 
+      ## Mumble
+      ".local/share/applications/mumble.desktop".text = ''
+        [Desktop Entry]
+        Name=Mumble ⚡ 🫨
+        Comment=Low-latency, high quality voice chat software
+        Exec=bash -c "nix run nixpkgs-unstable#mumble & disown"
+        Icon=mumble
+        Terminal=false
+        Type=Application
+        Categories=Audio;Network;Ephemeral-App;
+      '';
+
       ## OBS Studio
       ".local/share/applications/obs-studio.desktop".text = ''
         [Desktop Entry]
