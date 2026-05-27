@@ -178,6 +178,18 @@
           {
             type = "calendar";
           }
+          {
+            type = "rss";
+            limit = 50;
+            "collapse-after" = 30;
+            cache = "3h";
+            feeds = [
+              {
+                url = "https://bitbra.in/atom.xml";
+                title = "Bit Brain (godot)";
+              }
+            ];
+          }
         ];
       }
     ];
