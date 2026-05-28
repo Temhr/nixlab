@@ -63,7 +63,7 @@ in {
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
     hostId = "4a313e3b";
-    nixpkgsInput = "nixpkgs-unstable";
+    nixpkgsInput = "nixpkgs";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixvat = mkHostMeta {
