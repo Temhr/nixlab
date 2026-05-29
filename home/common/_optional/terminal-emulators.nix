@@ -28,7 +28,7 @@
         #inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
         pkgs.unstable.ghostty
       ]; #fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration
-      home.file.".config/ghostty/config".text = "background = 000000";
+      home.file.".config/ghostty/config.ghostty".text = "";
     })
     (lib.mkIf config.kitty.enable {
       home.packages = with pkgs; [kitty]; #Modern, hackable, featureful, OpenGL based terminal emulator
