@@ -1,17 +1,11 @@
 # ghostty_theme_randomizer — picks a random Ghostty theme on each shell reload
 
-_ghostty_fold="$HOME/.config/ghostty/"
 _ghostty_config="$HOME/.config/ghostty/config"
 _ghostty_themes="$HOME/.bash/ghostty_themes.txt"
 
-# Bail out safely if either file is missing
+# Bail out safely if ghostty_themes file is missing
 if [ ! -f "$_ghostty_themes" ]; then
     echo "Warning: ghostty_themes.txt not found, skipping theme randomizer."
-    unset _ghostty_config _ghostty_themes
-    return
-fi
-if [ ! -f "$_ghostty_fold" ]; then
-    echo "Warning: Ghostty folder not found at $_ghostty_fold, skipping theme randomizer."
     unset _ghostty_config _ghostty_themes
     return
 fi
