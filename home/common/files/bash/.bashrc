@@ -1,50 +1,43 @@
-# source Ghostty Theme Randomizer
-source ~/.bash/ghostty_theme_randomizer
+# .bashrc — sourced for every interactive shell
 
-# source bash prompt
-source ~/.bash/bash_prompt
+# Load all modules in order: env first so vars are available to everything else
+for _file in ~/.bash/{environment_variables,ghostty_theme_randomizer,bash_prompt,bash_functions}; do
+    [ -r "$_file" ] && source "$_file"
+done
+unset _file
 
-# Source bash aliases
-source ~/.bash/bash_aliases
+# Load all alias domain files
+for _file in ~/.bash/aliases/*.sh; do
+    [ -r "$_file" ] && source "$_file"
+done
+unset _file
 
-# Source bash functions
-source ~/.bash/bash_functions
-
-# Source bash Environment Variables
-source ~/.bash/environment_variables
-
-# Show system information at login
+# Show system info on login (interactive terminal only)
 if [ -t 0 ]; then
     if type -p "fastfetch" > /dev/null; then
         fastfetch
     else
-        echo "Warning: fastfetch was called, but it's not installed."
+        echo "Warning: fastfetch not installed."
     fi
 fi
 
-# Don't add duplicate lines or lines beginning with a space to the history
-HISTCONTROL=ignoreboth
-
-# Set history format to include timestamps
+# History: no duplicates, no lines starting with a space
+HISTCONTROL=ignoreboth:erasedups
 HISTTIMEFORMAT="%Y-%m-%d %T "
 
-# Correct simple errors while using cd
+# Fix minor cd typos automatically
 shopt -s cdspell
 
-# Add /home/$USER/bin to $PATH
+# Add ~/bin and ~/.local/bin to PATH if not already present
 case :$PATH: in
-	*:/home/$USER/bin:*) ;;
-	*) PATH=/home/$USER/bin:$PATH ;;
+    *:/home/$USER/bin:*)       ;;
+    *) PATH=/home/$USER/bin:$PATH ;;
+esac
+case :$PATH: in
+    *:/home/$USER/.local/bin:*) ;;
+    *) PATH=/home/$USER/.local/bin:$PATH ;;
 esac
 
-# Add /home/$USER/.local/bin to $PATH
-case :$PATH: in
-	*:/home/$USER/.local/bin:*) ;;
-	*) PATH=/home/$USER/.local/bin:$PATH ;;
-esac
-
-# Add zoxide to Bash
+# Zoxide (smart cd) and fzf (fuzzy finder) init
 eval "$(zoxide init bash)"
-
-# Set up fzf key bindings and fuzzy completion
 eval "$(fzf --bash)"

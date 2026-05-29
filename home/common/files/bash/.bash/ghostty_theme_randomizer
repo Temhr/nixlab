@@ -1,24 +1,29 @@
-##Random ghostty theme on reload
-# Define the file to store the variable
-file="/home/temhr/.config/ghostty/config"
+# ghostty_theme_randomizer — picks a random Ghostty theme on each shell reload
 
-#Define an array of themes FAVOURITES -> "Argonaut" "GruvboxDark" "Adventure" "Fahrenheit"
-mapfile -t variable_themes < /home/temhr/.bash/ghostty_themes.txt
+_ghostty_config="$HOME/.config/ghostty/config"
+_ghostty_themes="$HOME/.bash/ghostty_themes.txt"
 
-#Define an array of fonts
-#mapfile -t variable_fonts < /home/temhr/.bash/ghostty_fonts.txt
+# Bail out safely if either file is missing
+if [ ! -f "$_ghostty_themes" ]; then
+    echo "Warning: ghostty_themes.txt not found, skipping theme randomizer."
+    unset _ghostty_config _ghostty_themes
+    return
+fi
+if [ ! -f "$_ghostty_config" ]; then
+    echo "Warning: Ghostty config not found at $_ghostty_config, skipping theme randomizer."
+    unset _ghostty_config _ghostty_themes
+    return
+fi
 
-#Get a random index within the range of the array
-rantheme_index=$((RANDOM % ${#variable_themes[@]}))
+# Load themes into array and pick one at random
+mapfile -t _themes < "$_ghostty_themes"
+_rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 
-#Get a random index within the range of the array
-#ranfont_index=$((RANDOM % ${#variable_fonts[@]}))
+# Back up current config then write new one
+\cp -f "$_ghostty_config" "${_ghostty_config}.bak"
+{
+    echo "background = 000000"
+    echo "theme = $_rantheme"
+} > "$_ghostty_config"
 
-#Save current config before writting a new one
-\cp -f "$file" "$file.bak"
-
-#Echo the randomly selected value to config file
-echo "background = 000000" > "$file"
-echo "theme = ${variable_themes[$rantheme_index]}" >> "$file"
-
-#echo "font-family = ${variable_fonts[$ranfont_index]}" >> "$file"
+unset _ghostty_config _ghostty_themes _themes _rantheme
