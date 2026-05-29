@@ -31,7 +31,7 @@ _set_prompt() {
 
     PS1="$_CLR_CLOCK\t "
     PS1+="$_CLR_BRACKET[${_CLR_JOBS}\j${_CLR_BRACKET}] "
-    PS1+="${_exit_indicator}\H: ${_CLR_PATH}\w${_CLR_RESET} [$(_random_emoji)]\n"
+    PS1+="${_exit_indicator}\H: ${_CLR_PATH}\w${_CLR_RESET} $(_random_emoji)\n"
     PS1+="|# "
 }
 
