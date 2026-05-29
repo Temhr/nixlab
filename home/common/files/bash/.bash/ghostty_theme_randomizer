@@ -1,6 +1,6 @@
 # ghostty_theme_randomizer — picks a random Ghostty theme on each shell reload
 
-_ghostty_config="$HOME/.config/ghostty/config"
+_ghostty_config="$HOME/.config/ghostty/"
 _ghostty_themes="$HOME/.bash/ghostty_themes.txt"
 
 # Bail out safely if either file is missing
