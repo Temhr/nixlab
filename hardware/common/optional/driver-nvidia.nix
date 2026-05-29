@@ -43,6 +43,16 @@
           vulkan-tools
           stable.cudaPackages.cudatoolkit
         ];
+
+        boot.kernelParams = ["nvidia-drm.modeset=1" "nvidia-drm.fbdev=1"];
+        boot.initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
+        environment.sessionVariables = {
+          NIXOS_OZONE_WL = "1";
+          GBM_BACKEND = "nvidia-drm";
+          __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+          WLR_NO_HARDWARE_CURSORS = "1"; # fixes invisible/broken cursor on NVIDIA
+          LIBVA_DRIVER_NAME = "nvidia";
+        };
       })
       # Quadro K series (e.g. K2200) — legacy 470 driver
       (lib.mkIf (cfg.quadro == "k") {

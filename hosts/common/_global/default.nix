@@ -10,6 +10,7 @@
     ./auto-ping-watchdog.nix
     ./bluetooth.nix
     ./boot-loader.nix
+    ./diagnose.nix
     ./display-manager.nix
     ./firefox.nix
     ./flatpak.nix
