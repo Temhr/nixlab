@@ -8,30 +8,30 @@
   home.file = {
     # ── Root-level bash entry points ──────────────────────────────────────────
     ".bash_profile".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash_profile";
-    ".bashrc".source        = lib.mkForce "${flakePath}/home/common/files/bash/.bashrc";
+    ".bashrc".source = lib.mkForce "${flakePath}/home/common/files/bash/.bashrc";
 
     # ── Core .bash/ modules ───────────────────────────────────────────────────
     ".bash/environment_variables".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/environment_variables";
-    ".bash/bash_prompt".source           = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_prompt";
-    ".bash/bash_functions".source        = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_functions";
-    ".bash/emoticons".source             = lib.mkForce "${flakePath}/home/common/files/bash/.bash/emoticons";
-    ".bash/ghostty_themes.txt".source    = lib.mkForce "${flakePath}/home/common/files/bash/.bash/ghostty_themes.txt";
+    ".bash/bash_prompt".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_prompt";
+    ".bash/bash_functions".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_functions";
+    ".bash/emoticons".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/emoticons";
+    ".bash/ghostty_themes.txt".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/ghostty_themes.txt";
 
     # Ghostty theme randomizer needs execute permission
     ".bash/ghostty_theme_randomizer" = {
-      source     = lib.mkForce "${flakePath}/home/common/files/bash/.bash/ghostty_theme_randomizer";
+      source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/ghostty_theme_randomizer";
       executable = true;
     };
 
     # ── Alias domain files ────────────────────────────────────────────────────
-    ".bash/aliases/navigation.sh".source  = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/navigation.sh";
-    ".bash/aliases/files.sh".source       = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/files.sh";
-    ".bash/aliases/system.sh".source      = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/system.sh";
-    ".bash/aliases/network.sh".source     = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/network.sh";
-    ".bash/aliases/git.sh".source         = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/git.sh";
-    ".bash/aliases/nix.sh".source         = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/nix.sh";
-    ".bash/aliases/scrcpy.sh".source      = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/scrcpy.sh";
-    ".bash/aliases/powertools.sh".source  = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/powertools.sh";
+    ".bash/aliases/navigation.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/navigation.sh";
+    ".bash/aliases/files.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/files.sh";
+    ".bash/aliases/system.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/system.sh";
+    ".bash/aliases/network.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/network.sh";
+    ".bash/aliases/git.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/git.sh";
+    ".bash/aliases/nix.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/nix.sh";
+    ".bash/aliases/scrcpy.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/scrcpy.sh";
+    ".bash/aliases/powertools.sh".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/aliases/powertools.sh";
 
     # SSH shortcuts — dynamically generated from allHosts, appended to a
     # dedicated file so the other alias files stay static and version-controlled
@@ -55,8 +55,8 @@
     enable = true;
 
     # Large history so you can always find that command you ran 3 weeks ago
-    historySize     = 50000;
+    historySize = 50000;
     historyFileSize = 100000;
-    historyControl  = [ "ignoredups" "ignorespace" "erasedups" ];
+    historyControl = ["ignoredups" "ignorespace" "erasedups"];
   };
 }
