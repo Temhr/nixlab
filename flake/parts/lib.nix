@@ -13,10 +13,14 @@
     self.overlays.modifications
   ];
 
-  mkCommonModules = [
+  mkCommonModules = hostPkgs: [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.systm--home-manager-config
     {nixpkgs.overlays = allOverlays;}
+    {
+      home-manager.useGlobalPkgs = true;
+      home-manager.useUserPackages = true;
+    }
   ];
 
   mkHost = {
@@ -26,10 +30,18 @@
     meta = hostsMeta.${name};
     nixpkgsSource = inputs.${meta.nixpkgsInput};
     hostLib = nixpkgsSource.lib;
+    hostPkgs = import nixpkgsSource {
+      inherit (meta) system;
+      config = {
+        allowUnfree = true;
+        nvidia.acceptLicense = true;
+      };
+      overlays = allOverlays;
+    };
   in
     assert hostLib.assertMsg
     (builtins.hasAttr name hostsMeta)
-    "mkHost: no hostsMeta entry found for '${name}' — add it to the hostsMeta attrset in flake/parts/lib.nix";
+    "mkHost: no hostsMeta entry found for '${name}'";
     assert hostLib.assertMsg
     (builtins.hasAttr meta.nixpkgsInput inputs)
     "mkHost: nixpkgsInput '${meta.nixpkgsInput}' not found in flake inputs for host '${name}'";
@@ -37,11 +49,11 @@
         system = meta.system;
         specialArgs = {
           inherit inputs self;
+          pkgs = hostPkgs;
           outputs = self;
           flakePath = self;
           allHosts = hostsMeta;
           hostMeta = meta;
-          # Pass the selected nixpkgs for reference
           nixpkgsSource = nixpkgsSource;
           self' =
             self.packages.${meta.system}
@@ -52,29 +64,16 @@
             };
         };
         modules =
-          mkCommonModules
+          (mkCommonModules hostPkgs)
           ++ modules
           ++ [
             {networking.hostName = name;}
-            # Conditionally add hostId if it exists in meta
-            (lib.mkIf (meta.hostId != null) {
+            (hostLib.mkIf (meta.hostId != null) {
               networking.hostId = meta.hostId;
             })
-            # Override nixpkgs source while preserving config from modules
+            {nixpkgs.pkgs = hostLib.mkForce hostPkgs;}
             {
-              nixpkgs.pkgs = lib.mkForce (import nixpkgsSource {
-                inherit (meta) system;
-                config = {
-                  allowUnfree = true;
-                  # Nvidia license acceptance (if nvidia driver is enabled)
-                  nvidia.acceptLicense = true;
-                };
-                overlays = allOverlays;
-              });
-            }
-            # Force registry to match the host's actual nixpkgs source
-            {
-              nix.registry.nixpkgs = lib.mkForce {
+              nix.registry.nixpkgs = hostLib.mkForce {
                 flake = nixpkgsSource;
               };
             }
