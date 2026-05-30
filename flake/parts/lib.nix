@@ -72,6 +72,12 @@
                 overlays = allOverlays;
               });
             }
+            # Force registry to match the host's actual nixpkgs source
+            {
+              nix.registry.nixpkgs = lib.mkForce {
+                flake = nixpkgsSource;
+              };
+            }
           ];
       };
 in {
