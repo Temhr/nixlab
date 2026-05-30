@@ -18,7 +18,6 @@
     ./locale.nix
     ./nginx.nix
     ./nix.nix
-    ./nixpkgs.nix
     ./open-ssh.nix
     ./power-management.nix
     ./sops.nix
