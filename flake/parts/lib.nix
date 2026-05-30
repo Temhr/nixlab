@@ -24,15 +24,16 @@
     modules,
   }: let
     meta = hostsMeta.${name};
-    nixpkgsSource = inputs.${meta.nixpkgsInput}; # Select the nixpkgs input based on meta
+    nixpkgsSource = inputs.${meta.nixpkgsInput};
+    hostLib = nixpkgsSource.lib;
   in
-    assert lib.assertMsg
+    assert hostLib.assertMsg
     (builtins.hasAttr name hostsMeta)
     "mkHost: no hostsMeta entry found for '${name}' — add it to the hostsMeta attrset in flake/parts/lib.nix";
-    assert lib.assertMsg
+    assert hostLib.assertMsg
     (builtins.hasAttr meta.nixpkgsInput inputs)
     "mkHost: nixpkgsInput '${meta.nixpkgsInput}' not found in flake inputs for host '${name}'";
-      lib.nixosSystem {
+      hostLib.nixosSystem {
         system = meta.system;
         specialArgs = {
           inherit inputs self;
