@@ -16,7 +16,6 @@
   mkCommonModules = hostPkgs: [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.systm--home-manager-config
-    {nixpkgs.overlays = allOverlays;}
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
