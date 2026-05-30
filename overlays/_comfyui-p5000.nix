@@ -1,13 +1,22 @@
 # ComfyUI overlay with CUDA support for P5000
 _: prev: {
-  # Fix terminado test failure
   python311 = prev.python311.override {
-    packageOverrides = _: pyprev: {
+    packageOverrides = final: pyprev: {
       terminado = pyprev.terminado.overridePythonAttrs (_: {
-        doCheck = false; # Skip tests due to flaky test_max_terminals
+        doCheck = false;
       });
       einops = pyprev.einops.overridePythonAttrs (_: {
-        doCheck = false; # Skip tests since terminado is broken
+        doCheck = false;
+      });
+      # sphinx 9.1+ requires Python 3.12+; pin to last 3.11-compatible release
+      sphinx = pyprev.sphinx.overridePythonAttrs (old: rec {
+        version = "8.2.3";
+        src = pyprev.fetchPypi {
+          inherit (old) pname;
+          inherit version;
+          hash = "sha256-F5RBnlBMBFhBBrfLGsMk9Q7JUbmQvMEzN7QdHmX+gCI=";
+        };
+        doCheck = false;
       });
     };
   };
