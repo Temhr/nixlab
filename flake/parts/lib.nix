@@ -69,7 +69,7 @@
               networking.hostId = meta.hostId;
             })
             {
-              imports = [ "${nixpkgsSource}/nixos/modules/misc/nixpkgs/read-only.nix" ];
+              imports = ["${nixpkgsSource}/nixos/modules/misc/nixpkgs/read-only.nix"];
               nixpkgs.pkgs = hostPkgs;
             }
             {
