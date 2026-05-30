@@ -1,38 +1,50 @@
 #!/usr/bin/env bash
-# bash_prompt — two-line prompt with time, job count, hostname, path, random emoji
-
-# Only apply in interactive shells
+# Exit early if not in an interactive shell
 [[ $- != *i* ]] && return
 
-_PROMPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Get the directory of the current script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Load emoji list from file (single whitespace-separated line)
-read -ra _EMOJIS <<< "$(cat "${_PROMPT_DIR}/emoticons")"
+# Read emojis from a single-line, whitespace-separated file
+read -ra EMOJIS <<< "$(cat "${SCRIPT_DIR}/emoticons")"
 
-# Returns a random emoji from the loaded list
-_random_emoji() {
-    echo "${_EMOJIS[RANDOM % ${#_EMOJIS[@]}]}"
+# Function to select a random emoji
+RANDOM_EMOJI() {
+  echo "${EMOJIS[RANDOM % ${#EMOJIS[@]}]}"
 }
 
-# ANSI 256-colour codes (wrapped in \[ \] so readline counts width correctly)
-_CLR_BRACKET="\[\033[38;5;35m\]"
-_CLR_CLOCK="\[\033[38;5;35m\]"
-_CLR_JOBS="\[\033[38;5;33m\]"
-_CLR_PATH="\[\033[38;5;33m\]"
-_CLR_RESET="\[\033[0m\]"
+# ANSI 256 color escapes (properly wrapped in \[ \] for prompt alignment)
+BRACKET_COLOR="\[\033[38;5;35m\]"
+CLOCK_COLOR="\[\033[38;5;35m\]"
+JOB_COLOR="\[\033[38;5;33m\]"
+PATH_COLOR="\[\033[38;5;33m\]"
+LINE_COLOR="\[\033[38;5;248m\]"
+RESET_COLOR="\[\033[0m\]"
 
-# Rebuild PS1 before each command so time and exit code stay current
-_set_prompt() {
-    local _last=$?
-    local _exit_indicator=""
+# Line characters (UTF-8)
+LINE_BOTTOM="─"
+LINE_BOTTOM_CORNER="└"
+LINE_UPPER_CORNER="┌"
+LINE_STRAIGHT="─"
 
-    # Show exit code if last command failed
-    [[ $_last -ne 0 ]] && _exit_indicator="❌($_last) "
+# Misc symbols
+END_CHARACTER="|"
+WHITE_SPACE=" "
+HASH="#"
 
-    PS1="$_CLR_CLOCK\t "
-    PS1+="$_CLR_BRACKET[${_CLR_JOBS}\j${_CLR_BRACKET}] "
-    PS1+="${_exit_indicator}\H: ${_CLR_PATH}\w${_CLR_RESET} $(_random_emoji)\n"
-    PS1+="|# "
+# Prompt update function
+set_prompt() {
+  local emoji exit_code_symbol=""
+  local last_code=$?
+
+  [[ $last_code -ne 0 ]] && exit_code_symbol="❌($last_code) "
+  emoji="$(RANDOM_EMOJI)"
+
+  PS1="$CLOCK_COLOR\t$WHITE_SPACE"
+  PS1+="$BRACKET_COLOR[$JOB_COLOR\j$BRACKET_COLOR]$WHITE_SPACE"
+  PS1+="$exit_code_symbol\H: $PATH_COLOR\w$RESET_COLOR$WHITE_SPACE\[$emoji\]\n"
+  PS1+="$END_CHARACTER$RESET_COLOR$HASH$WHITE_SPACE"
 }
 
-PROMPT_COMMAND="_set_prompt"
+# Set the prompt before each command
+PROMPT_COMMAND="set_prompt"
