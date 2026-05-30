@@ -49,7 +49,6 @@
         system = meta.system;
         specialArgs = {
           inherit inputs self;
-          pkgs = hostPkgs;
           outputs = self;
           flakePath = self;
           allHosts = hostsMeta;
@@ -71,7 +70,10 @@
             (hostLib.mkIf (meta.hostId != null) {
               networking.hostId = meta.hostId;
             })
-            {nixpkgs.pkgs = hostLib.mkForce hostPkgs;}
+            {
+              imports = [ "${nixpkgsSource}/nixos/modules/misc/nixpkgs/read-only.nix" ];
+              nixpkgs.pkgs = hostPkgs;
+            }
             {
               nix.registry.nixpkgs = hostLib.mkForce {
                 flake = nixpkgsSource;
