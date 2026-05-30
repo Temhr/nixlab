@@ -20,8 +20,8 @@
       # systemd-logind: ignore all lid events
       services.logind.settings.Login = {
         HandleLidSwitch = "ignore";
-        HandleLidSwitchDocked = "ignore"; # Optional: disables lid action even when docked
-        HandleLidSwitchExternalPower = "ignore"; # Optional: disables lid action when charging
+        HandleLidSwitchDocked = "ignore";
+        HandleLidSwitchExternalPower = "ignore";
       };
 
       # Optional: disable all sleep mechanisms
@@ -32,21 +32,12 @@
         targets."hybrid-sleep".enable = false;
         targets."suspend-then-hibernate".enable = false;
 
-        sleep.extraConfig = ''
-          [Sleep]
-          AllowSuspend=no
-          AllowHibernation=no
-          AllowSuspendThenHibernate=no
-          AllowHybridSleep=no
-        '';
-        /*
         sleep.settings.Sleep = {
           AllowSuspend = "no";
           AllowHibernation = "no";
           AllowSuspendThenHibernate = "no";
           AllowHybridSleep = "no";
         };
-        */
       };
 
       # Prevent UPower from auto-suspending on critical battery
