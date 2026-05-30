@@ -9,13 +9,8 @@ _: prev: {
         doCheck = false;
       });
       # sphinx 9.1+ requires Python 3.12+; pin to last 3.11-compatible release
-      sphinx = pyprev.sphinx.overridePythonAttrs (old: rec {
-        version = "8.2.3";
-        src = pyprev.fetchPypi {
-          inherit (old) pname;
-          inherit version;
-          hash = "sha256-F5RBnlBMBFhBBrfLGsMk9Q7JUbmQvMEzN7QdHmX+gCI=";
-        };
+      sphinx = pyprev.sphinx.overridePythonAttrs (_: {
+        meta = { broken = false; };
         doCheck = false;
       });
     };
