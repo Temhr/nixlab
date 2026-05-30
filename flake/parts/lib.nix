@@ -45,7 +45,6 @@
     (builtins.hasAttr meta.nixpkgsInput inputs)
     "mkHost: nixpkgsInput '${meta.nixpkgsInput}' not found in flake inputs for host '${name}'";
       hostLib.nixosSystem {
-        system = meta.system;
         specialArgs = {
           inherit inputs self;
           outputs = self;
