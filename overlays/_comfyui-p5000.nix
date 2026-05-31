@@ -8,9 +8,10 @@ _: prev: {
       einops = pyprev.einops.overridePythonAttrs (_: {
         doCheck = false;
       });
-      # sphinx 9.1+ requires Python 3.12+; pin to last 3.11-compatible release
-      sphinx = pyprev.sphinx.overridePythonAttrs (_: {
-        meta = { broken = false; };
+      # sphinx 9.1+ declares it doesn't support py311, but we only need it
+      # as a transitive doc-build dep — override the broken flag to allow it
+      sphinx = pyprev.sphinx.overridePythonAttrs (old: {
+        disabled = false;
         doCheck = false;
       });
     };
