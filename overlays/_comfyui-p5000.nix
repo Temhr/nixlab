@@ -1,7 +1,7 @@
 # ComfyUI overlay with CUDA support for P5000
-_: prev: {
+final: prev: {
   python311 = prev.python311.override {
-    packageOverrides = final: pyprev: {
+    packageOverrides = pyFinal: pyprev: {
       terminado = pyprev.terminado.overridePythonAttrs (_: {
         doCheck = false;
       });
@@ -13,25 +13,16 @@ _: prev: {
         propagatedBuildInputs = [ pyprev.frozenlist ];
         doCheck = false;
       });
-      # aiohttp must also be overridden so it picks up the patched aiosignal
-      # via `final` (the fixed-point) rather than pyprev's original
+      # aiohttp must pick up the patched aiosignal via pyFinal fixed-point
       aiohttp = pyprev.aiohttp.overridePythonAttrs (old: {
         propagatedBuildInputs = map
-          (dep: if (dep.pname or "") == "aiosignal" then final.aiosignal else dep)
+          (dep: if (dep.pname or "") == "aiosignal" then pyFinal.aiosignal else dep)
           (old.propagatedBuildInputs or []);
         doCheck = false;
       });
     };
   };
 
-  # PyTorch 2.2.2 cu118 wheels fetched into the Nix store with pinned hashes.
-  # These are Fixed Output Derivations: reproducible, offline after first fetch,
-  # and hash-verified — no network access at boot.
-  #
-  # To obtain hashes, run:
-  #   nix store prefetch-file --hash-type sha256 \
-  #     "https://download.pytorch.org/whl/cu118/torch-2.2.2%2Bcu118-cp311-cp311-linux_x86_64.whl"
-  # (repeat for torchvision and torchaudio)
   pytorchCu118Wheels = {
     torch = prev.fetchurl {
       name = "torch-2.2.2-cu118-cp311-linux_x86_64.whl";
@@ -50,7 +41,8 @@ _: prev: {
     };
   };
 
-  # ComfyUI package — source pinned via fetchFromGitHub hash
+  # comfyui now uses final.python311 and final.python311Packages
+  # so it sees the patched aiosignal/aiohttp, not prev's originals
   comfyui = prev.stdenv.mkDerivation rec {
     pname = "comfyui";
     version = "unstable-2024-11-30";
@@ -60,13 +52,13 @@ _: prev: {
       rev = "a0ae3f3bd46b9e58f43fccfe17077873bf16f905";
       sha256 = "sha256-tv1IclHucV42JSVpxO/IdsOm+j6a5UcmZ+wBThZEhkY=";
     };
-    nativeBuildInputs = [prev.makeWrapper prev.autoPatchelfHook];
-    buildInputs = with prev; [
-      python311
-      stdenv.cc.cc.lib
-      zlib
+    nativeBuildInputs = [ prev.makeWrapper prev.autoPatchelfHook ];
+    buildInputs = [
+      final.python311          # <-- final, not prev
+      prev.stdenv.cc.cc.lib
+      prev.zlib
     ];
-    propagatedBuildInputs = with prev.python311Packages; [
+    propagatedBuildInputs = with final.python311Packages; [  # <-- final, not prev
       pillow
       numpy
       safetensors
@@ -81,8 +73,6 @@ _: prev: {
       transformers
       accelerate
       sentencepiece
-      # torch is NOT included here — it is installed into the venv
-      # from the Nix store wheels in pytorchCu118Wheels.
     ];
     dontBuild = true;
     dontConfigure = true;
@@ -90,9 +80,9 @@ _: prev: {
       mkdir -p $out/share/comfyui
       cp -r . $out/share/comfyui/
       mkdir -p $out/bin
-      makeWrapper ${prev.python311}/bin/python $out/bin/comfyui \
+      makeWrapper ${final.python311}/bin/python $out/bin/comfyui \
         --add-flags "$out/share/comfyui/main.py" \
-        --prefix PYTHONPATH : "${prev.python311.pkgs.makePythonPath propagatedBuildInputs}" \
+        --prefix PYTHONPATH : "${final.python311.pkgs.makePythonPath propagatedBuildInputs}" \
         --prefix LD_LIBRARY_PATH : "${prev.lib.makeLibraryPath [prev.stdenv.cc.cc.lib]}" \
         --chdir "$out/share/comfyui"
     '';
