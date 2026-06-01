@@ -20,6 +20,7 @@
   };
   flake.nixosModules.hosts--nixace = {
     config,
+    lib,
     pkgs,
     hostMeta,
     ...
@@ -144,7 +145,7 @@
       ip saddr 10.88.0.0/16 tcp dport 3306 accept
     '';
 
-    nixpkgs.config.permittedInsecurePackages = [
+    nixpkgs.config.permittedInsecurePackages = lib.mkDefault [
       "electron-39.8.10"
     ];
 
