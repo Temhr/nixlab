@@ -1,17 +1,18 @@
 # ComfyUI overlay with CUDA support for P5000
 _: prev: {
   python311 = prev.python311.override {
-    packageOverrides = final: pyprev: {
+    packageOverrides = _: pyprev: {
       terminado = pyprev.terminado.overridePythonAttrs (_: {
         doCheck = false;
       });
       einops = pyprev.einops.overridePythonAttrs (_: {
         doCheck = false;
       });
-      # sphinx 9.1+ declares it doesn't support py311, but we only need it
-      # as a transitive doc-build dep — override the broken flag to allow it
-      sphinx = pyprev.sphinx.overridePythonAttrs (old: {
-        disabled = false;
+      # aiosignal's propagatedBuildInputs includes sphinx for docs only.
+      # sphinx 9.1+ uses py312 syntax and cannot be built on py311.
+      # frozenlist is the only runtime dependency aiosignal actually needs.
+      aiosignal = pyprev.aiosignal.overridePythonAttrs (_: {
+        propagatedBuildInputs = [ pyprev.frozenlist ];
         doCheck = false;
       });
     };
