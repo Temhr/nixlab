@@ -7,7 +7,7 @@
       self.nixosModules.hardw--c-optional--mount-mirnas1
       self.nixosModules.hardw--c-optional--mount-mirnas2
     ];
-    # Choose between these choices: "none" "k" "p"
-    driver-nvidia.quadro = "p";
+    # Choose between these choices: "none" "l" "s"
+    driver-nvidia.driver-branch = "l";
   };
 }

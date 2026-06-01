@@ -9,16 +9,16 @@
   in {
     options = {
       driver-nvidia = {
-        quadro = lib.mkOption {
-          type = lib.types.enum ["none" "k" "p"];
+        driver-branch = lib.mkOption {
+          type = lib.types.enum ["none" "l" "s"];
           default = "none";
           description = "Select which between three options or none";
         };
       };
     };
     config = lib.mkMerge [
-      # Base nvidia config, shared by "k" and "p"
-      (lib.mkIf (cfg.quadro != "none") {
+      # Base nvidia config, shared by "l" and "s"
+      (lib.mkIf (cfg.driver-branch != "none") {
         hardware.graphics = {
           enable = true;
         };
@@ -54,12 +54,12 @@
           LIBVA_DRIVER_NAME = "nvidia";
         };
       })
-      # Quadro K series (e.g. K2200) — legacy 470 driver
-      (lib.mkIf (cfg.quadro == "k") {
+      # legacy 470 driver - Quadro series (e.g. K2200 & P5000)
+      (lib.mkIf (cfg.driver-branch == "l") {
         hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
       })
-      # Quadro P series (e.g. P5000) — stable driver
-      (lib.mkIf (cfg.quadro == "p") {
+      # stable driver
+      (lib.mkIf (cfg.driver-branch == "s") {
         hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
       })
     ];
