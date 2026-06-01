@@ -82,7 +82,6 @@ final: prev: {
       mkdir -p $out/bin
       makeWrapper ${final.python311}/bin/python $out/bin/comfyui \
         --add-flags "$out/share/comfyui/main.py" \
-        --prefix PYTHONPATH : "${final.python311.pkgs.makePythonPath propagatedBuildInputs}" \
         --prefix LD_LIBRARY_PATH : "${prev.lib.makeLibraryPath [prev.stdenv.cc.cc.lib]}" \
         --chdir "$out/share/comfyui"
     '';
