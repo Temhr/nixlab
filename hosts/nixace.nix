@@ -11,9 +11,9 @@
       # Services
       self.nixosModules.servc--bookstack-nixlab
       self.nixosModules.nsops--bookstack
-      #self.nixosModules.servc--comfyui-p5000
-      #self.nixosModules.servc--comfyui-extensions
-      #self.nixosModules.servc--comfyui-models
+      self.nixosModules.servc--comfyui-p5000
+      self.nixosModules.servc--comfyui-extensions
+      self.nixosModules.servc--comfyui-models
       self.nixosModules.servc--ollama
       self.nixosModules.nsops--ollama
     ];
@@ -83,7 +83,66 @@
       models = ["qwen3.5:35b" "gemma4:31b" "qwen3.6:35b" ""];
       openFirewall = true;
     };
-
+    services.comfyui-p5000 = {
+      enable = true;
+      # Network configuration
+      listenAddress = "0.0.0.0"; # Listen on all interfaces
+      # Data directory (models, outputs, inputs)
+      dataDir = "/data/comfyui";
+      # GPU configuration
+      gpuDevice = 0; # First GPU
+      openFirewall = true;
+    };
+    services.comfyui-extensions = {
+      enable = true;
+      # Recommended: Install ComfyUI-Manager (enabled by default)
+      enableManager = true;
+      # Optional: Enable ControlNet support
+      enableControlNet = true;
+      # Optional: Enable common image processing nodes
+      enableImageProcessing = true;
+      # Optional: Enable video processing nodes
+      enableVideoProcessing = true;
+      # Optional: Install custom nodes from git repos
+      customNodes = [
+        /*
+        {
+          name = "ComfyUI-Impact-Pack";
+          url = "https://github.com/ltdrdata/ComfyUI-Impact-Pack";
+          rev = "main";
+        }
+        {
+          name = "ComfyUI-AnimateDiff-Evolved";
+          url = "https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved";
+          rev = "main";
+        }
+        */
+      ];
+    };
+    services.comfyui-models = {
+      enable = true;
+      # Download Stable Diffusion 1.5 (good for P5000 with 16GB VRAM)
+      downloadSD15 = true;
+      # Download SDXL (requires more VRAM, might need --lowvram flag)
+      downloadSDXL = true;
+      # Download recommended VAE models
+      downloadVAE = true;
+      # Download upscale models
+      downloadUpscalers = true;
+      # Download custom models
+      customModels = [
+        /*
+        {
+          name = "my-custom-model.safetensors";
+          url = "https://civitai.com/api/download/models/12345";
+          type = "checkpoint";
+        }
+        */
+      ];
+    };
+    networking.firewall.extraInputRules = ''
+      ip saddr 10.88.0.0/16 tcp dport 3306 accept
+    '';
     services.bookstack-nixlab = {
       enable = true;
       listenAddress = "0.0.0.0";
