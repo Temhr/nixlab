@@ -47,7 +47,7 @@ in {
     ethIface = "enp0s31f6";
     wifiIface = "wlp3s0";
     hostId = "dbacbbff";
-    nixpkgsInput = "nixpkgs-unstable";
+    nixpkgsInput = "nixpkgs-stable";
     services = ["glance" "grafana" "prometheus" "loki" "bookstack" "comfyui" "ollama-gpu" "home-assistant"];
   };
   nixsun = mkHostMeta {
@@ -55,7 +55,7 @@ in {
     ethIface = "enp0s25";
     wifiIface = "wlo1";
     hostId = "eba785f1";
-    nixpkgsInput = "nixpkgs-unstable";
+    nixpkgsInput = "nixpkgs-stable";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixtop = mkHostMeta {
@@ -63,7 +63,7 @@ in {
     ethIface = "enp0s25";
     wifiIface = "wlp61s0";
     hostId = "4a313e3b";
-    nixpkgsInput = "nixpkgs-unstable";
+    nixpkgsInput = "nixpkgs-stable";
     services = ["glance" "grafana" "prometheus" "loki"];
   };
   nixvat = mkHostMeta {
@@ -71,7 +71,7 @@ in {
     ethIface = "enp0s25";
     wifiIface = "wlo1";
     hostId = "5845aa8d";
-    nixpkgsInput = "nixpkgs-unstable";
+    nixpkgsInput = "nixpkgs-stable";
     services = ["glance" "grafana" "prometheus" "loki" "ollama-cpu" "wikijs" "zola"];
   };
   nixzen = mkHostMeta {
