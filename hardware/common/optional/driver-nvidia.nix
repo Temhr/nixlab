@@ -10,7 +10,7 @@
     options = {
       driver-nvidia = {
         driver-branch = lib.mkOption {
-          type = lib.types.enum ["none" "l4" "l5" "s"];
+          type = lib.types.enum ["none" "l470" "l535" "l580" "stable"];
           default = "none";
           description = "Select which between three options or none";
         };
@@ -55,15 +55,19 @@
         };
       })
       # legacy 470 driver - Quadro series (e.g. K2200)
-      (lib.mkIf (cfg.driver-branch == "l4") {
+      (lib.mkIf (cfg.driver-branch == "l470") {
         hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.legacy_470;
       })
       # legacy 535 driver - Quadro series (e.g. P5000)
-      (lib.mkIf (cfg.driver-branch == "l5") {
+      (lib.mkIf (cfg.driver-branch == "l535") {
         hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.legacy_535;
       })
+      # legacy 580 driver - Quadro series (e.g. P5000)
+      (lib.mkIf (cfg.driver-branch == "l580") {
+        hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+      })
       # stable driver
-      (lib.mkIf (cfg.driver-branch == "s") {
+      (lib.mkIf (cfg.driver-branch == "stable") {
         hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
       })
     ];

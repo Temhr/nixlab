@@ -7,7 +7,7 @@
       self.nixosModules.hardw--c-optional--mount-mirnas1
       self.nixosModules.hardw--c-optional--mount-mirnas2
     ];
-    # Choose between these choices: "none" "l4" "l5" "s"
-    driver-nvidia.driver-branch = "s";
+    # Choose between these choices: "none" "l470" "l535" "l580" "stable"
+    driver-nvidia.driver-branch = "l580";
   };
 }
