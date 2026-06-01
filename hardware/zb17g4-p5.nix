@@ -8,6 +8,6 @@
       self.nixosModules.hardw--c-optional--mount-mirnas2
     ];
     # Choose between these choices: "none" "l4" "l5" "s"
-    driver-nvidia.driver-branch = "l5";
+    driver-nvidia.driver-branch = "s";
   };
 }
