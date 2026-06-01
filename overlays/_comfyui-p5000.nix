@@ -1,28 +1,5 @@
 # ComfyUI overlay with CUDA support for P5000
 final: prev: {
-  python311 = prev.python311.override {
-    packageOverrides = pyFinal: pyprev: {
-      terminado = pyprev.terminado.overridePythonAttrs (_: {
-        doCheck = false;
-      });
-      einops = pyprev.einops.overridePythonAttrs (_: {
-        doCheck = false;
-      });
-      # Strip sphinx from aiosignal — it's a doc-only dep, not runtime
-      aiosignal = pyprev.aiosignal.overridePythonAttrs (_: {
-        propagatedBuildInputs = [ pyprev.frozenlist ];
-        doCheck = false;
-      });
-      # aiohttp must pick up the patched aiosignal via pyFinal fixed-point
-      aiohttp = pyprev.aiohttp.overridePythonAttrs (old: {
-        propagatedBuildInputs = map
-          (dep: if (dep.pname or "") == "aiosignal" then pyFinal.aiosignal else dep)
-          (old.propagatedBuildInputs or []);
-        doCheck = false;
-      });
-    };
-  };
-
   pytorchCu118Wheels = {
     torch = prev.fetchurl {
       name = "torch-2.2.2-cu118-cp311-linux_x86_64.whl";
@@ -54,25 +31,9 @@ final: prev: {
     };
     nativeBuildInputs = [ prev.makeWrapper prev.autoPatchelfHook ];
     buildInputs = [
-      final.python311          # <-- final, not prev
+      final.python311
       prev.stdenv.cc.cc.lib
       prev.zlib
-    ];
-    propagatedBuildInputs = with final.python311Packages; [  # <-- final, not prev
-      pillow
-      numpy
-      safetensors
-      aiohttp
-      pyyaml
-      tqdm
-      psutil
-      scipy
-      einops
-      opencv4
-      matplotlib
-      transformers
-      accelerate
-      sentencepiece
     ];
     dontBuild = true;
     dontConfigure = true;
