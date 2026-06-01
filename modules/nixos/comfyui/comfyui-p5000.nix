@@ -212,7 +212,9 @@
                     SENTINEL="$VENV_DIR/.pytorch-version"
                     EXPECTED_TORCH="${pytorchWheels.torch}"
 
-                    if [ -f "$SENTINEL" ] && grep -qF "$EXPECTED_TORCH" "$SENTINEL" 2>/dev/null; then
+                    # Skip only if sentinel matches AND venv python actually exists
+                    if [ -f "$SENTINEL" ] && grep -qF "$EXPECTED_TORCH" "$SENTINEL" 2>/dev/null \
+                      && [ -x "$VENV_DIR/bin/python" ]; then
                       echo "PyTorch already installed from $EXPECTED_TORCH — skipping"
                       exit 0
                     fi
