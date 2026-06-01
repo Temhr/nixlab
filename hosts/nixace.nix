@@ -84,7 +84,7 @@
       openFirewall = true;
     };
     services.comfyui-p5000 = {
-      enable = true;
+      enable = false;
       # Network configuration
       listenAddress = "0.0.0.0"; # Listen on all interfaces
       # Data directory (models, outputs, inputs)
@@ -94,7 +94,7 @@
       openFirewall = true;
     };
     services.comfyui-extensions = {
-      enable = true;
+      enable = false;
       # Recommended: Install ComfyUI-Manager (enabled by default)
       enableManager = true;
       # Optional: Enable ControlNet support
@@ -120,7 +120,7 @@
       ];
     };
     services.comfyui-models = {
-      enable = true;
+      enable = false;
       # Download Stable Diffusion 1.5 (good for P5000 with 16GB VRAM)
       downloadSD15 = true;
       # Download SDXL (requires more VRAM, might need --lowvram flag)
