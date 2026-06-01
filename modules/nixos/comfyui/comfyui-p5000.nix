@@ -333,8 +333,8 @@
               pkgs.linuxPackages.nvidia_x11
               pkgs.libGL
               pkgs.libGLU
-              pkgs.xorg.libX11
-              pkgs.xorg.libXext
+              pkgs.libX11
+              pkgs.libXext
             ]}"
           ];
 
