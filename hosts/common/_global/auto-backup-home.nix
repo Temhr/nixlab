@@ -81,21 +81,22 @@
         "--include=Downloads"            # symlink itself
         "--include=Music"                # symlink itself
         "--include=Pictures"             # symlink itself
+        "--include=Projects"             # symlink itself
         "--include=Public"               # symlink itself
         "--include=Templates"            # symlink itself
         "--include=Videos"               # symlink itself
         "--include=repast4py-workspace"  # symlink itself
 
         # Actual files/directories
-        "--include=.ssh/***"               # SSH keys
         "--include=.pki/***"               # Certificates
         "--include=Calibre Library/***"    # Ebooks
         "--include=.bash_history"          # Shell history
         "--include=.python_history"        # Python history
-        #"--include=.bash/***"              # Bash config
+        #"--include=.bash/***"             # Bash config
         "--include=.keychain/***"          # Keychain
         "--include=bin/***"                # Personal scripts
-        #"--include=.mozilla/***"           # Firefox (optional)
+        #"--include=.mozilla/***"          # Firefox (optional)
+        #"--include=.zen/***"          # Firefox (optional)
 
         # EXPLICITLY PROTECT shelf from deletion (must come BEFORE --exclude=*)
         "--filter=protect shelf/"
