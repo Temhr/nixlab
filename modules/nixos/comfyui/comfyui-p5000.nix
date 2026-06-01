@@ -321,10 +321,10 @@
             "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
             "COMFYUI_EXTRA_MODEL_PATHS=${cfg.dataDir}/extra_model_paths.yaml"
             "VIRTUAL_ENV=${cfg.dataDir}/venv"
-            # Tell ComfyUI to use our data directory for user data
             "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
-            # Add git to PATH for ComfyUI-Manager
-            "PATH=${pkgs.git}/bin:${pkgs.coreutils}/bin"
+            # Prepend venv/bin and needed tools; don't replace the whole PATH
+            "PATH=${cfg.dataDir}/venv/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin:/run/current-system/sw/bin"
+            "PYTHONPATH="  # Clear any Nix PYTHONPATH so venv site-packages take precedence
             "LD_LIBRARY_PATH=${lib.makeLibraryPath [
               pkgs.stdenv.cc.cc.lib
               pkgs.glib
