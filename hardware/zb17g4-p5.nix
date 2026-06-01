@@ -8,6 +8,6 @@
       self.nixosModules.hardw--c-optional--mount-mirnas2
     ];
     # Choose between these choices: "none" "l470" "l535" "l580" "stable"
-    driver-nvidia.driver-branch = "l580";
+    driver-nvidia.driver-branch = "stable";
   };
 }
