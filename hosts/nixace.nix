@@ -145,7 +145,7 @@
       ip saddr 10.88.0.0/16 tcp dport 3306 accept
     '';
 
-    nixpkgs.config.permittedInsecurePackages = lib.mkDefault [
+    nixpkgs.config.permittedInsecurePackages = lib.mkForce [
       "electron-39.8.10"
     ];
 
