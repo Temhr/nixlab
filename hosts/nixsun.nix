@@ -58,6 +58,7 @@
     # Define your Flatpak packages here
     flatpakPackages = [
       "com.discordapp.Discord" # Discord Talk, play, hang out
+      "io.github.mhogomchungu.media-downloader" #A GUI to yt-dlp, gallery-dl and others
     ];
 
     ## List packages installed in system profile. To search, run:
