@@ -278,6 +278,10 @@
                       comfyui-workflow-templates \
                       comfyui-embedded-docs
 
+                    # Force numpy<2 — other deps may have pulled in numpy 2.x
+                    echo "Pinning numpy<2 for PyTorch 2.2 compatibility..."
+                    "$VENV_DIR/bin/pip" install --force-reinstall "numpy<2"
+
                     # Write sentinel so we can skip this on the next boot
                     echo "$EXPECTED_TORCH" > "$SENTINEL"
 
@@ -325,9 +329,9 @@
             "VIRTUAL_ENV=${cfg.dataDir}/venv"
             "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
             # Prepend venv/bin and needed tools; don't replace the whole PATH
-            "PATH=${cfg.dataDir}/venv/bin:${pkgs.git}/bin:${pkgs.coreutils}/bin:/run/current-system/sw/bin"
+            "PATH=${cfg.dataDir}/venv/bin:${pkgs.git}/bin:${pkgs.uv}/bin:${pkgs.coreutils}/bin:/run/current-system/sw/bin"
             "PYTHONPATH="  # Clear any Nix PYTHONPATH so venv site-packages take precedence
-            "LD_LIBRARY_PATH=${lib.makeLibraryPath [
+            "LD_LIBRARY_PATH=/run/opengl-driver/lib:${lib.makeLibraryPath [
               pkgs.stdenv.cc.cc.lib
               pkgs.glib
               pkgs.zlib
