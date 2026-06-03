@@ -102,7 +102,7 @@
       ollamaDataDir = "/data/ollama";
       webuiDataDir = "/data/open-webui";
       # Pre-download models
-      models = ["llama2" "mistral" "codellama"];
+      models = ["qwen3.5:35b" "gemma4:31b" "qwen3.6:35b" ""];
       openFirewall = true;
     };
 
