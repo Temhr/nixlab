@@ -330,7 +330,7 @@
             "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
             # Prepend venv/bin and needed tools; don't replace the whole PATH
             "PATH=${cfg.dataDir}/venv/bin:${pkgs.git}/bin:${pkgs.uv}/bin:${pkgs.coreutils}/bin:/run/current-system/sw/bin"
-            "PYTHONPATH="  # Clear any Nix PYTHONPATH so venv site-packages take precedence
+            "PYTHONPATH=" # Clear any Nix PYTHONPATH so venv site-packages take precedence
             "LD_LIBRARY_PATH=/run/opengl-driver/lib:${lib.makeLibraryPath [
               pkgs.stdenv.cc.cc.lib
               pkgs.glib

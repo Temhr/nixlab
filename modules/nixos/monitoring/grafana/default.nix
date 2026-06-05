@@ -150,8 +150,8 @@
               folder = "maintenance";
               editable = true;
             };
-            system-overview = {
-              path = ./dashboards/system-overview.json;
+            system-overview-v2 = {
+              path = ./dashboards/system-overview-v2.json;
               folder = "maintenance";
               editable = true;
             };
@@ -262,58 +262,60 @@
             ProtectSystem = "strict";
             ProtectHome = true;
             ReadWritePaths = [cfg.dataDir];
+
+            ExecStartPre = [
+              # 1. Runs as root (+) - creates all directories
+              "+${pkgs.writeShellScript "grafana-mkdir" ''
+                install -d -m 0775 -o ${cfg.user} -g ${cfg.group} \
+                  ${cfg.dataDir}/provisioning \
+                  ${cfg.dataDir}/provisioning/dashboards \
+                  ${cfg.dataDir}/provisioning/datasources \
+                  ${cfg.dataDir}/provisioning/notifiers \
+                  ${lib.concatStringsSep " \\\n        " (
+                  lib.mapAttrsToList (
+                    name: _: "${cfg.dataDir}/dashboards/${name}"
+                  )
+                  cfg.dashboards
+                )}
+              ''}"
+
+              # 2. Runs as grafana user - copies files and writes provisioning configs
+              (pkgs.writeShellScript "grafana-provision" (
+                lib.optionalString (cfg.credentialsFile != null) ''
+                  echo "GRAFANA_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
+                    > /run/grafana-credentials.env
+                  chown ${cfg.user}:${cfg.group} /run/grafana-credentials.env
+                  chmod 600 /run/grafana-credentials.env
+                ''
+                + lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
+                    if [ -f ${dashboard.path} ]; then
+                      install -m 644 ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
+                    else
+                      echo "Warning: Dashboard file not found: ${dashboard.path}"
+                    fi
+
+                    cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
+                    apiVersion: 1
+                    providers:
+                      - name: '${name}'
+                        orgId: 1
+                        folder: '${dashboard.folder}'
+                        type: file
+                        disableDeletion: false
+                        updateIntervalSeconds: ${toString dashboard.updateInterval}
+                        allowUiUpdates: ${lib.boolToString dashboard.editable}
+                        options:
+                          path: ${cfg.dataDir}/dashboards/${name}
+                          foldersFromFilesStructure: false
+                    DASHEOF
+                  '')
+                  cfg.dashboards)
+              ))
+            ];
           }
           // lib.optionalAttrs (cfg.credentialsFile != null) {
             EnvironmentFile = "/run/grafana-credentials.env";
           };
-
-        preStart = lib.mkBefore (
-          lib.optionalString (cfg.credentialsFile != null) ''
-            echo "GRAFANA_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
-              > /run/grafana-credentials.env
-            chown ${cfg.user}:${cfg.group} /run/grafana-credentials.env
-            chmod 600 /run/grafana-credentials.env
-          ''
-          + ''
-            # Set up provisioning directories
-            mkdir -p ${cfg.dataDir}/provisioning/{dashboards,datasources,notifiers}
-            chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}/provisioning
-
-            # ┌─────────────────────────────────────────────────────────┐
-            # │ PROVISION ALL DASHBOARDS                                │
-            # └─────────────────────────────────────────────────────────┘
-            ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
-                # Setup dashboard: ${name}
-                mkdir -p ${cfg.dataDir}/dashboards/${name}
-                chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/dashboards/${name}
-
-                # Copy dashboard JSON if it exists
-                if [ -f ${dashboard.path} ]; then
-                  install -m 644 -o ${cfg.user} -g ${cfg.group} ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
-                else
-                  echo "Warning: Dashboard file not found: ${dashboard.path}"
-                fi
-
-                # Create dashboard provisioning config
-                cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
-                apiVersion: 1
-                providers:
-                  - name: '${name}'
-                    orgId: 1
-                    folder: '${dashboard.folder}'
-                    type: file
-                    disableDeletion: false
-                    updateIntervalSeconds: ${toString dashboard.updateInterval}
-                    allowUiUpdates: ${lib.boolToString dashboard.editable}
-                    options:
-                      path: ${cfg.dataDir}/dashboards/${name}
-                      foldersFromFilesStructure: false
-                DASHEOF
-                chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/provisioning/dashboards/${name}.yaml
-              '')
-              cfg.dashboards)}
-          ''
-        );
       };
 
       # ----------------------------------------------------------------------------

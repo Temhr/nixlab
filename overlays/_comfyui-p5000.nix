@@ -29,7 +29,7 @@ final: prev: {
       rev = "a0ae3f3bd46b9e58f43fccfe17077873bf16f905";
       sha256 = "sha256-tv1IclHucV42JSVpxO/IdsOm+j6a5UcmZ+wBThZEhkY=";
     };
-    nativeBuildInputs = [ prev.makeWrapper prev.autoPatchelfHook ];
+    nativeBuildInputs = [prev.makeWrapper prev.autoPatchelfHook];
     buildInputs = [
       final.python311
       prev.stdenv.cc.cc.lib

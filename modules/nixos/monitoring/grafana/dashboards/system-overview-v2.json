@@ -1,8 +1,14 @@
 {
   "id": null,
-  "uid": "system-maintenance-overview",
-  "title": "System Monitoring & Maintenance Dashboard",
-  "tags": ["maintenance", "monitoring", "system", "homelab", "nixos"],
+  "uid": "system-maintenance-overview-v2",
+  "title": "System Monitoring & Maintenance Dashboard v2",
+  "tags": [
+    "maintenance",
+    "monitoring",
+    "system",
+    "homelab",
+    "nixos"
+  ],
   "timezone": "browser",
   "schemaVersion": 36,
   "editable": true,
@@ -19,15 +25,25 @@
   "panels": [
     {
       "type": "row",
-      "title": "🎯 System Health Overview",
+      "title": "\ud83c\udfaf System Health Overview",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
     },
     {
       "id": 1,
       "title": "Overall Health Score",
       "type": "gauge",
-      "gridPos": {"h": 8, "w": 6, "x": 0, "y": 1},
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
       "targets": [
         {
           "expr": "system:health_score:percentage",
@@ -44,10 +60,22 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "red"},
-              {"value": 50, "color": "orange"},
-              {"value": 80, "color": "yellow"},
-              {"value": 95, "color": "green"}
+              {
+                "value": 0,
+                "color": "red"
+              },
+              {
+                "value": 50,
+                "color": "orange"
+              },
+              {
+                "value": 80,
+                "color": "yellow"
+              },
+              {
+                "value": 95,
+                "color": "green"
+              }
             ]
           },
           "min": 0,
@@ -60,7 +88,12 @@
       "id": 2,
       "title": "Active Alerts by Severity",
       "type": "stat",
-      "gridPos": {"h": 4, "w": 18, "x": 6, "y": 1},
+      "gridPos": {
+        "h": 4,
+        "w": 18,
+        "x": 6,
+        "y": 1
+      },
       "targets": [
         {
           "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"})",
@@ -78,9 +111,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 1, "color": "orange"},
-              {"value": 5, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 1,
+                "color": "orange"
+              },
+              {
+                "value": 5,
+                "color": "red"
+              }
             ]
           }
         }
@@ -90,20 +132,34 @@
       "id": 3,
       "title": "System Uptime",
       "type": "stat",
-      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 5},
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 5
+      },
       "targets": [
         {
           "expr": "node_time_seconds - node_boot_time_seconds",
           "legendFormat": "uptime"
         }
       ],
-      "fieldConfig": {"defaults": {"unit": "s"}}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
     },
     {
       "id": 4,
       "title": "Root Filesystem Usage",
       "type": "stat",
-      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 5},
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 5
+      },
       "targets": [
         {
           "expr": "100 * (node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"} - node_filesystem_free_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"}) / node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"tmpfs\"}",
@@ -116,9 +172,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 80, "color": "yellow"},
-              {"value": 90, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "yellow"
+              },
+              {
+                "value": 90,
+                "color": "red"
+              }
             ]
           }
         }
@@ -128,7 +193,12 @@
       "id": 5,
       "title": "RAM Usage",
       "type": "stat",
-      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 5},
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 5
+      },
       "targets": [
         {
           "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))",
@@ -141,9 +211,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 80, "color": "yellow"},
-              {"value": 90, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "yellow"
+              },
+              {
+                "value": 90,
+                "color": "red"
+              }
             ]
           }
         }
@@ -153,14 +232,27 @@
       "type": "row",
       "title": "CPU Metrics",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      }
     },
     {
       "type": "stat",
       "title": "CPU Usage",
-      "gridPos": {"h": 3, "w": 4, "x": 0, "y": 10},
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 10
+      },
       "targets": [
-        {"expr": "node:cpu_usage_percent:avg", "legendFormat": "CPU Usage"}
+        {
+          "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+          "legendFormat": "CPU Usage"
+        }
       ],
       "fieldConfig": {
         "defaults": {
@@ -170,9 +262,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 70, "color": "yellow"},
-              {"value": 90, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 70,
+                "color": "yellow"
+              },
+              {
+                "value": 90,
+                "color": "red"
+              }
             ]
           }
         }
@@ -181,10 +282,15 @@
     {
       "type": "timeseries",
       "title": "CPU Usage Over Time",
-      "gridPos": {"h": 8, "w": 12, "x": 4, "y": 10},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 4,
+        "y": 10
+      },
       "targets": [
         {
-          "expr": "node:cpu_usage_percent:avg",
+          "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
           "legendFormat": "CPU Usage"
         }
       ],
@@ -199,11 +305,25 @@
     {
       "type": "timeseries",
       "title": "CPU Load Average",
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 10},
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 10
+      },
       "targets": [
-        {"expr": "node_load1 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})", "legendFormat": "1m"},
-        {"expr": "node_load5 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})", "legendFormat": "5m"},
-        {"expr": "node_load15 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})", "legendFormat": "15m"}
+        {
+          "expr": "node_load1 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})",
+          "legendFormat": "1m"
+        },
+        {
+          "expr": "node_load5 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})",
+          "legendFormat": "5m"
+        },
+        {
+          "expr": "node_load15 / count without (cpu,mode)(node_cpu_seconds_total{mode=\"idle\"})",
+          "legendFormat": "15m"
+        }
       ],
       "fieldConfig": {
         "defaults": {
@@ -216,15 +336,16 @@
     {
       "type": "timeseries",
       "title": "CPU Pressure",
-      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 18},
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
       "targets": [
         {
-          "expr": "rate(node_pressure_cpu_waiting_seconds_total{type=\"some\"}[5m]) * 100",
+          "expr": "rate(node_pressure_cpu_waiting_seconds_total[5m]) * 100",
           "legendFormat": "Some processes waiting"
-        },
-        {
-          "expr": "rate(node_pressure_cpu_waiting_seconds_total{type=\"full\"}[5m]) * 100",
-          "legendFormat": "All processes blocked"
         }
       ],
       "fieldConfig": {
@@ -239,14 +360,19 @@
     {
       "type": "timeseries",
       "title": "Memory Pressure",
-      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 18},
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
       "targets": [
         {
-          "expr": "rate(node_pressure_memory_waiting_seconds_total{type=\"some\"}[5m]) * 100",
+          "expr": "rate(node_pressure_memory_waiting_seconds_total[5m]) * 100",
           "legendFormat": "Some processes waiting"
         },
         {
-          "expr": "rate(node_pressure_memory_waiting_seconds_total{type=\"full\"}[5m]) * 100",
+          "expr": "rate(node_pressure_memory_stalled_seconds_total[5m]) * 100",
           "legendFormat": "All processes blocked"
         }
       ],
@@ -259,9 +385,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 1, "color": "yellow"},
-              {"value": 10, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 1,
+                "color": "yellow"
+              },
+              {
+                "value": 10,
+                "color": "red"
+              }
             ]
           }
         }
@@ -271,12 +406,22 @@
       "type": "row",
       "title": "Memory Metrics",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 24}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      }
     },
     {
       "type": "timeseries",
       "title": "Memory Usage Breakdown",
-      "gridPos": {"h": 8, "w": 16, "x": 0, "y": 25},
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 25
+      },
       "targets": [
         {
           "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
@@ -300,7 +445,9 @@
           "unit": "bytes",
           "custom": {
             "fillOpacity": 10,
-            "stacking": {"mode": "normal"}
+            "stacking": {
+              "mode": "normal"
+            }
           }
         }
       }
@@ -308,10 +455,21 @@
     {
       "type": "timeseries",
       "title": "Swap Usage",
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 25},
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 25
+      },
       "targets": [
-        {"expr": "node_swap_used_bytes", "legendFormat": "Used"},
-        {"expr": "node_swap_free_bytes", "legendFormat": "Free"}
+        {
+          "expr": "node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "node_memory_SwapFree_bytes",
+          "legendFormat": "Free"
+        }
       ],
       "fieldConfig": {
         "defaults": {
@@ -326,12 +484,22 @@
       "type": "row",
       "title": "Storage and Disk Metrics",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      }
     },
     {
       "type": "timeseries",
       "title": "Disk Space Usage",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 34},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
       "targets": [
         {
           "expr": "100 * (node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"} - node_filesystem_free_bytes{fstype!~\"tmpfs|overlay\"}) / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"}",
@@ -346,9 +514,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 80, "color": "yellow"},
-              {"value": 90, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "yellow"
+              },
+              {
+                "value": 90,
+                "color": "red"
+              }
             ]
           }
         }
@@ -357,7 +534,12 @@
     {
       "type": "timeseries",
       "title": "Inode Usage",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 34},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
       "targets": [
         {
           "expr": "(1 - node_filesystem_files_free{fstype!~\"tmpfs|overlay\"} / node_filesystem_files{fstype!~\"tmpfs|overlay\"}) * 100",
@@ -372,9 +554,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 80, "color": "yellow"},
-              {"value": 90, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "yellow"
+              },
+              {
+                "value": 90,
+                "color": "red"
+              }
             ]
           }
         }
@@ -383,10 +574,21 @@
     {
       "type": "timeseries",
       "title": "Disk IO Operations",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 42},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 42
+      },
       "targets": [
-        {"expr": "rate(node_disk_reads_completed_total[5m])", "legendFormat": "{{device}} reads"},
-        {"expr": "rate(node_disk_writes_completed_total[5m])", "legendFormat": "{{device}} writes"}
+        {
+          "expr": "rate(node_disk_reads_completed_total[5m])",
+          "legendFormat": "{{device}} reads"
+        },
+        {
+          "expr": "rate(node_disk_writes_completed_total[5m])",
+          "legendFormat": "{{device}} writes"
+        }
       ],
       "fieldConfig": {
         "defaults": {
@@ -397,14 +599,19 @@
     {
       "type": "timeseries",
       "title": "IO Pressure",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 42},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
       "targets": [
         {
-          "expr": "rate(node_pressure_io_waiting_seconds_total{type=\"some\"}[5m]) * 100",
+          "expr": "rate(node_pressure_io_waiting_seconds_total[5m]) * 100",
           "legendFormat": "Some processes waiting"
         },
         {
-          "expr": "rate(node_pressure_io_waiting_seconds_total{type=\"full\"}[5m]) * 100",
+          "expr": "rate(node_pressure_io_stalled_seconds_total[5m]) * 100",
           "legendFormat": "All processes blocked"
         }
       ],
@@ -417,9 +624,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 5, "color": "yellow"},
-              {"value": 20, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 5,
+                "color": "yellow"
+              },
+              {
+                "value": 20,
+                "color": "red"
+              }
             ]
           }
         }
@@ -429,12 +645,22 @@
       "type": "row",
       "title": "Network Metrics",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 50}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      }
     },
     {
       "type": "stat",
       "title": "Network In",
-      "gridPos": {"h": 3, "w": 6, "x": 0, "y": 51},
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 51
+      },
       "targets": [
         {
           "expr": "sum(rate(node_network_receive_bytes_total[5m]))",
@@ -451,7 +677,12 @@
     {
       "type": "stat",
       "title": "Network Out",
-      "gridPos": {"h": 3, "w": 6, "x": 6, "y": 51},
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 51
+      },
       "targets": [
         {
           "expr": "sum(rate(node_network_transmit_bytes_total[5m]))",
@@ -468,10 +699,21 @@
     {
       "type": "timeseries",
       "title": "Network Traffic",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 51},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 51
+      },
       "targets": [
-        {"expr": "rate(node_network_receive_bytes_total[5m])", "legendFormat": "{{device}} rx"},
-        {"expr": "rate(node_network_transmit_bytes_total[5m])", "legendFormat": "{{device}} tx"}
+        {
+          "expr": "rate(node_network_receive_bytes_total[5m])",
+          "legendFormat": "{{device}} rx"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total[5m])",
+          "legendFormat": "{{device}} tx"
+        }
       ],
       "fieldConfig": {
         "defaults": {
@@ -486,14 +728,27 @@
       "type": "row",
       "title": "Hardware and System Info",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 59}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      }
     },
     {
       "type": "timeseries",
       "title": "Temperature Sensors",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 60},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      },
       "targets": [
-        {"expr": "node_hwmon_temp_celsius", "legendFormat": "{{sensor}} {{chip}}"}
+        {
+          "expr": "node_hwmon_temp_celsius",
+          "legendFormat": "{{sensor}} {{chip}}"
+        }
       ],
       "fieldConfig": {
         "defaults": {
@@ -501,10 +756,22 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "blue"},
-              {"value": 60, "color": "green"},
-              {"value": 75, "color": "yellow"},
-              {"value": 85, "color": "red"}
+              {
+                "value": 0,
+                "color": "blue"
+              },
+              {
+                "value": 60,
+                "color": "green"
+              },
+              {
+                "value": 75,
+                "color": "yellow"
+              },
+              {
+                "value": 85,
+                "color": "red"
+              }
             ]
           }
         }
@@ -513,7 +780,12 @@
     {
       "type": "timeseries",
       "title": "Systemd Failed Units",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 60},
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 60
+      },
       "targets": [
         {
           "expr": "node_systemd_units{state=\"failed\"}",
@@ -525,8 +797,14 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"value": 0, "color": "green"},
-              {"value": 1, "color": "red"}
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 1,
+                "color": "red"
+              }
             ]
           }
         }
@@ -536,12 +814,22 @@
       "type": "row",
       "title": "Service Monitoring",
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 68}
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 68
+      }
     },
     {
       "type": "status-history",
       "title": "Service Uptime History",
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 69},
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 69
+      },
       "targets": [
         {
           "expr": "up{job!~\"prometheus|node\"}",
@@ -566,7 +854,12 @@
     {
       "type": "timeseries",
       "title": "Alert History",
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 77},
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 77
+      },
       "targets": [
         {
           "expr": "count by (severity) (ALERTS{alertstate=\"firing\"})",
@@ -583,12 +876,34 @@
         },
         "overrides": [
           {
-            "matcher": {"id": "byName", "options": "critical"},
-            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
+            "matcher": {
+              "id": "byName",
+              "options": "critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
           },
           {
-            "matcher": {"id": "byName", "options": "warning"},
-            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]
+            "matcher": {
+              "id": "byName",
+              "options": "warning"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
           }
         ]
       }
@@ -597,13 +912,23 @@
       "type": "row",
       "title": "Maintenance Checklists",
       "collapsed": true,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 85},
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 85
+      },
       "panels": [
         {
           "id": 501,
           "title": "Weekly Summary",
           "type": "text",
-          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 86},
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 86
+          },
           "options": {
             "mode": "markdown",
             "content": "# Weekly Tasks\n\n## Critical\n- [ ] Review all Prometheus alerts\n- [ ] Check backup completion\n- [ ] Verify storage pool health\n- [ ] Inspect certificate expiry\n- [ ] Review system logs\n\n## Routine\n- [ ] Check service status dashboard\n- [ ] Monitor resource utilization trends\n- [ ] Review network connectivity\n\n---\n**Last completed:** _[Manual entry]_"
@@ -613,7 +938,12 @@
           "id": 502,
           "title": "Monthly Summary",
           "type": "text",
-          "gridPos": {"h": 8, "w": 8, "x": 8, "y": 86},
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 86
+          },
           "options": {
             "mode": "markdown",
             "content": "# Monthly Tasks\n\n## System Updates\n- [ ] Apply NixOS updates\n- [ ] Update firmware\n- [ ] Review kernel changes\n\n## Storage\n- [ ] Run ZFS/Btrfs scrub\n- [ ] Test backup restore\n- [ ] Verify snapshot retention\n\n## Security\n- [ ] Audit firewall rules\n- [ ] Review SSH access logs\n- [ ] Rotate credentials\n- [ ] Check fail2ban effectiveness\n\n## Database\n- [ ] Run vacuum/analyze\n- [ ] Check index bloat\n\n---\n**Last completed:** _[Manual entry]_"
@@ -623,7 +953,12 @@
           "id": 503,
           "title": "Quarterly Summary",
           "type": "text",
-          "gridPos": {"h": 8, "w": 8, "x": 16, "y": 86},
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 86
+          },
           "options": {
             "mode": "markdown",
             "content": "# Quarterly Tasks\n\n## Hardware\n- [ ] Deep hardware cleaning\n- [ ] RAID consistency check\n- [ ] Replace aging components\n\n## Disaster Recovery\n- [ ] DR rehearsal/test\n- [ ] Update recovery playbooks\n- [ ] Test cold site backups\n\n## Security\n- [ ] Full access audit\n- [ ] Network device scan\n- [ ] Review security baselines\n- [ ] License compliance check\n\n## Documentation\n- [ ] Update network map\n- [ ] Review service inventory\n- [ ] Update runbooks\n\n---\n**Last completed:** _[Manual entry]_"
