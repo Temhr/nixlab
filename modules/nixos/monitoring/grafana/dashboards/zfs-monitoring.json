@@ -10,7 +10,7 @@
   "timezone": "browser",
   "schemaVersion": 36,
   "editable": true,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "style": "dark",
   "time": {
@@ -20,11 +20,11 @@
   "templating": {
     "list": [
       {
-        "name": "pool",
+        "name": "zpool",
         "type": "query",
         "label": "ZFS Pool",
         "datasource": null,
-        "query": "label_values(node_zfs_zpool_size_bytes, pool)",
+        "query": "label_values(node_zfs_zpool_reads, zpool)",
         "refresh": 2,
         "includeAll": true,
         "multi": false,
@@ -34,22 +34,22 @@
   },
   "panels": [
     {
+      "id": 1,
       "type": "row",
-      "title": "\ud83c\udfca Pool Health Overview",
+      "title": "\ud83c\udfca Pool State",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
-      },
-      "id": 100
+      }
     },
     {
-      "id": 1,
+      "id": 2,
       "type": "stat",
       "title": "Pool State",
-      "description": "0=ONLINE, 1=DEGRADED, 2=FAULTED, 3=OFFLINE, 4=UNAVAIL, 5=REMOVED",
+      "description": "Shows 1 for the active state. Green=online, Orange=degraded, Red=faulted/unavail.",
       "gridPos": {
         "h": 4,
         "w": 4,
@@ -58,69 +58,13 @@
       },
       "targets": [
         {
-          "expr": "node_zfs_zpool_state{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
+          "expr": "node_zfs_pool_state{pool=~\"$zpool\"}",
+          "legendFormat": "{{pool}} - {{state}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "ONLINE",
-                  "color": "green"
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "1": {
-                  "text": "DEGRADED",
-                  "color": "orange"
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "2": {
-                  "text": "FAULTED",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "3": {
-                  "text": "OFFLINE",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "4": {
-                  "text": "UNAVAIL",
-                  "color": "red"
-                }
-              }
-            },
-            {
-              "type": "value",
-              "options": {
-                "5": {
-                  "text": "REMOVED",
-                  "color": "red"
-                }
-              }
-            }
-          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -130,18 +74,78 @@
               },
               {
                 "value": 1,
-                "color": "orange"
-              },
-              {
-                "value": 2,
-                "color": "red"
+                "color": "green"
               }
             ]
           },
-          "color": {
-            "mode": "thresholds"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "inactive",
+                  "color": "text"
+                }
+              }
+            },
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "ACTIVE",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "online - 1"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "degraded.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "(faulted|unavail|offline|removed|suspended).*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
-        }
+        ]
       },
       "options": {
         "colorMode": "background",
@@ -150,235 +154,130 @@
       }
     },
     {
-      "id": 2,
-      "type": "stat",
-      "title": "Pool Size",
+      "id": 3,
+      "type": "timeseries",
+      "title": "Pool State History",
+      "description": "Value=1 means the pool was in that state. Watch for degraded/faulted appearing.",
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 20,
         "x": 4,
         "y": 1
       },
       "targets": [
         {
-          "expr": "node_zfs_zpool_size_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "blue"
-          }
-        }
-      }
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "Space Used",
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 8,
-        "y": 1
-      },
-      "targets": [
+          "expr": "node_zfs_pool_state{pool=~\"$zpool\", state=\"online\"}",
+          "legendFormat": "{{pool}} online"
+        },
         {
-          "expr": "node_zfs_zpool_allocated_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "value": 0,
-                "color": "green"
-              },
-              {
-                "value": 70,
-                "color": "yellow"
-              },
-              {
-                "value": 85,
-                "color": "orange"
-              },
-              {
-                "value": 95,
-                "color": "red"
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        }
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Space Free",
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 12,
-        "y": 1
-      },
-      "targets": [
+          "expr": "node_zfs_pool_state{pool=~\"$zpool\", state=\"degraded\"}",
+          "legendFormat": "{{pool}} degraded"
+        },
         {
-          "expr": "node_zfs_zpool_free_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        }
-      }
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "Fragmentation",
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 16,
-        "y": 1
-      },
-      "targets": [
+          "expr": "node_zfs_pool_state{pool=~\"$zpool\", state=\"faulted\"}",
+          "legendFormat": "{{pool}} faulted"
+        },
         {
-          "expr": "node_zfs_zpool_fragmentation{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percentunit",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": 0,
-                "color": "green"
-              },
-              {
-                "value": 0.3,
-                "color": "yellow"
-              },
-              {
-                "value": 0.6,
-                "color": "red"
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        }
-      }
-    },
-    {
-      "id": 6,
-      "type": "stat",
-      "title": "Dedup Ratio",
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 1
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_zpool_dedupratio{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
+          "expr": "node_zfs_pool_state{pool=~\"$zpool\", state=\"suspended\"}",
+          "legendFormat": "{{pool}} suspended"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "decimals": 2
-        }
-      }
-    },
-    {
-      "id": 7,
-      "type": "gauge",
-      "title": "Pool Space Usage %",
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 5
-      },
-      "targets": [
-        {
-          "expr": "100 * node_zfs_zpool_allocated_bytes{pool=~\"$pool\"} / node_zfs_zpool_size_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
           "min": 0,
-          "max": 100,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "max": 1
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "online"
+            },
+            "properties": [
               {
-                "value": 0,
-                "color": "green"
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "solid"
+                }
               },
               {
-                "value": 70,
-                "color": "yellow"
-              },
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "degraded"
+            },
+            "properties": [
               {
-                "value": 85,
-                "color": "orange"
-              },
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "(faulted|suspended)"
+            },
+            "properties": [
               {
-                "value": 95,
-                "color": "red"
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
               }
             ]
           }
-        }
-      },
-      "options": {
-        "showThresholdMarkers": true
+        ]
       }
     },
     {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Pool Space Over Time",
+      "id": 4,
+      "type": "row",
+      "title": "\u26a1 Pool I/O Performance",
+      "collapsed": false,
       "gridPos": {
-        "h": 6,
-        "w": 18,
-        "x": 6,
+        "h": 1,
+        "w": 24,
+        "x": 0,
         "y": 5
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Pool IOPS (reads/writes per second)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
       },
       "targets": [
         {
-          "expr": "node_zfs_zpool_allocated_bytes{pool=~\"$pool\"}",
-          "legendFormat": "Used {{pool}}"
+          "expr": "rate(node_zfs_zpool_reads{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Reads {{zpool}}"
         },
         {
-          "expr": "node_zfs_zpool_free_bytes{pool=~\"$pool\"}",
-          "legendFormat": "Free {{pool}}"
+          "expr": "rate(node_zfs_zpool_writes{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Writes {{zpool}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes"
+          "unit": "iops"
         }
       },
       "options": {
@@ -388,146 +287,123 @@
       }
     },
     {
-      "type": "row",
-      "title": "\u26a1 Pool I/O Performance",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 11
-      },
-      "id": 101
-    },
-    {
-      "id": 10,
+      "id": 6,
       "type": "timeseries",
-      "title": "Pool Read/Write Operations",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 12
-      },
-      "targets": [
-        {
-          "expr": "rate(node_zfs_zpool_reads_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Reads {{pool}}"
-        },
-        {
-          "expr": "rate(node_zfs_zpool_writes_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Writes {{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "iops"
-        }
-      }
-    },
-    {
-      "id": 11,
-      "type": "timeseries",
-      "title": "Pool Read/Write Bandwidth",
+      "title": "Pool Bandwidth (bytes/s)",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 6
       },
       "targets": [
         {
-          "expr": "rate(node_zfs_zpool_nread_bytes{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Read Bytes {{pool}}"
+          "expr": "rate(node_zfs_zpool_nread{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Read {{zpool}}"
         },
         {
-          "expr": "rate(node_zfs_zpool_nwritten_bytes{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Written Bytes {{pool}}"
+          "expr": "rate(node_zfs_zpool_nwritten{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Write {{zpool}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "Bps"
         }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
       }
     },
     {
-      "id": 12,
+      "id": 7,
       "type": "timeseries",
-      "title": "Pool Wait Times",
+      "title": "Pool Wait Time (ns/s \u2014 proxy for latency)",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 14
       },
       "targets": [
         {
-          "expr": "rate(node_zfs_zpool_read_wait_ns{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Read Wait {{pool}}"
+          "expr": "rate(node_zfs_zpool_wtime{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Write Wait ns/s {{zpool}}"
         },
         {
-          "expr": "rate(node_zfs_zpool_write_wait_ns{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Write Wait {{pool}}"
+          "expr": "rate(node_zfs_zpool_rtime{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Read Wait ns/s {{zpool}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "ns"
         }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
       }
     },
     {
-      "id": 13,
+      "id": 8,
       "type": "timeseries",
-      "title": "Pool Sync Waits",
+      "title": "Pool Queue Depth",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 14
       },
       "targets": [
         {
-          "expr": "rate(node_zfs_zpool_sync_reads_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Sync Reads {{pool}}"
+          "expr": "node_zfs_zpool_wcnt{zpool=~\"$zpool\"}",
+          "legendFormat": "Write Queue {{zpool}}"
         },
         {
-          "expr": "rate(node_zfs_zpool_sync_writes_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Sync Writes {{pool}}"
+          "expr": "node_zfs_zpool_rcnt{zpool=~\"$zpool\"}",
+          "legendFormat": "Read Queue {{zpool}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "iops"
+          "unit": "short"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
         }
       }
     },
     {
+      "id": 9,
       "type": "row",
-      "title": "\ud83e\udde0 ARC Cache",
+      "title": "\ud83e\udde0 ARC (Adaptive Replacement Cache)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
-      },
-      "id": 102
+        "y": 22
+      }
     },
     {
-      "id": 20,
+      "id": 10,
       "type": "stat",
-      "title": "ARC Size",
+      "title": "ARC Current Size",
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 29
+        "y": 23
       },
       "targets": [
         {
-          "expr": "node_zfs_arc_size_bytes",
+          "expr": "node_zfs_arcstats_size_bytes",
           "legendFormat": "ARC Size"
         }
       ],
@@ -538,18 +414,62 @@
       }
     },
     {
-      "id": 21,
+      "id": 11,
+      "type": "stat",
+      "title": "ARC Max Size",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 23
+      },
+      "targets": [
+        {
+          "expr": "node_zfs_arcstats_c_max_bytes",
+          "legendFormat": "ARC Max"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "ARC Min Size",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 23
+      },
+      "targets": [
+        {
+          "expr": "node_zfs_arcstats_c_min_bytes",
+          "legendFormat": "ARC Min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 13,
       "type": "gauge",
       "title": "ARC Hit Ratio",
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 4,
-        "y": 29
+        "x": 12,
+        "y": 23
       },
       "targets": [
         {
-          "expr": "rate(node_zfs_arc_hits_total[5m]) / (rate(node_zfs_arc_hits_total[5m]) + rate(node_zfs_arc_misses_total[5m])) * 100",
+          "expr": "rate(node_zfs_arcstats_hits_total[5m]) / (rate(node_zfs_arcstats_hits_total[5m]) + rate(node_zfs_arcstats_misses_total[5m])) * 100",
           "legendFormat": "Hit Ratio"
         }
       ],
@@ -576,115 +496,24 @@
             ]
           }
         }
+      },
+      "options": {
+        "showThresholdMarkers": true
       }
     },
     {
-      "id": 22,
+      "id": 14,
       "type": "stat",
-      "title": "ARC Max Size",
+      "title": "ARC Data Size",
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 8,
-        "y": 29
+        "x": 16,
+        "y": 23
       },
       "targets": [
         {
-          "expr": "node_zfs_arc_max_size_bytes",
-          "legendFormat": "ARC Max"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        }
-      }
-    },
-    {
-      "id": 23,
-      "type": "stat",
-      "title": "ARC Min Size",
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 12,
-        "y": 29
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_arc_min_size_bytes",
-          "legendFormat": "ARC Min"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        }
-      }
-    },
-    {
-      "id": 24,
-      "type": "timeseries",
-      "title": "ARC Hits vs Misses",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 33
-      },
-      "targets": [
-        {
-          "expr": "rate(node_zfs_arc_hits_total[5m])",
-          "legendFormat": "Hits"
-        },
-        {
-          "expr": "rate(node_zfs_arc_misses_total[5m])",
-          "legendFormat": "Misses"
-        },
-        {
-          "expr": "rate(node_zfs_arc_demand_data_hits_total[5m])",
-          "legendFormat": "Demand Data Hits"
-        },
-        {
-          "expr": "rate(node_zfs_arc_prefetch_data_hits_total[5m])",
-          "legendFormat": "Prefetch Hits"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops"
-        }
-      }
-    },
-    {
-      "id": 25,
-      "type": "timeseries",
-      "title": "ARC Size Over Time",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 33
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_arc_size_bytes",
-          "legendFormat": "ARC Size"
-        },
-        {
-          "expr": "node_zfs_arc_max_size_bytes",
-          "legendFormat": "ARC Max"
-        },
-        {
-          "expr": "node_zfs_arc_min_size_bytes",
-          "legendFormat": "ARC Min"
-        },
-        {
-          "expr": "node_zfs_arc_metadata_size_bytes",
-          "legendFormat": "Metadata"
-        },
-        {
-          "expr": "node_zfs_arc_data_size_bytes",
+          "expr": "node_zfs_arcstats_data_bytes",
           "legendFormat": "Data"
         }
       ],
@@ -695,237 +524,19 @@
       }
     },
     {
-      "type": "row",
-      "title": "\ud83d\udee1\ufe0f Data Integrity & Errors",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 41
-      },
-      "id": 103
-    },
-    {
-      "id": 30,
+      "id": 15,
       "type": "stat",
-      "title": "Checksum Errors",
-      "description": "Non-zero means data corruption detected. Investigate immediately.",
+      "title": "ARC Metadata Size",
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 42
+        "w": 4,
+        "x": 20,
+        "y": 23
       },
       "targets": [
         {
-          "expr": "node_zfs_zpool_checksum_errors_total{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": 0,
-                "color": "green"
-              },
-              {
-                "value": 1,
-                "color": "red"
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        }
-      },
-      "options": {
-        "colorMode": "background"
-      }
-    },
-    {
-      "id": 31,
-      "type": "stat",
-      "title": "Read Errors",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 42
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_zpool_read_errors_total{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": 0,
-                "color": "green"
-              },
-              {
-                "value": 1,
-                "color": "red"
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        }
-      },
-      "options": {
-        "colorMode": "background"
-      }
-    },
-    {
-      "id": 32,
-      "type": "stat",
-      "title": "Write Errors",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 42
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_zpool_write_errors_total{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": 0,
-                "color": "green"
-              },
-              {
-                "value": 1,
-                "color": "red"
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        }
-      },
-      "options": {
-        "colorMode": "background"
-      }
-    },
-    {
-      "id": 33,
-      "type": "stat",
-      "title": "Scrub Repaired Bytes",
-      "description": "Bytes repaired during last scrub. Non-zero means errors were found and corrected.",
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 42
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_zpool_scrub_repaired_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "value": 0,
-                "color": "green"
-              },
-              {
-                "value": 1,
-                "color": "orange"
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        }
-      }
-    },
-    {
-      "id": 34,
-      "type": "timeseries",
-      "title": "Pool Errors Over Time",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 46
-      },
-      "targets": [
-        {
-          "expr": "rate(node_zfs_zpool_checksum_errors_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Checksum Errors {{pool}}"
-        },
-        {
-          "expr": "rate(node_zfs_zpool_read_errors_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Read Errors {{pool}}"
-        },
-        {
-          "expr": "rate(node_zfs_zpool_write_errors_total{pool=~\"$pool\"}[5m])",
-          "legendFormat": "Write Errors {{pool}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short"
-        }
-      },
-      "options": {
-        "custom": {
-          "drawStyle": "bars"
-        }
-      }
-    },
-    {
-      "id": 35,
-      "type": "timeseries",
-      "title": "Scrub Progress",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 46
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_zpool_scrub_examined_bytes{pool=~\"$pool\"}",
-          "legendFormat": "Examined {{pool}}"
-        },
-        {
-          "expr": "node_zfs_zpool_scrub_repaired_bytes{pool=~\"$pool\"}",
-          "legendFormat": "Repaired {{pool}}"
-        },
-        {
-          "expr": "node_zfs_zpool_scrub_errors_total{pool=~\"$pool\"}",
-          "legendFormat": "Errors {{pool}}"
+          "expr": "node_zfs_arcstats_metadata_size_bytes",
+          "legendFormat": "Metadata"
         }
       ],
       "fieldConfig": {
@@ -935,85 +546,290 @@
       }
     },
     {
-      "type": "row",
-      "title": "\ud83d\udd04 Resilver & Rebuild",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 54
-      },
-      "id": 104
-    },
-    {
-      "id": 40,
+      "id": 16,
       "type": "timeseries",
-      "title": "Resilver Progress",
-      "description": "Active during disk replacement. Shows bytes examined vs to-scan.",
+      "title": "ARC Hits vs Misses",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 55
+        "y": 27
       },
       "targets": [
         {
-          "expr": "node_zfs_zpool_resilver_examined_bytes{pool=~\"$pool\"}",
-          "legendFormat": "Examined {{pool}}"
+          "expr": "rate(node_zfs_arcstats_hits_total[5m])",
+          "legendFormat": "Hits"
         },
         {
-          "expr": "node_zfs_zpool_resilver_to_examine_bytes{pool=~\"$pool\"}",
-          "legendFormat": "To Examine {{pool}}"
+          "expr": "rate(node_zfs_arcstats_misses_total[5m])",
+          "legendFormat": "Misses"
+        },
+        {
+          "expr": "rate(node_zfs_arcstats_demand_data_hits_total[5m])",
+          "legendFormat": "Demand Data Hits"
+        },
+        {
+          "expr": "rate(node_zfs_arcstats_demand_data_misses_total[5m])",
+          "legendFormat": "Demand Data Misses"
+        },
+        {
+          "expr": "rate(node_zfs_arcstats_prefetch_data_hits_total[5m])",
+          "legendFormat": "Prefetch Hits"
+        },
+        {
+          "expr": "rate(node_zfs_arcstats_prefetch_data_misses_total[5m])",
+          "legendFormat": "Prefetch Misses"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "ARC Size Over Time",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "targets": [
+        {
+          "expr": "node_zfs_arcstats_size_bytes",
+          "legendFormat": "Total ARC"
+        },
+        {
+          "expr": "node_zfs_arcstats_c_max_bytes",
+          "legendFormat": "Max (c_max)"
+        },
+        {
+          "expr": "node_zfs_arcstats_c_min_bytes",
+          "legendFormat": "Min (c_min)"
+        },
+        {
+          "expr": "node_zfs_arcstats_data_bytes",
+          "legendFormat": "Data"
+        },
+        {
+          "expr": "node_zfs_arcstats_metadata_size_bytes",
+          "legendFormat": "Metadata"
+        },
+        {
+          "expr": "node_zfs_arcstats_anon_size_bytes",
+          "legendFormat": "Anon"
+        },
+        {
+          "expr": "node_zfs_arcstats_mru_size_bytes",
+          "legendFormat": "MRU"
+        },
+        {
+          "expr": "node_zfs_arcstats_mfu_size_bytes",
+          "legendFormat": "MFU"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "bytes"
         }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
       }
     },
     {
-      "id": 41,
-      "type": "stat",
-      "title": "Resilver Speed",
+      "id": 18,
+      "type": "row",
+      "title": "\ud83d\udcdd ZIL (ZFS Intent Log)",
+      "collapsed": false,
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 55
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      }
+    },
+    {
+      "id": 19,
+      "type": "timeseries",
+      "title": "ZIL Commit Rate",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 36
       },
       "targets": [
         {
-          "expr": "rate(node_zfs_zpool_resilver_examined_bytes{pool=~\"$pool\"}[5m])",
-          "legendFormat": "{{pool}}"
+          "expr": "rate(node_zfs_zil_zil_itx_count_total[5m])",
+          "legendFormat": "Transactions/s"
+        },
+        {
+          "expr": "rate(node_zfs_zil_zil_commit_count_total[5m])",
+          "legendFormat": "Commits/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "ZIL Write Bytes",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "targets": [
+        {
+          "expr": "rate(node_zfs_zil_zil_itx_write_bytes_total[5m])",
+          "legendFormat": "Write Bytes/s"
+        },
+        {
+          "expr": "rate(node_zfs_zil_zil_itx_copied_bytes_total[5m])",
+          "legendFormat": "Copied Bytes/s"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "Bps"
         }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
       }
     },
     {
-      "id": 42,
-      "type": "stat",
-      "title": "Resilver Errors",
+      "id": 21,
+      "type": "row",
+      "title": "\ud83d\udcc1 Dataset I/O (per-dataset)",
+      "collapsed": false,
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 55
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      }
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Dataset Read/Write Ops",
+      "description": "Per-dataset I/O from /proc/spl/kstat/zfs/POOL/objset-*. Label 'dataset' shows the dataset path.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 45
       },
       "targets": [
         {
-          "expr": "node_zfs_zpool_resilver_errors_total{pool=~\"$pool\"}",
-          "legendFormat": "{{pool}}"
+          "expr": "rate(node_zfs_zpool_dataset_reads_total{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Reads {{dataset}}"
+        },
+        {
+          "expr": "rate(node_zfs_zpool_dataset_writes_total{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Writes {{dataset}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "unit": "iops"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "Dataset Read/Write Bytes",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 45
+      },
+      "targets": [
+        {
+          "expr": "rate(node_zfs_zpool_dataset_nread_bytes_total{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Read {{dataset}}"
+        },
+        {
+          "expr": "rate(node_zfs_zpool_dataset_nwritten_bytes_total{zpool=~\"$zpool\"}[5m])",
+          "legendFormat": "Write {{dataset}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 24,
+      "type": "row",
+      "title": "\ud83d\udcbe Disk Space (via filesystem metrics)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      }
+    },
+    {
+      "id": 25,
+      "type": "timeseries",
+      "title": "ZFS Dataset Mounted Space Usage",
+      "description": "Uses node_filesystem_* metrics. Only shows ZFS datasets that are mounted. Filters fstype=zfs.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 54
+      },
+      "targets": [
+        {
+          "expr": "100 * (node_filesystem_size_bytes{fstype=\"zfs\"} - node_filesystem_avail_bytes{fstype=\"zfs\"}) / node_filesystem_size_bytes{fstype=\"zfs\"}",
+          "legendFormat": "Used% {{mountpoint}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1022,73 +838,51 @@
                 "color": "green"
               },
               {
-                "value": 1,
+                "value": 70,
+                "color": "yellow"
+              },
+              {
+                "value": 85,
+                "color": "orange"
+              },
+              {
+                "value": 95,
                 "color": "red"
               }
             ]
-          },
-          "color": {
-            "mode": "thresholds"
           }
         }
-      },
-      "options": {
-        "colorMode": "background"
       }
     },
     {
-      "type": "row",
-      "title": "\ud83d\udcc1 Dataset Metrics",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 63
-      },
-      "id": 105
-    },
-    {
-      "id": 50,
+      "id": 26,
       "type": "timeseries",
-      "title": "Dataset Used Space",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 64
-      },
-      "targets": [
-        {
-          "expr": "node_zfs_dataset_used_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{dataset}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        }
-      }
-    },
-    {
-      "id": 51,
-      "type": "timeseries",
-      "title": "Dataset Available Space",
+      "title": "ZFS Dataset Free Space",
+      "description": "Free bytes per mounted ZFS dataset.",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 64
+        "y": 54
       },
       "targets": [
         {
-          "expr": "node_zfs_dataset_available_bytes{pool=~\"$pool\"}",
-          "legendFormat": "{{dataset}}"
+          "expr": "node_filesystem_avail_bytes{fstype=\"zfs\"}",
+          "legendFormat": "Free {{mountpoint}}"
+        },
+        {
+          "expr": "node_filesystem_size_bytes{fstype=\"zfs\"}",
+          "legendFormat": "Total {{mountpoint}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "bytes"
+        }
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
         }
       }
     }
