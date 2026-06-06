@@ -155,6 +155,16 @@
               folder = "maintenance";
               editable = true;
             };
+            system-overview-v3 = {
+              path = ./dashboards/system-overview-v3.json;
+              folder = "maintenance";
+              editable = true;
+            };
+            zfs-monitoring = {
+              path = ./dashboards/zfs-monitoring.json;
+              folder = "maintenance";
+              editable = true;
+            };
           };
           description = ''
             Dashboards to provision. Each dashboard needs a unique name.
