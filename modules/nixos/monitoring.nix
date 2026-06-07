@@ -96,7 +96,7 @@
         openFirewall = cfg.openFirewall;
       } // lib.optionalAttrs cfg.zfs.enable {
         extraDashboards.zfs-monitoring = {
-          path = ./dashboards/zfs-monitoring.json;
+          path = ./grafana/dashboards/zfs-monitoring.json;
           folder = "maintenance";
           editable = true;
         };
