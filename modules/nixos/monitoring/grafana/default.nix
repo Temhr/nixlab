@@ -150,11 +150,6 @@
               folder = "maintenance";
               editable = true;
             };
-            system-overview-v2 = {
-              path = ./dashboards/system-overview-v2.json;
-              folder = "maintenance";
-              editable = true;
-            };
             system-overview-v3 = {
               path = ./dashboards/system-overview-v3.json;
               folder = "maintenance";
