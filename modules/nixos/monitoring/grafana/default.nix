@@ -200,11 +200,12 @@
       # Guard: catch unknown dashboard names before anything tries to run.
       assertions = [
         {
-          assertion = builtins.all (
-            name:
-              builtins.pathExists "${dashboardsDir}/${name}.json"
-          )
-          cfg.extraDashboards;
+          assertion =
+            builtins.all (
+              name:
+                builtins.pathExists "${dashboardsDir}/${name}.json"
+            )
+            cfg.extraDashboards;
           message = let
             missing =
               builtins.filter (
