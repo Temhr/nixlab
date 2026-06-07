@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hosts--c-optional--education = {
+  flake.nixosModules.hosts--c-opt--education = {
     config,
     lib,
     pkgs,

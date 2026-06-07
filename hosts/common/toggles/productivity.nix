@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hosts--c-optional--productivity = {
+  flake.nixosModules.hosts--c-opt--productivity = {
     config,
     lib,
     pkgs,

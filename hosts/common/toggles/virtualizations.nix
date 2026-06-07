@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hosts--c-optional--virtualizations = {
+  flake.nixosModules.hosts--c-opt--virtualizations = {
     config,
     lib,
     pkgs,

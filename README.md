@@ -181,10 +181,10 @@ All NixOS modules are registered under `flake.nixosModules` using a nested names
 │   └───...
 ├───nixosModules
 │   ├───hardw--c-global: NixOS module
-│   ├───hardw--c-optional--driver-nvidia: NixOS module
+│   ├───hardw--c-opt--driver-nvidia: NixOS module
 │   ├───hardw--zb17g4-p5: NixOS module
 │   ├───hosts--c-global: NixOS module
-│   ├───hosts--c-optional--games: NixOS module
+│   ├───hosts--c-opt--games: NixOS module
 │   ├───hosts--nixace: NixOS module
 │   ├───servc--glance-nixlab: NixOS module
 │   ├───servc--grafana-nixlab: NixOS module
@@ -565,8 +565,8 @@ Adding a new host requires creating three self-registering files and one metadat
     imports = [
       self.nixosModules.hardw--c-global
       # Add optional hardware modules as needed:
-      # self.nixosModules.hardw--c-optional--driver-nvidia
-      # self.nixosModules.hardw--c-optional--mounts-extra
+      # self.nixosModules.hardw--c-opt--driver-nvidia
+      # self.nixosModules.hardw--c-opt--mounts-extra
     ];
 
     # Paste output from nixos-generate-config here:
@@ -600,8 +600,8 @@ Adding a new host requires creating three self-registering files and one metadat
       self.nixosModules.systm--cachix
       
       # Optional feature modules
-      self.nixosModules.hosts--c-optional--games
-      self.nixosModules.hosts--c-optional--media
+      self.nixosModules.hosts--c-opt--games
+      self.nixosModules.hosts--c-opt--media
       
       # Service modules (only those this host uses)
       self.nixosModules.servc--glance-nixlab

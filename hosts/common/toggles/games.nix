@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hosts--c-optional--games = {
+  flake.nixosModules.hosts--c-opt--games = {
     config,
     lib,
     ...

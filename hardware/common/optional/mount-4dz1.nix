@@ -1,12 +1,12 @@
 {self, ...}: {
-  flake.nixosModules.hardw--c-optional--mount-4dz1 = {
+  flake.nixosModules.hardw--c-opt--mount-4dz1 = {
     config,
     lib,
     pkgs,
     ...
   }: {
     imports = [
-      self.nixosModules.hardw--c-optional--zfs-pool-rename
+      self.nixosModules.hardw--c-opt--zfs-pool-rename
     ];
     options = {
       mount-zfs-4dz1 = {

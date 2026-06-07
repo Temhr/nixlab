@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--mount-mirzen = {
+  flake.nixosModules.hardw--c-opt--mount-mirzen = {
     allHosts,
     config,
     ...

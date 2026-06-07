@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--mount-mirror = {config, ...}: {
+  flake.nixosModules.hardw--c-opt--mount-mirror = {config, ...}: {
     fileSystems."/mirror" = {
       device = "/dev/disk/by-label/mirror";
       fsType = "ext4";

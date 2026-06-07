@@ -78,6 +78,13 @@
           description = "Enable smartctl disk health exporter.";
         };
       };
+      zfs = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Include ZFS monitoring dashboard and enable ZFS-specific scrapers.";
+        };
+      };
     };
 
     config = lib.mkIf cfg.enable {
@@ -87,6 +94,12 @@
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/grafana";
         openFirewall = cfg.openFirewall;
+      } // lib.optionalAttrs cfg.zfs.enable {
+        extraDashboards.zfs-monitoring = {
+          path = ./dashboards/zfs-monitoring.json;
+          folder = "maintenance";
+          editable = true;
+        };
       };
 
       services.loki-nixlab = {

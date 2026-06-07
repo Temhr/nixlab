@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--mount-mirnas2 = {
+  flake.nixosModules.hardw--c-opt--mount-mirnas2 = {
     allHosts,
     config,
     ...

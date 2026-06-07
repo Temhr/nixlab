@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hosts--c-optional--media = {
+  flake.nixosModules.hosts--c-opt--media = {
     config,
     lib,
     pkgs,

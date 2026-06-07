@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hosts--c-optional--development = {
+  flake.nixosModules.hosts--c-opt--development = {
     config,
     lib,
     pkgs,

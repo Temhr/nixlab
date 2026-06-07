@@ -6,6 +6,11 @@
     ...
   }: let
     cfg = config.services.grafana-nixlab;
+
+    # Single merged set used everywhere in config.
+    # extraDashboards keys must not clash with dashboards keys — validated below.
+    allDashboards = cfg.dashboards // cfg.extraDashboards;
+
     rootUrl =
       if cfg.domain != null
       then "${
@@ -14,289 +19,314 @@
         else "http"
       }://${cfg.domain}/"
       else "http://localhost:${toString cfg.port}/";
+
     serverDomain =
       if cfg.domain != null
       then cfg.domain
       else "localhost";
-  in {
-    imports = [
-    ];
-    # ============================================================================
-    # OPTIONS - Define what can be configured
-    # ============================================================================
-    options = {
-      services.grafana-nixlab = {
-        # REQUIRED: Enable the service
-        enable = lib.mkEnableOption "Grafana monitoring and visualization platform";
 
-        # OPTIONAL: Port to listen on (default: 3100)
-        port = lib.mkOption {
-          type = lib.types.port;
-          default = 3101;
-          description = "Port for Grafana to listen on";
-        };
-
-        # OPTIONAL: IP to bind to (default: 127.0.0.1 = localhost only)
-        listenAddress = lib.mkOption {
-          type = lib.types.str;
-          default = "127.0.0.1";
-          description = "IP address to bind to (use 0.0.0.0 for all interfaces)";
-        };
-
-        # OPTIONAL: Domain for nginx reverse proxy (default: null = no proxy)
-        domain = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          example = "grafana.example.com";
-          description = "Domain name for nginx reverse proxy (optional)";
-        };
-
-        # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
-        # Only works if domain is set
-        enableSSL = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = "Enable HTTPS with Let's Encrypt (requires domain)";
-        };
-
-        # OPTIONAL: Where to store Grafana data (default: /var/lib/grafana)
-        dataDir = lib.mkOption {
+    # Reusable submodule type for a single dashboard entry.
+    dashboardSubmodule = lib.types.submodule {
+      options = {
+        path = lib.mkOption {
           type = lib.types.path;
-          default = "/var/lib/grafana";
-          example = "/data/grafana";
-          description = "Directory for Grafana data and databases";
+          description = "Path to the dashboard JSON file.";
+          example = lib.literalExpression "./my-dashboard.json";
         };
 
-        # OPTIONAL: Grafana package to use (default: pkgs.grafana)
-        package = lib.mkOption {
-          type = lib.types.package;
-          default = pkgs.grafana;
-          defaultText = lib.literalExpression "pkgs.grafana";
-          description = "The Grafana package to use";
+        folder = lib.mkOption {
+          type = lib.types.str;
+          default = "General";
+          description = "Grafana folder to place this dashboard in.";
+          example = "System Monitoring";
         };
 
-        # OPTIONAL: Auto-open firewall ports (default: true)
-        openFirewall = lib.mkOption {
+        editable = lib.mkOption {
           type = lib.types.bool;
           default = true;
-          description = "Open firewall ports";
+          description = "Allow editing this dashboard in the Grafana UI.";
         };
 
-        # OPTIONAL: Allow anonymous access (default: false)
-        allowAnonymous = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = "Allow anonymous read-only access to dashboards";
+        updateInterval = lib.mkOption {
+          type = lib.types.int;
+          default = 10;
+          description = "How often Grafana checks for file changes (seconds).";
         };
+      };
+    };
 
-        user = lib.mkOption {
-          type = lib.types.str;
-          default = "grafana";
-          description = "User to run Grafana as";
+  in {
+    # ============================================================================
+    # OPTIONS
+    # ============================================================================
+    options.services.grafana-nixlab = {
+
+      enable = lib.mkEnableOption "Grafana monitoring and visualization platform";
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 3101;
+        description = "Port for Grafana to listen on.";
+      };
+
+      listenAddress = lib.mkOption {
+        type = lib.types.str;
+        default = "127.0.0.1";
+        description = "IP address to bind to. Use 0.0.0.0 for all interfaces.";
+      };
+
+      domain = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "grafana.example.com";
+        description = "Domain name for nginx reverse proxy. Null disables the proxy.";
+      };
+
+      enableSSL = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable HTTPS with Let's Encrypt. Requires domain to be set.";
+      };
+
+      dataDir = lib.mkOption {
+        type = lib.types.path;
+        default = "/var/lib/grafana";
+        example = "/data/grafana";
+        description = "Root directory for Grafana data, logs, plugins, and dashboards.";
+      };
+
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.grafana;
+        defaultText = lib.literalExpression "pkgs.grafana";
+        description = "The Grafana package to use.";
+      };
+
+      openFirewall = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Open firewall ports automatically.";
+      };
+
+      allowAnonymous = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Allow anonymous read-only access to dashboards.";
+      };
+
+      user = lib.mkOption {
+        type = lib.types.str;
+        default = "grafana";
+        description = "System user to run Grafana as.";
+      };
+
+      group = lib.mkOption {
+        type = lib.types.str;
+        default = "grafana";
+        description = "System group to run Grafana as.";
+      };
+
+      credentialsFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        description = ''
+          Path to a file containing the raw admin password (no KEY=VALUE wrapper).
+          The service reads it at start time and writes a temporary credentials env
+          file owned by the grafana user. If null, Grafana uses its built-in default.
+        '';
+      };
+
+      # ── Base dashboards (module-owned) ──────────────────────────────────────
+      dashboards = lib.mkOption {
+        type = lib.types.attrsOf dashboardSubmodule;
+        description = ''
+          Module-owned dashboards provisioned on every host that enables this
+          service. Override the whole set only if you want to remove built-in
+          dashboards; to add host-specific dashboards use extraDashboards instead.
+        '';
+        default = {
+          maintenance = {
+            path = ./dashboards/maintenance-checklist.json;
+            folder = "maintenance";
+            editable = true;
+          };
+          system-overview = {
+            path = ./dashboards/system-overview-v3.json;
+            folder = "maintenance";
+            editable = true;
+          };
         };
-
-        group = lib.mkOption {
-          type = lib.types.str;
-          default = "grafana";
-          description = "Group to run Grafana as";
-        };
-
-        # Credentials File
-        credentialsFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
-          default = null;
-          description = ''
-            Path to a file containing GRAFANA_ADMIN_PASSWORD=<value>.
-            Set automatically by importing the nsops--grafana module.
-            If null, no credentials file is loaded (service will use Grafana defaults).
-          '';
-        };
-
-        # MULTIPLE DASHBOARDS SUPPORT
-        dashboards = lib.mkOption {
-          type = lib.types.attrsOf (lib.types.submodule {
-            options = {
-              path = lib.mkOption {
-                type = lib.types.path;
-                description = "Path to the dashboard JSON file";
-                example = ./my-dashboard.json;
-              };
-
-              folder = lib.mkOption {
-                type = lib.types.str;
-                default = "General";
-                description = "Grafana folder to place this dashboard in";
-                example = "System Monitoring";
-              };
-
-              editable = lib.mkOption {
-                type = lib.types.bool;
-                default = true;
-                description = "Allow editing this dashboard in the UI";
-              };
-
-              updateInterval = lib.mkOption {
-                type = lib.types.int;
-                default = 10;
-                description = "How often to check for updates (seconds)";
-              };
+        example = lib.literalExpression ''
+          {
+            my-app = {
+              path = ./dashboards/my-app.json;
+              folder = "Applications";
+              editable = false;
             };
-          });
-          # Module owns its own default dashboards.
-          # ./dashboards/ is relative to this file.
-          default = {
-            maintenance = {
-              path = ./dashboards/maintenance-checklist.json;
+          }
+        '';
+      };
+
+      # ── Per-host / per-stack extras ─────────────────────────────────────────
+      extraDashboards = lib.mkOption {
+        type = lib.types.attrsOf dashboardSubmodule;
+        default = {};
+        description = ''
+          Additional dashboards merged on top of `dashboards`. Use this from
+          monitoring.nix, global.nix, or individual host files to add dashboards
+          without replacing the module defaults.
+
+          Keys must not clash with those already defined in `dashboards`; a
+          duplicate key causes an assertion failure at eval time.
+
+          Example — adding a ZFS dashboard only on hosts that have ZFS:
+
+            services.grafana-nixlab.extraDashboards.zfs-monitoring = {
+              path = ./dashboards/zfs-monitoring.json;
               folder = "maintenance";
               editable = true;
             };
-            system-overview-v3 = {
-              path = ./dashboards/system-overview-v3.json;
-              folder = "maintenance";
-              editable = true;
-            };
+        '';
+        example = lib.literalExpression ''
+          {
             zfs-monitoring = {
               path = ./dashboards/zfs-monitoring.json;
               folder = "maintenance";
               editable = true;
             };
-          };
-          description = ''
-            Dashboards to provision. Each dashboard needs a unique name.
-            Example:
-              dashboards = {
-                maintenance = {
-                  path = ./maintenance-dashboard.json;
-                  folder = "Maintenance";
-                };
-                system-overview = {
-                  path = ./system-overview.json;
-                  folder = "System";
-                };
-              };
-          '';
-          example = lib.literalExpression ''
-            {
-              maintenance = {
-                path = ./maintenance-dashboard.json;
-                folder = "Maintenance";
-                editable = true;
-              };
-              node-exporter = {
-                path = ./node-exporter.json;
-                folder = "System Monitoring";
-                editable = false;
-              };
-            }
-          '';
-        };
+            docker = {
+              path = ./dashboards/docker.json;
+              folder = "Containers";
+              editable = false;
+            };
+          }
+        '';
       };
     };
 
     # ============================================================================
-    # CONFIG - What happens when the service is enabled
+    # CONFIG
     # ============================================================================
     config = lib.mkIf cfg.enable {
-      # ----------------------------------------------------------------------------
-      # DIRECTORY SETUP - Create necessary directories with proper permissions
-      # ----------------------------------------------------------------------------
+
+      # Guard: catch key collisions between dashboards and extraDashboards early.
+      assertions = [
+        {
+          assertion = let
+            baseKeys  = builtins.attrNames cfg.dashboards;
+            extraKeys = builtins.attrNames cfg.extraDashboards;
+            dupes     = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
+          in dupes == [];
+          message = let
+            baseKeys  = builtins.attrNames cfg.dashboards;
+            extraKeys = builtins.attrNames cfg.extraDashboards;
+            dupes     = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
+          in ''
+            services.grafana-nixlab.extraDashboards contains keys that clash with
+            services.grafana-nixlab.dashboards: ${lib.concatStringsSep ", " dupes}.
+            Rename the extraDashboards entries to avoid the collision.
+          '';
+        }
+      ];
+
+      # ── Directory setup ──────────────────────────────────────────────────────
       systemd.tmpfiles.rules =
         [
-          "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/data 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/logs 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/plugins 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}            0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/data       0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/logs       0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/plugins    0770 ${cfg.user} ${cfg.group} -"
           "d ${cfg.dataDir}/dashboards 0775 ${cfg.user} ${cfg.group} -"
         ]
-        ++ lib.flatten (lib.mapAttrsToList (name: _: [
-            "d ${cfg.dataDir}/dashboards/${name} 0775 ${cfg.user} ${cfg.group} -"
-          ])
-          cfg.dashboards);
+        ++ lib.mapAttrsToList (name: _:
+          "d ${cfg.dataDir}/dashboards/${name} 0775 ${cfg.user} ${cfg.group} -"
+        ) allDashboards;
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Grafana
       # ----------------------------------------------------------------------------
       users.users.${cfg.user} = {
         isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        description = "Grafana service user";
+        group        = cfg.group;
+        home         = cfg.dataDir;
+        description  = "Grafana service user";
       };
 
       users.groups.${cfg.group} = {};
 
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
+      users.users.${config.nixlab.mainUser}.extraGroups = lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # GRAFANA SERVICE - Configure the systemd service
       # ----------------------------------------------------------------------------
       systemd.services.grafana = {
         description = "Grafana Monitoring and Visualization Platform";
-        wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        wantedBy    = ["multi-user.target"];
+        after       = ["network.target"];
 
         environment = {
-          GF_PATHS_DATA = "${cfg.dataDir}/data";
-          GF_PATHS_LOGS = "${cfg.dataDir}/logs";
-          GF_PATHS_PLUGINS = "${cfg.dataDir}/plugins";
+          GF_PATHS_DATA         = "${cfg.dataDir}/data";
+          GF_PATHS_LOGS         = "${cfg.dataDir}/logs";
+          GF_PATHS_PLUGINS      = "${cfg.dataDir}/plugins";
           GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
-          GF_LOG_MODE = "console file";
-          GF_LOG_LEVEL = "info";
-          GF_SERVER_HTTP_PORT = toString cfg.port;
-          GF_SERVER_HTTP_ADDR = cfg.listenAddress;
-          GF_SERVER_DOMAIN = serverDomain;
-          GF_SERVER_ROOT_URL = rootUrl;
-          GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
+          GF_LOG_MODE           = "console file";
+          GF_LOG_LEVEL          = "info";
+          GF_SERVER_HTTP_PORT   = toString cfg.port;
+          GF_SERVER_HTTP_ADDR   = cfg.listenAddress;
+          GF_SERVER_DOMAIN      = serverDomain;
+          GF_SERVER_ROOT_URL    = rootUrl;
+          GF_AUTH_ANONYMOUS_ENABLED  = lib.boolToString cfg.allowAnonymous;
           GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
-          GF_DATABASE_TYPE = "sqlite3";
-          GF_DATABASE_PATH = "${cfg.dataDir}/data/grafana.db";
+          GF_DATABASE_TYPE      = "sqlite3";
+          GF_DATABASE_PATH      = "${cfg.dataDir}/data/grafana.db";
         };
 
         serviceConfig =
           {
-            Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
+            Type             = "simple";
+            User             = cfg.user;
+            Group            = cfg.group;
             WorkingDirectory = cfg.dataDir;
-            ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
-            Restart = "on-failure";
-            RestartSec = "10s";
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ReadWritePaths = [cfg.dataDir];
+            ExecStart        = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
+            Restart          = "on-failure";
+            RestartSec       = "10s";
+            NoNewPrivileges  = true;
+            PrivateTmp       = true;
+            ProtectSystem    = "strict";
+            ProtectHome      = true;
+            ReadWritePaths   = [cfg.dataDir];
 
             ExecStartPre = [
-              # 1. Runs as root (+) - creates all directories
-              "+${pkgs.writeShellScript "grafana-mkdir" ''
+              # Step 1 — runs as root (+): create every directory that must exist
+              # before the unprivileged provisioning step runs.
+              ("+${pkgs.writeShellScript "grafana-mkdir" ''
                 install -d -m 0775 -o ${cfg.user} -g ${cfg.group} \
                   ${cfg.dataDir}/provisioning \
                   ${cfg.dataDir}/provisioning/dashboards \
                   ${cfg.dataDir}/provisioning/datasources \
                   ${cfg.dataDir}/provisioning/notifiers \
-                  ${lib.concatStringsSep " \\\n        " (
-                  lib.mapAttrsToList (
-                    name: _: "${cfg.dataDir}/dashboards/${name}"
-                  )
-                  cfg.dashboards
-                )}
-              ''}"
+                  ${lib.concatStringsSep " \\\n                  " (
+                    lib.mapAttrsToList (name: _:
+                      "${cfg.dataDir}/dashboards/${name}"
+                    ) allDashboards
+                  )}
+              ''}")
 
-              # 2. Runs as grafana user - copies files and writes provisioning configs
+              # Step 2 — runs as the grafana user: write credentials env file,
+              # copy dashboard JSON files, and write provisioning YAML configs.
               (pkgs.writeShellScript "grafana-provision" (
                 lib.optionalString (cfg.credentialsFile != null) ''
                   echo "GRAFANA_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
                     > /run/grafana-credentials.env
-                  chown ${cfg.user}:${cfg.group} /run/grafana-credentials.env
                   chmod 600 /run/grafana-credentials.env
                 ''
                 + lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
+                    # ── dashboard: ${name} ──
                     if [ -f ${dashboard.path} ]; then
-                      install -m 644 ${dashboard.path} ${cfg.dataDir}/dashboards/${name}/dashboard.json
+                      install -m 644 ${dashboard.path} \
+                        ${cfg.dataDir}/dashboards/${name}/dashboard.json
                     else
-                      echo "Warning: Dashboard file not found: ${dashboard.path}"
+                      echo "WARNING: dashboard file not found: ${dashboard.path}" >&2
                     fi
 
                     cat > ${cfg.dataDir}/provisioning/dashboards/${name}.yaml << 'DASHEOF'
@@ -313,8 +343,7 @@
                           path: ${cfg.dataDir}/dashboards/${name}
                           foldersFromFilesStructure: false
                     DASHEOF
-                  '')
-                  cfg.dashboards)
+                  '') allDashboards)
               ))
             ];
           }
@@ -330,21 +359,21 @@
 
       services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
         ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
+          forceSSL   = cfg.enableSSL;
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
+            proxyPass       = "http://${cfg.listenAddress}:${toString cfg.port}";
             proxyWebsockets = true;
             extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header Host              $host;
+              proxy_set_header X-Real-IP         $remote_addr;
+              proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
               proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
-              proxy_buffer_size 128k;
-              proxy_buffers 4 256k;
+              proxy_set_header Upgrade           $http_upgrade;
+              proxy_set_header Connection        "upgrade";
+              proxy_buffer_size      128k;
+              proxy_buffers        4 256k;
               proxy_busy_buffers_size 256k;
             '';
           };

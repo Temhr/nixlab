@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--mount-mirvat = {
+  flake.nixosModules.hardw--c-opt--mount-mirvat = {
     allHosts,
     config,
     ...

@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--c-optional--zfs-pool-rename = {
+  flake.nixosModules.hardw--c-opt--zfs-pool-rename = {
     config,
     lib,
     pkgs,
