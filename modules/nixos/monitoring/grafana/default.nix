@@ -305,9 +305,47 @@
             ReadWritePaths = [cfg.dataDir];
 
             ExecStartPre = [
-              # Step 1 — runs as root (+): create all directories before the
-              # unprivileged provisioning step needs them.
-              "+${pkgs.writeShellScript "grafana-mkdir" ''
+              # Step 1 — runs as root (+):
+              #   a) Remove any dashboard directories and provisioning configs
+              #      that are no longer in allDashboards (stale cleanup).
+              #   b) Create all directories the provisioning step needs.
+              "+${pkgs.writeShellScript "grafana-setup" ''
+                # ── known dashboard names (set at eval time) ──────────────────
+                known="${lib.concatStringsSep " " (builtins.attrNames allDashboards)}"
+
+                # ── clean up stale dashboard directories ──────────────────────
+                if [ -d ${cfg.dataDir}/dashboards ]; then
+                  for dir in ${cfg.dataDir}/dashboards/*/; do
+                    [ -d "$dir" ] || continue
+                    name="$(basename "$dir")"
+                    found=0
+                    for k in $known; do
+                      [ "$k" = "$name" ] && found=1 && break
+                    done
+                    if [ "$found" = "0" ]; then
+                      echo "grafana-setup: removing stale dashboard: $name"
+                      rm -rf "$dir"
+                    fi
+                  done
+                fi
+
+                # ── clean up stale provisioning YAML configs ──────────────────
+                if [ -d ${cfg.dataDir}/provisioning/dashboards ]; then
+                  for yaml in ${cfg.dataDir}/provisioning/dashboards/*.yaml; do
+                    [ -f "$yaml" ] || continue
+                    name="$(basename "$yaml" .yaml)"
+                    found=0
+                    for k in $known; do
+                      [ "$k" = "$name" ] && found=1 && break
+                    done
+                    if [ "$found" = "0" ]; then
+                      echo "grafana-setup: removing stale provisioning config: $name.yaml"
+                      rm -f "$yaml"
+                    fi
+                  done
+                fi
+
+                # ── create required directories ───────────────────────────────
                 install -d -m 0775 -o ${cfg.user} -g ${cfg.group} \
                   ${cfg.dataDir}/provisioning \
                   ${cfg.dataDir}/provisioning/dashboards \
