@@ -44,7 +44,7 @@
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.systemd = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
-      zfs.enable = false;   # default for all hosts
+      zfs.enable = lib.mkDefault false;
     };
 
     # Define your Flatpak packages here
