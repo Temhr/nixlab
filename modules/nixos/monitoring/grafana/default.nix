@@ -54,13 +54,11 @@
         };
       };
     };
-
   in {
     # ============================================================================
     # OPTIONS
     # ============================================================================
     options.services.grafana-nixlab = {
-
       enable = lib.mkEnableOption "Grafana monitoring and visualization platform";
 
       port = lib.mkOption {
@@ -208,19 +206,19 @@
     # CONFIG
     # ============================================================================
     config = lib.mkIf cfg.enable {
-
       # Guard: catch key collisions between dashboards and extraDashboards early.
       assertions = [
         {
           assertion = let
-            baseKeys  = builtins.attrNames cfg.dashboards;
+            baseKeys = builtins.attrNames cfg.dashboards;
             extraKeys = builtins.attrNames cfg.extraDashboards;
-            dupes     = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
-          in dupes == [];
+            dupes = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
+          in
+            dupes == [];
           message = let
-            baseKeys  = builtins.attrNames cfg.dashboards;
+            baseKeys = builtins.attrNames cfg.dashboards;
             extraKeys = builtins.attrNames cfg.extraDashboards;
-            dupes     = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
+            dupes = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
           in ''
             services.grafana-nixlab.extraDashboards contains keys that clash with
             services.grafana-nixlab.dashboards: ${lib.concatStringsSep ", " dupes}.
@@ -238,18 +236,19 @@
           "d ${cfg.dataDir}/plugins    0770 ${cfg.user} ${cfg.group} -"
           "d ${cfg.dataDir}/dashboards 0775 ${cfg.user} ${cfg.group} -"
         ]
-        ++ lib.mapAttrsToList (name: _:
-          "d ${cfg.dataDir}/dashboards/${name} 0775 ${cfg.user} ${cfg.group} -"
-        ) allDashboards;
+        ++ lib.mapAttrsToList (
+          name: _: "d ${cfg.dataDir}/dashboards/${name} 0775 ${cfg.user} ${cfg.group} -"
+        )
+        allDashboards;
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Grafana
       # ----------------------------------------------------------------------------
       users.users.${cfg.user} = {
         isSystemUser = true;
-        group        = cfg.group;
-        home         = cfg.dataDir;
-        description  = "Grafana service user";
+        group = cfg.group;
+        home = cfg.dataDir;
+        description = "Grafana service user";
       };
 
       users.groups.${cfg.group} = {};
@@ -261,56 +260,57 @@
       # ----------------------------------------------------------------------------
       systemd.services.grafana = {
         description = "Grafana Monitoring and Visualization Platform";
-        wantedBy    = ["multi-user.target"];
-        after       = ["network.target"];
+        wantedBy = ["multi-user.target"];
+        after = ["network.target"];
 
         environment = {
-          GF_PATHS_DATA         = "${cfg.dataDir}/data";
-          GF_PATHS_LOGS         = "${cfg.dataDir}/logs";
-          GF_PATHS_PLUGINS      = "${cfg.dataDir}/plugins";
+          GF_PATHS_DATA = "${cfg.dataDir}/data";
+          GF_PATHS_LOGS = "${cfg.dataDir}/logs";
+          GF_PATHS_PLUGINS = "${cfg.dataDir}/plugins";
           GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
-          GF_LOG_MODE           = "console file";
-          GF_LOG_LEVEL          = "info";
-          GF_SERVER_HTTP_PORT   = toString cfg.port;
-          GF_SERVER_HTTP_ADDR   = cfg.listenAddress;
-          GF_SERVER_DOMAIN      = serverDomain;
-          GF_SERVER_ROOT_URL    = rootUrl;
-          GF_AUTH_ANONYMOUS_ENABLED  = lib.boolToString cfg.allowAnonymous;
+          GF_LOG_MODE = "console file";
+          GF_LOG_LEVEL = "info";
+          GF_SERVER_HTTP_PORT = toString cfg.port;
+          GF_SERVER_HTTP_ADDR = cfg.listenAddress;
+          GF_SERVER_DOMAIN = serverDomain;
+          GF_SERVER_ROOT_URL = rootUrl;
+          GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
           GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
-          GF_DATABASE_TYPE      = "sqlite3";
-          GF_DATABASE_PATH      = "${cfg.dataDir}/data/grafana.db";
+          GF_DATABASE_TYPE = "sqlite3";
+          GF_DATABASE_PATH = "${cfg.dataDir}/data/grafana.db";
         };
 
         serviceConfig =
           {
-            Type             = "simple";
-            User             = cfg.user;
-            Group            = cfg.group;
+            Type = "simple";
+            User = cfg.user;
+            Group = cfg.group;
             WorkingDirectory = cfg.dataDir;
-            ExecStart        = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
-            Restart          = "on-failure";
-            RestartSec       = "10s";
-            NoNewPrivileges  = true;
-            PrivateTmp       = true;
-            ProtectSystem    = "strict";
-            ProtectHome      = true;
-            ReadWritePaths   = [cfg.dataDir];
+            ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            ReadWritePaths = [cfg.dataDir];
 
             ExecStartPre = [
               # Step 1 — runs as root (+): create every directory that must exist
               # before the unprivileged provisioning step runs.
-              ("+${pkgs.writeShellScript "grafana-mkdir" ''
+              "+${pkgs.writeShellScript "grafana-mkdir" ''
                 install -d -m 0775 -o ${cfg.user} -g ${cfg.group} \
                   ${cfg.dataDir}/provisioning \
                   ${cfg.dataDir}/provisioning/dashboards \
                   ${cfg.dataDir}/provisioning/datasources \
                   ${cfg.dataDir}/provisioning/notifiers \
                   ${lib.concatStringsSep " \\\n                  " (
-                    lib.mapAttrsToList (name: _:
-                      "${cfg.dataDir}/dashboards/${name}"
-                    ) allDashboards
-                  )}
-              ''}")
+                  lib.mapAttrsToList (
+                    name: _: "${cfg.dataDir}/dashboards/${name}"
+                  )
+                  allDashboards
+                )}
+              ''}"
 
               # Step 2 — runs as the grafana user: write credentials env file,
               # copy dashboard JSON files, and write provisioning YAML configs.
@@ -343,7 +343,8 @@
                           path: ${cfg.dataDir}/dashboards/${name}
                           foldersFromFilesStructure: false
                     DASHEOF
-                  '') allDashboards)
+                  '')
+                  allDashboards)
               ))
             ];
           }
@@ -359,11 +360,11 @@
 
       services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
         ${cfg.domain} = {
-          forceSSL   = cfg.enableSSL;
+          forceSSL = cfg.enableSSL;
           enableACME = cfg.enableSSL;
 
           locations."/" = {
-            proxyPass       = "http://${cfg.listenAddress}:${toString cfg.port}";
+            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
             proxyWebsockets = true;
             extraConfig = ''
               proxy_set_header Host              $host;

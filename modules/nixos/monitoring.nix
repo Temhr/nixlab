@@ -88,19 +88,21 @@
     };
 
     config = lib.mkIf cfg.enable {
-      services.grafana-nixlab = {
-        enable = true;
-        port = cfg.ports.grafana;
-        listenAddress = cfg.listenAddress;
-        dataDir = "${cfg.dataDir}/grafana";
-        openFirewall = cfg.openFirewall;
-      } // lib.optionalAttrs cfg.zfs.enable {
-        extraDashboards.zfs-monitoring = {
-          path = ./monitoring/grafana/dashboards/zfs-monitoring.json;
-          folder = "maintenance";
-          editable = true;
+      services.grafana-nixlab =
+        {
+          enable = true;
+          port = cfg.ports.grafana;
+          listenAddress = cfg.listenAddress;
+          dataDir = "${cfg.dataDir}/grafana";
+          openFirewall = cfg.openFirewall;
+        }
+        // lib.optionalAttrs cfg.zfs.enable {
+          extraDashboards.zfs-monitoring = {
+            path = ./monitoring/grafana/dashboards/zfs-monitoring.json;
+            folder = "maintenance";
+            editable = true;
+          };
         };
-      };
 
       services.loki-nixlab = {
         enable = true;

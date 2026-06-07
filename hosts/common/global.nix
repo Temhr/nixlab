@@ -19,6 +19,8 @@
       self.nixosModules.nsops--ssh-keys
       self.nixosModules.systm--auto-flake-update
       self.nixosModules.systm--auto-nixlab-gpull
+
+      self.nixosModules.hosts--c-glo--utilities
     ];
 
     services.ignoreLid = {
