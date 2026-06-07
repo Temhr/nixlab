@@ -390,6 +390,7 @@
                         options:
                           path: ${cfg.dataDir}/dashboards/${name}
                           foldersFromFilesStructure: false
+                          deleteDashboardsOnResync: true
                     DASHEOF
                   '')
                   allDashboards)
