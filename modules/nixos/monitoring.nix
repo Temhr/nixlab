@@ -81,14 +81,13 @@
     };
 
     config = lib.mkIf cfg.enable {
-      services.grafana-nixlab =
-        {
-          enable = true;
-          port = cfg.ports.grafana;
-          listenAddress = cfg.listenAddress;
-          dataDir = "${cfg.dataDir}/grafana";
-          openFirewall = cfg.openFirewall;
-        }
+      services.grafana-nixlab = {
+        enable = true;
+        port = cfg.ports.grafana;
+        listenAddress = cfg.listenAddress;
+        dataDir = "${cfg.dataDir}/grafana";
+        openFirewall = cfg.openFirewall;
+      };
 
       services.loki-nixlab = {
         enable = true;

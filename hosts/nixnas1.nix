@@ -22,7 +22,7 @@
     nixlab.mainUser = "temhr";
     ## Enable automatic login for the user.
     services.displayManager.autoLogin.user = config.nixlab.mainUser;
-    services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];
+    services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
 
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
