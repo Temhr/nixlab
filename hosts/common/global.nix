@@ -1,24 +1,6 @@
 {self, ...}: {
   flake.nixosModules.hosts--c-global = {...}: {
     imports = [
-      self.nixosModules.hosts--c-opt--development
-      self.nixosModules.hosts--c-opt--education
-      self.nixosModules.hosts--c-opt--games
-      self.nixosModules.hosts--c-opt--media
-      self.nixosModules.hosts--c-opt--productivity
-      self.nixosModules.hosts--c-opt--virtualizations
-      self.nixosModules.systm--ignore-lid
-      self.nixosModules.systm--cachix
-      self.nixosModules.systm--gui-shells
-      self.nixosModules.systm--home-manager-config
-      self.nixosModules.servc--homepage-nixlab
-      self.nixosModules.nsops--homepage
-      self.nixosModules.servc--monitoring-nixlab
-      self.nixosModules.systm--networking
-      self.nixosModules.nsops--ssh-keys
-      self.nixosModules.systm--auto-flake-update
-      self.nixosModules.systm--auto-nixlab-gpull
-
       self.nixosModules.hosts--c-glo--audio
       self.nixosModules.hosts--c-glo--auto-backup-home
       self.nixosModules.hosts--c-glo--auto-nix-gc
@@ -40,6 +22,25 @@
       self.nixosModules.hosts--c-glo--system
       self.nixosModules.hosts--c-glo--users
       self.nixosModules.hosts--c-glo--utilities
+
+      self.nixosModules.hosts--c-opt--development
+      self.nixosModules.hosts--c-opt--education
+      self.nixosModules.hosts--c-opt--games
+      self.nixosModules.hosts--c-opt--media
+      self.nixosModules.hosts--c-opt--productivity
+      self.nixosModules.hosts--c-opt--virtualizations
+
+      self.nixosModules.systm--ignore-lid
+      self.nixosModules.systm--cachix
+      self.nixosModules.systm--gui-shells
+      self.nixosModules.systm--home-manager-config
+      self.nixosModules.servc--homepage-nixlab
+      self.nixosModules.nsops--homepage
+      self.nixosModules.servc--monitoring-nixlab
+      self.nixosModules.systm--networking
+      self.nixosModules.nsops--ssh-keys
+      self.nixosModules.systm--auto-flake-update
+      self.nixosModules.systm--auto-nixlab-gpull
     ];
 
     services.ignoreLid = {
