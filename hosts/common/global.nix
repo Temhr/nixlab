@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--c-global = {...}: {
+  flake.nixosModules.hosts--c-global = {lib, ...}: {
     imports = [
       ./_global
       self.nixosModules.hosts--c-opt--development
