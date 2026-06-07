@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hardw--m720q-nas1 = {lib, ...}: {
+  flake.nixosModules.hardw--m720q-nas1 = {...}: {
     imports = [
       self.nixosModules.hardw--c-global
       self.nixosModules.hardw--c-opt--mount-4dz1
@@ -20,6 +20,5 @@
       enableMonitoring = true;
       #alertEmail = "your-email@example.com";  # Optional: for email alerts
     };
-    services.nixlab-monitoring.zfs.enable = lib.mkForce true;
   };
 }

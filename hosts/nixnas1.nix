@@ -22,6 +22,7 @@
     nixlab.mainUser = "temhr";
     ## Enable automatic login for the user.
     services.displayManager.autoLogin.user = config.nixlab.mainUser;
+    services.nixlab-monitoring.zfs.enable = true;
 
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
