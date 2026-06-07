@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--c-global = {lib, ...}: {
+  flake.nixosModules.hosts--c-global = {...}: {
     imports = [
       ./_global
       self.nixosModules.hosts--c-opt--development
@@ -44,7 +44,6 @@
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.systemd = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
-      zfs.enable = lib.mkDefault false;
     };
 
     # Define your Flatpak packages here
