@@ -752,7 +752,7 @@ secret_key: your-secret-here
   in {
     options.services.<service>.secretsFile = lib.mkOption {
       type = lib.types.path;
-      default = ./service>.yaml;
+      default = ./<service>.yaml;
       description = "Path to sops-encrypted secrets file";
     };
 
