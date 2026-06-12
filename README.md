@@ -507,48 +507,12 @@ nixlab/
 │       ├── profile-desktop.nix      # hosts--profl--desktop: desktop module composition
 │       ├── profile-nas.nix          # hosts--profl--nas: NAS module composition
 │       ├── core/                    # Universal modules (imported by profile-base)
-│       │   ├── -boot-loader.nix
-│       │   ├── -display-manager.nix
-│       │   ├── -home-manager-config.nix
-│       │   ├── -journald.nix
-│       │   ├── -locale.nix
-│       │   ├── -monitoring.nix      # Prometheus + Loki + Grafana composite
-│       │   ├── -networking.nix
-│       │   ├── -nginx.nix
-│       │   ├── -nix.nix
-│       │   ├── -open-ssh.nix
-│       │   ├── -sops.nix
-│       │   ├── -system.nix
-│       │   ├── -users.nix
-│       │   ├── -utilities.nix
 │       │   └── _users/              # nixlab.mainUser option + user account definitions
 │       ├── desktop/                 # Desktop-only modules (imported by profile-desktop)
-│       │   ├── -cache-tmpfs.nix     # Browser cache redirect to tmpfs
-│       │   ├── firefox.nix
-│       │   ├── flatpak.nix
-│       │   ├── gui-shells.nix       # GNOME / Plasma6 selector
-│       │   └── ignore-lid.nix
 │       ├── hardware/                # Physical hardware modules (imported by profile-desktop)
-│       │   ├── -audio.nix
-│       │   ├── -bluetooth.nix
-│       │   └── -power-management.nix
 │       ├── apps/                    # Toggleable software modules (imported by profile-desktop)
-│       │   ├── development.nix
-│       │   ├── education.nix
-│       │   ├── games.nix
-│       │   ├── media.nix
-│       │   ├── productivity.nix
-│       │   └── virtualizations.nix
 │       ├── automation/              # Scheduled tasks (split between base and desktop profiles)
-│       │   ├── -backup-home.nix
-│       │   ├── -backup-phone-media.nix
-│       │   ├── -flake-update.nix
-│       │   ├── -nix-gc.nix
-│       │   ├── -nixlab-gpull.nix
-│       │   ├── -nixos-upgrade.nix
-│       │   └── -ping-watchdog.nix
 │       └── debug/                   # Opt-in only — never included in any profile
-│           └── diagnose.nix         # Crash dumps, oops=panic, kdump, verbose logging
 │
 ├── home/                            # User-level Home Manager configurations
 │   ├── common/
