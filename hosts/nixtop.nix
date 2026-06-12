@@ -6,8 +6,8 @@
       self.nixosModules.hardw--zb17g2-k5
       # Host config
       self.nixosModules.hosts--nixtop
-      self.nixosModules.hosts--c-global
-      # Home manager
+      self.nixosModules.hosts--profl--base
+      self.nixosModules.hosts--profl--desktop
       # Services
       self.nixosModules.servc--waydroid-nixlab
     ];
@@ -24,9 +24,6 @@
 
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
-
-    ## Enable CUPS to print documents.
-    services.printing.enable = true;
 
     ## DEVELOPMENT
     blender.enable = true; #3D Creation/Animation/Publishing System

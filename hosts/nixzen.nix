@@ -6,10 +6,9 @@
       self.nixosModules.hardw--zb15g2-k1
       # Host config
       self.nixosModules.hosts--nixzen
-      self.nixosModules.hosts--c-global
-      # Home manager
+      self.nixosModules.hosts--profl--base
+      self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.systm--auto-backup-phone-media
     ];
   };
   flake.nixosModules.hosts--nixzen = {
@@ -24,9 +23,6 @@
 
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
-
-    ## Enable CUPS to print documents.
-    services.printing.enable = true;
 
     ## DEVELOPMENT
     #blender.enable = true;    #3D Creation/Animation/Publishing System

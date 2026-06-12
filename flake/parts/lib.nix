@@ -15,7 +15,7 @@
 
   mkCommonModules = hostPkgs: [
     inputs.sops-nix.nixosModules.sops
-    self.nixosModules.systm--home-manager-config
+    self.nixosModules.hosts--core--home-manager-config
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;

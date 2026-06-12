@@ -6,8 +6,8 @@
       self.nixosModules.hardw--zb17g1-k3
       # Host config
       self.nixosModules.hosts--nixvat
-      self.nixosModules.hosts--c-global
-      # Home manager
+      self.nixosModules.hosts--profl--base
+      self.nixosModules.hosts--profl--desktop
       # Services
       self.nixosModules.servc--glance-nixlab
       self.nixosModules.nsops--glance
@@ -35,9 +35,6 @@
 
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
-
-    ## Enable CUPS to print documents.
-    services.printing.enable = true;
 
     ## DEVELOPMENT
     blender.enable = true; #3D Creation/Animation/Publishing System
