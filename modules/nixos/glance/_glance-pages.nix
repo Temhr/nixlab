@@ -160,6 +160,10 @@
                 title = "Fabio Natali (guix)";
               }
               {
+                url = "https://coopi.neocities.org/feed.xml";
+                title = "coopi's corner of the web! (guix)";
+              }
+              {
                 url = "https://nixos.org/blog/announcements-rss.xml";
                 title = "Nixos.org/blog/ (announcements)";
               }

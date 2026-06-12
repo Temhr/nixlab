@@ -7,7 +7,7 @@ let
     system ? "x86_64-linux",
     gateway ? "192.168.0.1",
     prefixLength ? 24,
-    nameservers ? ["1.1.1.1" "9.9.9.9"],
+    nameservers ? ["9.9.9.9" "1.1.1.1"],
     hostId ? null,
     nixpkgsInput ? "nixpkgs", # defaults to stable
   }: {
