@@ -1,9 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--hardw--power-management = {
-    config,
-    pkgs,
-    ...
-  }: {
+  flake.nixosModules.hosts--hardw--power-management = {pkgs, ...}: {
     # Disable WD HDD power management (conditional on drive existence)
     systemd.services.disable-hdd-apm = {
       description = "Disable APM on data drive";
@@ -20,15 +16,6 @@
     };
 
     boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
-
-    # Reduce writes to SD card - cache in RAM
-    fileSystems."/home".options = ["relatime" "noatime"];
-
-    # Move browser cache to tmpfs
-    systemd.tmpfiles.rules = [
-      "L+ /home/${config.nixlab.mainUser}/.cache - - - - /tmp/user-cache"
-      "d /tmp/user-cache 0700 ${config.nixlab.mainUser} users -"
-    ];
 
     # Increase RAM cache for filesystem
     boot.kernel.sysctl = {

@@ -8,6 +8,7 @@
       self.nixosModules.hosts--apps--productivity
       self.nixosModules.hosts--apps--virtualizations
 
+      self.nixosModules.hosts--deskt--cache-tmpfs
       self.nixosModules.hosts--deskt--firefox
       self.nixosModules.hosts--deskt--flatpak
       self.nixosModules.hosts--deskt--gui-shells
