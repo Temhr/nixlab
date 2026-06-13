@@ -59,7 +59,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 ## Architecture
 
-nixlab uses **flake-parts** as its orchestration layer, structured around the **Dendritic Pattern** and a **self-exporting module schema** where every file registers its own outputs directly into the flake — no central registry required.
+nixlab uses **flake-parts**, the **Dendritic Pattern**, and a **self-exporting module schema** — every file registers its own outputs directly into the flake, no central registry required.
 
 - ### <ins>flake-parts Orchestration</ins>
 
@@ -67,9 +67,7 @@ nixlab uses **flake-parts** as its orchestration layer, structured around the **
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-[flake-parts](https://github.com/hercules-ci/flake-parts) is a NixOS community library that structures flake outputs as composable modules called **parts**. Instead of one monolithic `outputs = { ... }` function, each concern lives in its own file and declares exactly what it contributes.
-
-The `flake.nix` root is a thin entry point that uses [import-tree](https://github.com/vic/import-tree) to auto-discover all part files across multiple directories:
+[flake-parts](https://github.com/hercules-ci/flake-parts) structures flake outputs as composable modules. Each concern lives in its own file and declares exactly what it contributes. `flake.nix` is a thin entry point that uses [import-tree](https://github.com/vic/import-tree) to auto-discover all part files:
 
 ```nix
 outputs = inputs @ { flake-parts, ... }:
@@ -89,10 +87,10 @@ outputs = inputs @ { flake-parts, ... }:
 ```
 
 **Key benefits:**
-- Adding a new self-exporting file to any discovered directory requires no changes to `flake.nix`
-- `perSystem` is called automatically for each supported system
+- New files auto-register — no changes to `flake.nix` required
+- `perSystem` called automatically per supported system
 - Architecture-independent outputs use the `flake.` namespace
-- Files prefixed with `_` are leaf files excluded from import-tree discovery
+- `_`-prefixed files are excluded from auto-discovery
 
 </details>
 
@@ -102,16 +100,12 @@ outputs = inputs @ { flake-parts, ... }:
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-The Dendritic Pattern organizes NixOS configuration around **features rather than hostnames**. The name comes from the branching, self-similar structure where each part of the config is independent and composable.
+Organizes configuration around **features rather than hostnames**. Instead of asking _"what does this machine need?"_, you ask _"which features does it require?"_ and assemble from capabilities.
 
-**The key shift** is in the axis of composition: instead of asking _"what does this machine need?"_ and building outward from a hostname, you ask _"which features does this machine require?"_ and assemble inward from capabilities.
-
-In practice:
-- **Shared behaviour** lives in domain-grouped modules under `hosts/common/` — `core/` for universals, `desktop/` for display-specific concerns, `apps/` for toggleable software, `automation/` for scheduled tasks, `hardware/` for physical concerns
+- **Shared behaviour** lives in domain-grouped modules under `hosts/common/` — `core/` for universals, `desktop/`, `apps/`, `automation/`, `hardware/`
 - **Profiles** (`profile-base`, `profile-desktop`, `profile-nas`) compose those modules into role-appropriate bundles
-- **Host files** become pure feature manifests — short declarations selecting a profile and enabling specific apps or services
-- **Adding a new host** means writing three small files (host, home, hardware) plus a metadata entry — no deep knowledge of filesystem layout required
-- **Changing a feature** happens in one place and propagates to every host that selects it
+- **Host files** are pure feature manifests — a profile selection plus declarative option enables
+- **Changing a feature** happens in one place and propagates to every host that uses it
 
 </details>
 
@@ -121,7 +115,7 @@ In practice:
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Almost every file in this flake is a **flake-parts module**. A **flake-parts module** is a function that takes `{ self, inputs, ... }` and registers its own outputs directly into the flake. There is no central registry. Each file is fully self-sufficient:
+Every file is a **flake-parts module** — a function taking `{ self, inputs, ... }` that registers its own outputs directly into the flake. No central registry:
 
 ```nix
 # modules/nixos/glance/default.nix
@@ -160,9 +154,9 @@ Almost every file in this flake is a **flake-parts module**. A **flake-parts mod
 ```
 
 **Key principles:**
-- Files reference each other exclusively by **output name** (`self.nixosModules.*`) — never by filesystem path
+- Files reference each other by **output name** (`self.nixosModules.*`) — never by path
 - Files can be freely moved or renamed without breaking consumers
-- A single file can emit multiple related outputs (e.g., a service module alongside its host config)
+- A single file can emit multiple related outputs
 - The name is the contract, not the path
 
 </details>
@@ -173,7 +167,7 @@ Almost every file in this flake is a **flake-parts module**. A **flake-parts mod
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-All NixOS modules are registered under `flake.nixosModules` using a nested namespace that groups them by concern. Module names use a double-dash separator to create a readable hierarchy:
+All NixOS modules register under `flake.nixosModules` using a double-dash naming convention that encodes a two-level hierarchy in a flat namespace:
 
 **Naming convention:**
 - `hardw--<identifier>`: Hardware configurations
@@ -230,7 +224,7 @@ Run `nix flake show` to see the complete module tree.
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-A small number of concerns remain in `flake/parts/` as conventional flake-parts files rather than self-registering modules.
+A small number of concerns live in `flake/parts/` as conventional flake-parts files rather than self-registering modules:
 
 | File | Responsibility | Output namespace |
 |------|---------------|------------------|
@@ -242,10 +236,10 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 | `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) and formatter configuration | `perSystem.checks`, `perSystem.formatter` |
 | `apps.nix` | Defines the `build-all` app that validates all `nixosConfiguration` outputs | `perSystem.apps.build-all` |
 
-**Key orchestration features:**
-- **Per-host nixpkgs selection**: `_hosts-meta.nix` allows different hosts to use different nixpkgs inputs (stable, unstable, or pinned versions)
-- **Centralized overlays**: All overlays are applied uniformly across all configurations
-- **Metadata-driven networking**: IP addresses and interface names are centralized in `_hosts-meta.nix` for easier network management
+**Key features:**
+- **Per-host nixpkgs selection**: different hosts can use different nixpkgs inputs (stable, unstable, pinned)
+- **Centralized overlays**: applied uniformly across all configurations
+- **Metadata-driven networking**: IPs and interface names centralized in `_hosts-meta.nix`
 
 </details>
 
@@ -255,20 +249,12 @@ A small number of concerns remain in `flake/parts/` as conventional flake-parts 
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Secrets are managed with sops-nix using age encryption. All [sops-nix](https://github.com/Mic92/sops-nix) secrets-related files are centralized in the `sops/` directory:
+Secrets are managed with [sops-nix](https://github.com/Mic92/sops-nix) using age encryption, centralized in `sops/`:
 
-- **Encrypted secrets**: Each service has a dedicated `.yaml` file (e.g., `sops/glance.yaml`, `sops/grafana.yaml`, `sops/ssh-keys.yaml`)
-- **Secret modules**: Corresponding `sops/<service>.nix` files declare which keys to decrypt and wire them to services
-- **Self-registering**: Secret modules follow the flake-parts pattern, registering as `flake.nixosModules.nsops--<service>`
-- **File-based options**: Service modules accept `*File` path options (not plaintext strings)
-- **Runtime decryption**: Decrypted paths are passed via `config.sops.secrets.<KEY>.path`
-
-**Key design patterns:**
-
-1. **Centralized location**: All secrets live in `sops/` for easier auditing and rotation
-2. **Configurable paths**: Secret modules expose a `secretsFile` option (defaults to co-located `.yaml`) for per-host overrides
-3. **Automatic wiring**: Secret modules are conditionally enabled based on service enablement
-4. **Service coupling**: Secrets modules are imported separately in host configurations alongside their service modules
+- **Encrypted secrets**: per-service `.yaml` files (`sops/glance.yaml`, `sops/ssh-keys.yaml`, etc.)
+- **Secret modules**: `sops/<service>.nix` declares which keys to decrypt and wires them to services, registering as `flake.nixosModules.nsops--<service>`
+- **File-based options**: service modules accept `*File` path options, never plaintext strings
+- **Runtime decryption**: paths available via `config.sops.secrets.<KEY>.path`
 
 **Example structure:**
 ```
@@ -281,16 +267,9 @@ sops/
 └── networking.yaml          # Shared networking secrets (wifi credentials)
 ```
 
-**SSH Key Management:**
+**SSH Keys:** Private keys stored encrypted in `sops/ssh-keys.yaml`, decrypted at boot to `/run/secrets/ssh_key_*`. Symlinks at `~/.ssh/id_*` enable interactive use; systemd services reference `/run/secrets/` directly.
 
-SSH private keys (like the GitHub nixlab repository key) are managed declaratively through sops-nix:
-
-- **Encrypted storage**: Private keys stored in `sops/ssh-keys.yaml` (safe to commit)
-- **Runtime decryption**: Keys decrypted to `/run/secrets/ssh_key_*` at boot with proper permissions (0400, user ownership)
-- **Interactive use**: Symlinks created at `~/.ssh/id_*` pointing to decrypted secrets for command-line operations
-- **Service use**: Systemd services reference `/run/secrets/ssh_key_*` directly via `GIT_SSH_COMMAND`
-
-**Common secret management patterns:**
+**Secret patterns used in this repo:**
 
 1. **Simple environment file** (`glance`, `homepage`): Single `SERVICENAME_ENV` secret containing KEY=value lines, loaded via `EnvironmentFile`
 2. **Multiple discrete secrets** (`grafana`, `bookstack`): Individual secrets declared with `lib.genAttrs`, each accessible separately in the service config
@@ -327,7 +306,7 @@ sops -d sops/<service>.yaml
 
 ## Dependency & Import Flow
 
-This section maps how configuration flows from the `flake.nix` entry point through every layer of the repository down to a final built NixOS system.
+How configuration flows from `flake.nix` through every layer to a built NixOS system.
 
 - ### <ins>Top-Level Entry Point</ins>
 
@@ -335,7 +314,7 @@ This section maps how configuration flows from the `flake.nix` entry point throu
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-`flake.nix` is a pure delegation layer. It has no logic of its own — it hands control to `flake-parts` and uses `import-tree` to recursively discover every `.nix` file in each top-level directory. Each discovered file is a self-registering flake-parts module that contributes to the shared `flake.*` and `perSystem.*` output namespaces.
+`flake.nix` is a pure delegation layer with no logic of its own. `import-tree` recursively discovers every `.nix` file in each top-level directory; each file is a self-registering module contributing to the shared `flake.*` / `perSystem.*` output namespaces. Files prefixed with `_` are excluded from discovery.
 
 ```
 flake.nix
@@ -351,8 +330,6 @@ flake.nix
         └── sops/           → registers nsops--* nixosModules
 ```
 
-All outputs from every discovered file are merged together by flake-parts into a single coherent flake output. Files prefixed with `_` are leaf imports consumed by their parent and are excluded from auto-discovery.
-
 </details>
 
 - ### <ins>Host Build Flow</ins>
@@ -361,7 +338,7 @@ All outputs from every discovered file are merged together by flake-parts into a
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-When `nixos-rebuild` builds a host, it evaluates `flake.nixosConfigurations.<hostname>`. Each configuration is constructed by `self.lib.mkHost`, which is defined in `flake/parts/lib.nix` and wires together all module layers:
+`nixos-rebuild` evaluates `flake.nixosConfigurations.<hostname>`, built by `self.lib.mkHost` (defined in `flake/parts/lib.nix`). The NixOS module system merges all layers — resolving options and `lib.mkIf` guards — into a single system configuration passed to `nixpkgs.lib.nixosSystem`.
 
 ```
 nixosConfigurations.nixace
@@ -385,8 +362,6 @@ nixosConfigurations.nixace
     └── nsops--ollama             # Ollama secrets wiring
 ```
 
-The NixOS module system then merges all of these modules together — resolving options, applying `lib.mkIf` guards, and producing a single evaluated system configuration that is passed to `nixpkgs.lib.nixosSystem`.
-
 </details>
 
 - ### <ins>Profile Composition</ins>
@@ -395,7 +370,7 @@ The NixOS module system then merges all of these modules together — resolving 
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Profiles are pure import lists — they contain no new configuration of their own, only `imports = [...]`. They define what a role-type machine receives without any host needing to enumerate it manually.
+Profiles are pure `imports = [...]` lists — no new configuration, just role-appropriate module bundles.
 
 ```
 hosts--profl--base
@@ -443,7 +418,7 @@ hosts--profl--nas
 └── hosts--autom--backup-phone-media  # nightly move of phone photos from Syncthing share
 ```
 
-A desktop host (`nixace`, `nixtop`, `nixsun`, `nixvat`, `nixzen`) imports both `base` and `desktop`. A NAS host (`nixnas1`, `nixnas2`) imports `base` and `nas`. The difference in what each machine type receives is entirely determined by which profiles are in its `modules = [...]` list.
+Desktop hosts (`nixace`, `nixtop`, `nixsun`, `nixvat`, `nixzen`) import `base` + `desktop`. NAS hosts (`nixnas1`, `nixnas2`) import `base` + `nas`.
 
 </details>
 
@@ -453,13 +428,9 @@ A desktop host (`nixace`, `nixtop`, `nixsun`, `nixvat`, `nixzen`) imports both `
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-No file in this repo imports another by filesystem path (with the exception of `_` prefixed leaf files consumed by their direct parent). All cross-file references use the `self.nixosModules.*` or `self.homeModules.*` output namespaces. This means:
+No file imports another by filesystem path (except `_`-prefixed leaf files consumed by their direct parent). All cross-file references use `self.nixosModules.*` or `self.homeModules.*` — the name is the only stable contract, so modules can be freely moved without breaking consumers.
 
-- A module can be moved to any directory without breaking any consumer
-- The name in the namespace is the only stable contract
-- `nix flake show` always reflects the true current state
-
-The double-dash naming scheme encodes a two-level hierarchy in a flat namespace:
+The double-dash scheme encodes a two-level hierarchy in a flat namespace:
 
 ```
 hosts--profl--base        →  hosts / profile / base
@@ -474,7 +445,7 @@ nsops--bookstack          →  sops secrets / bookstack
 hardw--zb17g4-p5          →  hardware / specific machine model
 ```
 
-The `debug/` layer (`hosts--debug--diagnose`) is intentionally isolated and never included in any profile. It must be explicitly added to a host's module list, making it impossible to accidentally ship crash-dump kernel settings to a production machine.
+The `debug/` layer (`hosts--debug--diagnose`) is never included in any profile — it must be explicitly added to a host's module list, preventing crash-dump kernel settings from reaching any machine unintentionally.
 
 </details>
 
@@ -498,14 +469,15 @@ nixlab/
 │       └── packages.nix             # Imports pkgs/ into perSystem.packages
 │
 ├── hardware/                        # Machine-level hardware configs (self-registering)
-│   └── <model>.nix                  # Per-device hardware: filesystems, kernel modules, platform
+│   ├── common/
+│   │   ├── global/                  # Applied to all machines unconditionally
+│   │   └── optional/                # Selectable hardware modules (GPU drivers, extra mounts)
+│   └── <model>.nix                  # Per-device hardware configuration + module registration
 │
 ├── hosts/                           # System-level NixOS configurations (self-registering)
 │   ├── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
 │   └── common/
-│       ├── profile-base.nix         # hosts--profl--base: universal module composition
-│       ├── profile-desktop.nix      # hosts--profl--desktop: desktop module composition
-│       ├── profile-nas.nix          # hosts--profl--nas: NAS module composition
+│       ├── profile-*.nix            # hosts--profl--*: module compositions
 │       ├── core/                    # Universal modules (imported by profile-base)
 │       │   └── _users/              # nixlab.mainUser option + user account definitions
 │       ├── desktop/                 # Desktop-only modules (imported by profile-desktop)
@@ -550,7 +522,7 @@ nixlab/
 └── .sops.yaml                       # SOPS age key configuration
 ```
 
-> **Note:** The repository tree is the authoritative reference for current hosts, modules, shells, and features. Browse the directories themselves for precise contents. Files prefixed with `_` are leaf files consumed by their parent module and are intentionally excluded from import-tree discovery.
+> Files prefixed with `_` are leaf files consumed by their parent and excluded from import-tree discovery.
 
 ---
 
@@ -656,7 +628,7 @@ sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Adding a new host requires creating three self-registering files and one metadata entry.
+Three self-registering files and one metadata entry.
 
 #### 1. Add host metadata to `flake/parts/_hosts-meta.nix`
 
@@ -763,7 +735,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Service modules follow the self-exporting pattern and live in `modules/nixos/<service>/`. Secrets are managed separately in the `sops/` directory.
+Service modules live in `modules/nixos/<service>/`. Secrets are managed separately in `sops/`.
 
 #### 1. Create the module `modules/nixos/<service>/default.nix`
 
