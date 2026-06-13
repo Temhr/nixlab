@@ -8,16 +8,15 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 **Table of Contents**
 - [Nix Ecosystem Terminology](#nix-ecosystem-terminology)
-- [Architecture](#architecture)
-  - [flake-parts Orchestration](#flake-parts-orchestration)
+- [Architecture & Import Flow](#architecture--import-flow)
+  - [Entry Point & Discovery](#entry-point--discovery)
   - [The Dendritic Pattern](#the-dendritic-pattern)
   - [Self-Exporting Module Schema](#self-exporting-module-schema)
-  - [nixosModules Namespace](#nixosmodules-namespace)
-  - [Central Orchestration Files](#central-orchestration-files)
-  - [Secrets Management](#secrets-management)
-- [Dependency & Import Flow](#dependency--import-flow)
+  - [Module Namespace & Naming](#module-namespace--naming)
   - [Host Build Flow](#host-build-flow)
   - [Profile Composition](#profile-composition)
+  - [Central Orchestration Files](#central-orchestration-files)
+  - [Secrets Management](#secrets-management)
 - [Repository Layout](#repository-layout)
 - [Usage](#usage)
   - [First Install](#first-install-on-a-new-machine)
@@ -55,40 +54,34 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 ---
 
-## Architecture
+## Architecture & Import Flow
 
-nixlab uses **flake-parts**, the **Dendritic Pattern**, and a **self-exporting module schema** — every file registers its own outputs directly into the flake, no central registry required.
+nixlab uses **flake-parts** and the **Dendritic Pattern**: configuration is organized around features rather than hostnames, with every file self-registering its own outputs — no central registry required.
 
-- ### <ins>flake-parts Orchestration</ins>
+- ### <ins>Entry Point & Discovery</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-[flake-parts](https://github.com/hercules-ci/flake-parts) structures flake outputs as composable modules. Each concern lives in its own file and declares exactly what it contributes. `flake.nix` is a thin entry point that uses [import-tree](https://github.com/vic/import-tree) to auto-discover all part files:
+`flake.nix` is a pure delegation layer. [flake-parts](https://github.com/hercules-ci/flake-parts) structures outputs as composable modules; [import-tree](https://github.com/vic/import-tree) auto-discovers every `.nix` file in each top-level directory. Each discovered file contributes to the shared `flake.*` / `perSystem.*` namespaces — adding a new file requires no changes to `flake.nix`. Files prefixed with `_` are leaf imports consumed by their parent and excluded from discovery.
 
 ```nix
 outputs = inputs @ { flake-parts, ... }:
   flake-parts.lib.mkFlake { inherit inputs; } {
     systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
     imports = [
-      (inputs.import-tree ./flake)
-      (inputs.import-tree ./hardware)
-      (inputs.import-tree ./home)
-      (inputs.import-tree ./hosts)
-      (inputs.import-tree ./modules)
-      (inputs.import-tree ./overlays)
-      (inputs.import-tree ./shells)
-      (inputs.import-tree ./sops)
+      (inputs.import-tree ./flake)    # → orchestration (lib, nixpkgs, checks, apps)
+      (inputs.import-tree ./hardware) # → hardw--* nixosModules
+      (inputs.import-tree ./home)     # → homeModules.*
+      (inputs.import-tree ./hosts)    # → hosts--* nixosModules + nixosConfigurations
+      (inputs.import-tree ./modules)  # → servc--* nixosModules
+      (inputs.import-tree ./overlays) # → flake.overlays.*
+      (inputs.import-tree ./shells)   # → perSystem.devShells.*
+      (inputs.import-tree ./sops)     # → nsops--* nixosModules
     ];
   };
 ```
-
-**Key benefits:**
-- New files auto-register — no changes to `flake.nix` required
-- `perSystem` called automatically per supported system
-- Architecture-independent outputs use the `flake.` namespace
-- `_`-prefixed files are excluded from auto-discovery
 
 </details>
 
@@ -98,7 +91,7 @@ outputs = inputs @ { flake-parts, ... }:
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Organizes configuration around **features rather than hostnames**. Instead of asking _"what does this machine need?"_, you ask _"which features does it require?"_ and assemble from capabilities.
+Instead of building outward from a hostname, you assemble inward from capabilities: _"which features does this machine require?"_
 
 - **Shared behaviour** lives in domain-grouped modules under `hosts/common/` — `core/` for universals, `desktop/`, `apps/`, `automation/`, `hardware/`
 - **Profiles** (`profile-base`, `profile-desktop`, `profile-nas`) compose those modules into role-appropriate bundles
@@ -113,20 +106,20 @@ Organizes configuration around **features rather than hostnames**. Instead of as
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Every file is a **flake-parts module** — a function taking `{ self, inputs, ... }` that registers its own outputs directly into the flake. No central registry:
+Every file is a flake-parts module that registers its own outputs directly. No central registry; the name is the only stable contract — files can be freely moved without breaking consumers.
 
 ```nix
 # modules/nixos/glance/default.nix
 { ... }: {
   flake.nixosModules.servc--glance-nixlab = { config, lib, pkgs, ... }: {
-    options.services.glance = { ... };
-    config = lib.mkIf config.services.glance.enable { ... };
+    options.services.glance-nixlab = { enable = lib.mkEnableOption "glance"; ... };
+    config = lib.mkIf cfg.enable { ... };
   };
 }
 ```
 
 ```nix
-# hosts/nixace.nix
+# hosts/nixace.nix  — one file, two outputs
 { self, ... }: {
   flake.nixosConfigurations.nixace = self.lib.mkHost {
     name = "nixace";
@@ -137,7 +130,6 @@ Every file is a **flake-parts module** — a function taking `{ self, inputs, ..
       self.nixosModules.hosts--profl--desktop
       self.nixosModules.servc--bookstack-nixlab
       self.nixosModules.nsops--bookstack
-      # ...
     ];
   };
 
@@ -146,56 +138,114 @@ Every file is a **flake-parts module** — a function taking `{ self, inputs, ..
     gShells.DE = "plasma6";
     blender.enable = true;
     steam.enable = true;
-    # feature selections only — no imports, no inline configs
+    # feature selections only — no imports, no inline service configs
   };
 }
 ```
 
-**Key principles:**
-- Files reference each other by **output name** (`self.nixosModules.*`) — never by path
-- Files can be freely moved or renamed without breaking consumers
-- A single file can emit multiple related outputs
-- The name is the contract, not the path
-
 </details>
 
-- ### <ins>nixosModules Namespace</ins>
+- ### <ins>Module Namespace & Naming</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-All NixOS modules register under `flake.nixosModules` using a double-dash naming convention that encodes a two-level hierarchy in a flat namespace:
+All modules register under `flake.nixosModules`. The double-dash convention encodes a two-level hierarchy in a flat namespace — all cross-file references use `self.nixosModules.*`, never filesystem paths.
 
-**Naming convention:**
-- `hardw--<identifier>`: Hardware configurations
-- `hosts--<identifier>`: Host configurations, profiles, and feature selections
-- `hosts--profl--<identifier>`: Profile compositions (base, desktop, nas)
-- `hosts--core--<identifier>`: Universal core modules
-- `hosts--deskt--<identifier>`: Desktop-specific modules
-- `hosts--apps--<identifier>`: Toggleable application modules
-- `hosts--autom--<identifier>`: Automation and scheduled task modules
-- `hosts--hardw--<identifier>`: Shared hardware concern modules
-- `hosts--debug--<identifier>`: Opt-in debug/diagnostic modules
-- `servc--<identifier>`: Self-hosted service modules
-- `nsops--<identifier>`: sops-nix secret modules (auto-discovered from `sops/`)
-
-Run `nix flake show` to see the complete output tree. Representative sample:
+| Prefix | Layer |
+|--------|-------|
+| `hardw--` | Physical machine hardware |
+| `hosts--<hostname>` | Host identity + feature selections |
+| `hosts--profl--` | Profile compositions (base, desktop, nas) |
+| `hosts--core--` | Universal modules (all hosts) |
+| `hosts--deskt--` | Desktop-only modules |
+| `hosts--apps--` | Toggleable application modules |
+| `hosts--autom--` | Scheduled tasks and automation |
+| `hosts--hardw--` | Shared hardware concerns |
+| `hosts--debug--` | Opt-in diagnostics (never in any profile) |
+| `servc--` | Self-hosted service modules |
+| `nsops--` | sops-nix secret wiring modules |
 
 ```
+# nix flake show (abbreviated)
 ├───nixosConfigurations
-│   ├───nixace, nixtop, nixsun, nixvat, nixzen  # desktops
-│   └───nixnas1, nixnas2                        # NAS
+│   ├───nixace, nixnas1, nixnas2, nixsun, nixtop, nixvat, nixzen
 ├───nixosModules
-│   ├───hardw--zb17g4-p5          # one per machine model
-│   ├───hosts--profl--base        # profiles
-│   ├───hosts--core--networking   # universal core
-│   ├───hosts--deskt--firefox     # desktop layer
-│   ├───hosts--apps--games        # app toggles
-│   ├───hosts--autom--backup-home # automation
-│   ├───hosts--debug--diagnose    # opt-in only
-│   ├───servc--glance-nixlab      # service modules
-│   └───nsops--glance             # secrets wiring
+│   ├───hardw--zb17g4-p5
+│   ├───hosts--profl--base, hosts--profl--desktop, hosts--profl--nas
+│   ├───hosts--core--nix, hosts--core--networking, hosts--core--monitoring, ...
+│   ├───hosts--deskt--gui-shells, hosts--deskt--firefox, ...
+│   ├───hosts--apps--development, hosts--apps--games, ...
+│   ├───hosts--autom--backup-home, hosts--autom--ping-watchdog, ...
+│   ├───hosts--debug--diagnose
+│   ├───servc--glance-nixlab, servc--grafana-nixlab, ...
+│   └───nsops--glance, nsops--ssh-keys, ...
+```
+
+Run `nix flake show` for the complete tree.
+
+</details>
+
+- ### <ins>Host Build Flow</ins>
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+`nixos-rebuild` evaluates `flake.nixosConfigurations.<hostname>`, built by `self.lib.mkHost` in `flake/parts/lib.nix`. The NixOS module system merges all layers — resolving options and `lib.mkIf` guards — into a single configuration passed to `nixpkgs.lib.nixosSystem`.
+
+```
+nixosConfigurations.nixace
+└── self.lib.mkHost { name = "nixace"; modules = [...]; }
+    │
+    │  (injected automatically by lib.nix for every host)
+    ├── nixpkgs    ← selected per-host via _hosts-meta.nix
+    ├── sops-nix   ← inputs.sops-nix.nixosModules.sops-nix
+    ├── overlays   ← all overlays applied to pkgs
+    ├── hostMeta   ← IP, interfaces, etc.
+    │
+    │  (declared in the host's modules = [...] list)
+    ├── hardw--zb17g4-p5         # filesystems, kernel modules
+    ├── hosts--nixace            # feature selections
+    ├── hosts--profl--base       # universal profile
+    ├── hosts--profl--desktop    # desktop profile
+    ├── servc--bookstack-nixlab  # service module
+    └── nsops--bookstack         # secrets wiring
+```
+
+</details>
+
+- ### <ins>Profile Composition</ins>
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+Profiles are pure `imports = [...]` lists — no new configuration, just role-appropriate module bundles. Desktop hosts import `base` + `desktop`; NAS hosts import `base` + `nas`.
+
+```
+hosts--profl--base
+├── hosts--core--boot-loader       # systemd-boot, generation limit
+├── hosts--core--nix               # flakes, registry, store optimisation
+├── hosts--core--networking        # NetworkManager, firewall, wifi via sops templates
+├── hosts--core--open-ssh          # sshd, key-only auth, no root login
+├── hosts--core--users             # nixlab.mainUser option, accounts, HM dispatch
+├── hosts--core--monitoring        # Prometheus + Loki + Grafana (mandatory)
+├── hosts--core--utilities         # system-wide CLI tools
+├── hosts--core--{locale,journald,sops,nginx,display-manager,home-manager-config,system}
+├── hosts--autom--{nix-gc,nixos-upgrade,nixlab-gpull}
+├── servc--homepage-nixlab         # Homepage dashboard (mandatory)
+└── nsops--ssh-keys                # GitHub SSH key decryption
+
+hosts--profl--desktop
+├── hosts--apps--{development,education,games,media,productivity,virtualizations}
+├── hosts--deskt--{firefox,flatpak,gui-shells,ignore-lid,cache-tmpfs}
+├── hosts--hardw--{audio,bluetooth,power-management}
+└── hosts--autom--{backup-home,flake-update,ping-watchdog}
+
+hosts--profl--nas
+└── hosts--autom--backup-phone-media
 ```
 
 </details>
@@ -208,20 +258,15 @@ Run `nix flake show` to see the complete output tree. Representative sample:
 
 A small number of concerns live in `flake/parts/` as conventional flake-parts files rather than self-registering modules:
 
-| File | Responsibility | Output namespace |
-|------|---------------|------------------|
-| `lib.nix` | Defines `mkHost` helper; reads `_hosts-meta.nix`; wires common modules (sops-nix, home-manager, overlays) | `flake.lib` |
-| `_hosts-meta.nix` | Static `hostsMeta` attrset containing per-host metadata: IP addresses, network interfaces, system architecture, nixpkgs input selection | *(imported by `lib.nix`)* |
-| `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option for collision-free contributions | `flake.homeModules` |
-| `nixpkgs.nix` | Configures the default `pkgs` instance for all `perSystem` blocks with `allowUnfree = true` and applies all overlays | `perSystem._module.args.pkgs` |
-| `packages.nix` | Imports custom packages from `pkgs/` directory | `perSystem.packages` |
-| `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) and formatter configuration | `perSystem.checks`, `perSystem.formatter` |
-| `apps.nix` | Defines the `build-all` app that validates all `nixosConfiguration` outputs | `perSystem.apps.build-all` |
-
-**Key features:**
-- **Per-host nixpkgs selection**: different hosts can use different nixpkgs inputs (stable, unstable, pinned)
-- **Centralized overlays**: applied uniformly across all configurations
-- **Metadata-driven networking**: IPs and interface names centralized in `_hosts-meta.nix`
+| File | Responsibility | Output |
+|------|---------------|--------|
+| `lib.nix` | `mkHost` constructor; reads `_hosts-meta.nix`; injects nixpkgs, sops-nix, overlays, hostMeta | `flake.lib` |
+| `_hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection | *(imported by `lib.nix`)* |
+| `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option | `flake.homeModules` |
+| `nixpkgs.nix` | Configures `pkgs` for all `perSystem` blocks (`allowUnfree` + overlays) | `perSystem._module.args.pkgs` |
+| `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks` |
+| `apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` |
+| `packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` |
 
 </details>
 
@@ -233,141 +278,43 @@ A small number of concerns live in `flake/parts/` as conventional flake-parts fi
 
 Secrets are managed with [sops-nix](https://github.com/Mic92/sops-nix) using age encryption, centralized in `sops/`:
 
-- **Encrypted secrets**: per-service `.yaml` files (`sops/glance.yaml`, `sops/ssh-keys.yaml`, etc.)
-- **Secret modules**: `sops/<service>.nix` declares which keys to decrypt and wires them to services, registering as `flake.nixosModules.nsops--<service>`
-- **File-based options**: service modules accept `*File` path options, never plaintext strings
+- **Encrypted secrets**: per-service `.yaml` files committed to the repo
+- **Secret modules**: `sops/<service>.nix` declares which keys to decrypt and wires paths to services, registering as `nsops--<service>`
+- **File-based options**: service modules accept `*File` path options — never plaintext strings
 - **Runtime decryption**: paths available via `config.sops.secrets.<KEY>.path`
 
-Each service gets a paired `<service>.nix` (module declaration) and `<service>.yaml` (encrypted secrets) under `sops/`. See [Repository Layout](#repository-layout) for the full structure.
+```
+sops/
+├── <service>.nix   # registers nsops--<service> module
+├── <service>.yaml  # encrypted secrets
+├── ssh-keys.{nix,yaml}
+└── networking.{nix,yaml}
+```
 
-**SSH Keys:** Stored encrypted in `sops/ssh-keys.yaml`, decrypted at boot to `/run/secrets/ssh_key_*`. Symlinks at `~/.ssh/id_*` enable interactive use; systemd services reference `/run/secrets/` directly.
+**SSH keys:** Private keys stored encrypted in `sops/ssh-keys.yaml`, decrypted at boot to `/run/secrets/ssh_key_*`. Symlinks at `~/.ssh/id_*` enable interactive use; systemd services reference `/run/secrets/` directly.
 
 **Secret patterns used in this repo:**
 
-1. **Simple environment file** (`glance`, `homepage`): Single `SERVICENAME_ENV` secret containing KEY=value lines, loaded via `EnvironmentFile`
-2. **Multiple discrete secrets** (`grafana`, `bookstack`): Individual secrets declared with `lib.genAttrs`, each accessible separately in the service config
-3. **Dedicated oneshot service** (`node-red`): A systemd oneshot service builds the environment file from multiple secrets at runtime
-4. **YAML file passthrough** (`home-assistant`): The entire decrypted secret is installed as `secrets.yaml` in the service's data directory
-5. **Shared secrets** (`networking`): Common credentials (WiFi SSID/password) used across multiple hosts
-6. **SSH private keys** (`ssh-keys`): Encrypted private keys with dual access via `/run/secrets/` (services) and `~/.ssh/` symlinks (interactive)
-
-**Encrypting and managing secrets:**
+1. **Environment file** (`glance`, `homepage`): Single secret with KEY=value lines, loaded via `EnvironmentFile`
+2. **Discrete secrets** (`grafana`, `bookstack`): Individual secrets declared with `lib.genAttrs`, each accessible separately
+3. **Oneshot builder** (`node-red`): Systemd oneshot assembles the env file from multiple secrets at runtime
+4. **File passthrough** (`home-assistant`): Entire decrypted secret installed as `secrets.yaml` in the data directory
+5. **Shared secrets** (`networking`): WiFi credentials used across multiple hosts
+6. **SSH keys** (`ssh-keys`): Dual access via `/run/secrets/` (services) and `~/.ssh/` symlinks (interactive)
 
 ```bash
-# Encrypt a new or existing secrets file
-sops sops/<service>.yaml
+sops sops/<service>.yaml       # create or edit
+sops -d sops/<service>.yaml    # view decrypted (read-only)
 
-# Edit encrypted secrets
-sops sops/<service>.yaml
-
-# Update all secrets after modifying .sops.yaml
+# Re-key all files after modifying .sops.yaml
 sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/key.txt \
   nix-shell -p sops --run "sops updatekeys sops/*.yaml"
-
-# View decrypted content (does not modify)
-sops -d sops/<service>.yaml
 ```
 
-| Secret Type | Encrypted Location | Decrypted Location | Interactive Access |
-|-------------|-------------------|-------------------|-------------------|
-| Service secrets | `sops/service.yaml` | `/run/secrets/SERVICE_*` | N/A |
+| Secret Type | Encrypted | Decrypted | Interactive |
+|-------------|-----------|-----------|-------------|
+| Service secrets | `sops/<service>.yaml` | `/run/secrets/SERVICE_*` | — |
 | SSH keys | `sops/ssh-keys.yaml` | `/run/secrets/ssh_key_*` | `~/.ssh/id_*` (symlink) |
-
-</details>
-
----
-
-## Dependency & Import Flow
-
-How configuration flows from `flake.nix` through every layer to a built NixOS system.
-
-- ### <ins>Host Build Flow</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-`nixos-rebuild` evaluates `flake.nixosConfigurations.<hostname>`, built by `self.lib.mkHost` (defined in `flake/parts/lib.nix`). The NixOS module system merges all layers — resolving options and `lib.mkIf` guards — into a single system configuration passed to `nixpkgs.lib.nixosSystem`.
-
-```
-nixosConfigurations.nixace
-└── self.lib.mkHost { name = "nixace"; modules = [...]; }
-    │
-    │  (lib.nix injects automatically)
-    ├── nixpkgs instance  ← per-host selection from _hosts-meta.nix
-    ├── sops-nix module
-    ├── overlays
-    ├── hostMeta          ← IP, interfaces, etc.
-    │
-    │  (declared in modules = [...])
-    ├── hardw--zb17g4-p5          # hardware
-    ├── hosts--nixace             # host identity + feature selections
-    ├── hosts--profl--base        # see Profile Composition below
-    ├── hosts--profl--desktop     # see Profile Composition below
-    ├── servc--bookstack-nixlab   # host-specific services
-    ├── nsops--bookstack
-    ├── servc--ollama
-    └── nsops--ollama
-```
-
-</details>
-
-- ### <ins>Profile Composition</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-Profiles are pure `imports = [...]` lists — no new configuration, just role-appropriate module bundles.
-
-```
-hosts--profl--base
-├── hosts--core--boot-loader
-├── hosts--core--display-manager
-├── hosts--core--home-manager-config
-├── hosts--core--journald
-├── hosts--core--locale             # en_CA, America/Toronto
-├── hosts--core--monitoring         # Prometheus + Loki + Grafana
-├── hosts--core--networking         # NetworkManager, wifi via sops templates
-├── hosts--core--nginx              # active only if nginx is enabled
-├── hosts--core--nix                # flakes, registry, store optimisation
-├── hosts--core--open-ssh           # key-only auth, no root login
-├── hosts--core--sops
-├── hosts--core--system
-├── hosts--core--users              # nixlab.mainUser option + HM dispatch
-├── hosts--core--utilities
-├── hosts--autom--nix-gc
-├── hosts--autom--nixos-upgrade
-├── hosts--autom--nixlab-gpull
-├── servc--homepage-nixlab
-└── nsops--ssh-keys
-
-
-hosts--profl--desktop
-├── hosts--apps--development        # blender, godot, vscodium (toggles)
-├── hosts--apps--education          # anki (toggle)
-├── hosts--apps--games              # steam (toggle)
-├── hosts--apps--media              # obs, spotify, vlc (toggles)
-├── hosts--apps--productivity       # calibre, libreoffice, logseq (toggles)
-├── hosts--apps--virtualizations    # incus, quickemu, wine, etc. (toggles)
-├── hosts--deskt--cache-tmpfs       # browser cache → tmpfs
-├── hosts--deskt--firefox           # system Firefox with policies + extensions
-├── hosts--deskt--flatpak           # Flathub + auto-update
-├── hosts--deskt--gui-shells        # GNOME / Plasma6 selector
-├── hosts--deskt--ignore-lid        # lid-close + sleep inhibit
-├── hosts--hardw--audio             # PipeWire + ALSA + PulseAudio compat
-├── hosts--hardw--bluetooth
-├── hosts--hardw--power-management  # HDD APM, AHCI LPM, sysctl I/O tuning
-├── hosts--autom--backup-home       # nightly rsync home backup
-├── hosts--autom--flake-update      # nightly flake.lock update + push
-└── hosts--autom--ping-watchdog     # internet watchdog, exponential backoff
-
-
-hosts--profl--nas
-└── hosts--autom--backup-phone-media  # move phone photos from Syncthing share
-```
-
-Desktop hosts (`nixace`, `nixtop`, `nixsun`, `nixvat`, `nixzen`) import `base` + `desktop`. NAS hosts (`nixnas1`, `nixnas2`) import `base` + `nas`.
 
 </details>
 
@@ -580,8 +527,6 @@ Three self-registering files and one metadata entry.
 
 #### 3. Create host configuration `hosts/<hostname>.nix`
 
-Choose the appropriate profile(s) for the machine role:
-
 ```nix
 { self, ... }: {
   flake.nixosConfigurations.<hostname> = self.lib.mkHost {
@@ -590,9 +535,8 @@ Choose the appropriate profile(s) for the machine role:
       self.nixosModules.hardw--<model>
       self.nixosModules.hosts--<hostname>
       self.nixosModules.hosts--profl--base      # required for all hosts
-      self.nixosModules.hosts--profl--desktop   # add for desktop/laptop machines
-      # self.nixosModules.hosts--profl--nas     # add instead for NAS/server machines
-      # service modules this host specifically needs:
+      self.nixosModules.hosts--profl--desktop   # desktop/laptop machines
+      # self.nixosModules.hosts--profl--nas     # NAS/server machines
       self.nixosModules.servc--glance-nixlab
       self.nixosModules.nsops--glance
     ];
@@ -603,12 +547,10 @@ Choose the appropriate profile(s) for the machine role:
     services.displayManager.autoLogin.user = config.nixlab.mainUser;
     gShells.DE = "plasma6";   # only needed if using profile-desktop
 
-    # App toggles (options provided by profile-desktop's app modules)
     blender.enable = true;
     steam.enable = true;
     libreoffice.enable = true;
 
-    # Service configuration
     services.glance-nixlab = {
       enable = true;
       listenAddress = "0.0.0.0";
@@ -628,7 +570,6 @@ Choose the appropriate profile(s) for the machine role:
   flake.homeModules.<username>-<hostname> = { config, lib, pkgs, ... }: {
     imports = [
       self.homeModules.common-global
-      # optional user feature modules
     ];
 
     home = {
@@ -640,7 +581,7 @@ Choose the appropriate profile(s) for the machine role:
 }
 ```
 
-#### 5. Deploy the new host
+#### 5. Deploy
 
 ```bash
 cd ~/nixlab
@@ -664,36 +605,14 @@ Service modules live in `modules/nixos/<service>/`. Secrets are managed separate
 ```nix
 { ... }: {
   flake.nixosModules.servc--<service>-nixlab = { config, lib, pkgs, ... }:
-  let
-    cfg = config.services.<service>-nixlab;
-  in {
+  let cfg = config.services.<service>-nixlab; in {
     options.services.<service>-nixlab = {
       enable = lib.mkEnableOption "<service>";
-
-      port = lib.mkOption {
-        type = lib.types.port;
-        default = 8080;
-      };
-
-      listenAddress = lib.mkOption {
-        type = lib.types.str;
-        default = "127.0.0.1";
-      };
-
-      dataDir = lib.mkOption {
-        type = lib.types.str;
-        default = "/var/lib/<service>";
-      };
-
-      openFirewall = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-      };
-
-      secretsEnvFile = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-      };
+      port = lib.mkOption { type = lib.types.port; default = 8080; };
+      listenAddress = lib.mkOption { type = lib.types.str; default = "127.0.0.1"; };
+      dataDir = lib.mkOption { type = lib.types.str; default = "/var/lib/<service>"; };
+      openFirewall = lib.mkOption { type = lib.types.bool; default = false; };
+      secretsEnvFile = lib.mkOption { type = lib.types.nullOr lib.types.path; default = null; };
     };
 
     config = lib.mkIf cfg.enable {
@@ -711,34 +630,24 @@ Service modules live in `modules/nixos/<service>/`. Secrets are managed separate
 
       users.users.<service> = { isSystemUser = true; group = "<service>"; };
       users.groups.<service> = {};
-
       networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
     };
   };
 }
 ```
 
-#### 2. (Optional) Add secrets support in `sops/`
+#### 2. (Optional) Add secrets support `sops/<service>.nix`
 
-**`sops/<service>.nix`:**
 ```nix
 { ... }: {
   flake.nixosModules.nsops--<service> = { config, lib, ... }:
-  let
-    cfg = config.services.<service>-nixlab;
-  in {
-    options.services.<service>-nixlab.secretsFile = lib.mkOption {
-      type = lib.types.path;
-      default = ./<service>.yaml;
-    };
-
+  let cfg = config.services.<service>-nixlab; in {
     config = lib.mkIf cfg.enable {
       sops.secrets."<service>/env" = {
-        sopsFile = cfg.secretsFile;
+        sopsFile = ./<service>.yaml;
         owner = "<service>";
         restartUnits = ["<service>.service"];
       };
-
       services.<service>-nixlab.secretsEnvFile =
         config.sops.secrets."<service>/env".path;
     };
@@ -746,16 +655,16 @@ Service modules live in `modules/nixos/<service>/`. Secrets are managed separate
 }
 ```
 
-Then encrypt your secrets file: `sops sops/<service>.yaml`
+Then encrypt: `sops sops/<service>.yaml`
 
-#### 3. Use the module in a host
+#### 3. Use in a host
 
 ```nix
-# In hosts/<hostname>.nix modules = [...]:
+# modules = [...]:
 self.nixosModules.servc--<service>-nixlab
-self.nixosModules.nsops--<service>     # if secrets are needed
+self.nixosModules.nsops--<service>
 
-# In the host's config section:
+# config:
 services.<service>-nixlab = {
   enable = true;
   port = 9090;
