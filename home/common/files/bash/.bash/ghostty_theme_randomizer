@@ -19,7 +19,7 @@ _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 {
     echo "background = 000000"
     echo "theme = $_rantheme"
-    echo "font-size = 11"
+    echo "font-size = 10"
 } > "$_ghostty_config"
 
 unset _ghostty_config _ghostty_themes _themes _rantheme
