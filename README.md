@@ -365,10 +365,10 @@ nixlab/
 │   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
 │
 ├── modules/                         # Reusable self-exporting service modules
-│   ├── nixos/                       # System-level service modules (servc--*)
-│   │   └── <service>/
-│   │       └── default.nix
-│   └── home-manager/                # User-level service modules
+│   ├── home-manager/                # User-level service modules
+│   └── nixos/                       # System-level service modules (servc--*)
+│       └── <service>/
+│           └── default.nix
 │
 ├── sops/                            # Centralized secrets management
 │   ├── <service>.nix                # Secret module declarations (nsops--*)
