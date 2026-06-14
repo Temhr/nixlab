@@ -328,11 +328,11 @@ nixlab/
 ├── flake.nix                        # Thin root — delegates to directories via import-tree
 ├── flake.lock                       # Version-pinned input revisions
 │
-├── flake/                           # Orchestration-level flake-parts configs
+├── flake/                           # Orchestration-level flake-parts configurations
 │   └── parts/
 │       ├── _hosts-meta.nix          # Static per-host metadata: IPs, interfaces, nixpkgs
 │       ├── apps.nix                 # build-all app: validates every nixosConfiguration
-│       ├── checks.nix               # Pre-commit hooks (alejandra, deadnix, guards) + formatter
+│       ├── checks.nix               # Pre-commit hooks (alejandra, ...) + formatter
 │       ├── lib.nix                  # mkHost constructor; reads hostsMeta; wires modules + overlays
 │       ├── nixpkgs.nix              # Configs pkgs instance (allowUnfree + overlays) for perSystem
 │       ├── options-home.nix         # Declares flake.homeModules as mergeable lazyAttrsOf option
@@ -362,7 +362,7 @@ nixlab/
 │   │   ├── automation/              # Scheduled tasks
 │   │   ├── debug/                   # Opt-in only — never included in any profile
 │   │   └── profile-*.nix            # hosts--profl--*: module compositions
-│   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
+│   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> modules 
 │
 ├── modules/                         # Reusable self-exporting service modules
 │   ├── home-manager/                # User-level service modules
@@ -381,7 +381,7 @@ nixlab/
 │   ├── _stable-packages.nix         # Exposes nixpkgs-stable as pkgs.stable
 │   └── _unstable-packages.nix       # Exposes nixpkgs-unstable as pkgs.unstable
 │
-├── shells/                          # Isolated development environments (self-registering)
+├── shells/                          # Isolated development environments
 ├── cachix/                          # Cachix binary cache declarations
 ├── pkgs/                            # Custom package definitions
 ├── bin/                             # Utility shell scripts
