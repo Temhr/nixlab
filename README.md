@@ -345,16 +345,16 @@ nixlab/
 │   └── <model>.nix                  # Per-device hardware configuration + module registration
 │
 ├── hosts/                           # System-level NixOS configurations (self-registering)
-│   ├── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
-│   └── common/
-│       ├── profile-*.nix            # hosts--profl--*: module compositions
-│       ├── core/                    # Universal modules (imported by profile-base)
-│       │   └── _users/              # nixlab.mainUser option + user account definitions
-│       ├── desktop/                 # Desktop-only modules (imported by profile-desktop)
-│       ├── hardware/                # Physical hardware modules (imported by profile-desktop)
-│       ├── apps/                    # Toggleable software modules (imported by profile-desktop)
-│       ├── automation/              # Scheduled tasks (split between base and desktop profiles)
-│       └── debug/                   # Opt-in only — never included in any profile
+│   ├── common/
+│   │   ├── profile-*.nix            # hosts--profl--*: module compositions
+│   │   ├── core/                    # Universal modules (imported by profile-base)
+│   │   │   └── _users/              # nixlab.mainUser option + user account definitions
+│   │   ├── desktop/                 # Desktop-only modules (imported by profile-desktop)
+│   │   ├── hardware/                # Physical hardware modules (imported by profile-desktop)
+│   │   ├── apps/                    # Toggleable software modules (imported by profile-desktop)
+│   │   ├── automation/              # Scheduled tasks (split between base and desktop profiles)
+│   │   └── debug/                   # Opt-in only — never included in any profile
+│   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
 │
 ├── home/                            # User-level Home Manager configurations
 │   ├── common/
