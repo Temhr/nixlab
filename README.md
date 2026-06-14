@@ -338,7 +338,7 @@ nixlab/
 │       ├── options-home.nix         # Declares flake.homeModules as mergeable lazyAttrsOf option
 │       └── packages.nix             # Imports pkgs/ into perSystem.packages
 │
-├── hardware/                        # Machine-level hardware configs (self-registering)
+├── hardware/                        # Machine-level hardware configs
 │   ├── common/
 │   │   ├── global/                  # Applied to all machines unconditionally
 │   │   └── optional/                # Selectable hardware modules (GPU drivers, extra mounts)
@@ -352,15 +352,15 @@ nixlab/
 │   └── <username>/                  # User environment for specific hosts
 │       └── <hostname>.nix 
 │
-├── hosts/                           # System-level NixOS configurations (self-registering)
+├── hosts/                           # System-level NixOS configurations
 │   ├── common/
 │   │   ├── profile-*.nix            # hosts--profl--*: module compositions
-│   │   ├── core/                    # Universal modules (imported by profile-base)
+│   │   ├── core/                    # Universal modules
 │   │   │   └── _users/              # nixlab.mainUser option + user account definitions
-│   │   ├── desktop/                 # Desktop-only modules (imported by profile-desktop)
-│   │   ├── hardware/                # Physical hardware modules (imported by profile-desktop)
-│   │   ├── apps/                    # Toggleable software modules (imported by profile-desktop)
-│   │   ├── automation/              # Scheduled tasks (split between base and desktop profiles)
+│   │   ├── desktop/                 # Desktop-only modules
+│   │   ├── hardware/                # Physical hardware modules
+│   │   ├── apps/                    # Toggleable software modules
+│   │   ├── automation/              # Scheduled tasks
 │   │   └── debug/                   # Opt-in only — never included in any profile
 │   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
 │
@@ -372,11 +372,7 @@ nixlab/
 │
 ├── sops/                            # Centralized secrets management
 │   ├── <service>.nix                # Secret module declarations (nsops--*)
-│   ├── <service>.yaml               # Encrypted secrets per service
-│   ├── ssh-keys.nix
-│   ├── ssh-keys.yaml
-│   ├── networking.nix
-│   └── networking.yaml
+│   └── <service>.yaml               # Encrypted secrets per module
 │
 ├── overlays/                        # nixpkgs modifications and channel pinning
 │   ├── default.nix                  # Self-registers all overlays into flake.overlays
