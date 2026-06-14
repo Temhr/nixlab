@@ -338,7 +338,7 @@ nixlab/
 │       ├── options-home.nix         # Declares flake.homeModules as mergeable lazyAttrsOf option
 │       └── packages.nix             # Imports pkgs/ into perSystem.packages
 │
-├── hardware/                        # Machine-level hardware configs
+├── hardware/                        # Machine-level hardware configurations
 │   ├── common/
 │   │   ├── global/                  # Applied to all machines unconditionally
 │   │   └── optional/                # Selectable hardware modules (GPU drivers, extra mounts)
