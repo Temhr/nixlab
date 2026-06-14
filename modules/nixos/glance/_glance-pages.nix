@@ -157,11 +157,15 @@
               }
               {
                 url = "https://fabionatali.com/rss.xml";
-                title = "Fabio Natali (guix)";
+                title = "Fabio Natali (Guix user)";
               }
               {
                 url = "https://coopi.neocities.org/feed.xml";
-                title = "coopi's corner of the web! (guix)";
+                title = "coopi's corner of the web! (Guix user)";
+              }
+              {
+                url = "https://trop.in/feed/blog.xml";
+                title = "Andrew Tropin's blog (Guix dev)";
               }
               {
                 url = "https://nixos.org/blog/announcements-rss.xml";
