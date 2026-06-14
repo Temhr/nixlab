@@ -354,14 +354,14 @@ nixlab/
 │
 ├── hosts/                           # System-level NixOS configurations
 │   ├── common/
-│   │   ├── profile-*.nix            # hosts--profl--*: module compositions
 │   │   ├── core/                    # Universal modules
 │   │   │   └── _users/              # nixlab.mainUser option + user account definitions
 │   │   ├── desktop/                 # Desktop-only modules
 │   │   ├── hardware/                # Physical hardware modules
 │   │   ├── apps/                    # Toggleable software modules
 │   │   ├── automation/              # Scheduled tasks
-│   │   └── debug/                   # Opt-in only — never included in any profile
+│   │   ├── debug/                   # Opt-in only — never included in any profile
+│   │   └── profile-*.nix            # hosts--profl--*: module compositions
 │   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
 │
 ├── modules/                         # Reusable self-exporting service modules
