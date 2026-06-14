@@ -344,6 +344,14 @@ nixlab/
 │   │   └── optional/                # Selectable hardware modules (GPU drivers, extra mounts)
 │   └── <model>.nix                  # Per-device hardware configuration + module registration
 │
+├── home/                            # User-level Home Manager configurations
+│   ├── common/
+│   │   ├── files/                   # Managed dotfiles and scripts
+│   │   ├── global/                  # Applied to all users unconditionally
+│   │   └── optional/                # Selectable user-package modules
+│   └── <username>/                  # User environment for specific hosts
+│       └── <hostname>.nix 
+│
 ├── hosts/                           # System-level NixOS configurations (self-registering)
 │   ├── common/
 │   │   ├── profile-*.nix            # hosts--profl--*: module compositions
@@ -355,14 +363,6 @@ nixlab/
 │   │   ├── automation/              # Scheduled tasks (split between base and desktop profiles)
 │   │   └── debug/                   # Opt-in only — never included in any profile
 │   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> module declaration
-│
-├── home/                            # User-level Home Manager configurations
-│   ├── common/
-│   │   ├── files/                   # Managed dotfiles and scripts
-│   │   ├── global/                  # Applied to all users unconditionally
-│   │   └── optional/                # Selectable user-package modules
-│   └── <username>/
-│       └── <hostname>.nix           # User environment for specific host
 │
 ├── modules/                         # Reusable self-exporting service modules
 │   ├── nixos/                       # System-level service modules (servc--*)
