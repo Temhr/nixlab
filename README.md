@@ -10,12 +10,12 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 - [Nix Ecosystem Terminology](#nix-ecosystem-terminology)
 - [Architecture & Import Flow](#architecture--import-flow)
   - [Entry Point & Discovery](#entry-point--discovery)
+  - [Central Orchestration Files](#central-orchestration-files)
   - [The Dendritic Pattern](#the-dendritic-pattern)
   - [Self-Exporting Module Schema](#self-exporting-module-schema)
   - [Module Namespace & Naming](#module-namespace--naming)
-  - [Host Build Flow](#host-build-flow)
   - [Profile Composition](#profile-composition)
-  - [Central Orchestration Files](#central-orchestration-files)
+  - [Host Build Flow](#host-build-flow)
   - [Secrets Management](#secrets-management)
 - [Repository Layout](#repository-layout)
 - [Usage](#usage)
@@ -209,35 +209,6 @@ Run `nix flake show` for the complete tree.
 
 </details>
 
-- ### <ins>Host Build Flow</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-`nixos-rebuild` evaluates `flake.nixosConfigurations.<hostname>`, built by `self.lib.mkHost` in `flake/parts/lib.nix`. The NixOS module system merges all layers — resolving options and `lib.mkIf` guards — into a single configuration passed to `nixpkgs.lib.nixosSystem`.
-
-```
-nixosConfigurations.nixace
-└── self.lib.mkHost { name = "nixace"; modules = [...]; }
-    │
-    │  (injected automatically by lib.nix for every host)
-    ├── nixpkgs    ← selected per-host via _hosts-meta.nix
-    ├── sops-nix   ← inputs.sops-nix.nixosModules.sops-nix
-    ├── overlays   ← all overlays applied to pkgs
-    ├── hostMeta   ← IP, interfaces, etc.
-    │
-    │  (declared in the host's modules = [...] list)
-    ├── hardw--zb17g4-p5         # filesystems, kernel modules
-    ├── hosts--nixace            # feature selections
-    ├── hosts--profl--base       # universal profile
-    ├── hosts--profl--desktop    # desktop profile
-    ├── servc--bookstack-nixlab  # service module
-    └── nsops--bookstack         # secrets wiring
-```
-
-</details>
-
 - ### <ins>Profile Composition</ins>
 
 <details>
@@ -267,6 +238,35 @@ hosts--profl--desktop
 
 hosts--profl--nas
 └── hosts--autom--backup-phone-media
+```
+
+</details>
+
+- ### <ins>Host Build Flow</ins>
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+`nixos-rebuild` evaluates `flake.nixosConfigurations.<hostname>`, built by `self.lib.mkHost` in `flake/parts/lib.nix`. The NixOS module system merges all layers — resolving options and `lib.mkIf` guards — into a single configuration passed to `nixpkgs.lib.nixosSystem`.
+
+```
+nixosConfigurations.nixace
+└── self.lib.mkHost { name = "nixace"; modules = [...]; }
+    │
+    │  (injected automatically by lib.nix for every host)
+    ├── nixpkgs    ← selected per-host via _hosts-meta.nix
+    ├── sops-nix   ← inputs.sops-nix.nixosModules.sops-nix
+    ├── overlays   ← all overlays applied to pkgs
+    ├── hostMeta   ← IP, interfaces, etc.
+    │
+    │  (declared in the host's modules = [...] list)
+    ├── hardw--zb17g4-p5         # filesystems, kernel modules
+    ├── hosts--nixace            # feature selections
+    ├── hosts--profl--base       # universal profile
+    ├── hosts--profl--desktop    # desktop profile
+    ├── servc--bookstack-nixlab  # service module
+    └── nsops--bookstack         # secrets wiring
 ```
 
 </details>
