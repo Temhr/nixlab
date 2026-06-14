@@ -113,7 +113,7 @@ A small number of concerns live in `flake/parts/` as conventional flake-parts fi
 
 Instead of configuring each machine individually, you assemble it from capabilities. **Features** > **Profiles** > **Hosts** — branching from general to specific: _"which features does this machine require?"_
 
-1. **Feature Modules** — standalone services (`modules/`), secrets (`nsops/`), or domain-grouped by shared behaviour
+1. **Feature Modules** — standalone services (`modules/`), secrets (`nsops/`), or modules domain-grouped by shared behaviour
     - `hosts/common/` — `core/`, `desktop/`, `apps/`, `automation/`, `hardware/`
 1. **Profiles** — (`profile-base`, ...) composed from **Feature Modules** into role-appropriate bundles
 1. **Host manifest** — a selection of **Profiles**, **Feature Modules**, option enables, plus assignment of the **Hardware** and **Home** manifests
