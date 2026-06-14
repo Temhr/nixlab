@@ -85,18 +85,40 @@ outputs = inputs @ { flake-parts, ... }:
 
 </details>
 
+- ### <ins>Central Orchestration Files</ins>
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+A small number of concerns live in `flake/parts/` as conventional flake-parts files rather than self-registering modules:
+
+| File | Responsibility | Output |
+|------|---------------|--------|
+| `lib.nix` | `mkHost` constructor; reads `_hosts-meta.nix`; injects nixpkgs, sops-nix, overlays, hostMeta | `flake.lib` |
+| `_hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection | *(imported by `lib.nix`)* |
+| `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option | `flake.homeModules` |
+| `nixpkgs.nix` | Configures `pkgs` for all `perSystem` blocks (`allowUnfree` + overlays) | `perSystem._module.args.pkgs` |
+| `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks` |
+| `apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` |
+| `packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` |
+
+</details>
+
 - ### <ins>The Dendritic Pattern</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Instead of building outward from a hostname, you assemble inward from capabilities: _"which features does this machine require?"_
+Instead of configuring each machine individually, you assemble it from capabilities. **Features** > **Profiles** > **Hosts** — branching from general to specific: _"which features does this machine require?"_
 
-- **Shared behaviour** lives in domain-grouped modules under `hosts/common/` — `core/` for universals, `desktop/`, `apps/`, `automation/`, `hardware/`
-- **Profiles** (`profile-base`, `profile-desktop`, `profile-nas`) compose those modules into role-appropriate bundles
-- **Host files** are pure feature manifests — a profile selection plus declarative option enables
-- **Changing a feature** happens in one place and propagates to every host that uses it
+1. **Feature Modules** — standalone services (`modules/`), secrets (`nsops/`), or domain-grouped by shared behaviour
+    - `hosts/common/` — `core/`, `desktop/`, `apps/`, `automation/`, `hardware/`
+1. **Profiles** — (`profile-base`, ...) composed from **Feature Modules** into role-appropriate bundles
+1. **Host manifest** — a selection of **Profiles**, **Feature Modules**, option enables, plus assignment of the **Hardware** and **Home** manifests
+1. **nixosConfigurations.[hostname]** fully built system output — **Host** plus **Overlays**, **Home**, and **dev shells** wired in automatically
+   by `mkHost` in `lib.nix`
 
 </details>
 
@@ -246,26 +268,6 @@ hosts--profl--desktop
 hosts--profl--nas
 └── hosts--autom--backup-phone-media
 ```
-
-</details>
-
-- ### <ins>Central Orchestration Files</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-A small number of concerns live in `flake/parts/` as conventional flake-parts files rather than self-registering modules:
-
-| File | Responsibility | Output |
-|------|---------------|--------|
-| `lib.nix` | `mkHost` constructor; reads `_hosts-meta.nix`; injects nixpkgs, sops-nix, overlays, hostMeta | `flake.lib` |
-| `_hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection | *(imported by `lib.nix`)* |
-| `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option | `flake.homeModules` |
-| `nixpkgs.nix` | Configures `pkgs` for all `perSystem` blocks (`allowUnfree` + overlays) | `perSystem._module.args.pkgs` |
-| `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks` |
-| `apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` |
-| `packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` |
 
 </details>
 
