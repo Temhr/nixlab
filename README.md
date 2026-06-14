@@ -231,11 +231,10 @@ hosts--profl--base
 ├── hosts--core--networking        # NetworkManager, firewall, wifi via sops templates
 ├── hosts--core--open-ssh          # sshd, key-only auth, no root login
 ├── hosts--core--users             # nixlab.mainUser option, accounts, HM dispatch
-├── hosts--core--monitoring        # Prometheus + Loki + Grafana (mandatory)
+├── hosts--core--monitoring        # Prometheus + Loki + Grafana
 ├── hosts--core--utilities         # system-wide CLI tools
-├── hosts--core--{locale,journald,sops,nginx,display-manager,home-manager-config,system}
-├── hosts--autom--{nix-gc,nixos-upgrade,nixlab-gpull}
-├── servc--homepage-nixlab         # Homepage dashboard (mandatory)
+├── hosts--...
+├── servc--homepage-nixlab         # Homepage dashboard
 └── nsops--ssh-keys                # GitHub SSH key decryption
 
 hosts--profl--desktop
