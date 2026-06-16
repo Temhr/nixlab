@@ -5,6 +5,7 @@
 }: let
   inherit (inputs.nixpkgs) lib;
   hostsMeta = import ./_hosts-meta.nix { inherit lib; };
+  nixlabLib = import ./_nixos-lib.nix { inherit lib; };
 
   allOverlays = [
     self.overlays.unstable-packages
@@ -47,6 +48,7 @@
       hostLib.nixosSystem {
         specialArgs = {
           inherit inputs self;
+          inherit nixlabLib;
           outputs = self;
           flakePath = self;
           allHosts = hostsMeta;
@@ -80,5 +82,5 @@
           ];
       };
 in {
-  flake.lib = {inherit mkHost hostsMeta;};
+  flake.lib = { inherit mkHost hostsMeta nixlabLib; };
 }
