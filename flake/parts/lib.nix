@@ -4,7 +4,7 @@
   ...
 }: let
   inherit (inputs.nixpkgs) lib;
-  hostsMeta = import ./_hosts-meta.nix;
+  hostsMeta = import ./_hosts-meta.nix { inherit lib; };
 
   allOverlays = [
     self.overlays.unstable-packages
