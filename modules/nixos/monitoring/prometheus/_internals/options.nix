@@ -66,6 +66,15 @@
     description = "Enable Prometheus Node Exporter for system metrics";
   };
 
+  # OPTIONAL: allow opting out of the mainUser group membership
+  # without coupling to a specific external option name
+  extraUsers = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [];
+    example = ["alice"];
+    description = "Extra users to add to the groups";
+  };
+
   # Maintenance options (defined inline)
   maintenance = {
     enable = lib.mkEnableOption "maintenance monitoring exporters and alerts";

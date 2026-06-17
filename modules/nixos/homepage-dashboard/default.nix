@@ -105,6 +105,15 @@
           description = "Group to run Homepage as";
         };
 
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # OPTIONAL: sops-nix path to a KEY=value env file for Homepage widget API keys.
         # Homepage reads HOMEPAGE_VAR_* variables from the service environment and
         # substitutes them into service/widget YAML as {{HOMEPAGE_VAR_NAME}}.
@@ -131,17 +140,21 @@
       # ----------------------------------------------------------------------------
       # USER SETUP
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        extraGroups = ["users"];
-      };
+      users.users = lib.mkMerge (
+        [ { ${cfg.user} = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              extraGroups  = [ "users" ];
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
       users.groups.${cfg.group} = {};
-
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP

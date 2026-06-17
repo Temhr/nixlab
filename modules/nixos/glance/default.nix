@@ -85,6 +85,15 @@
           description = "Group to run Glance as";
         };
 
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # OPTIONAL: Auto-open firewall ports (default: true)
         openFirewall = lib.mkOption {
           type = lib.types.bool;
@@ -124,16 +133,21 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Glance
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        description = "Glance dashboard user";
-      };
+      users.users = lib.mkMerge (
+        [ { ${cfg.user} = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              description  = "Glance dashboard user";
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
       users.groups.${cfg.group} = {};
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # GLANCE SERVICE - Configure the systemd service

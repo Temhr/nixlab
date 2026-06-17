@@ -24,19 +24,24 @@ in {
     ];
 
   # User configuration
-  users.users.prometheus = {
-    isSystemUser = true;
-    group = "prometheus";
-    home = cfg.dataDir;
-    description = "Prometheus service user";
-    extraGroups =
-      lib.optional
-      (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable)
-      "disk";
-  };
+  users.users = lib.mkMerge (
+    [ { prometheus = {
+          isSystemUser = true;
+          group        = "prometheus";
+          home         = cfg.dataDir;
+          description  = "Prometheus service user";
+          extraGroups  = lib.optional
+            (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable)
+            "disk";
+        };
+      }
+    ]
+    ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+      (map (u: { ${u} = { extraGroups = [ "prometheus" ]; }; })
+        ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+  );
 
   users.groups.prometheus = {};
-  users.users.${config.nixlab.mainUser}.extraGroups = ["prometheus"];
 
   # Import service configurations
   systemd.services =
