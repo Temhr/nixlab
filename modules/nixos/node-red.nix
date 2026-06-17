@@ -76,6 +76,15 @@
           description = "Group to run Node-Red as";
         };
 
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # OPTIONAL: Path to credentials environment file
         credentialsEnvFile = lib.mkOption {
           type = lib.types.nullOr lib.types.path;
@@ -105,17 +114,21 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Node-RED
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        description = "Node-Red service user";
-      };
+      users.users = lib.mkMerge (
+        [ { ${cfg.user} = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              description  = "Node-Red service user";
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
       users.groups.${cfg.group} = {};
-
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
 
       # ----------------------------------------------------------------------------
       # NODE-RED SERVICE - Configure the systemd service

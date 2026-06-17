@@ -56,6 +56,15 @@
           description = "Directory for Home Assistant configuration and data";
         };
 
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # OPTIONAL: List of integration components to enable (default: [])
         # Examples: "met" (weather), "esphome", "mqtt", "google_assistant"
         extraComponents = lib.mkOption {
@@ -200,7 +209,12 @@
         "d ${cfg.dataDir} 0770 hass hass -"
       ];
 
-      users.users.${config.nixlab.mainUser}.extraGroups = ["hass"];
+      users.users = lib.mkIf (config.nixlab ? mainUser && config.nixlab.mainUser != "") (
+        lib.mkMerge (
+          map (u: { ${u} = { extraGroups = [ "hass" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers)
+        )
+      );
 
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY - Only configured if domain is set

@@ -75,6 +75,15 @@
           description = "Group to run Comfyui as";
         };
 
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # OPTIONAL: Enable SSL/HTTPS with Let's Encrypt (default: false)
         enableSSL = lib.mkOption {
           type = lib.types.bool;
@@ -103,16 +112,21 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        description = "ComfyUI service user";
-      };
-      users.groups.${cfg.group} = {};
+      users.users = lib.mkMerge (
+        [ { ${cfg.user} = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              description  = "ComfyUI service user";
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group];
+      users.groups.${cfg.group} = {};
 
       # ----------------------------------------------------------------------------
       # COMFYUI PATCH - Fix PyTorch 2.2 compatibility
