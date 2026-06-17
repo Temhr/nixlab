@@ -219,6 +219,15 @@
             Contains: SYNCTHING_GUI_USER, SYNCTHING_GUI_PASSWORD_HASH, SYNCTHING_API_KEY
           '';
         };
+
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
       };
     };
 
@@ -249,23 +258,25 @@
       # USER SETUP - Create Syncthing user and configure access
       # ----------------------------------------------------------------------------
       # Create syncthing system user if using default
-      users.users.syncthing = lib.mkIf (cfg.user == "syncthing") {
-        isSystemUser = true;
-        group = cfg.group;
-        home =
-          if cfg.dataDir != null
-          then cfg.dataDir
-          else "/var/lib/syncthing";
-        createHome = true;
-        description = "Syncthing daemon user";
-      };
+      users.users = lib.mkMerge (
+        lib.optional (cfg.user == "syncthing")
+          { syncthing = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = if cfg.dataDir != null
+                            then cfg.dataDir
+                            else "/var/lib/syncthing";
+              createHome   = true;
+              description  = "Syncthing daemon user";
+            };
+          }
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
-      # Add main user to syncthing group for easy file access
-      users.users.${config.nixlab.mainUser} = lib.mkIf (config.nixlab ? mainUser) {
-        extraGroups = lib.mkAfter [cfg.group];
-      };
-
-      users.groups.syncthing = lib.mkIf (cfg.user == "syncthing" && cfg.group == "syncthing") {};
+      users.groups.syncthing =
+        lib.mkIf (cfg.user == "syncthing" && cfg.group == "syncthing") {};
 
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions

@@ -142,13 +142,13 @@
         description = "Group to run Open WebUI as";
       };
 
-      # NEW: allow opting out of the mainUser group membership
+      # OPTIONAL: allow opting out of the mainUser group membership
       # without coupling to a specific external option name
       extraUsers = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
         example = ["alice"];
-        description = "Extra users to add to the ollama and open-webui groups";
+        description = "Extra users to add to the groups";
       };
     };
 
@@ -183,30 +183,27 @@
       # USERS
       # --------------------------------------------------------------------------
       # Define users in one go using lib.mkMerge
-      users.users = lib.mkMerge [
-        {
-          ollama = {
-            isSystemUser = true;
-            group = "ollama";
-            home = cfg.ollamaDataDir;
-            description = "Ollama service user";
-          };
-          ${cfg.webuiUser} = {
-            isSystemUser = true;
-            group = cfg.webuiGroup;
-            home = cfg.webuiDataDir;
-            description = "Open WebUI service user";
-          };
-        }
-        # Merge in extra users with extraGroups
-        (lib.mkMerge (map (u: {
-            ${u} = {
-              extraGroups = ["ollama" "open-webui"];
+      users.users = lib.mkMerge (
+        [ { ollama = {
+              isSystemUser = true;
+              group        = "ollama";
+              home         = cfg.ollamaDataDir;
+              description  = "Ollama service user";
             };
-          })
-          cfg.extraUsers))
-      ];
-      users.groups.ollama = {};
+            ${cfg.webuiUser} = {
+              isSystemUser = true;
+              group        = cfg.webuiGroup;
+              home         = cfg.webuiDataDir;
+              description  = "Open WebUI service user";
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ "ollama" "open-webui" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
+
+      users.groups.ollama    = {};
       users.groups.open-webui = {};
 
       # --------------------------------------------------------------------------

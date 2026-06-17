@@ -99,6 +99,16 @@
           default = "wiki-js";
           description = "Group to run Wiki-js as";
         };
+
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # OPTIONAL: sops-nix path to the decrypted Wiki.js session/JWT secret.
         # If null, Wiki.js generates its own random secret on startup (non-persistent
         # across restarts — all sessions are invalidated on each service restart).
@@ -126,17 +136,21 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system user for Glance
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        description = "wiki-js user";
-      };
+      users.users = lib.mkMerge (
+        [ { ${cfg.user} = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              description  = "wiki-js user";
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group "postgres" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
       users.groups.${cfg.group} = {};
-
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group "postgres"];
 
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions

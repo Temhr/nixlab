@@ -102,6 +102,15 @@
           description = "Group to run Loki as";
         };
 
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the groups";
+        };
+
         # Maintenance monitoring options
         maintenance = {
           enable = lib.mkEnableOption "maintenance task logging integration";
@@ -145,26 +154,30 @@
       # ----------------------------------------------------------------------------
       # USER SETUP - Create dedicated system users
       # ----------------------------------------------------------------------------
-      users.users.${cfg.user} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = cfg.dataDir;
-        description = "Loki service user";
-      };
+      users.users = lib.mkMerge (
+        [ { ${cfg.user} = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              description  = "Loki service user";
+            };
+          }
+        ]
+        ++ lib.optional cfg.enableAlloy
+          { alloy = {
+              isSystemUser = true;
+              group        = "alloy";
+              description  = "Grafana Alloy service user";
+              extraGroups  = [ "systemd-journal" ];
+            };
+          }
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ cfg.group "alloy" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+      );
 
       users.groups.${cfg.group} = {};
-
-      users.users.alloy = lib.mkIf cfg.enableAlloy {
-        isSystemUser = true;
-        group = "alloy";
-        description = "Grafana Alloy service user";
-        extraGroups = ["systemd-journal"];
-      };
-
-      users.groups.alloy = lib.mkIf cfg.enableAlloy {};
-
-      users.users.${config.nixlab.mainUser}.extraGroups =
-        lib.mkAfter [cfg.group "alloy"];
+      users.groups.alloy         = lib.mkIf cfg.enableAlloy {};
 
       # ----------------------------------------------------------------------------
       # LOKI SERVICE - Configure the systemd service

@@ -131,15 +131,13 @@
           description = "Extra arguments passed verbatim to zola serve.";
         };
 
-        # OPTIONAL: Additional system users to add to the 'zola' group.
-        # Members of this group can read/write the siteDir.
-        # Replaces the previous hardcoded config.nixlab.mainUser reference so
-        # the module works outside the nixlab flake.
+        # OPTIONAL: allow opting out of the mainUser group membership
+        # without coupling to a specific external option name
         extraUsers = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
           example = ["alice"];
-          description = "Extra users to add to the zola group (allows siteDir access).";
+          description = "Extra users to add to the groups";
         };
 
         # OPTIONAL: Declarative config.toml as a Nix attribute set (default: null).
@@ -218,23 +216,19 @@
       # ----------------------------------------------------------------------------
       users.groups.zola = {};
 
-      # Combine the zola system user definition and any extraUsers group
-      # assignments into a single users.users attrset to avoid duplicate
-      # attribute errors from the NixOS module system.
       users.users = lib.mkMerge (
         [
           {
             zola = {
               isSystemUser = true;
-              group = "zola";
-              description = "Zola static site server user.";
+              group        = "zola";
+              description  = "Zola static site server user.";
             };
           }
         ]
-        # Add any requested users to the zola group so they can manage siteDir.
-        # Use extraUsers instead of hardcoding nixlab.mainUser so this module
-        # remains portable outside the nixlab flake.
-        ++ map (u: {${u}.extraGroups = ["zola"];}) cfg.extraUsers
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: { ${u} = { extraGroups = [ "zola" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
       );
 
       # ----------------------------------------------------------------------------
