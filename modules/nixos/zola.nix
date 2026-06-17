@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--zola-nixlab = {
     config,
     lib,
@@ -37,6 +37,9 @@
         (cfg.configToml // {base_url = effectiveBaseUrl;})
       else null;
   in {
+    imports = [
+      self.nixosModules.systm--ports-zola
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

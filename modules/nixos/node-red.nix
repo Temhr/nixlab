@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--node-red-nixlab = {
     config,
     lib,
@@ -8,6 +8,7 @@
     cfg = config.services.nodered-service;
   in {
     imports = [
+      self.nixosModules.systm--ports-nodered
     ];
     # ============================================================================
     # OPTIONS - Define what can be configured

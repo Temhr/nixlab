@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--comfyui-p5000 = {
     config,
     lib,
@@ -8,6 +8,9 @@
     cfg = config.services.comfyui-p5000;
     pytorchWheels = pkgs.pytorchCu118Wheels;
   in {
+    imports = [
+      self.nixosModules.systm--ports-comfyui
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

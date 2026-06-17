@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--syncthing-nixlab = {
     config,
     lib,
@@ -7,6 +7,9 @@
   }: let
     cfg = config.services.syncthing-nixlab;
   in {
+    imports = [
+      self.nixosModules.systm--ports-syncthing
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

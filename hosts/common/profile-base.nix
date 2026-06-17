@@ -1,6 +1,8 @@
 {self, ...}: {
   flake.nixosModules.hosts--profl--base = {...}: {
     imports = [
+      self.nixosModules.systm--ports-core
+
       self.nixosModules.hosts--core--boot-loader
       self.nixosModules.hosts--core--display-manager
       self.nixosModules.hosts--core--home-manager-config
