@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.loki-nixlab;
@@ -133,6 +134,17 @@
     # CONFIG - What happens when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
+
+      # ============================================================================
+      # ASSERTIONS - Catch invalid option combinations at eval time
+      # ============================================================================
+      assertions = [
+        (nixlabLib.mkSslAssertion {
+          inherit (cfg) enableSSL domain;
+          moduleName = "services.loki-nixlab";
+        })
+      ];
+
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions
       # ----------------------------------------------------------------------------
@@ -187,20 +199,15 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
 
-        serviceConfig = {
-          Type = "simple";
-          User = cfg.user;
-          Group = cfg.group;
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ cfg.dataDir ];
+        } // {
+          Type      = "simple";
+          User      = cfg.user;
+          Group     = cfg.group;
           ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
-          Restart = "on-failure";
+          Restart   = "on-failure";
           RestartSec = "10s";
-
-          # Security hardening
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = [cfg.dataDir];
         };
 
         preStart = let
@@ -285,6 +292,10 @@
                 };
               };
             };
+
+            memberlist = {
+              bind_addr = [ "127.0.0.1" ];
+            };
           };
 
           jsonFile =
@@ -314,20 +325,19 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target" "loki.service"];
 
-        serviceConfig = {
-          Type = "simple";
-          User = "alloy";
-          Group = "alloy";
-          ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
-          Restart = "on-failure";
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ "/var/lib/alloy" ];
+        } // {
+          Type       = "simple";
+          User       = "alloy";
+          Group      = "alloy";
+          ExecStart  = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
+          Restart    = "on-failure";
           RestartSec = "10s";
-
-          # Security hardening
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = ["/var/lib/alloy"];
+          # Alloy uses JIT/eBPF — these two options from mkServiceHardening are too
+          # restrictive and cause the SYS signal core dump
+          MemoryDenyWriteExecute = false;
+          SystemCallFilter       = "";   # empty string removes the filter entirely
         };
 
         preStart = let
@@ -460,36 +470,24 @@
       # NGINX REVERSE PROXY - Only configured if domain is set
       # ----------------------------------------------------------------------------
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-
-              # Required for Loki
-              proxy_http_version 1.1;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null) [cfg.port cfg.grpcPort]
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+          extraPorts  = lib.optionals (cfg.domain == null) [ cfg.grpcPort ];
+        });
 
       # ----------------------------------------------------------------------------
       # MAINTENANCE LOG HELPER SCRIPT
