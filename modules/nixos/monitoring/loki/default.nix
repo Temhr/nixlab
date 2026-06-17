@@ -222,6 +222,7 @@
             };
 
             common = {
+              instance_addr = "127.0.0.1";
               path_prefix = cfg.dataDir;
               storage = {
                 filesystem = {
@@ -294,7 +295,7 @@
             };
 
             memberlist = {
-              bind_addr = [ "127.0.0.1" ];
+              join_members = [ ];
             };
           };
 
