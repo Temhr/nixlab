@@ -137,17 +137,19 @@
       # USER SETUP - Create dedicated system user for Glance
       # ----------------------------------------------------------------------------
       users.users = lib.mkMerge (
-        [ { ${cfg.user} = {
+        [
+          {
+            ${cfg.user} = {
               isSystemUser = true;
-              group        = cfg.group;
-              home         = cfg.dataDir;
-              description  = "wiki-js user";
+              group = cfg.group;
+              home = cfg.dataDir;
+              description = "wiki-js user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group "postgres" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group "postgres"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.${cfg.group} = {};

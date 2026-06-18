@@ -141,17 +141,19 @@
       # USER SETUP
       # ----------------------------------------------------------------------------
       users.users = lib.mkMerge (
-        [ { ${cfg.user} = {
+        [
+          {
+            ${cfg.user} = {
               isSystemUser = true;
-              group        = cfg.group;
-              home         = cfg.dataDir;
-              extraGroups  = [ "users" ];
+              group = cfg.group;
+              home = cfg.dataDir;
+              extraGroups = ["users"];
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.${cfg.group} = {};

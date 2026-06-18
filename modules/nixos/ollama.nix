@@ -184,26 +184,28 @@
       # --------------------------------------------------------------------------
       # Define users in one go using lib.mkMerge
       users.users = lib.mkMerge (
-        [ { ollama = {
+        [
+          {
+            ollama = {
               isSystemUser = true;
-              group        = "ollama";
-              home         = cfg.ollamaDataDir;
-              description  = "Ollama service user";
+              group = "ollama";
+              home = cfg.ollamaDataDir;
+              description = "Ollama service user";
             };
             ${cfg.webuiUser} = {
               isSystemUser = true;
-              group        = cfg.webuiGroup;
-              home         = cfg.webuiDataDir;
-              description  = "Open WebUI service user";
+              group = cfg.webuiGroup;
+              home = cfg.webuiDataDir;
+              description = "Open WebUI service user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ "ollama" "open-webui" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = ["ollama" "open-webui"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
-      users.groups.ollama    = {};
+      users.groups.ollama = {};
       users.groups.open-webui = {};
 
       # --------------------------------------------------------------------------

@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.grafana-nixlab;
@@ -208,6 +209,10 @@
     config = lib.mkIf cfg.enable {
       # Guard: catch unknown dashboard names before anything tries to run.
       assertions = [
+        (nixlabLib.mkSslAssertion {
+          inherit (cfg) enableSSL domain;
+          moduleName = "services.grafana-nixlab";
+        })
         {
           assertion =
             builtins.all (
@@ -266,17 +271,19 @@
 
       # ── User / group ─────────────────────────────────────────────────────────
       users.users = lib.mkMerge (
-        [ { ${cfg.user} = {
+        [
+          {
+            ${cfg.user} = {
               isSystemUser = true;
-              group        = cfg.group;
-              home         = cfg.dataDir;
-              description  = "Grafana service user";
+              group = cfg.group;
+              home = cfg.dataDir;
+              description = "Grafana service user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.${cfg.group} = {};
@@ -305,7 +312,10 @@
         };
 
         serviceConfig =
-          {
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.dataDir];
+          }
+          // {
             Type = "simple";
             User = cfg.user;
             Group = cfg.group;
@@ -313,11 +323,6 @@
             ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
             Restart = "on-failure";
             RestartSec = "10s";
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ReadWritePaths = [cfg.dataDir];
 
             ExecStartPre = [
               # Step 1 — runs as root (+):
@@ -368,11 +373,11 @@
 
                   # Delete provisioned dashboards whose provider is no longer known.
                   ${pkgs.sqlite}/bin/sqlite3 "$db"                     "DELETE FROM dashboard
-                     WHERE id IN (
-                       SELECT d.id FROM dashboard d
-                       INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
-                       WHERE dp.name NOT IN ($known_sql)
-                     );"
+                      WHERE id IN (
+                        SELECT d.id FROM dashboard d
+                        INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
+                        WHERE dp.name NOT IN ($known_sql)
+                      );"
 
                   # Delete provisioned dashboards whose provider IS known but whose
                   # uid in the DB does not match the uid in the current JSON file.
@@ -380,30 +385,30 @@
                   # a new version that has a different uid — Grafana won't update
                   # the title or uid itself, so we force a clean re-provision.
                   ${lib.concatStringsSep "
-                  " (lib.mapAttrsToList (name: dashboard: ''
-                    json_uid=$(${pkgs.jq}/bin/jq -r '.uid // empty' ${dashboard.path} 2>/dev/null || true)
-                    if [ -n "$json_uid" ]; then
-                      ${pkgs.sqlite}/bin/sqlite3 "$db"                         "DELETE FROM dashboard
-                         WHERE id IN (
-                           SELECT d.id FROM dashboard d
-                           INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
-                           WHERE dp.name = '${name}' AND d.uid != '$json_uid'
-                         );"
-                    fi
-                  '')
-                  allDashboards)}
+                " (lib.mapAttrsToList (name: dashboard: ''
+                      json_uid=$(${pkgs.jq}/bin/jq -r '.uid // empty' ${dashboard.path} 2>/dev/null || true)
+                      if [ -n "$json_uid" ]; then
+                        ${pkgs.sqlite}/bin/sqlite3 "$db"                         "DELETE FROM dashboard
+                            WHERE id IN (
+                              SELECT d.id FROM dashboard d
+                              INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
+                              WHERE dp.name = '${name}' AND d.uid != '$json_uid'
+                            );"
+                      fi
+                    '')
+                    allDashboards)}
 
                   # Delete orphaned folder records — folders with no remaining
                   # child dashboards and no provisioning entry of their own.
                   ${pkgs.sqlite}/bin/sqlite3 "$db"                     "DELETE FROM dashboard
-                     WHERE is_folder = 1
-                       AND id NOT IN (
-                         SELECT DISTINCT folder_id FROM dashboard
-                         WHERE folder_id IS NOT NULL AND is_folder = 0
-                       )
-                       AND id NOT IN (
-                         SELECT dashboard_id FROM dashboard_provisioning
-                       );"
+                      WHERE is_folder = 1
+                        AND id NOT IN (
+                          SELECT DISTINCT folder_id FROM dashboard
+                          WHERE folder_id IS NOT NULL AND is_folder = 0
+                        )
+                        AND id NOT IN (
+                          SELECT dashboard_id FROM dashboard_provisioning
+                        );"
 
                   echo "grafana-setup: database cleanup complete"
                 fi
@@ -465,35 +470,25 @@
 
       # ── nginx reverse proxy ──────────────────────────────────────────────────
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host               $host;
-              proxy_set_header X-Real-IP          $remote_addr;
-              proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto  $scheme;
-              proxy_set_header Upgrade            $http_upgrade;
-              proxy_set_header Connection         "upgrade";
-              proxy_buffer_size       128k;
-              proxy_buffers         4 256k;
-              proxy_busy_buffers_size 256k;
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_buffer_size       128k;
+          proxy_buffers         4 256k;
+          proxy_busy_buffers_size 256k;
+        '';
       };
 
       # ── Firewall ─────────────────────────────────────────────────────────────
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null) [cfg.port]
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
     };
   };
 }

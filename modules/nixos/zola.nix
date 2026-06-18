@@ -221,14 +221,14 @@
           {
             zola = {
               isSystemUser = true;
-              group        = "zola";
-              description  = "Zola static site server user.";
+              group = "zola";
+              description = "Zola static site server user.";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ "zola" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = ["zola"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       # ----------------------------------------------------------------------------

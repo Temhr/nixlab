@@ -134,7 +134,6 @@
     # CONFIG - What happens when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
-
       # ============================================================================
       # ASSERTIONS - Catch invalid option combinations at eval time
       # ============================================================================
@@ -167,29 +166,32 @@
       # USER SETUP - Create dedicated system users
       # ----------------------------------------------------------------------------
       users.users = lib.mkMerge (
-        [ { ${cfg.user} = {
+        [
+          {
+            ${cfg.user} = {
               isSystemUser = true;
-              group        = cfg.group;
-              home         = cfg.dataDir;
-              description  = "Loki service user";
+              group = cfg.group;
+              home = cfg.dataDir;
+              description = "Loki service user";
             };
           }
         ]
         ++ lib.optional cfg.enableAlloy
-          { alloy = {
-              isSystemUser = true;
-              group        = "alloy";
-              description  = "Grafana Alloy service user";
-              extraGroups  = [ "systemd-journal" ];
-            };
-          }
+        {
+          alloy = {
+            isSystemUser = true;
+            group = "alloy";
+            description = "Grafana Alloy service user";
+            extraGroups = ["systemd-journal"];
+          };
+        }
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group "alloy" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group "alloy"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.${cfg.group} = {};
-      users.groups.alloy         = lib.mkIf cfg.enableAlloy {};
+      users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
       # ----------------------------------------------------------------------------
       # LOKI SERVICE - Configure the systemd service
@@ -199,16 +201,18 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
 
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ cfg.dataDir ];
-        } // {
-          Type      = "simple";
-          User      = cfg.user;
-          Group     = cfg.group;
-          ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
-          Restart   = "on-failure";
-          RestartSec = "10s";
-        };
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.dataDir];
+          }
+          // {
+            Type = "simple";
+            User = cfg.user;
+            Group = cfg.group;
+            ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
+            Restart = "on-failure";
+            RestartSec = "10s";
+          };
 
         preStart = let
           lokiConfig = {
@@ -295,7 +299,7 @@
             };
 
             memberlist = {
-              join_members = [ ];
+              join_members = [];
             };
           };
 
@@ -326,20 +330,22 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target" "loki.service"];
 
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ "/var/lib/alloy" ];
-        } // {
-          Type       = "simple";
-          User       = "alloy";
-          Group      = "alloy";
-          ExecStart  = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
-          Restart    = "on-failure";
-          RestartSec = "10s";
-          # Alloy uses JIT/eBPF — these two options from mkServiceHardening are too
-          # restrictive and cause the SYS signal core dump
-          MemoryDenyWriteExecute = false;
-          SystemCallFilter       = "";   # empty string removes the filter entirely
-        };
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = ["/var/lib/alloy"];
+          }
+          // {
+            Type = "simple";
+            User = "alloy";
+            Group = "alloy";
+            ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            # Alloy uses JIT/eBPF — these two options from mkServiceHardening are too
+            # restrictive and cause the SYS signal core dump
+            MemoryDenyWriteExecute = false;
+            SystemCallFilter = ""; # empty string removes the filter entirely
+          };
 
         preStart = let
           # Base configuration in Alloy's River configuration language
@@ -483,11 +489,12 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;
-          extraPorts  = lib.optionals (cfg.domain == null) [ cfg.grpcPort ];
+          extraPorts = lib.optionals (cfg.domain == null) [cfg.grpcPort];
         });
 
       # ----------------------------------------------------------------------------

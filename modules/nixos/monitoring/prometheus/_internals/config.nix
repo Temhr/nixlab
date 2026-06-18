@@ -25,20 +25,23 @@ in {
 
   # User configuration
   users.users = lib.mkMerge (
-    [ { prometheus = {
+    [
+      {
+        prometheus = {
           isSystemUser = true;
-          group        = "prometheus";
-          home         = cfg.dataDir;
-          description  = "Prometheus service user";
-          extraGroups  = lib.optional
+          group = "prometheus";
+          home = cfg.dataDir;
+          description = "Prometheus service user";
+          extraGroups =
+            lib.optional
             (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable)
             "disk";
         };
       }
     ]
     ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-      (map (u: { ${u} = { extraGroups = [ "prometheus" ]; }; })
-        ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+    (map (u: {${u} = {extraGroups = ["prometheus"];};})
+      ([config.nixlab.mainUser] ++ cfg.extraUsers))
   );
 
   users.groups.prometheus = {};

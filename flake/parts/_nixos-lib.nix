@@ -1,8 +1,7 @@
 # Shared helper functions available to all NixOS modules via specialArgs.
 # Receive in any module with: { nixlabLib, ... }:
 # Then destructure: inherit (nixlabLib) mkNginxVirtualHost mkFirewallPorts mkServiceHardening mkSslAssertion;
-{ lib }:
-{
+{lib}: {
   # ---------------------------------------------------------------------------
   # mkNginxVirtualHost
   # Returns an attrset for services.nginx.virtualHosts.
@@ -20,27 +19,29 @@
   #     '';
   #   };
   # ---------------------------------------------------------------------------
-  mkNginxVirtualHost =
-    { domain
-    , listenAddress
-    , port
-    , enableSSL
-    , extraConfig ? ""
-    , proxyWebsockets ? true
-    }:
+  mkNginxVirtualHost = {
+    domain,
+    listenAddress,
+    port,
+    enableSSL,
+    extraConfig ? "",
+    proxyWebsockets ? true,
+  }:
     lib.optionalAttrs (domain != null) {
       ${domain} = {
-        forceSSL  = enableSSL;
+        forceSSL = enableSSL;
         enableACME = enableSSL;
         locations."/" = {
-          proxyPass       = "http://${listenAddress}:${toString port}";
+          proxyPass = "http://${listenAddress}:${toString port}";
           inherit proxyWebsockets;
-          extraConfig = ''
-            proxy_set_header Host              $host;
-            proxy_set_header X-Real-IP         $remote_addr;
-            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-          '' + extraConfig;
+          extraConfig =
+            ''
+              proxy_set_header Host              $host;
+              proxy_set_header X-Real-IP         $remote_addr;
+              proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+            ''
+            + extraConfig;
         };
       };
     };
@@ -60,14 +61,14 @@
   #       extraPorts  = [ cfg.grpcPort ];   # optional
   #     });
   # ---------------------------------------------------------------------------
-  mkFirewallPorts =
-    { domain
-    , listenAddress
-    , servicePort
-    , extraPorts ? []
-    }:
-    lib.optionals (domain == null && listenAddress != "127.0.0.1") [ servicePort ]
-    ++ lib.optionals (domain != null) [ 80 443 ]
+  mkFirewallPorts = {
+    domain,
+    listenAddress,
+    servicePort,
+    extraPorts ? [],
+  }:
+    lib.optionals (domain == null && listenAddress != "127.0.0.1") [servicePort]
+    ++ lib.optionals (domain != null) [80 443]
     ++ extraPorts;
 
   # ---------------------------------------------------------------------------
@@ -90,27 +91,27 @@
   #     ExecStart = "...";
   #   };
   # ---------------------------------------------------------------------------
-  mkServiceHardening =
-    { writablePaths ? []
-    , allowNetwork  ? true
-    , allowDevices  ? false
-    }:
+  mkServiceHardening = {
+    writablePaths ? [],
+    allowNetwork ? true,
+    allowDevices ? false,
+  }:
     {
-      NoNewPrivileges        = true;
-      PrivateTmp             = true;
-      ProtectSystem          = "strict";
-      ProtectHome            = true;
-      ProtectKernelTunables  = true;
-      ProtectKernelModules   = true;
-      ProtectControlGroups   = true;
-      RestrictNamespaces     = true;
-      LockPersonality        = true;
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectControlGroups = true;
+      RestrictNamespaces = true;
+      LockPersonality = true;
       MemoryDenyWriteExecute = true;
-      SystemCallFilter       = "@system-service";
-      ReadWritePaths         = writablePaths;
+      SystemCallFilter = "@system-service";
+      ReadWritePaths = writablePaths;
     }
     // lib.optionalAttrs allowNetwork {
-      RestrictAddressFamilies = [ "AF_INET" "AF_INET6" ];
+      RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
     }
     // lib.optionalAttrs (!allowDevices) {
       PrivateDevices = true;
@@ -129,13 +130,12 @@
   #     })
   #   ];
   # ---------------------------------------------------------------------------
-  mkSslAssertion =
-    { enableSSL
-    , domain
-    , moduleName
-    }:
-    {
-      assertion = !enableSSL || domain != null;
-      message   = "${moduleName}: enableSSL = true requires domain to be set.";
-    };
+  mkSslAssertion = {
+    enableSSL,
+    domain,
+    moduleName,
+  }: {
+    assertion = !enableSSL || domain != null;
+    message = "${moduleName}: enableSSL = true requires domain to be set.";
+  };
 }

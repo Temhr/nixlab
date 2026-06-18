@@ -211,8 +211,8 @@
 
       users.users = lib.mkIf (config.nixlab ? mainUser && config.nixlab.mainUser != "") (
         lib.mkMerge (
-          map (u: { ${u} = { extraGroups = [ "hass" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers)
+          map (u: {${u} = {extraGroups = ["hass"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers)
         )
       );
 

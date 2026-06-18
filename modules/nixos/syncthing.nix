@@ -260,19 +260,21 @@
       # Create syncthing system user if using default
       users.users = lib.mkMerge (
         lib.optional (cfg.user == "syncthing")
-          { syncthing = {
-              isSystemUser = true;
-              group        = cfg.group;
-              home         = if cfg.dataDir != null
-                            then cfg.dataDir
-                            else "/var/lib/syncthing";
-              createHome   = true;
-              description  = "Syncthing daemon user";
-            };
-          }
+        {
+          syncthing = {
+            isSystemUser = true;
+            group = cfg.group;
+            home =
+              if cfg.dataDir != null
+              then cfg.dataDir
+              else "/var/lib/syncthing";
+            createHome = true;
+            description = "Syncthing daemon user";
+          };
+        }
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.syncthing =

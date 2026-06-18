@@ -1,5 +1,4 @@
-{ lib }:
-let
+{lib}: let
   mkHostMeta = {
     address,
     ethIface,
@@ -14,9 +13,19 @@ let
   }: {
     inherit address system gateway prefixLength nameservers services hostId nixpkgsInput;
     interfaces =
-      [ { name = ethIface; inherit address; type = "ethernet"; } ]
+      [
+        {
+          name = ethIface;
+          inherit address;
+          type = "ethernet";
+        }
+      ]
       ++ lib.optionals (wifiIface != "") [
-        { name = wifiIface; inherit address; type = "wifi"; }
+        {
+          name = wifiIface;
+          inherit address;
+          type = "wifi";
+        }
       ];
   };
 in {
