@@ -4,6 +4,7 @@
     lib,
     pkgs,
     allHosts,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.glance-nixlab;
@@ -159,28 +160,21 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
 
-        serviceConfig =
-          {
-            Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
-            WorkingDirectory = cfg.dataDir;
-            ExecStart = "${cfg.package}/bin/glance";
-            Restart = "on-failure";
-            RestartSec = "10s";
-            TimeoutStartSec = "60s";
-            TimeoutStopSec = "30s";
-
-            # Security hardening
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ReadWritePaths = [cfg.dataDir];
-          }
-          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
-            EnvironmentFile = cfg.secretsEnvFile;
-          };
+      serviceConfig = nixlabLib.mkServiceHardening {
+        writablePaths = [ cfg.dataDir ];
+      } // {
+        Type             = "simple";
+        User             = cfg.user;
+        Group            = cfg.group;
+        WorkingDirectory = cfg.dataDir;
+        ExecStart        = "${cfg.package}/bin/glance";
+        Restart          = "on-failure";
+        RestartSec       = "10s";
+        TimeoutStartSec  = "60s";
+        TimeoutStopSec   = "30s";
+      } // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+        EnvironmentFile = cfg.secretsEnvFile;
+      };
 
         # Always regenerate glance.yml so the pages section stays in sync
         # with _glance-pages.nix on every rebuild.
@@ -218,32 +212,18 @@
       # NGINX REVERSE PROXY - Only configured if domain is set
       # ----------------------------------------------------------------------------
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null) [cfg.port]
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
     };
   };
 }
