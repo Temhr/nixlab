@@ -5,6 +5,7 @@
   config,
   lib,
   pkgs,
+  nixlabLib,
 }: let
   cfg = config.services.prometheus-nixlab;
   scrapeConfigs = import ../scrape-configs.nix {inherit config lib;};
@@ -86,11 +87,13 @@ in {
   wantedBy = ["multi-user.target"];
   after = ["network.target"];
 
-  serviceConfig = {
-    Type = "simple";
-    User = "prometheus";
-    Group = "prometheus";
-    ExecStart = ''
+  serviceConfig = nixlabLib.mkServiceHardening {
+    writablePaths = [ cfg.dataDir ];
+  } // {
+    Type       = "simple";
+    User       = "prometheus";
+    Group      = "prometheus";
+    ExecStart  = ''
       ${cfg.package}/bin/prometheus \
         --config.file=${cfg.dataDir}/prometheus.yml \
         --storage.tsdb.path=${cfg.dataDir}/data \
@@ -100,15 +103,8 @@ in {
         --web.console.libraries=${cfg.package}/etc/prometheus/console_libraries
     '';
     ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
-    Restart = "on-failure";
+    Restart    = "on-failure";
     RestartSec = "10s";
-
-    # Security hardening
-    NoNewPrivileges = true;
-    PrivateTmp = true;
-    ProtectSystem = "strict";
-    ProtectHome = true;
-    ReadWritePaths = [cfg.dataDir];
   };
 
   preStart = preStartScript;

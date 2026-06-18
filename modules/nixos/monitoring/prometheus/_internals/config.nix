@@ -5,14 +5,15 @@
   config,
   lib,
   pkgs,
+  nixlabLib,
 }: let
   cfg = config.services.prometheus-nixlab;
 
   # Import specialized configurations
-  prometheusService = import ./services/prometheus.nix {inherit config lib pkgs;};
+  prometheusService = import ./services/prometheus.nix {inherit config lib pkgs nixlabLib;};
   nodeExporterService = import ./exporters/node.nix {inherit config lib pkgs;};
   maintenanceExporters = import ./exporters/maintenance.nix {inherit config lib pkgs;};
-  nginxConfig = import ./extras/nginx.nix {inherit config lib;};
+  nginxConfig = import ./extras/nginx.nix {inherit config lib nixlabLib;};
 in {
   # Directory setup
   systemd.tmpfiles.rules =
@@ -61,8 +62,9 @@ in {
   services.nginx = nginxConfig;
 
   # Firewall configuration
-  networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-    lib.optionals (cfg.domain == null) [cfg.port]
-    ++ lib.optionals (cfg.domain != null) [80 443]
-  );
+  networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+    (nixlabLib.mkFirewallPorts {
+      inherit (cfg) domain listenAddress;
+      servicePort = cfg.port;
+    });
 }

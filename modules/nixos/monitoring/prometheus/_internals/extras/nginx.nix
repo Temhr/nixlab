@@ -4,25 +4,12 @@
 {
   config,
   lib,
+  nixlabLib,
 }: let
   cfg = config.services.prometheus-nixlab;
 in {
   enable = lib.mkIf (cfg.domain != null) true;
-
-  virtualHosts = lib.mkIf (cfg.domain != null) {
-    ${cfg.domain} = {
-      forceSSL = cfg.enableSSL;
-      enableACME = cfg.enableSSL;
-
-      locations."/" = {
-        proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-        '';
-      };
-    };
+  virtualHosts = nixlabLib.mkNginxVirtualHost {
+    inherit (cfg) domain listenAddress port enableSSL;
   };
 }

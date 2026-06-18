@@ -22,13 +22,14 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.prometheus-nixlab;
 
     # Import all submodules - pass pkgs to options
     options = import ./_internals/options.nix {inherit lib pkgs;};
-    prometheusConfig = import ./_internals/config.nix {inherit config lib pkgs;};
+    prometheusConfig = import ./_internals/config.nix {inherit config lib pkgs nixlabLib;};
   in {
     # Import options from separate file
     options.services.prometheus-nixlab = options;
