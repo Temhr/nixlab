@@ -2,6 +2,7 @@
   flake.nixosModules.servc--home-assistant-nixlab = {
     config,
     lib,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.homeassistant-custom;
@@ -211,8 +212,8 @@
 
       users.users = lib.mkIf (config.nixlab ? mainUser && config.nixlab.mainUser != "") (
         lib.mkMerge (
-          map (u: {${u} = {extraGroups = ["hass"];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers)
+          map (u: { ${u} = { extraGroups = [ "hass" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers)
         )
       );
 
@@ -222,40 +223,23 @@
       # Enable nginx if domain is configured
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
-      # Configure virtual host for Home Assistant
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          # Force HTTPS if SSL is enabled
-          forceSSL = cfg.enableSSL;
-          # Get automatic SSL certificate from Let's Encrypt
-          enableACME = cfg.enableSSL;
-
-          # Proxy all requests to Home Assistant
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            # Enable WebSocket support (required for real-time updates)
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Always open the Home Assistant port
-        [cfg.port]
-        # Also open HTTP (80) and HTTPS (443) if using domain
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
     };
   };
 }
