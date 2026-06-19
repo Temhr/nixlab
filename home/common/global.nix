@@ -5,7 +5,7 @@
       self.homeModules.common-global--config-folders
       self.homeModules.common-global--config-git
       self.homeModules.common-global--config-ssh
-      self.homeModules.common-global--config-virt-manager
+      # self.homeModules.common-global--config-virt-manager
       self.homeModules.common-global--ephemeral-apps
       self.homeModules.common-global--system
       self.homeModules.common-global--utilities
