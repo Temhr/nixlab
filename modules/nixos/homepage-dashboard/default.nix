@@ -5,6 +5,7 @@
     pkgs,
     allHosts,
     hostMeta,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.homepage-nixlab;
@@ -217,66 +218,46 @@
           rm -f ${settingsTmp}
         '';
 
-        serviceConfig =
-          {
-            Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
-            ExecStart = "${cfg.package}/bin/homepage";
-            Restart = "on-failure";
-            RestartSec = "10s";
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ cfg.dataDir ];
+        } // {
+          Type       = "simple";
+          User       = cfg.user;
+          Group      = cfg.group;
+          ExecStart  = "${cfg.package}/bin/homepage";
+          Restart    = "on-failure";
+          RestartSec = "10s";
 
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            ProtectSystem =
-              if lib.hasPrefix "/home/" cfg.dataDir
-              then "false"
-              else "strict";
-            ProtectHome =
-              if lib.hasPrefix "/home/" cfg.dataDir
-              then false
-              else true;
-            ReadWritePaths = [cfg.dataDir];
-          }
-          // lib.optionalAttrs (cfg.environmentFile != null) {
-            EnvironmentFile = cfg.environmentFile;
-          };
+          # homepage-dashboard is a Next.js app — it uses JIT compilation which
+          # requires write+execute memory and syscalls outside @system-service.
+          # These two options from mkServiceHardening must be relaxed.
+          MemoryDenyWriteExecute = false;
+          SystemCallFilter       = "";
+
+          # ProtectSystem/ProtectHome need special handling for home directory paths
+          ProtectSystem = if lib.hasPrefix "/home/" cfg.dataDir then "false" else "strict";
+          ProtectHome   = if lib.hasPrefix "/home/" cfg.dataDir then false else true;
+        } // lib.optionalAttrs (cfg.environmentFile != null) {
+          EnvironmentFile = cfg.environmentFile;
+        };
       };
 
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY
       # ----------------------------------------------------------------------------
-      services.nginx = lib.mkIf (cfg.domain != null) {
-        enable = true;
-        recommendedProxySettings = true;
-        recommendedTlsSettings = true;
-        recommendedOptimisation = true;
-        recommendedGzipSettings = true;
-
-        virtualHosts.${cfg.domain} = {
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-            '';
-          };
-
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-        };
+      services.nginx.enable = lib.mkIf (cfg.domain != null) true;
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
     };
   };
 }
