@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.syncthing-nixlab;
@@ -240,18 +241,19 @@
       # ----------------------------------------------------------------------------
       assertions = [
         {
-          assertion = cfg.enableGuiAuth -> (cfg.secretsEnvFile != null);
+          assertion = !cfg.enableGuiAuth || cfg.secretsEnvFile != null;
           message = ''
-            Syncthing GUI authentication is enabled but no secretsEnvFile is provided.
-            Either:
-            1. Set enableGuiAuth = false; (no authentication)
-            2. Import the nsops--syncthing module to provide secrets
+            services.syncthing-nixlab: enableGuiAuth = true requires secretsEnvFile to be set.
+            Provide a path to a KEY=value env file containing:
+              SYNCTHING_GUI_USER=...
+              SYNCTHING_GUI_PASSWORD_HASH=...
+              SYNCTHING_API_KEY=...
           '';
         }
-        {
-          assertion = cfg.enableSSL -> (cfg.domain != null);
-          message = "Syncthing enableSSL requires a domain to be set";
-        }
+        (nixlabLib.mkSslAssertion {
+          inherit (cfg) enableSSL domain;
+          moduleName = "services.syncthing-nixlab";
+        })
       ];
 
       # ----------------------------------------------------------------------------
@@ -260,21 +262,19 @@
       # Create syncthing system user if using default
       users.users = lib.mkMerge (
         lib.optional (cfg.user == "syncthing")
-        {
-          syncthing = {
-            isSystemUser = true;
-            group = cfg.group;
-            home =
-              if cfg.dataDir != null
-              then cfg.dataDir
-              else "/var/lib/syncthing";
-            createHome = true;
-            description = "Syncthing daemon user";
-          };
-        }
+          { syncthing = {
+              isSystemUser = true;
+              group        = cfg.group;
+              home         = if cfg.dataDir != null
+                            then cfg.dataDir
+                            else "/var/lib/syncthing";
+              createHome   = true;
+              description  = "Syncthing daemon user";
+            };
+          }
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = [cfg.group];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
       );
 
       users.groups.syncthing =
@@ -296,41 +296,6 @@
       in [
         "d ${actualDataDir} 0770 ${cfg.user} ${cfg.group} -"
       ];
-
-      # ----------------------------------------------------------------------------
-      # SECRETS PREPARATION SERVICE (only if GUI auth is enabled)
-      # ----------------------------------------------------------------------------
-      # A dedicated oneshot that writes /run/syncthing-credentials.env BEFORE
-      # syncthing.service starts. This ensures the environment file exists at
-      # unit-load time.
-      systemd.services.syncthing-secrets = lib.mkIf (cfg.enableGuiAuth && cfg.secretsEnvFile != null) {
-        description = "Write Syncthing credentials env file";
-        wantedBy = ["syncthing.service"];
-        before = ["syncthing.service"];
-        after = ["sops-nix.service"];
-
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          User = "root";
-        };
-
-        script = ''
-          # Read the decrypted secrets and create environment file
-          GUI_USER=$(cat ${config.sops.secrets."syncthing/gui_user".path})
-          GUI_PASS_HASH=$(cat ${config.sops.secrets."syncthing/gui_password_hash".path})
-          API_KEY=$(cat ${config.sops.secrets."syncthing/api_key".path})
-
-          cat > /run/syncthing-credentials.env << EOF
-          SYNCTHING_GUI_USER=$GUI_USER
-          SYNCTHING_GUI_PASSWORD_HASH=$GUI_PASS_HASH
-          SYNCTHING_API_KEY=$API_KEY
-          EOF
-
-          chown ${cfg.user}:${cfg.group} /run/syncthing-credentials.env
-          chmod 600 /run/syncthing-credentials.env
-        '';
-      };
 
       # ----------------------------------------------------------------------------
       # SYNCTHING SERVICE - Configure the built-in NixOS Syncthing module
@@ -420,64 +385,39 @@
       # SERVICE CUSTOMIZATION - Additional systemd service configuration
       # ----------------------------------------------------------------------------
       systemd.services.syncthing = {
-        # Ensure secrets are ready before starting (only if GUI auth enabled)
-        requires = lib.optionals (cfg.enableGuiAuth && cfg.secretsEnvFile != null) ["syncthing-secrets.service"];
-        after = lib.optionals (cfg.enableGuiAuth && cfg.secretsEnvFile != null) ["syncthing-secrets.service"];
-
-        serviceConfig =
-          {
-            # Restart on failure
-            Restart = "on-failure";
-            RestartSec = "10s";
-          }
-          // lib.optionalAttrs (cfg.enableGuiAuth && cfg.secretsEnvFile != null) {
-            # Load environment file with secrets (only if auth enabled)
-            EnvironmentFile = cfg.secretsEnvFile;
-          };
+        serviceConfig = {
+          Restart    = "on-failure";
+          RestartSec = "10s";
+        } // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+          EnvironmentFile = cfg.secretsEnvFile;
+        };
       };
 
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY - Only configured if domain is set
       # ----------------------------------------------------------------------------
-      services.nginx = lib.mkIf (cfg.domain != null) {
-        enable = true;
-        # Enable recommended security and performance settings
-        recommendedProxySettings = true;
-        recommendedTlsSettings = true;
-        recommendedOptimisation = true;
-        recommendedGzipSettings = true;
+      services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
-        virtualHosts.${cfg.domain} = {
-          # Proxy all requests to Syncthing GUI
-          locations."/" = {
-            proxyPass = "http://${cfg.guiAddress}:${toString cfg.guiPort}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
-            '';
-          };
-
-          # Force HTTPS if SSL is enabled
-          forceSSL = cfg.enableSSL;
-          # Get automatic SSL certificate from Let's Encrypt
-          enableACME = cfg.enableSSL;
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain enableSSL;
+        listenAddress = cfg.guiAddress;
+        port          = cfg.guiPort;
+        extraConfig   = ''
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Open GUI port if not localhost-only
-        lib.optionals (cfg.guiAddress != "127.0.0.1") [cfg.guiPort]
-        # Also open HTTP/HTTPS if using reverse proxy
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          domain        = cfg.domain;
+          listenAddress = cfg.guiAddress;
+          servicePort   = cfg.guiPort;
+        });
     };
   };
 }
