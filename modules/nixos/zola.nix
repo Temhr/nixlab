@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.zola-nixlab;
@@ -131,13 +132,13 @@
           description = "Extra arguments passed verbatim to zola serve.";
         };
 
-        # OPTIONAL: allow opting out of the mainUser group membership
-        # without coupling to a specific external option name
+        # OPTIONAL: Additional users to add to the zola group.
+        # The primary nixlab user is added automatically via config.nixlab.mainUser.
         extraUsers = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
           example = ["alice"];
-          description = "Extra users to add to the groups";
+          description = "Extra users to add to the zola group (allows siteDir access).";
         };
 
         # OPTIONAL: Declarative config.toml as a Nix attribute set (default: null).
@@ -154,20 +155,6 @@
         # When null (default) the module does NOT manage config.toml at all.
         # A config.toml must already exist in siteDir (e.g. created via `zola init`)
         # or the preStart check will fail and the service will not start.
-        #
-        # Example:
-        #   configToml = {
-        #     title = "My Blog";
-        #     compile_sass = true;
-        #     build_search_index = true;
-        #     markdown = { highlight_code = true; };
-        #     extra = { author = "Alice"; };
-        #   };
-        #
-        #   Separate file:
-        #     configToml = import ./zola-config.nix;
-        #   where zola-config.nix contains:
-        #   { title = "My Blog"; markdown = { highlight_code = true; }; }
         configToml = lib.mkOption {
           type = lib.types.nullOr (lib.types.attrsOf lib.types.anything);
           default = null;
@@ -203,12 +190,10 @@
     # ============================================================================
     config = lib.mkIf cfg.enable {
       assertions = [
-        {
-          # enableSSL without a domain is meaningless — Let's Encrypt needs a
-          # hostname to issue a certificate.
-          assertion = cfg.enableSSL -> cfg.domain != null;
-          message = "services.zola-nixlab: enableSSL = true requires domain to be set.";
-        }
+        (nixlabLib.mkSslAssertion {
+          inherit (cfg) enableSSL domain;
+          moduleName = "services.zola-nixlab";
+        })
       ];
 
       # ----------------------------------------------------------------------------
@@ -221,14 +206,14 @@
           {
             zola = {
               isSystemUser = true;
-              group = "zola";
-              description = "Zola static site server user.";
+              group        = "zola";
+              description  = "Zola static site server user.";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = ["zola"];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
+          (map (u: { ${u} = { extraGroups = [ "zola" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
       );
 
       # ----------------------------------------------------------------------------
@@ -285,137 +270,85 @@
       # ----------------------------------------------------------------------------
       systemd.services.zola = {
         description = "Zola Static Site Server";
-        wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        wantedBy    = [ "multi-user.target" ];
+        after       = [ "network.target" ];
 
-        serviceConfig =
-          {
-            Type = "simple";
-            User = "zola";
-            Group = "zola";
-            WorkingDirectory = cfg.siteDir;
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ cfg.siteDir ];
+        } // {
+          Type             = "simple";
+          User             = "zola";
+          Group            = "zola";
+          WorkingDirectory = cfg.siteDir;
 
-            # ExecStartPre commands run before ExecStart in order.
-            #
-            # Step 1 (root, '+' prefix): install config.toml from the Nix store
-            # when configToml is set.  The '+' prefix runs this specific command
-            # as root regardless of User = zola above — the correct way to do a
-            # privileged pre-start action under systemd hardening without the
-            # deprecated PermissionsStartOnly.  Only present when configToml != null.
-            #
-            # Step 2 (zola user): guard against a missing config.toml.  Catches
-            # the case where configToml is null and the user hasn't created one,
-            # or where siteDir is a mount that isn't present yet.
-            ExecStartPre =
-              lib.optional (cfg.configToml != null)
-              "+${pkgs.coreutils}/bin/install -m 640 -o zola -g zola ${configFile} ${cfg.siteDir}/config.toml"
-              ++ [
-                # Runs as User = zola (no '+'), so this is inside the sandbox.
-                "${pkgs.bash}/bin/bash -c 'if [ ! -f ${cfg.siteDir}/config.toml ]; then echo \"ERROR: no config.toml at ${cfg.siteDir} — set configToml or create one manually\"; exit 1; fi'"
-              ];
+          # ExecStartPre commands run before ExecStart in order.
+          #
+          # Step 1 (root, '+' prefix): install config.toml from the Nix store
+          # when configToml is set. The '+' prefix runs this specific command
+          # as root regardless of User = zola above — the correct way to do a
+          # privileged pre-start action under systemd hardening without the
+          # deprecated PermissionsStartOnly. Only present when configToml != null.
+          #
+          # Step 2 (zola user): guard against a missing config.toml. Catches
+          # the case where configToml is null and the user hasn't created one,
+          # or where siteDir is a mount that isn't present yet.
+          ExecStartPre =
+            lib.optional (cfg.configToml != null)
+            "+${pkgs.coreutils}/bin/install -m 640 -o zola -g zola ${configFile} ${cfg.siteDir}/config.toml"
+            ++ [
+              "${pkgs.bash}/bin/bash -c 'if [ ! -f ${cfg.siteDir}/config.toml ]; then echo \"ERROR: no config.toml at ${cfg.siteDir} — set configToml or create one manually\"; exit 1; fi'"
+            ];
 
-            # The --base-url flag always mirrors effectiveBaseUrl so it stays in
-            # sync with whatever nginx / the domain options say, even if the
-            # on-disk config.toml has a different value.
-            ExecStart = lib.concatStringsSep " " (
-              [
-                "${cfg.package}/bin/zola"
-                "serve"
-                "--interface"
-                cfg.listenAddress
-                "--port"
-                (toString cfg.port)
-                "--base-url"
-                effectiveBaseUrl
-              ]
-              # watchMode = false: --watch-only tells Zola to rebuild on changes
-              # but not run its own HTTP server (hand off serving to nginx).
-              # watchMode = true (default): serve + live-reload normally.
-              ++ lib.optionals (!cfg.watchMode) ["--watch-only"]
-              ++ cfg.extraArgs
-            );
+          # The --base-url flag always mirrors effectiveBaseUrl so it stays in
+          # sync with whatever nginx / the domain options say, even if the
+          # on-disk config.toml has a different value.
+          ExecStart = lib.concatStringsSep " " (
+            [
+              "${cfg.package}/bin/zola"
+              "serve"
+              "--interface"
+              cfg.listenAddress
+              "--port"
+              (toString cfg.port)
+              "--base-url"
+              effectiveBaseUrl
+            ]
+            # watchMode = false: --watch-only tells Zola to rebuild on changes
+            # but not run its own HTTP server (hand off serving to nginx).
+            # watchMode = true (default): serve + live-reload normally.
+            ++ lib.optionals (!cfg.watchMode) [ "--watch-only" ]
+            ++ cfg.extraArgs
+          );
 
-            Restart = "on-failure";
-            RestartSec = "10s";
-
-            # Allow Zola read-write access to siteDir for rebuilds and cache.
-            ReadWritePaths = [cfg.siteDir];
-
-            # Inject secrets from an external file when provided.
-            # The file must be KEY=value lines (systemd EnvironmentFile syntax).
-            # It is NOT in the Nix store, so secrets stay out of /nix/store.
-          }
-          # Conditionally merge EnvironmentFile — lib.optionalAttrs keeps the
-          # attrset clean when no secrets file is configured.
-          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
-            EnvironmentFile = cfg.secretsEnvFile;
-          }
-          # ---- Systemd hardening ------------------------------------------------
-          # These options constrain what the zola process can do at the OS level
-          # without affecting normal site-serving operation.
-          // {
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            # "strict" marks the whole filesystem read-only; only ReadWritePaths
-            # above are writable.
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ProtectKernelTunables = true;
-            ProtectKernelModules = true;
-            ProtectControlGroups = true;
-            RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
-            RestrictNamespaces = true;
-            LockPersonality = true;
-            MemoryDenyWriteExecute = true;
-            SystemCallFilter = "@system-service";
-          };
+          Restart    = "on-failure";
+          RestartSec = "10s";
+        } // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+          EnvironmentFile = cfg.secretsEnvFile;
+        };
       };
 
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY - Only configured if domain is set
       # ----------------------------------------------------------------------------
-
-      # Use lib.mkIf rather than placing mkIf inside the attribute value to
-      # avoid unexpected merge behaviour in the NixOS module system.
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
-      # Use lib.optionalAttrs so the attrset is empty (not wrapped in mkIf) when
-      # no domain is configured — this plays more nicely with module merging.
-      services.nginx.virtualHosts = lib.optionalAttrs (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-
-              # WebSocket support for Zola's live-reload feature.
-              # Without these headers the browser's WS connection through nginx
-              # will be silently dropped and live-reload won't work.
-              proxy_http_version 1.1;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports when requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Only open the Zola port directly if there's no reverse proxy AND
-        # Zola is binding to a non-loopback address (opening localhost ports
-        # via the firewall has no effect).
-        lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
-        # When using nginx as a reverse proxy, open standard HTTP/HTTPS ports.
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
     };
   };
 }
@@ -558,4 +491,3 @@ Validate site (checks links, templates, etc.):
 Verbose build:
   cd /var/www/my-blog && zola build --verbose
 */
-
