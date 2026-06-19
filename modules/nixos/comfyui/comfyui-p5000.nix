@@ -321,23 +321,23 @@
       # ----------------------------------------------------------------------------
       systemd.services.comfyui = {
         description = "ComfyUI Stable Diffusion Service (GPU - P5000)";
-        wantedBy    = [ "multi-user.target" ];
-        after       = [ "network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service" ];
-        requires    = [ "comfyui-pytorch-setup.service" "comfyui-patch.service" ];
+        wantedBy = ["multi-user.target"];
+        after = ["network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service"];
+        requires = ["comfyui-pytorch-setup.service" "comfyui-patch.service"];
 
         unitConfig = {
           ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
         };
 
         serviceConfig = {
-          Type             = "simple";
-          User             = cfg.user;
-          Group            = cfg.group;
+          Type = "simple";
+          User = cfg.user;
+          Group = cfg.group;
           WorkingDirectory = cfg.dataDir;
-          ExecStartPre     = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
-          ExecStart        = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --base-directory ${cfg.dataDir} --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
-          Restart          = "on-failure";
-          RestartSec       = "10s";
+          ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
+          ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --base-directory ${cfg.dataDir} --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
+          Restart = "on-failure";
+          RestartSec = "10s";
 
           Environment = [
             "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
@@ -374,11 +374,11 @@
           # PrivateDevices = false is required — true blocks /dev/nvidia*.
           # PrivateTmp = false is required — CUDA uses /tmp for IPC (error 304 otherwise).
           NoNewPrivileges = true;
-          PrivateDevices  = false;
-          PrivateTmp      = false;
-          ProtectSystem   = "strict";
-          ProtectHome     = true;
-          ReadWritePaths  = [ cfg.dataDir ];
+          PrivateDevices = false;
+          PrivateTmp = false;
+          ProtectSystem = "strict";
+          ProtectHome = true;
+          ReadWritePaths = [cfg.dataDir];
         };
       };
 
@@ -397,7 +397,8 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary port if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;

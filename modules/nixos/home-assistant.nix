@@ -212,8 +212,8 @@
 
       users.users = lib.mkIf (config.nixlab ? mainUser && config.nixlab.mainUser != "") (
         lib.mkMerge (
-          map (u: { ${u} = { extraGroups = [ "hass" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers)
+          map (u: {${u} = {extraGroups = ["hass"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers)
         )
       );
 
@@ -235,7 +235,8 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;

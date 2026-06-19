@@ -211,7 +211,7 @@
         };
 
         secretsEnvFile = lib.mkOption {
-          type    = lib.types.nullOr lib.types.path;
+          type = lib.types.nullOr lib.types.path;
           default = null;
           example = "/run/secrets/syncthing-env";
           description = ''
@@ -251,23 +251,23 @@
       # ASSERTIONS - Verify configuration is valid
       # ----------------------------------------------------------------------------
       assertions = [
-      {
-        assertion = !cfg.enableGuiAuth || cfg.secretsEnvFile != null;
-        message = ''
-          services.syncthing-nixlab: enableGuiAuth = true requires secretsEnvFile to be set.
-          Provide a path to a KEY=value env file containing:
-            SYNCTHING_GUI_USER=...
-            SYNCTHING_GUI_PASSWORD_HASH=...
-            SYNCTHING_API_KEY=...
-          With sops-nix, declare a binary secret whose content IS the env file,
-          then pass config.sops.secrets.<name>.path as secretsEnvFile.
-        '';
-      }
-      (nixlabLib.mkSslAssertion {
-        inherit (cfg) enableSSL domain;
-        moduleName = "services.syncthing-nixlab";
-      })
-    ];
+        {
+          assertion = !cfg.enableGuiAuth || cfg.secretsEnvFile != null;
+          message = ''
+            services.syncthing-nixlab: enableGuiAuth = true requires secretsEnvFile to be set.
+            Provide a path to a KEY=value env file containing:
+              SYNCTHING_GUI_USER=...
+              SYNCTHING_GUI_PASSWORD_HASH=...
+              SYNCTHING_API_KEY=...
+            With sops-nix, declare a binary secret whose content IS the env file,
+            then pass config.sops.secrets.<name>.path as secretsEnvFile.
+          '';
+        }
+        (nixlabLib.mkSslAssertion {
+          inherit (cfg) enableSSL domain;
+          moduleName = "services.syncthing-nixlab";
+        })
+      ];
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create Syncthing user and configure access
@@ -275,19 +275,21 @@
       # Create syncthing system user if using default
       users.users = lib.mkMerge (
         lib.optional (cfg.user == "syncthing")
-          { syncthing = {
-              isSystemUser = true;
-              group        = cfg.group;
-              home         = if cfg.dataDir != null
-                            then cfg.dataDir
-                            else "/var/lib/syncthing";
-              createHome   = true;
-              description  = "Syncthing daemon user";
-            };
-          }
+        {
+          syncthing = {
+            isSystemUser = true;
+            group = cfg.group;
+            home =
+              if cfg.dataDir != null
+              then cfg.dataDir
+              else "/var/lib/syncthing";
+            createHome = true;
+            description = "Syncthing daemon user";
+          };
+        }
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.syncthing =
@@ -398,12 +400,14 @@
       # SERVICE CUSTOMIZATION - Additional systemd service configuration
       # ----------------------------------------------------------------------------
       systemd.services.syncthing = {
-        serviceConfig = {
-          Restart    = "on-failure";
-          RestartSec = "10s";
-        } // lib.optionalAttrs (cfg.secretsEnvFile != null) {
-          EnvironmentFile = cfg.secretsEnvFile;
-        };
+        serviceConfig =
+          {
+            Restart = "on-failure";
+            RestartSec = "10s";
+          }
+          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+            EnvironmentFile = cfg.secretsEnvFile;
+          };
       };
 
       # ----------------------------------------------------------------------------
@@ -414,8 +418,8 @@
       services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
         inherit (cfg) domain enableSSL;
         listenAddress = cfg.guiAddress;
-        port          = cfg.guiPort;
-        extraConfig   = ''
+        port = cfg.guiPort;
+        extraConfig = ''
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection "upgrade";
@@ -425,11 +429,12 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
-          domain        = cfg.domain;
+          domain = cfg.domain;
           listenAddress = cfg.guiAddress;
-          servicePort   = cfg.guiPort;
+          servicePort = cfg.guiPort;
         });
     };
   };

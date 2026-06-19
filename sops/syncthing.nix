@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   flake.nixosModules.nsops--syncthing = {
     config,
     lib,
@@ -7,7 +7,7 @@
     cfg = config.services.syncthing-nixlab;
   in {
     options.services.syncthing-nixlab.secretsFile = lib.mkOption {
-      type    = lib.types.path;
+      type = lib.types.path;
       default = ./syncthing.yaml;
       defaultText = lib.literalExpression "./syncthing.yaml";
       description = ''
@@ -44,12 +44,12 @@
       # Declare a single binary secret — the file content IS the env file.
       # sops-nix decrypts it to a path before any service starts.
       sops.secrets.syncthing-env = {
-        sopsFile    = cfg.secretsFile;
-        format      = "binary";
-        owner       = cfg.user;
-        group       = cfg.group;
+        sopsFile = cfg.secretsFile;
+        format = "binary";
+        owner = cfg.user;
+        group = cfg.group;
         # Restart syncthing when the secret is rotated
-        restartUnits = [ "syncthing.service" ];
+        restartUnits = ["syncthing.service"];
       };
 
       # Wire the decrypted env file path directly to the service module.

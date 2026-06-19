@@ -116,17 +116,19 @@
       # USER SETUP - Create dedicated system user for Node-RED
       # ----------------------------------------------------------------------------
       users.users = lib.mkMerge (
-        [ { ${cfg.user} = {
+        [
+          {
+            ${cfg.user} = {
               isSystemUser = true;
-              group        = cfg.group;
-              home         = cfg.dataDir;
-              description  = "Node-Red service user";
+              group = cfg.group;
+              home = cfg.dataDir;
+              description = "Node-Red service user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = [cfg.group];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       users.groups.${cfg.group} = {};
@@ -180,22 +182,25 @@
               chmod 640 ${cfg.dataDir}/settings.js
         '';
 
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ cfg.dataDir ];
-        } // {
-          Type             = "simple";
-          User             = cfg.user;
-          Group            = cfg.group;
-          WorkingDirectory = cfg.dataDir;
-          ExecStart        = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
-          Restart          = "on-failure";
-          RestartSec       = "10s";
-          # Node-RED uses Node.js/V8 JIT — these must be relaxed
-          MemoryDenyWriteExecute = false;
-          SystemCallFilter       = "";
-        } // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
-          EnvironmentFile = cfg.credentialsEnvFile;
-        };
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.dataDir];
+          }
+          // {
+            Type = "simple";
+            User = cfg.user;
+            Group = cfg.group;
+            WorkingDirectory = cfg.dataDir;
+            ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            # Node-RED uses Node.js/V8 JIT — these must be relaxed
+            MemoryDenyWriteExecute = false;
+            SystemCallFilter = "";
+          }
+          // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
+            EnvironmentFile = cfg.credentialsEnvFile;
+          };
       };
 
       # ----------------------------------------------------------------------------
@@ -217,7 +222,8 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;

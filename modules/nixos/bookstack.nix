@@ -325,7 +325,7 @@
       services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
         inherit (cfg) domain enableSSL;
         listenAddress = "127.0.0.1";
-        port          = cfg.port;
+        port = cfg.port;
       };
 
       # --------------------------------------------------------------------------

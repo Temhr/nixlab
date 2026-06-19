@@ -185,26 +185,28 @@
       # --------------------------------------------------------------------------
       # Define users in one go using lib.mkMerge
       users.users = lib.mkMerge (
-        [ { ollama = {
+        [
+          {
+            ollama = {
               isSystemUser = true;
-              group        = "ollama";
-              home         = cfg.ollamaDataDir;
-              description  = "Ollama service user";
+              group = "ollama";
+              home = cfg.ollamaDataDir;
+              description = "Ollama service user";
             };
             ${cfg.webuiUser} = {
               isSystemUser = true;
-              group        = cfg.webuiGroup;
-              home         = cfg.webuiDataDir;
-              description  = "Open WebUI service user";
+              group = cfg.webuiGroup;
+              home = cfg.webuiDataDir;
+              description = "Open WebUI service user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ "ollama" "open-webui" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = ["ollama" "open-webui"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
-      users.groups.ollama    = {};
+      users.groups.ollama = {};
       users.groups.open-webui = {};
 
       # --------------------------------------------------------------------------
@@ -240,17 +242,17 @@
 
         serviceConfig = lib.mkMerge [
           (nixlabLib.mkServiceHardening {
-            writablePaths = [ cfg.ollamaDataDir ];
-            allowDevices  = cfg.acceleration == "cuda-p5000";
+            writablePaths = [cfg.ollamaDataDir];
+            allowDevices = cfg.acceleration == "cuda-p5000";
           })
           {
-            Type             = "simple";
-            User             = "ollama";
-            Group            = "ollama";
+            Type = "simple";
+            User = "ollama";
+            Group = "ollama";
             WorkingDirectory = cfg.ollamaDataDir;
-            ExecStart        = "${resolvedPackage}/bin/ollama serve";
-            Restart          = "on-failure";
-            RestartSec       = "10s";
+            ExecStart = "${resolvedPackage}/bin/ollama serve";
+            Restart = "on-failure";
+            RestartSec = "10s";
           }
           (lib.mkIf (cfg.acceleration == "cuda-p5000") {
             DeviceAllow = [
@@ -388,24 +390,26 @@
             WEBUI_SECRET_KEY = "change-me-set-webuiSecretKeyFile";
           })
         ];
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ cfg.webuiDataDir ];
-        } // {
-          Type             = "simple";
-          User             = "open-webui";
-          Group            = "open-webui";
-          WorkingDirectory = cfg.webuiDataDir;
-          ExecStart        = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
-          Restart          = "on-failure";
-          RestartSec       = "10s";
-          TimeoutStartSec  = "120s";
-          StandardOutput   = "journal";
-          StandardError    = "journal";
-          # open-webui is a Node.js/Python app — JIT requires these relaxed
-          MemoryDenyWriteExecute = false;
-          SystemCallFilter       = "";
-          EnvironmentFile = lib.mkIf (cfg.webuiSecretKeyFile != null) cfg.webuiSecretKeyFile;
-        };
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.webuiDataDir];
+          }
+          // {
+            Type = "simple";
+            User = "open-webui";
+            Group = "open-webui";
+            WorkingDirectory = cfg.webuiDataDir;
+            ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            TimeoutStartSec = "120s";
+            StandardOutput = "journal";
+            StandardError = "journal";
+            # open-webui is a Node.js/Python app — JIT requires these relaxed
+            MemoryDenyWriteExecute = false;
+            SystemCallFilter = "";
+            EnvironmentFile = lib.mkIf (cfg.webuiSecretKeyFile != null) cfg.webuiSecretKeyFile;
+          };
       };
 
       # --------------------------------------------------------------------------
@@ -419,13 +423,13 @@
         (nixlabLib.mkNginxVirtualHost {
           inherit (cfg) domain enableSSL;
           listenAddress = cfg.webuiListenAddress;
-          port          = cfg.webuiPort;
-          extraConfig   = "proxy_buffering off;";
+          port = cfg.webuiPort;
+          extraConfig = "proxy_buffering off;";
         })
         (lib.mkIf (cfg.domain != null) {
           ${cfg.domain} = {
             locations."/api" = {
-              proxyPass   = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
+              proxyPass = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
               extraConfig = ''
                 proxy_set_header Host              $host;
                 proxy_set_header X-Real-IP         $remote_addr;
@@ -440,12 +444,13 @@
       # --------------------------------------------------------------------------
       # FIREWALL
       # --------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
-          domain        = cfg.domain;
+          domain = cfg.domain;
           listenAddress = cfg.webuiListenAddress;
-          servicePort   = cfg.webuiPort;
-          extraPorts    = lib.optionals (cfg.domain == null) [ cfg.ollamaPort ];
+          servicePort = cfg.webuiPort;
+          extraPorts = lib.optionals (cfg.domain == null) [cfg.ollamaPort];
         });
 
       # CUDA toolkit only needed for GPU mode
