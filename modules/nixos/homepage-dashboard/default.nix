@@ -218,28 +218,37 @@
           rm -f ${settingsTmp}
         '';
 
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ cfg.dataDir ];
-        } // {
-          Type       = "simple";
-          User       = cfg.user;
-          Group      = cfg.group;
-          ExecStart  = "${cfg.package}/bin/homepage";
-          Restart    = "on-failure";
-          RestartSec = "10s";
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.dataDir];
+          }
+          // {
+            Type = "simple";
+            User = cfg.user;
+            Group = cfg.group;
+            ExecStart = "${cfg.package}/bin/homepage";
+            Restart = "on-failure";
+            RestartSec = "10s";
 
-          # homepage-dashboard is a Next.js app — it uses JIT compilation which
-          # requires write+execute memory and syscalls outside @system-service.
-          # These two options from mkServiceHardening must be relaxed.
-          MemoryDenyWriteExecute = false;
-          SystemCallFilter       = "";
+            # homepage-dashboard is a Next.js app — it uses JIT compilation which
+            # requires write+execute memory and syscalls outside @system-service.
+            # These two options from mkServiceHardening must be relaxed.
+            MemoryDenyWriteExecute = false;
+            SystemCallFilter = "";
 
-          # ProtectSystem/ProtectHome need special handling for home directory paths
-          ProtectSystem = if lib.hasPrefix "/home/" cfg.dataDir then "false" else "strict";
-          ProtectHome   = if lib.hasPrefix "/home/" cfg.dataDir then false else true;
-        } // lib.optionalAttrs (cfg.environmentFile != null) {
-          EnvironmentFile = cfg.environmentFile;
-        };
+            # ProtectSystem/ProtectHome need special handling for home directory paths
+            ProtectSystem =
+              if lib.hasPrefix "/home/" cfg.dataDir
+              then "false"
+              else "strict";
+            ProtectHome =
+              if lib.hasPrefix "/home/" cfg.dataDir
+              then false
+              else true;
+          }
+          // lib.optionalAttrs (cfg.environmentFile != null) {
+            EnvironmentFile = cfg.environmentFile;
+          };
       };
 
       # ----------------------------------------------------------------------------
@@ -253,7 +262,8 @@
       # ----------------------------------------------------------------------------
       # FIREWALL
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;

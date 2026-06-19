@@ -2,6 +2,7 @@
   flake.nixosModules.servc--wiki-js-nixlab = {
     config,
     lib,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.wikijs-custom;
@@ -288,47 +289,23 @@
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY - Only configured if domain is set
       # ----------------------------------------------------------------------------
-      services.nginx = lib.mkIf (cfg.domain != null) {
-        enable = true;
-        # Enable recommended security and performance settings
-        recommendedProxySettings = true;
-        recommendedTlsSettings = true;
-        recommendedOptimisation = true;
-        recommendedGzipSettings = true;
-
-        virtualHosts.${cfg.domain} = {
-          # Proxy all requests to Wiki.js
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            # Enable WebSocket support (required for real-time collaboration)
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-
-              # Increase upload size limit for file attachments
-              client_max_body_size 50M;
-            '';
-          };
-
-          # Force HTTPS if SSL is enabled
-          forceSSL = cfg.enableSSL;
-          # Get automatic SSL certificate from Let's Encrypt
-          enableACME = cfg.enableSSL;
-        };
+      services.nginx.enable = lib.mkIf (cfg.domain != null) true;
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          client_max_body_size 50M;
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Open Wiki.js port if not using reverse proxy or binding to non-localhost
-        lib.optionals (cfg.domain == null && cfg.listenAddress != "127.0.0.1") [cfg.port]
-        # Open HTTP/HTTPS if using reverse proxy
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
 
       # ----------------------------------------------------------------------------
       # AUTOMATIC BACKUPS - PostgreSQL database backups (optional)

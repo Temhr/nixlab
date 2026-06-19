@@ -206,14 +206,14 @@
           {
             zola = {
               isSystemUser = true;
-              group        = "zola";
-              description  = "Zola static site server user.";
+              group = "zola";
+              description = "Zola static site server user.";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: { ${u} = { extraGroups = [ "zola" ]; }; })
-            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
+        (map (u: {${u} = {extraGroups = ["zola"];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
       # ----------------------------------------------------------------------------
@@ -270,61 +270,64 @@
       # ----------------------------------------------------------------------------
       systemd.services.zola = {
         description = "Zola Static Site Server";
-        wantedBy    = [ "multi-user.target" ];
-        after       = [ "network.target" ];
+        wantedBy = ["multi-user.target"];
+        after = ["network.target"];
 
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ cfg.siteDir ];
-        } // {
-          Type             = "simple";
-          User             = "zola";
-          Group            = "zola";
-          WorkingDirectory = cfg.siteDir;
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.siteDir];
+          }
+          // {
+            Type = "simple";
+            User = "zola";
+            Group = "zola";
+            WorkingDirectory = cfg.siteDir;
 
-          # ExecStartPre commands run before ExecStart in order.
-          #
-          # Step 1 (root, '+' prefix): install config.toml from the Nix store
-          # when configToml is set. The '+' prefix runs this specific command
-          # as root regardless of User = zola above — the correct way to do a
-          # privileged pre-start action under systemd hardening without the
-          # deprecated PermissionsStartOnly. Only present when configToml != null.
-          #
-          # Step 2 (zola user): guard against a missing config.toml. Catches
-          # the case where configToml is null and the user hasn't created one,
-          # or where siteDir is a mount that isn't present yet.
-          ExecStartPre =
-            lib.optional (cfg.configToml != null)
-            "+${pkgs.coreutils}/bin/install -m 640 -o zola -g zola ${configFile} ${cfg.siteDir}/config.toml"
-            ++ [
-              "${pkgs.bash}/bin/bash -c 'if [ ! -f ${cfg.siteDir}/config.toml ]; then echo \"ERROR: no config.toml at ${cfg.siteDir} — set configToml or create one manually\"; exit 1; fi'"
-            ];
+            # ExecStartPre commands run before ExecStart in order.
+            #
+            # Step 1 (root, '+' prefix): install config.toml from the Nix store
+            # when configToml is set. The '+' prefix runs this specific command
+            # as root regardless of User = zola above — the correct way to do a
+            # privileged pre-start action under systemd hardening without the
+            # deprecated PermissionsStartOnly. Only present when configToml != null.
+            #
+            # Step 2 (zola user): guard against a missing config.toml. Catches
+            # the case where configToml is null and the user hasn't created one,
+            # or where siteDir is a mount that isn't present yet.
+            ExecStartPre =
+              lib.optional (cfg.configToml != null)
+              "+${pkgs.coreutils}/bin/install -m 640 -o zola -g zola ${configFile} ${cfg.siteDir}/config.toml"
+              ++ [
+                "${pkgs.bash}/bin/bash -c 'if [ ! -f ${cfg.siteDir}/config.toml ]; then echo \"ERROR: no config.toml at ${cfg.siteDir} — set configToml or create one manually\"; exit 1; fi'"
+              ];
 
-          # The --base-url flag always mirrors effectiveBaseUrl so it stays in
-          # sync with whatever nginx / the domain options say, even if the
-          # on-disk config.toml has a different value.
-          ExecStart = lib.concatStringsSep " " (
-            [
-              "${cfg.package}/bin/zola"
-              "serve"
-              "--interface"
-              cfg.listenAddress
-              "--port"
-              (toString cfg.port)
-              "--base-url"
-              effectiveBaseUrl
-            ]
-            # watchMode = false: --watch-only tells Zola to rebuild on changes
-            # but not run its own HTTP server (hand off serving to nginx).
-            # watchMode = true (default): serve + live-reload normally.
-            ++ lib.optionals (!cfg.watchMode) [ "--watch-only" ]
-            ++ cfg.extraArgs
-          );
+            # The --base-url flag always mirrors effectiveBaseUrl so it stays in
+            # sync with whatever nginx / the domain options say, even if the
+            # on-disk config.toml has a different value.
+            ExecStart = lib.concatStringsSep " " (
+              [
+                "${cfg.package}/bin/zola"
+                "serve"
+                "--interface"
+                cfg.listenAddress
+                "--port"
+                (toString cfg.port)
+                "--base-url"
+                effectiveBaseUrl
+              ]
+              # watchMode = false: --watch-only tells Zola to rebuild on changes
+              # but not run its own HTTP server (hand off serving to nginx).
+              # watchMode = true (default): serve + live-reload normally.
+              ++ lib.optionals (!cfg.watchMode) ["--watch-only"]
+              ++ cfg.extraArgs
+            );
 
-          Restart    = "on-failure";
-          RestartSec = "10s";
-        } // lib.optionalAttrs (cfg.secretsEnvFile != null) {
-          EnvironmentFile = cfg.secretsEnvFile;
-        };
+            Restart = "on-failure";
+            RestartSec = "10s";
+          }
+          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+            EnvironmentFile = cfg.secretsEnvFile;
+          };
       };
 
       # ----------------------------------------------------------------------------
@@ -344,7 +347,8 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports when requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;
@@ -491,3 +495,4 @@ Validate site (checks links, templates, etc.):
 Verbose build:
   cd /var/www/my-blog && zola build --verbose
 */
+

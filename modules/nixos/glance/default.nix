@@ -160,21 +160,24 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
 
-      serviceConfig = nixlabLib.mkServiceHardening {
-        writablePaths = [ cfg.dataDir ];
-      } // {
-        Type             = "simple";
-        User             = cfg.user;
-        Group            = cfg.group;
-        WorkingDirectory = cfg.dataDir;
-        ExecStart        = "${cfg.package}/bin/glance";
-        Restart          = "on-failure";
-        RestartSec       = "10s";
-        TimeoutStartSec  = "60s";
-        TimeoutStopSec   = "30s";
-      } // lib.optionalAttrs (cfg.secretsEnvFile != null) {
-        EnvironmentFile = cfg.secretsEnvFile;
-      };
+        serviceConfig =
+          nixlabLib.mkServiceHardening {
+            writablePaths = [cfg.dataDir];
+          }
+          // {
+            Type = "simple";
+            User = cfg.user;
+            Group = cfg.group;
+            WorkingDirectory = cfg.dataDir;
+            ExecStart = "${cfg.package}/bin/glance";
+            Restart = "on-failure";
+            RestartSec = "10s";
+            TimeoutStartSec = "60s";
+            TimeoutStopSec = "30s";
+          }
+          // lib.optionalAttrs (cfg.secretsEnvFile != null) {
+            EnvironmentFile = cfg.secretsEnvFile;
+          };
 
         # Always regenerate glance.yml so the pages section stays in sync
         # with _glance-pages.nix on every rebuild.
@@ -219,7 +222,8 @@
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;

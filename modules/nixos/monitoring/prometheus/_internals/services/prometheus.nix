@@ -87,25 +87,27 @@ in {
   wantedBy = ["multi-user.target"];
   after = ["network.target"];
 
-  serviceConfig = nixlabLib.mkServiceHardening {
-    writablePaths = [ cfg.dataDir ];
-  } // {
-    Type       = "simple";
-    User       = "prometheus";
-    Group      = "prometheus";
-    ExecStart  = ''
-      ${cfg.package}/bin/prometheus \
-        --config.file=${cfg.dataDir}/prometheus.yml \
-        --storage.tsdb.path=${cfg.dataDir}/data \
-        --storage.tsdb.retention.time=${cfg.retention} \
-        --web.listen-address=${cfg.listenAddress}:${toString cfg.port} \
-        --web.console.templates=${cfg.package}/etc/prometheus/consoles \
-        --web.console.libraries=${cfg.package}/etc/prometheus/console_libraries
-    '';
-    ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
-    Restart    = "on-failure";
-    RestartSec = "10s";
-  };
+  serviceConfig =
+    nixlabLib.mkServiceHardening {
+      writablePaths = [cfg.dataDir];
+    }
+    // {
+      Type = "simple";
+      User = "prometheus";
+      Group = "prometheus";
+      ExecStart = ''
+        ${cfg.package}/bin/prometheus \
+          --config.file=${cfg.dataDir}/prometheus.yml \
+          --storage.tsdb.path=${cfg.dataDir}/data \
+          --storage.tsdb.retention.time=${cfg.retention} \
+          --web.listen-address=${cfg.listenAddress}:${toString cfg.port} \
+          --web.console.templates=${cfg.package}/etc/prometheus/consoles \
+          --web.console.libraries=${cfg.package}/etc/prometheus/console_libraries
+      '';
+      ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
+      Restart = "on-failure";
+      RestartSec = "10s";
+    };
 
   preStart = preStartScript;
 }

@@ -62,7 +62,8 @@ in {
   services.nginx = nginxConfig;
 
   # Firewall configuration
-  networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+  networking.firewall.allowedTCPPorts =
+    lib.mkIf cfg.openFirewall
     (nixlabLib.mkFirewallPorts {
       inherit (cfg) domain listenAddress;
       servicePort = cfg.port;
