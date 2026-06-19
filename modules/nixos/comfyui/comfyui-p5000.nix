@@ -319,66 +319,56 @@
       # ----------------------------------------------------------------------------
       # COMFYUI SERVICE - GPU-ACCELERATED
       # ----------------------------------------------------------------------------
-      systemd.services.comfyui = {
-        description = "ComfyUI Stable Diffusion Service (GPU - P5000)";
-        wantedBy = ["multi-user.target"];
-        after = ["network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service"];
-        requires = ["comfyui-pytorch-setup.service" "comfyui-patch.service"];
-        # Wait for setup to complete
-        unitConfig = {
-          ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
-        };
+      serviceConfig = {
+        Type             = "simple";
+        User             = cfg.user;
+        Group            = cfg.group;
+        WorkingDirectory = cfg.dataDir;
+        ExecStartPre     = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
+        ExecStart        = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --base-directory ${cfg.dataDir} --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
+        Restart          = "on-failure";
+        RestartSec       = "10s";
 
-        serviceConfig = nixlabLib.mkServiceHardening {
-          writablePaths = [ cfg.dataDir ];
-          allowDevices  = true;
-        } // {
-          Type             = "simple";
-          User             = cfg.user;
-          Group            = cfg.group;
-          WorkingDirectory = cfg.dataDir;
-          ExecStartPre     = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
-          ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --base-directory ${cfg.dataDir} --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
-          Restart          = "on-failure";
-          RestartSec       = "10s";
+        Environment = [
+          "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
+          "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
+          "COMFYUI_EXTRA_MODEL_PATHS=${cfg.dataDir}/extra_model_paths.yaml"
+          "VIRTUAL_ENV=${cfg.dataDir}/venv"
+          "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
+          "PATH=${cfg.dataDir}/venv/bin:${pkgs.git}/bin:${pkgs.uv}/bin:${pkgs.coreutils}/bin:/run/current-system/sw/bin"
+          "PYTHONPATH="
+          "LD_LIBRARY_PATH=/run/opengl-driver/lib:${lib.makeLibraryPath [
+            pkgs.stdenv.cc.cc.lib
+            pkgs.glib
+            pkgs.zlib
+            pkgs.cudatoolkit
+            pkgs.linuxPackages.nvidia_x11
+            pkgs.libGL
+            pkgs.libGLU
+            pkgs.libX11
+            pkgs.libXext
+          ]}"
+        ];
 
-          # Environment variables
-          Environment = [
-            "CUDA_VISIBLE_DEVICES=${toString cfg.gpuDevice}"
-            "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
-            "COMFYUI_EXTRA_MODEL_PATHS=${cfg.dataDir}/extra_model_paths.yaml"
-            "VIRTUAL_ENV=${cfg.dataDir}/venv"
-            "COMFYUI_USER_DIRECTORY=${cfg.dataDir}/user"
-            # Prepend venv/bin and needed tools; don't replace the whole PATH
-            "PATH=${cfg.dataDir}/venv/bin:${pkgs.git}/bin:${pkgs.uv}/bin:${pkgs.coreutils}/bin:/run/current-system/sw/bin"
-            "PYTHONPATH=" # Clear any Nix PYTHONPATH so venv site-packages take precedence
-            "LD_LIBRARY_PATH=/run/opengl-driver/lib:${lib.makeLibraryPath [
-              pkgs.stdenv.cc.cc.lib
-              pkgs.glib
-              pkgs.zlib
-              pkgs.cudatoolkit
-              pkgs.linuxPackages.nvidia_x11
-              pkgs.libGL
-              pkgs.libGLU
-              pkgs.libX11
-              pkgs.libXext
-            ]}"
-          ];
+        DeviceAllow = [
+          "/dev/nvidia0"
+          "/dev/nvidia1"
+          "/dev/nvidia2"
+          "/dev/nvidia3"
+          "/dev/nvidiactl"
+          "/dev/nvidia-uvm"
+          "/dev/nvidia-modeset"
+        ];
 
-          # GPU device access
-          DeviceAllow = [
-            "/dev/nvidia0"
-            "/dev/nvidia1"
-            "/dev/nvidia2"
-            "/dev/nvidia3"
-            "/dev/nvidiactl"
-            "/dev/nvidia-uvm"
-            "/dev/nvidia-modeset"
-          ];
-
-          # Allow access to GPU and driver
-          PrivateDevices = false;
-        };
+        # GPU services need relaxed sandboxing.
+        # PrivateDevices = false is required — true blocks /dev/nvidia*.
+        # PrivateTmp = false is required — CUDA uses /tmp for IPC (error 304 otherwise).
+        NoNewPrivileges = true;
+        PrivateDevices  = false;
+        PrivateTmp      = false;
+        ProtectSystem   = "strict";
+        ProtectHome     = true;
+        ReadWritePaths  = [ cfg.dataDir ];
       };
 
       # ----------------------------------------------------------------------------
