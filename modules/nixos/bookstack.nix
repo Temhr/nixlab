@@ -3,6 +3,7 @@
     config,
     lib,
     hostMeta,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.bookstack-nixlab;
@@ -321,22 +322,10 @@
       # NGINX REVERSE PROXY - Only configured when domain is set
       # --------------------------------------------------------------------------
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-          locations."/" = {
-            proxyPass = "http://127.0.0.1:${toString cfg.port}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain enableSSL;
+        listenAddress = "127.0.0.1";
+        port          = cfg.port;
       };
 
       # --------------------------------------------------------------------------
