@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.ollama-stack;
@@ -184,28 +185,26 @@
       # --------------------------------------------------------------------------
       # Define users in one go using lib.mkMerge
       users.users = lib.mkMerge (
-        [
-          {
-            ollama = {
+        [ { ollama = {
               isSystemUser = true;
-              group = "ollama";
-              home = cfg.ollamaDataDir;
-              description = "Ollama service user";
+              group        = "ollama";
+              home         = cfg.ollamaDataDir;
+              description  = "Ollama service user";
             };
             ${cfg.webuiUser} = {
               isSystemUser = true;
-              group = cfg.webuiGroup;
-              home = cfg.webuiDataDir;
-              description = "Open WebUI service user";
+              group        = cfg.webuiGroup;
+              home         = cfg.webuiDataDir;
+              description  = "Open WebUI service user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = ["ollama" "open-webui"];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
+          (map (u: { ${u} = { extraGroups = [ "ollama" "open-webui" ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
       );
 
-      users.groups.ollama = {};
+      users.groups.ollama    = {};
       users.groups.open-webui = {};
 
       # --------------------------------------------------------------------------
@@ -240,28 +239,22 @@
         ];
 
         serviceConfig = lib.mkMerge [
-          # Shared config
+          (nixlabLib.mkServiceHardening {
+            writablePaths = [ cfg.ollamaDataDir ];
+            allowDevices  = cfg.acceleration == "cuda-p5000";
+          })
           {
-            Type = "simple";
-            User = "ollama";
-            Group = "ollama";
+            Type             = "simple";
+            User             = "ollama";
+            Group            = "ollama";
             WorkingDirectory = cfg.ollamaDataDir;
-            ExecStart = "${resolvedPackage}/bin/ollama serve";
-            Restart = "on-failure";
-            RestartSec = "10s";
-            NoNewPrivileges = true;
-            PrivateTmp = true;
-            ProtectSystem = "strict";
-            ProtectHome = true;
-            ReadWritePaths = [cfg.ollamaDataDir];
+            ExecStart        = "${resolvedPackage}/bin/ollama serve";
+            Restart          = "on-failure";
+            RestartSec       = "10s";
           }
-          # GPU device access — only added for CUDA
           (lib.mkIf (cfg.acceleration == "cuda-p5000") {
             DeviceAllow = [
               "/dev/nvidia0"
-              "/dev/nvidia1"
-              "/dev/nvidia2"
-              "/dev/nvidia3"
               "/dev/nvidiactl"
               "/dev/nvidia-uvm"
               "/dev/nvidia-modeset"
@@ -395,23 +388,22 @@
             WEBUI_SECRET_KEY = "change-me-set-webuiSecretKeyFile";
           })
         ];
-        serviceConfig = {
-          Type = "simple";
-          User = "open-webui";
-          Group = "open-webui";
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ cfg.webuiDataDir ];
+        } // {
+          Type             = "simple";
+          User             = "open-webui";
+          Group            = "open-webui";
           WorkingDirectory = cfg.webuiDataDir;
-          ExecStart = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
-          Restart = "on-failure";
-          RestartSec = "10s";
-          TimeoutStartSec = "120s";
-          StandardOutput = "journal";
-          StandardError = "journal";
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = [cfg.webuiDataDir];
-          # Load the secret key from a file if provided
+          ExecStart        = "${pkgs.open-webui}/bin/open-webui serve --host ${cfg.webuiListenAddress} --port ${toString cfg.webuiPort}";
+          Restart          = "on-failure";
+          RestartSec       = "10s";
+          TimeoutStartSec  = "120s";
+          StandardOutput   = "journal";
+          StandardError    = "journal";
+          # open-webui is a Node.js/Python app — JIT requires these relaxed
+          MemoryDenyWriteExecute = false;
+          SystemCallFilter       = "";
           EnvironmentFile = lib.mkIf (cfg.webuiSecretKeyFile != null) cfg.webuiSecretKeyFile;
         };
       };
@@ -421,42 +413,40 @@
       # --------------------------------------------------------------------------
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-
-          locations."/" = {
-            proxyPass = "http://${cfg.webuiListenAddress}:${toString cfg.webuiPort}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_buffering off;
-            '';
+      # mkNginxVirtualHost handles the "/" location. The "/api" location
+      # for the Ollama backend is added via lib.mkIf separately.
+      services.nginx.virtualHosts = lib.mkMerge [
+        (nixlabLib.mkNginxVirtualHost {
+          inherit (cfg) domain enableSSL;
+          listenAddress = cfg.webuiListenAddress;
+          port          = cfg.webuiPort;
+          extraConfig   = "proxy_buffering off;";
+        })
+        (lib.mkIf (cfg.domain != null) {
+          ${cfg.domain} = {
+            locations."/api" = {
+              proxyPass   = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
+              extraConfig = ''
+                proxy_set_header Host              $host;
+                proxy_set_header X-Real-IP         $remote_addr;
+                proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+              '';
+            };
           };
-
-          locations."/api" = {
-            proxyPass = "http://${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-            '';
-          };
-        };
-      };
+        })
+      ];
 
       # --------------------------------------------------------------------------
       # FIREWALL
       # --------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null) [cfg.ollamaPort cfg.webuiPort]
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          domain        = cfg.domain;
+          listenAddress = cfg.webuiListenAddress;
+          servicePort   = cfg.webuiPort;
+          extraPorts    = lib.optionals (cfg.domain == null) [ cfg.ollamaPort ];
+        });
 
       # CUDA toolkit only needed for GPU mode
       environment.systemPackages = lib.mkIf (cfg.acceleration == "cuda-p5000") [
