@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.nodered-service;
@@ -115,19 +116,17 @@
       # USER SETUP - Create dedicated system user for Node-RED
       # ----------------------------------------------------------------------------
       users.users = lib.mkMerge (
-        [
-          {
-            ${cfg.user} = {
+        [ { ${cfg.user} = {
               isSystemUser = true;
-              group = cfg.group;
-              home = cfg.dataDir;
-              description = "Node-Red service user";
+              group        = cfg.group;
+              home         = cfg.dataDir;
+              description  = "Node-Red service user";
             };
           }
         ]
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = [cfg.group];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
+          (map (u: { ${u} = { extraGroups = [ cfg.group ]; }; })
+            ([ config.nixlab.mainUser ] ++ cfg.extraUsers))
       );
 
       users.groups.${cfg.group} = {};
@@ -181,28 +180,22 @@
               chmod 640 ${cfg.dataDir}/settings.js
         '';
 
-        serviceConfig =
-          {
-            Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
-            WorkingDirectory = cfg.dataDir;
-            # Start Node-RED with specified settings
-            ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
-            # Restart on failure
-            Restart = "on-failure";
-            RestartSec = "10s";
-
-            # Security hardening
-            NoNewPrivileges = true; # Prevent privilege escalation
-            PrivateTmp = true; # Use private /tmp directory
-            ProtectSystem = "strict"; # Make most of filesystem read-only
-            ProtectHome = true; # Make /home inaccessible
-            ReadWritePaths = [cfg.dataDir]; # Only allow writes to data directory
-          }
-          // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
-            EnvironmentFile = cfg.credentialsEnvFile;
-          };
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ cfg.dataDir ];
+        } // {
+          Type             = "simple";
+          User             = cfg.user;
+          Group            = cfg.group;
+          WorkingDirectory = cfg.dataDir;
+          ExecStart        = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
+          Restart          = "on-failure";
+          RestartSec       = "10s";
+          # Node-RED uses Node.js/V8 JIT — these must be relaxed
+          MemoryDenyWriteExecute = false;
+          SystemCallFilter       = "";
+        } // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
+          EnvironmentFile = cfg.credentialsEnvFile;
+        };
       };
 
       # ----------------------------------------------------------------------------
@@ -211,42 +204,24 @@
       # Enable nginx if domain is configured
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
 
-      # Configure virtual host for Node-RED
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          # Force HTTPS if SSL is enabled
-          forceSSL = cfg.enableSSL;
-          # Get automatic SSL certificate from Let's Encrypt
-          enableACME = cfg.enableSSL;
-
-          # Proxy all requests to Node-RED
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            # Enable WebSocket support (required for Node-RED editor)
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
-              # Longer timeout for long-running flows
-              proxy_read_timeout 300s;
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_read_timeout 300s;
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary ports if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        # Always open the Node-RED port
-        [cfg.port]
-        # Also open HTTP (80) and HTTPS (443) if using domain
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
     };
   };
 }
