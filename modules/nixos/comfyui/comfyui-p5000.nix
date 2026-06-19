@@ -338,7 +338,7 @@
           Group            = cfg.group;
           WorkingDirectory = cfg.dataDir;
           ExecStartPre     = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
-          ExecStart        = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py ...";
+          ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --base-directory ${cfg.dataDir} --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
           Restart          = "on-failure";
           RestartSec       = "10s";
 
