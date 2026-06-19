@@ -13,6 +13,9 @@
         ExecStart = "${pkgs.hdparm}/bin/hdparm -B 255 -S 0 /dev/disk/by-label/data";
         RemainAfterExit = true;
       };
+      # Fix: remove any reference to sysinit.target or local-fs.target
+      after = [ "multi-user.target" ];   # was likely "sysinit.target"
+      wantedBy = [ "multi-user.target" ];  # not "sysinit.target"
     };
 
     boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
