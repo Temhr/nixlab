@@ -3,6 +3,7 @@
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.comfyui-p5000;
@@ -328,17 +329,18 @@
           ConditionPathExists = "${cfg.dataDir}/venv/bin/python";
         };
 
-        serviceConfig = {
-          Type = "simple";
-          User = cfg.user;
-          Group = cfg.group;
+        serviceConfig = nixlabLib.mkServiceHardening {
+          writablePaths = [ cfg.dataDir ];
+          allowDevices  = true;
+        } // {
+          Type             = "simple";
+          User             = cfg.user;
+          Group            = cfg.group;
           WorkingDirectory = cfg.dataDir;
-          # Ensure user directory exists before starting
-          ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
-          # Use patched ComfyUI from writable location
-          ExecStart = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py --listen ${cfg.listenAddress} --port ${toString cfg.port} --user-directory ${cfg.dataDir}/user --temp-directory ${cfg.dataDir}/temp --input-directory ${cfg.dataDir}/input --output-directory ${cfg.dataDir}/output --extra-model-paths-config ${cfg.dataDir}/extra_model_paths.yaml";
-          Restart = "on-failure";
-          RestartSec = "10s";
+          ExecStartPre     = "${pkgs.coreutils}/bin/mkdir -p ${cfg.dataDir}/user";
+          ExecStart        = "${cfg.dataDir}/venv/bin/python ${cfg.dataDir}/comfyui/main.py ...";
+          Restart          = "on-failure";
+          RestartSec       = "10s";
 
           # Environment variables
           Environment = [
@@ -374,13 +376,6 @@
             "/dev/nvidia-modeset"
           ];
 
-          # Security hardening - relaxed for GPU access
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = true;
-          ReadWritePaths = [cfg.dataDir];
-
           # Allow access to GPU and driver
           PrivateDevices = false;
         };
@@ -390,34 +385,22 @@
       # NGINX REVERSE PROXY - Only configured if domain is set
       # ----------------------------------------------------------------------------
       services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-
-      services.nginx.virtualHosts = lib.mkIf (cfg.domain != null) {
-        ${cfg.domain} = {
-          forceSSL = cfg.enableSSL;
-          enableACME = cfg.enableSSL;
-
-          locations."/" = {
-            proxyPass = "http://${cfg.listenAddress}:${toString cfg.port}";
-            proxyWebsockets = true;
-            extraConfig = ''
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_buffering off;
-              client_max_body_size 100M;
-            '';
-          };
-        };
+      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+        inherit (cfg) domain listenAddress port enableSSL;
+        extraConfig = ''
+          proxy_buffering off;
+          client_max_body_size 100M;
+        '';
       };
 
       # ----------------------------------------------------------------------------
       # FIREWALL - Open necessary port if requested
       # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall (
-        lib.optionals (cfg.domain == null) [cfg.port]
-        ++ lib.optionals (cfg.domain != null) [80 443]
-      );
+      networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall
+        (nixlabLib.mkFirewallPorts {
+          inherit (cfg) domain listenAddress;
+          servicePort = cfg.port;
+        });
 
       # Include CUDA toolkit in system packages
       environment.systemPackages = [
