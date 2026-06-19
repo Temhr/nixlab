@@ -210,14 +210,25 @@
           description = "Enable global device discovery";
         };
 
-        # NEW: Environment file for secrets (populated by nsops module)
         secretsEnvFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
+          type    = lib.types.nullOr lib.types.path;
           default = null;
+          example = "/run/secrets/syncthing-env";
           description = ''
-            Path to environment file with Syncthing secrets.
-            Automatically set by nsops--syncthing module.
-            Contains: SYNCTHING_GUI_USER, SYNCTHING_GUI_PASSWORD_HASH, SYNCTHING_API_KEY
+            Path to a KEY=value environment file injected into the Syncthing service.
+            Required when enableGuiAuth = true.
+
+            The file must contain:
+              SYNCTHING_GUI_USER=your-username
+              SYNCTHING_GUI_PASSWORD_HASH=your-bcrypt-hash
+              SYNCTHING_API_KEY=your-api-key
+
+            With sops-nix, create a secret whose content is the env file itself
+            (format = "binary"), then set:
+              secretsEnvFile = config.sops.secrets.syncthing-env.path;
+
+            sops-nix decrypts the file before any service starts, so no oneshot
+            preparation service is needed.
           '';
         };
 
@@ -240,21 +251,23 @@
       # ASSERTIONS - Verify configuration is valid
       # ----------------------------------------------------------------------------
       assertions = [
-        {
-          assertion = !cfg.enableGuiAuth || cfg.secretsEnvFile != null;
-          message = ''
-            services.syncthing-nixlab: enableGuiAuth = true requires secretsEnvFile to be set.
-            Provide a path to a KEY=value env file containing:
-              SYNCTHING_GUI_USER=...
-              SYNCTHING_GUI_PASSWORD_HASH=...
-              SYNCTHING_API_KEY=...
-          '';
-        }
-        (nixlabLib.mkSslAssertion {
-          inherit (cfg) enableSSL domain;
-          moduleName = "services.syncthing-nixlab";
-        })
-      ];
+      {
+        assertion = !cfg.enableGuiAuth || cfg.secretsEnvFile != null;
+        message = ''
+          services.syncthing-nixlab: enableGuiAuth = true requires secretsEnvFile to be set.
+          Provide a path to a KEY=value env file containing:
+            SYNCTHING_GUI_USER=...
+            SYNCTHING_GUI_PASSWORD_HASH=...
+            SYNCTHING_API_KEY=...
+          With sops-nix, declare a binary secret whose content IS the env file,
+          then pass config.sops.secrets.<name>.path as secretsEnvFile.
+        '';
+      }
+      (nixlabLib.mkSslAssertion {
+        inherit (cfg) enableSSL domain;
+        moduleName = "services.syncthing-nixlab";
+      })
+    ];
 
       # ----------------------------------------------------------------------------
       # USER SETUP - Create Syncthing user and configure access
