@@ -7,7 +7,6 @@
     imports = [
       self.homeModules.home--c-global
       self.homeModules.home--c-opt
-      self.homeModules.common-optional--config-virt-manager
     ];
 
     # Add stuff for your user as you see fit:
