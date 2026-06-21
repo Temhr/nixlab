@@ -14,7 +14,7 @@
       # Configure SSH to use the sops-managed key for GitHub
       matchBlocks = {
         "github.com" = {
-          identityFile = "~/.ssh/id_github_nixlab";
+          identityFile = "~/.ssh/id_github";
           identitiesOnly = true;
           extraOptions = {
             AddKeysToAgent = "yes";

@@ -20,7 +20,7 @@
 
       echo "Pulling the latest version of the repository..."
       # Use the sops-managed GitHub nixlab key with full paths
-      GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github_nixlab -o BatchMode=yes -o StrictHostKeyChecking=no" \
+      GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github -o BatchMode=yes -o StrictHostKeyChecking=no" \
         ${pkgs.git}/bin/git pull --rebase
 
       # Update flake
@@ -34,7 +34,7 @@
           ${pkgs.git}/bin/git commit -m "$(${pkgs.nettools}/bin/hostname) - update flake.lock - $(${pkgs.coreutils}/bin/date)"
 
           echo "Pushing changes to remote..."
-          GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github_nixlab -o BatchMode=yes -o StrictHostKeyChecking=no" \
+          GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github -o BatchMode=yes -o StrictHostKeyChecking=no" \
             ${pkgs.git}/bin/git push
 
           echo "Flake update completed and pushed successfully"

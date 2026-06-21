@@ -25,7 +25,7 @@
 
       echo "Pulling the latest version of the repository..."
       # Use the sops-managed GitHub nixlab key
-      GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github_nixlab -o BatchMode=yes -o StrictHostKeyChecking=no" \
+      GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github -o BatchMode=yes -o StrictHostKeyChecking=no" \
         ${pkgs.git}/bin/git pull --rebase
 
       ## Exit on Success

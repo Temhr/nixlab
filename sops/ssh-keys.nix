@@ -94,10 +94,10 @@
 
       # GitHub nixlab repository key
       (lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable) {
-        sops.secrets."ssh-keys/id_github_nixlab" = {
+        sops.secrets."ssh-keys/id_github" = {
           sopsFile = cfg.secretsFile;
-          key = "id_github_nixlab";
-          path = "/run/secrets/ssh_key_github_nixlab";
+          key = "id_github";
+          path = "/run/secrets/ssh_key_github";
           owner = mainUser;
           group = userConfig.group;
           mode = "0400";
@@ -108,7 +108,7 @@
       (lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable && cfg.githubNixlabKey.symlinkToHome) {
         systemd.tmpfiles.rules = [
           "d /run/secrets 0755 root root -"
-          "L+ /home/${mainUser}/.ssh/id_github_nixlab - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github_nixlab"
+          "L+ /home/${mainUser}/.ssh/id_github - ${mainUser} ${userConfig.group} - /run/secrets/ssh_key_github"
         ];
       })
 
