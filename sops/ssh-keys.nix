@@ -73,7 +73,7 @@
           default = "";
           example = ''
             Host homeserver
-              HostName 192.168.1.100
+              HostName 10.0.1.100
               User admin
               IdentityFile ~/.ssh/id_ed25519
 

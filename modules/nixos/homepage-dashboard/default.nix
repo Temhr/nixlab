@@ -83,7 +83,7 @@
         allowedHosts = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = ["*"];
-          example = ["localhost" "127.0.0.1" "home.example.com" "192.168.1.100"];
+          example = ["localhost" "127.0.0.1" "home.example.com" "10.0.1.100"];
           description = "List of allowed hostnames/IPs (use [\"*\"] to allow all)";
         };
 

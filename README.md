@@ -500,7 +500,7 @@ Three self-registering files and one metadata entry.
 
 ```nix
 <hostname> = mkHostMeta {
-  address = "192.168.0.XXX";
+  address = "10.0.0.XXX";
   ethIface = "enp0s31f6";            # Find with: ip link
   wifiIface = "wlp3s0";              # Find with: ip link (omit if no wifi)
   hostId = "XXXXXXXX";               # Generate with: head -c 8 /etc/machine-id

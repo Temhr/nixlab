@@ -57,8 +57,8 @@
           };
           allowedNetwork = lib.mkOption {
             type = lib.types.str;
-            default = "192.168.0.0/255.255.255.0";
-            description = "Network CIDR to allow NFS access (e.g., 192.168.0.0/255.255.255.0)";
+            default = "10.0.0.0/255.255.255.0";
+            description = "Network CIDR to allow NFS access (e.g., 10.0.0.0/255.255.255.0)";
           };
           exportOptions = lib.mkOption {
             type = lib.types.str;

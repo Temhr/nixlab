@@ -369,6 +369,6 @@ Check configuration:
   sudo -u hass hass --script check_config --config /var/lib/hass
 
 Access via local network:
-  http://192.168.x.x:8123
+  http://10.0.x.x:8123
 */
 

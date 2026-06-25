@@ -20,7 +20,7 @@
         enable = lib.mkEnableOption "BookStack wiki service";
 
         # OPTIONAL: Port BookStack listens on from the host (default: 6875)
-        # This is the port you access in the browser, e.g. http://192.168.1.x:6875
+        # This is the port you access in the browser, e.g. http://10.0.1.x:6875
         port = lib.mkOption {
           type = lib.types.port;
           default = 6875;
@@ -39,7 +39,7 @@
         # BookStack embeds this into all internal links and asset URLs.
         # Must exactly match what you type in the browser — same IP/hostname and port.
         # No trailing slash. Examples:
-        #   http://192.168.1.50:6875
+        #   http://10.0.1.50:6875
         #   http://bookstack.local        (with Avahi mDNS)
         #   http://bookstack.home         (with Pi-hole or router DNS)
         appURL = lib.mkOption {
@@ -387,7 +387,7 @@ Wire the module:
 
   services.bookstack-nixlab = {
     enable             = true;
-    appURL             = "http://192.168.1.50:6875";   # your LAN IP
+    appURL             = "http://10.0.1.50:6875";   # your LAN IP
     dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;
     dbPasswordFile     = config.sops.secrets.BOOKSTACK_MYSQL_PASSWORD.path;
     appKeyFile         = config.sops.secrets.BOOKSTACK_APP_KEY.path;
@@ -397,7 +397,7 @@ With dataDir on a separate drive:
 
   services.bookstack-nixlab = {
     enable             = true;
-    appURL             = "http://192.168.1.50:6875";
+    appURL             = "http://10.0.1.50:6875";
     dataDir            = "/data/bookstack";
     dataMountUnit      = "data.mount";   # /data -> data.mount
     dbRootPasswordFile = config.sops.secrets.BOOKSTACK_MYSQL_ROOT_PASSWORD.path;

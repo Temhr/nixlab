@@ -282,7 +282,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
       "options": {
         "mode": "markdown",
-        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Review fail2ban/CrowdSec ban lists\n- [ ] Check VPN tunnel status manually\n- [ ] Verify certificate expiry dates >30 days\n\n### Monthly\n- [ ] Audit firewall rules for obsolete entries\n- [ ] Review open ports:\n  ```bash\n  ss -tulpn\n  ```\n- [ ] Verify SSH key-only authentication\n- [ ] Check ACME renewal logs\n- [ ] Audit user access and permissions\n- [ ] Rotate API tokens and admin passwords\n\n### Quarterly\n- [ ] Review SSO/authentication backend health\n- [ ] Audit LDAP/Keycloak user accounts\n- [ ] Verify internal CA certificate chain\n- [ ] Scan network for rogue devices:\n  ```bash\n  nmap -sn 192.168.1.0/24\n  ```\n- [ ] Test VPN failover procedures"
+        "content": "## Manual Maintenance Tasks\n\n### Weekly\n- [ ] Review fail2ban/CrowdSec ban lists\n- [ ] Check VPN tunnel status manually\n- [ ] Verify certificate expiry dates >30 days\n\n### Monthly\n- [ ] Audit firewall rules for obsolete entries\n- [ ] Review open ports:\n  ```bash\n  ss -tulpn\n  ```\n- [ ] Verify SSH key-only authentication\n- [ ] Check ACME renewal logs\n- [ ] Audit user access and permissions\n- [ ] Rotate API tokens and admin passwords\n\n### Quarterly\n- [ ] Review SSO/authentication backend health\n- [ ] Audit LDAP/Keycloak user accounts\n- [ ] Verify internal CA certificate chain\n- [ ] Scan network for rogue devices:\n  ```bash\n  nmap -sn 10.0.1.0/24\n  ```\n- [ ] Test VPN failover procedures"
       }
     },
     {

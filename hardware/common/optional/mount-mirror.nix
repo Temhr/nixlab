@@ -6,7 +6,7 @@
     };
     services.nfs.server = {
       enable = true;
-      exports = ''/mirror 192.168.0.0/255.255.255.0(rw,no_root_squash,fsid=0,no_subtree_check) '';
+      exports = ''/mirror 10.0.0.0/255.255.255.0(rw,no_root_squash,fsid=0,no_subtree_check) '';
       # fixed rpc.statd port; for firewall
       lockdPort = 4001;
       mountdPort = 4002;

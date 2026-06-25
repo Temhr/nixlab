@@ -80,7 +80,7 @@
     networking.firewall = {
       enable = true;
       extraInputRules = ''
-        ip saddr 192.168.0.0/24 accept
+        ip saddr 10.0.0.0/24 accept
       '';
     };
 
