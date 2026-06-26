@@ -55,6 +55,7 @@
         "datetime"
         {
           "type" = "weather";
+          "location" = "Ottawa";
           "timeout" = 1000;
         }
         "break"
