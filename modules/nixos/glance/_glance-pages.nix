@@ -144,32 +144,40 @@
                 title = "Ewan Croft (blog)";
               }
               {
-                url = "https://mane.quest/index.xml";
-                title = "The Lion's Den (blog)";
-              }
-              {
-                url = "https://unmovedcentre.com/feed.xml";
-                title = "Unmoved Centre (blog)";
-              }
-              {
                 url = "https://xeiaso.net/blog.rss";
                 title = "Xe's (blog)";
               }
               {
                 url = "https://fabionatali.com/rss.xml";
-                title = "Fabio Natali (Guix user)";
+                title = "Fabio Natali (Guix)";
               }
               {
                 url = "https://coopi.neocities.org/feed.xml";
-                title = "coopi's corner of the web! (Guix user)";
+                title = "coopi's corner of the web! (Guix)";
               }
               {
                 url = "https://trop.in/feed/blog.xml";
-                title = "Andrew Tropin's blog (Guix dev)";
+                title = "Andrew Tropin's blog (Guix)";
               }
               {
                 url = "https://nixos.org/blog/announcements-rss.xml";
-                title = "Nixos.org/blog/ (announcements)";
+                title = "Nixos.org/blog/ announcements";
+              }
+              {
+                url = "https://mane.quest/index.xml";
+                title = "The Lion's Den (NixOS)";
+              }
+              {
+                url = "https://unmovedcentre.com/feed.xml";
+                title = "Unmoved Centre (NixOS)";
+              }
+              {
+                url = "https://natkr.com/atom.xml";
+                title = "natkr's ramblings (NixOS)";
+              }
+              {
+                url = "https://britter.dev/feed.xml";
+                title = "Reproducible Thoughts. (NixOS)";
               }
             ];
           }
