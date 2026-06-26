@@ -1,25 +1,26 @@
 # ghostty_theme_randomizer — picks a random Ghostty theme on each shell reload
 
 _ghostty_config="$HOME/.config/ghostty/config"
-_ghostty_themes="$HOME/.bash/ghostty_themes.txt"
+_ghostty_themes_dir="$(dirname "$(command -v ghostty)")/../share/ghostty/themes"
 
-# Bail out safely if ghostty_themes file is missing
-if [ ! -f "$_ghostty_themes" ]; then
-    echo "Warning: ghostty_themes.txt not found, skipping theme randomizer."
-    unset _ghostty_config _ghostty_themes
+# Bail out safely if themes directory is missing
+if [ ! -d "$_ghostty_themes_dir" ]; then
+    echo "Warning: Ghostty themes directory not found, skipping theme randomizer."
+    unset _ghostty_config _ghostty_themes_dir
     return
 fi
 
-# Load themes into array and pick one at random
-mapfile -t _themes < "$_ghostty_themes"
+# Load theme names (filenames without extension) into array and pick one at random
+mapfile -t _themes < <(find "$_ghostty_themes_dir" -maxdepth 1 -type f -printf '%f\n')
 _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 
 # Back up current config then write new one
 \cp -f "$_ghostty_config" "${_ghostty_config}.bak"
 {
     echo "background = 000000"
+    echo "minimum-contrast = 10"
     echo "theme = $_rantheme"
     echo "font-size = 10"
 } > "$_ghostty_config"
 
-unset _ghostty_config _ghostty_themes _themes _rantheme
+unset _ghostty_config _ghostty_themes_dir _themes _rantheme
