@@ -179,6 +179,10 @@
                 url = "https://britter.dev/feed.xml";
                 title = "NixOS - Reproducible Thoughts.";
               }
+              {
+                url = "https://fzakaria.com/feed.xml";
+                title = "NixOS -  Farid Zakaria's Blog";
+              }
             ];
           }
         ];
