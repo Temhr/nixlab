@@ -133,31 +133,31 @@
             feeds = [
               {
                 url = "https://brennan.day/feed.xml";
-                title = "Brennan Day (blog)";
+                title = "blog - Brennan Day";
               }
               {
                 url = "https://emilygorcenski.com/index.xml";
-                title = "Emily Gorcenski (blog)";
+                title = "blog - Emily Gorcenski";
               }
               {
                 url = "https://blog.ewancroft.uk/rss";
-                title = "Ewan Croft (blog)";
+                title = "blog - Ewan Croft";
               }
               {
                 url = "https://xeiaso.net/blog.rss";
-                title = "Xe's (blog)";
+                title = "blog - Xe Iaso";
               }
               {
                 url = "https://fabionatali.com/rss.xml";
-                title = "Fabio Natali (Guix)";
+                title = "Guix - Fabio Natali";
               }
               {
                 url = "https://coopi.neocities.org/feed.xml";
-                title = "coopi's corner of the web! (Guix)";
+                title = "Guix - coopi's corner of the web!";
               }
               {
                 url = "https://trop.in/feed/blog.xml";
-                title = "Andrew Tropin's blog (Guix)";
+                title = "Guix - Andrew Tropin's blog";
               }
               {
                 url = "https://nixos.org/blog/announcements-rss.xml";
@@ -165,19 +165,19 @@
               }
               {
                 url = "https://mane.quest/index.xml";
-                title = "The Lion's Den (NixOS)";
+                title = "NixOS - The Lion's Den";
               }
               {
                 url = "https://unmovedcentre.com/feed.xml";
-                title = "Unmoved Centre (NixOS)";
+                title = "NixOS - Unmoved Centre";
               }
               {
                 url = "https://natkr.com/atom.xml";
-                title = "natkr's ramblings (NixOS)";
+                title = "NixOS - natkr's ramblings";
               }
               {
                 url = "https://britter.dev/feed.xml";
-                title = "Reproducible Thoughts. (NixOS)";
+                title = "NixOS - Reproducible Thoughts.";
               }
             ];
           }
