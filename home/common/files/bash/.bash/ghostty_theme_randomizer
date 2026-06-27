@@ -17,10 +17,17 @@ _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 # Back up current config then write new one
 \cp -f "$_ghostty_config" "${_ghostty_config}.bak"
 {
+    echo "app-notifications = false"
     echo "background = 000000"
     echo "minimum-contrast = 3"
     echo "theme = $_rantheme"
     echo "font-size = 10"
 } > "$_ghostty_config"
+
+# Check if running inside Ghostty
+if [ "$TERM_PROGRAM" = "ghostty" ] || [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
+    #reload ghostty config
+    systemctl --user reload app-com.mitchellh.ghostty.service
+fi
 
 unset _ghostty_config _ghostty_themes_dir _themes _rantheme
