@@ -19,6 +19,8 @@ _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 {
     echo "app-notifications = false"
     echo "background = 000000"
+    echo "background-opacity = 1"
+    echo "background-blur = true"
     echo "minimum-contrast = 3"
     echo "theme = $_rantheme"
     echo "font-size = 10"

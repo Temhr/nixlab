@@ -15,7 +15,6 @@
     ".bash/bash_prompt".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_prompt";
     ".bash/bash_functions".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/bash_functions";
     ".bash/emoticons".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/emoticons";
-    ".bash/ghostty_themes.txt".source = lib.mkForce "${flakePath}/home/common/files/bash/.bash/ghostty_themes.txt";
 
     # Ghostty theme randomizer needs execute permission
     ".bash/ghostty_theme_randomizer" = {
