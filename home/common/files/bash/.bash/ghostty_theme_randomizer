@@ -18,7 +18,7 @@ _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 \cp -f "$_ghostty_config" "${_ghostty_config}.bak"
 {
     echo "background = 000000"
-    echo "minimum-contrast = 5"
+    echo "minimum-contrast = 3"
     echo "theme = $_rantheme"
     echo "font-size = 10"
 } > "$_ghostty_config"
