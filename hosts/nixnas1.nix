@@ -38,7 +38,7 @@
           introducer = false;
         };
         "Pixel 8 Pro" = {
-          id = "JTOS7ON-REQH7GB-VHDAIHN-32L3YUQ-GHGWD3S-RVH6U3F-UEL6DQ7-TODIVQ3";
+          id = "DWVLZ6M-TP7GD2I-3NEQ3YT-FWXHW4I-PRRY67U-MNVJ76F-NZFWNT7-6KUQLAF";
           addresses = ["dynamic"];
         };
         "Pixel 3a XL" = {
