@@ -58,14 +58,14 @@
           path = "/mirror/phshare/photos";
           id = "Phone media";
           label = "Phone media";
-          devices = ["Pixel XL" "Pixel 3a XL"];
+          devices = ["Pixel 8 Pro" "Pixel 3a XL"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
         "Docs" = {
           path = "/mirror/phshare/docs";
           id = "Docs";
           label = "Docs";
-          devices = ["Pixel XL" "Pixel 3a XL"];
+          devices = ["Pixel 8 Pro" "Pixel 3a XL"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
       };
