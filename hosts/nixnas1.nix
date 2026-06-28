@@ -37,8 +37,8 @@
           addresses = ["dynamic"];
           introducer = false;
         };
-        "Pixel XL" = {
-          id = "LU65H6D-KZYP6H3-SGBGPY3-LIN6F2A-32JM2AQ-HN76W2G-ADJMWEH-6EMQXA4";
+        "Pixel 8 Pro" = {
+          id = "JTOS7ON-REQH7GB-VHDAIHN-32L3YUQ-GHGWD3S-RVH6U3F-UEL6DQ7-TODIVQ3";
           addresses = ["dynamic"];
         };
         "Pixel 3a XL" = {
