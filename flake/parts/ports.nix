@@ -1,9 +1,10 @@
 {...}: {
   flake.nixosModules.systm--ports-core = {lib, ...}: {
+    services.grafana-nixlab.port = lib.mkDefault 3101;
     services.homepage-nixlab.port = lib.mkDefault 3000;
     services.loki-nixlab.port = lib.mkDefault 3100;
     services.loki-nixlab.grpcPort = lib.mkDefault 9096;
-    services.grafana-nixlab.port = lib.mkDefault 3101;
+    services.ntfy-nixlab.port = lib.mkDefault 2586;
     services.prometheus-nixlab.port = lib.mkDefault 9090;
   };
   flake.nixosModules.systm--ports-llm = {lib, ...}: {

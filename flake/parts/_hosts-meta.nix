@@ -59,7 +59,7 @@ in {
     wifiIface = "wlo1";
     hostId = "eba785f1";
     nixpkgsInput = "nixpkgs-unstable";
-    services = ["glance" "grafana" "prometheus" "loki"];
+    services = ["glance" "grafana" "ntfy" "prometheus" "loki"];
   };
   nixtop = mkHostMeta {
     address = "10.0.0.202";

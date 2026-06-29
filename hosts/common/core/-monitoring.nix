@@ -11,9 +11,10 @@
       self.nixosModules.nsops--grafana
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab
+      self.nixosModules.servc--ntfy-nixlab
     ];
     options.services.nixlab-monitoring = {
-      enable = lib.mkEnableOption "nixlab monitoring stack (Prometheus + Loki + Grafana)";
+      enable = lib.mkEnableOption "nixlab monitoring stack (Prometheus + Loki + Grafana + ntfy)";
 
       listenAddress = lib.mkOption {
         type = lib.types.str;
@@ -53,6 +54,11 @@
           type = lib.types.port;
           default = 9090;
           description = "Prometheus HTTP port.";
+        };
+        ntfy = lib.mkOption {
+          type = lib.types.port;
+          default = 2586;
+          description = "Port for ntfy to listen on";
         };
       };
 
@@ -107,6 +113,14 @@
         dataDir = "${cfg.dataDir}/prometheus";
         openFirewall = cfg.openFirewall;
         maintenance = cfg.prometheus.maintenance;
+      };
+
+      services.ntfy-nixlab = {
+        enable = true;
+        port = cfg.ports.ntfy;
+        listenAddress = cfg.listenAddress;
+        dataDir = "${cfg.dataDir}/ntfy";
+        openFirewall = cfg.openFirewall;
       };
     };
   };

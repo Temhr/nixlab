@@ -90,6 +90,16 @@
       };
     };
 
+    "ntfy" = {
+      "ntfy" = {
+        href = "http://${hostMeta.address}:2586";
+        icon = "ntfy";
+        description = "Utility for sending notifications, on demand and when commands finish";
+        ping = "http://${hostMeta.address}:2586";
+        statusStyle = "dot";
+      };
+    };
+
     "prometheus" = {
       "Prometheus" = {
         href = "http://${hostMeta.address}:9090";
@@ -176,8 +186,9 @@
     "wikijs" = "Knowledge & Docs";
     "zola" = "Knowledge & Docs";
     "grafana" = "Monitoring & Logs";
-    "prometheus" = "Monitoring & Logs";
     "loki" = "Monitoring & Logs";
+    "ntfy" = "Monitoring & Logs";
+    "prometheus" = "Monitoring & Logs";
     "home-assistant" = "Home & Automation";
     "node-red" = "Home & Automation";
     "syncthing" = "Sync and Storage";
