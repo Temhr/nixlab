@@ -8,6 +8,10 @@
       self.homeModules.common-global--ephemeral-apps
       self.homeModules.common-global--system
       self.homeModules.common-global--utilities
+
+      self.homeModules.common-optional--bash-files-symlink
+      self.homeModules.common-optional--browsers
+      self.homeModules.common-optional--terminal-emulators
     ];
   };
 }

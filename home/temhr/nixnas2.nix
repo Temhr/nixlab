@@ -6,7 +6,6 @@
   }: {
     imports = [
       self.homeModules.home--c-global
-      self.homeModules.home--c-opt
     ];
 
     # Add stuff for your user as you see fit:

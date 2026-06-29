@@ -10,6 +10,9 @@ if [ ! -d "$_ghostty_themes_dir" ]; then
     return
 fi
 
+# Generate a random 6-digit hex color
+_randhex() { printf '%02x%02x%02x' $((RANDOM % 256)) $((RANDOM % 256)) $((RANDOM % 256)); }
+
 # Load theme names (filenames without extension) into array and pick one at random
 mapfile -t _themes < <(find "$_ghostty_themes_dir" -maxdepth 1 -type f -printf '%f\n')
 _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
@@ -18,6 +21,27 @@ _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
 \cp -f "$_ghostty_config" "${_ghostty_config}.bak"
 {
     echo "app-notifications = false"
+    echo "palette = 0=#$(_randhex)"
+    echo "palette = 1=#$(_randhex)"
+    echo "palette = 2=#$(_randhex)"
+    echo "palette = 3=#$(_randhex)"
+    echo "palette = 4=#$(_randhex)"
+    echo "palette = 5=#$(_randhex)"
+    echo "palette = 6=#$(_randhex)"
+    echo "palette = 7=#$(_randhex)"
+    echo "palette = 8=#$(_randhex)"
+    echo "palette = 9=#$(_randhex)"
+    echo "palette = 10=#$(_randhex)"
+    echo "palette = 11=#$(_randhex)"
+    echo "palette = 12=#$(_randhex)"
+    echo "palette = 13=#$(_randhex)"
+    echo "palette = 14=#$(_randhex)"
+    echo "palette = 15=#$(_randhex)"
+    echo "cursor-color = #$(_randhex)"
+    echo "cursor-text = #$(_randhex)"
+    echo "selection-background = #$(_randhex)"
+    echo "selection-foreground = #$(_randhex)"
+
     echo "background = 000000"
     echo "background-opacity = 1"
     echo "background-blur = true"
@@ -32,4 +56,5 @@ if [ "$TERM_PROGRAM" = "ghostty" ] || [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
     systemctl --user reload app-com.mitchellh.ghostty.service
 fi
 
+unset -f _randhex
 unset _ghostty_config _ghostty_themes_dir _themes _rantheme
