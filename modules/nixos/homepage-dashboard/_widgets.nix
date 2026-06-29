@@ -10,7 +10,6 @@
       cpu = true;
       memory = true;
       disk = "/";
-      network = true;
       uptime = true;
       expanded = true;
       cacheInterval = 5000;
