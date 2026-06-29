@@ -5,7 +5,6 @@ _ghostty_themes_dir="$(dirname "$(command -v ghostty)")/../share/ghostty/themes"
 
 # Bail out safely if themes directory is missing
 if [ ! -d "$_ghostty_themes_dir" ]; then
-    echo "Warning: Ghostty themes directory not found, skipping theme randomizer."
     unset _ghostty_config _ghostty_themes_dir
     return
 fi
