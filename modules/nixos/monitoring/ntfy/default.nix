@@ -334,52 +334,45 @@
             enable-reservations = cfg.auth.enable;
           };
 
-          cacheConfig =
-            lib.optionalAttrs (cfg.cacheFile != "") {
-              cache-file = cfg.cacheFile;
-            };
+          cacheConfig = lib.optionalAttrs (cfg.cacheFile != "") {
+            cache-file = cfg.cacheFile;
+          };
 
-          attachmentConfig =
-            lib.optionalAttrs cfg.attachments.enable {
-              attachment-cache-dir = "${cfg.dataDir}/attachments";
-              attachment-file-size-limit = cfg.attachments.sizeLimit;
-              attachment-total-size-limit = cfg.attachments.totalSizeLimit;
-              attachment-expiry-duration = cfg.attachments.expiryDuration;
-            };
+          attachmentConfig = lib.optionalAttrs cfg.attachments.enable {
+            attachment-cache-dir = "${cfg.dataDir}/attachments";
+            attachment-file-size-limit = cfg.attachments.sizeLimit;
+            attachment-total-size-limit = cfg.attachments.totalSizeLimit;
+            attachment-expiry-duration = cfg.attachments.expiryDuration;
+          };
 
-          authConfig =
-            lib.optionalAttrs cfg.auth.enable {
-              auth-file = "${cfg.dataDir}/user.db";
-              auth-default-access = cfg.auth.defaultAccess;
-            };
+          authConfig = lib.optionalAttrs cfg.auth.enable {
+            auth-file = "${cfg.dataDir}/user.db";
+            auth-default-access = cfg.auth.defaultAccess;
+          };
 
-          webConfig =
-            lib.optionalAttrs (!cfg.enableWebUI) {
-              web-root = "disable";
-            };
+          webConfig = lib.optionalAttrs (!cfg.enableWebUI) {
+            web-root = "disable";
+          };
 
-          smtpConfig =
-            lib.optionalAttrs cfg.smtp.enable (
-              {
-                smtp-server-listen = cfg.smtp.listenAddress;
-                smtp-server-domain = cfg.smtp.domain;
-              }
-              // lib.optionalAttrs (cfg.smtp.addrPrefix != "") {
-                smtp-server-addr-prefix = cfg.smtp.addrPrefix;
-              }
-            );
+          smtpConfig = lib.optionalAttrs cfg.smtp.enable (
+            {
+              smtp-server-listen = cfg.smtp.listenAddress;
+              smtp-server-domain = cfg.smtp.domain;
+            }
+            // lib.optionalAttrs (cfg.smtp.addrPrefix != "") {
+              smtp-server-addr-prefix = cfg.smtp.addrPrefix;
+            }
+          );
 
-          firebaseConfig =
-            lib.optionalAttrs (cfg.firebaseKeyFile != null) {
-              # The actual path is injected via the Environment= unit directive
-              # above; this key tells ntfy to look for it in the environment.
-              firebase-key-file = "\${NTFY_FIREBASE_KEY_FILE}";
-            };
+          firebaseConfig = lib.optionalAttrs (cfg.firebaseKeyFile != null) {
+            # The actual path is injected via the Environment= unit directive
+            # above; this key tells ntfy to look for it in the environment.
+            firebase-key-file = "\${NTFY_FIREBASE_KEY_FILE}";
+          };
 
-          subscriberRateConfig =
-            lib.optionalAttrs cfg.rateLimit.subscriberRateLimit {
-              visitor-subscriber-rate-limiting = true;
-            };
+          subscriberRateConfig = lib.optionalAttrs cfg.rateLimit.subscriberRateLimit {
+            visitor-subscriber-rate-limiting = true;
+          };
 
           serverConfig =
             baseConfig
@@ -435,10 +428,10 @@
       networking.firewall.allowedTCPPorts =
         lib.mkIf cfg.openFirewall
         (nixlabLib.mkFirewallPorts {
-          inherit (cfg) domain listenAddress;
-          servicePort = cfg.port;
-        }
-        ++ lib.optionals cfg.smtp.enable [25]);
+            inherit (cfg) domain listenAddress;
+            servicePort = cfg.port;
+          }
+          ++ lib.optionals cfg.smtp.enable [25]);
     };
   };
 }
@@ -633,3 +626,4 @@ Common issues:
   - Attachments fail: Ensure cacheFile is set (required for attachment support)
   - Port 25 blocked:  Many cloud providers block port 25; check security groups
 */
+
