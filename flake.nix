@@ -19,7 +19,7 @@
     # Version Pinned Apps (2026-05-16).
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ol/ollama/package.nix
     # https://github.com/NixOS/nixpkgs/commit/e3f72fe8fcc5dc84df51ebf17876dcf479e289da
-    nixpkgs-ollama.url = "github:nixos/nixpkgs/e3f72fe8fcc5dc84df51ebf17876dcf479e289da";
+    nixpkgs-ollama.url = "github:nixos/nixpkgs/3fecd68e9db837ecf9d4ee98cfaa9fe953ada487";
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/op/open-webui/package.nix
     # https://github.com/NixOS/nixpkgs/commit/ec1841e734baff3310d614e2a39c22828beef199
     nixpkgs-open-webui.url = "github:nixos/nixpkgs/ec1841e734baff3310d614e2a39c22828beef199";
