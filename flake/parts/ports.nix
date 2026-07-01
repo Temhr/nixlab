@@ -1,5 +1,6 @@
 {...}: {
   flake.nixosModules.systm--ports-core = {lib, ...}: {
+    services.alertmanager-nixlab.port = lib.mkDefault 9093;
     services.grafana-nixlab.port = lib.mkDefault 3101;
     services.homepage-nixlab.port = lib.mkDefault 3000;
     services.loki-nixlab.port = lib.mkDefault 3100;

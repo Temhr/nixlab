@@ -8,6 +8,17 @@ keys:
   - &nixzen age1mt0jjfq5wp2wx49aj8a9l5k2ejz8xlgnd5jp3e7ysze8jkwa8c9qj2w4ng
 
 creation_rules:
+  - path_regex: sops/alertmanager\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixnas1
+        - *nixnas2
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
   - path_regex: sops/bookstack\.yaml$
     key_groups:
       - age:
