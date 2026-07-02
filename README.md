@@ -97,6 +97,7 @@ A small number of concerns live in `flake/parts/` as conventional flake-parts fi
 |------|---------------|--------|
 | `lib.nix` | `mkHost` constructor; reads `_hosts-meta.nix`; injects nixpkgs, sops-nix, overlays, hostMeta | `flake.lib` |
 | `_hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection | *(imported by `lib.nix`)* |
+| `_nixos-lib.nix` | Shared NixOS helper functions (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) injected into every module as `nixlabLib` via `specialArgs` | *(imported by `lib.nix`)* |
 | `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option | `flake.homeModules` |
 | `nixpkgs.nix` | Configures `pkgs` for all `perSystem` blocks (`allowUnfree` + overlays) | `perSystem._module.args.pkgs` |
 | `checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks` |
@@ -255,10 +256,15 @@ nixosConfigurations.nixace
 └── self.lib.mkHost { name = "nixace"; modules = [...]; }
     │
     │  (injected automatically by lib.nix for every host)
-    ├── nixpkgs    ← selected per-host via _hosts-meta.nix
-    ├── sops-nix   ← inputs.sops-nix.nixosModules.sops-nix
-    ├── overlays   ← all overlays applied to pkgs
-    ├── hostMeta   ← IP, interfaces, etc.
+    ├── nixpkgs       ← selected per-host via _hosts-meta.nix
+    ├── sops-nix      ← inputs.sops-nix.nixosModules.sops
+    ├── home-manager  ← hosts--core--home-manager-config + useGlobalPkgs/useUserPackages
+    ├── overlays      ← all overlays applied to pkgs
+    ├── hostMeta      ← IP, interfaces, etc.
+    │
+    │  (available in every module via specialArgs)
+    ├── nixlabLib  ← shared helpers from _nixos-lib.nix
+    ├── self' / outputs / flakePath / allHosts
     │
     │  (declared in the host's modules = [...] list)
     ├── hardw--zb17g4-p5         # filesystems, kernel modules
@@ -596,6 +602,8 @@ sudo nixos-rebuild switch --flake .#<hostname>
 <p></p>
 
 Service modules live in `modules/nixos/<service>/`. Secrets are managed separately in `sops/`.
+
+> Shared helpers (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) are available in any module via `{ nixlabLib, ... }:` — see `flake/parts/_nixos-lib.nix` for usage examples.
 
 #### 1. Create the module `modules/nixos/<service>/default.nix`
 
