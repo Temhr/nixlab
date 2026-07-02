@@ -187,8 +187,9 @@ All modules register under `flake.nixosModules`. The double-dash convention enco
 | `hosts--autom--` | Scheduled tasks and automation |
 | `hosts--hardw--` | Shared hardware concerns |
 | `hosts--debug--` | Opt-in diagnostics (never in any profile) |
-| `servc--` | Self-hosted service modules |
 | `nsops--` | sops-nix secret wiring modules |
+| `servc--` | Self-hosted service modules |
+| `systm--` | Cross-cutting system defaults (e.g. centralized port assignments) |
 
 ```
 # nix flake show (abbreviated)
@@ -372,6 +373,7 @@ nixlab/
 │   └── <hostname>.nix               # nixosConfiguration + hosts--<hostname> modules 
 │
 ├── modules/                         # Reusable self-exporting service modules
+│   ├── ports.nix                    # systm--ports-*: centralized default port assignments
 │   ├── home-manager/                # User-level service modules
 │   └── nixos/                       # System-level service modules (servc--*)
 │       └── <service>/

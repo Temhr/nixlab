@@ -14,7 +14,7 @@
     self.overlays.modifications
   ];
 
-  mkCommonModules = hostLib: [
+  mkCommonModules = [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.hosts--core--home-manager-config
     {
@@ -55,16 +55,14 @@
             allHosts = hostsMeta;
             hostMeta = meta;
             nixpkgsSource = nixpkgsSource;
-            self' =
-              self.packages.${meta.system}
-              // {
-                packages = self.packages.${meta.system};
-                devShells = self.devShells.${meta.system};
-                apps = self.apps.${meta.system} or {};
-              };
+            self' = {
+              packages = self.packages.${meta.system};
+              devShells = self.devShells.${meta.system};
+              apps = self.apps.${meta.system} or {};
+            };
           };
           modules =
-            (mkCommonModules hostPkgs)
+            mkCommonModules
             ++ modules
             ++ [
               {networking.hostName = name;}
