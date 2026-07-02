@@ -263,7 +263,7 @@ nixosConfigurations.nixace
     ├── hostMeta      ← IP, interfaces, etc.
     │
     │  (available in every module via specialArgs)
-    ├── nixlabLib  ← shared helpers from _nixos-lib.nix
+    ├── nixlabLib  ← shared helpers (nginx vhost, firewall, hardening, SSL assertion)
     ├── self' / outputs / flakePath / allHosts
     │
     │  (declared in the host's modules = [...] list)
