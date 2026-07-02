@@ -1,6 +1,6 @@
 # Configure SSH for interactive git operations using sops-managed keys
 {...}: {
-  flake.homeModules.common-global--config-ssh = { allHosts, ... }: {
+  flake.homeModules.common-global--config-ssh = {allHosts, ...}: {
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
