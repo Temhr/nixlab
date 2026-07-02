@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--autom--backup-home = {
     config,
     pkgs,

@@ -2,7 +2,6 @@
   flake.nixosModules.servc--syncthing-nixlab = {
     config,
     lib,
-    pkgs,
     nixlabLib,
     ...
   }: let

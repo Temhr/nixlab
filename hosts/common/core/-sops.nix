@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--core--sops = {...}: {
     # Global SOPS configuration for all hosts
     sops = {

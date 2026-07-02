@@ -20,7 +20,6 @@
   };
   flake.nixosModules.hosts--nixace = {
     config,
-    lib,
     pkgs,
     hostMeta,
     ...

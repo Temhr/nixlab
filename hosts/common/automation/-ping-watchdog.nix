@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--autom--ping-watchdog = {pkgs, ...}: let
     # ─────────────────────────────────────────────────────────────────
     # Shared paths — referenced in both the watchdog and the toggle

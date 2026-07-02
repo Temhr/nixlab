@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-optional--browsers = {
     config,
     lib,

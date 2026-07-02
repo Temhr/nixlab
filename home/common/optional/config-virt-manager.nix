@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-optional--config-virt-manager = {...}: {
     ## Removes initial virt-manager warning
     dconf.settings = {

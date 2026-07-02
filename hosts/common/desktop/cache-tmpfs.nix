@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--deskt--cache-tmpfs = {config, ...}: {
     # Reduce writes to storage - keep /home with low-write mount options
     fileSystems."/home".options = ["relatime" "noatime"];

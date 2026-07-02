@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-global--utilities = {pkgs, ...}: {
     #1) User-specific
     #2) Don’t require elevated privileges

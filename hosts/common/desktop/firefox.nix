@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--deskt--firefox = {...}: {
     programs.firefox = {
       enable = true;

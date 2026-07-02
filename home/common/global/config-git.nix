@@ -1,7 +1,5 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-global--config-git = {
-    config,
-    lib,
     pkgs,
     ...
   }: {

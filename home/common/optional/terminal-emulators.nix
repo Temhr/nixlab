@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-optional--terminal-emulators = {
     config,
     lib,

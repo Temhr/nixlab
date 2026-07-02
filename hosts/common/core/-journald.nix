@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--core--journald = {...}: {
     services.journald.extraConfig = ''
       SystemMaxUse=100M

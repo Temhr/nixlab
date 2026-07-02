@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--core--users = {...}: {
     imports = [
       # Paths to other modules.

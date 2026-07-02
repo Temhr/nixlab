@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-global--ephemeral-apps = {...}: {
     ## One-time use applications downloaded into store and discarded afterward
 

@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--autom--nixos-upgrade = {...}: {
     system.autoUpgrade = {
       enable = true;

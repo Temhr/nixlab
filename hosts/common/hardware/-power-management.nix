@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--hardw--power-management = {pkgs, ...}: {
     systemd.services.disable-hdd-apm = {
       description = "Disable APM on data drive";

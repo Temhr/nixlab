@@ -14,7 +14,7 @@
     self.overlays.modifications
   ];
 
-  mkCommonModules = hostPkgs: [
+  mkCommonModules = _: [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.hosts--core--home-manager-config
     {

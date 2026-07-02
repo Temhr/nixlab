@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--hardw--audio = {...}: {
     services.pulseaudio.enable = false;
     security.rtkit.enable = true;

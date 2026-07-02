@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-optional--bash-files-symlink = {
     allHosts,
     flakePath,

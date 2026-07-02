@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--autom--nix-gc = {...}: {
     ## Garbage collection to maintain low disk usage
     nix.gc = {

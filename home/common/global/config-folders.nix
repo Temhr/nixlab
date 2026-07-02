@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.homeModules.common-global--config-folders = {lib, ...}: {
     home.sessionVariables = {
       # XDG User Directories

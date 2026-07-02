@@ -1,4 +1,4 @@
-{self, ...}: {
+{...}: {
   flake.nixosModules.hosts--core--utilities = {pkgs, ...}: {
     #1) Require system-level privileges
     #2) Interact with system hardware, kernel interfaces, or system-wide configurations
