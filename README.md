@@ -337,6 +337,7 @@ nixlab/
 ├── flake/                           # Orchestration-level flake-parts configurations
 │   └── parts/
 │       ├── _hosts-meta.nix          # Static per-host metadata: IPs, interfaces, nixpkgs
+│       ├── _nixos-lib.nix           # Shared NixOS helpers injected as nixlabLib
 │       ├── apps.nix                 # build-all app: validates every nixosConfiguration
 │       ├── checks.nix               # Pre-commit hooks (alejandra, ...) + formatter
 │       ├── lib.nix                  # mkHost constructor; reads hostsMeta; wires modules + overlays
