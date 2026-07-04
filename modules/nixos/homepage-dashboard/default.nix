@@ -11,9 +11,9 @@
     cfg = config.services.homepage-nixlab;
 
     # Import configurations from their respective nix files
-    servicesConfig = import ./_services.nix {inherit allHosts hostMeta;};
-    widgetsConfig = import ./_widgets.nix {inherit config hostMeta;};
-    settingsConfig = import ./_settings.nix {inherit hostMeta;};
+    servicesConfig = import ./_services.nix {inherit allHosts config hostMeta;};
+    widgetsConfig = import ./_widgets.nix {inherit config;};
+    settingsConfig = import ./_settings.nix {inherit config;};
 
     # Convert each to a JSON store path (remarshal converts to YAML at preStart)
     servicesJsonFile =

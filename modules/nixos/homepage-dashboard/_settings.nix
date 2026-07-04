@@ -1,26 +1,8 @@
 # /var/lib/homepage/config/settings.yaml
 # Homepage general settings
 # Docs: https://gethomepage.dev/en/configs/settings/
-{hostMeta}: let
-  # Mirror of the group membership from _services.nix.
-  # A group only appears in layout if at least one of its service keys
-  # is present in hostMeta.services.
-  serviceGroups = {
-    "ollama-cpu" = "AI & Inference";
-    "ollama-gpu" = "AI & Inference";
-    "comfyui" = "AI & Inference";
-    "bookstack" = "Knowledge & Docs";
-    "wikijs" = "Knowledge & Docs";
-    "zola" = "Knowledge & Docs";
-    "grafana" = "Monitoring & Logs";
-    "prometheus" = "Monitoring & Logs";
-    "loki" = "Monitoring & Logs";
-    "home-assistant" = "Home & Automation";
-    "node-red" = "Home & Automation";
-    "syncthing" = "Sync and Storage";
-    "gotosocial" = "Social & Feeds";
-    "glance" = "Social & Feeds";
-  };
+{config}: let
+  registry = import ./_service-registry.nix {inherit config;};
 
   groupColumns = {
     "AI & Inference" = 3;
@@ -35,14 +17,14 @@
     builtins.foldl'
     (
       acc: key: let
-        group = serviceGroups.${key};
+        group = registry.groups.${key};
       in
-        if builtins.elem key hostMeta.services && !(builtins.elem group acc)
+        if (registry.enabled.${key} or false) && !(builtins.elem group acc)
         then acc ++ [group]
         else acc
     )
     []
-    (builtins.attrNames serviceGroups);
+    (builtins.attrNames registry.groups);
 
   layoutEntries =
     builtins.foldl'

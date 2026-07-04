@@ -9,8 +9,10 @@
 #
 {
   allHosts,
+  config,
   hostMeta,
 }: let
+  registry = import ./_service-registry.nix {inherit config;};
   # ──────────────────────────────────────────────────────────────────────────
   # MASTER SERVICE DEFINITIONS
   # Add new services here. The attribute name is the key used in
@@ -174,29 +176,6 @@
   };
 
   # ──────────────────────────────────────────────────────────────────────────
-  # SECTION GROUPING
-  # Maps each service key to its display group. Add a new key here whenever
-  # you add a new service above.
-  # ──────────────────────────────────────────────────────────────────────────
-  serviceGroups = {
-    "ollama-cpu" = "AI & Inference";
-    "ollama-gpu" = "AI & Inference";
-    "comfyui" = "AI & Inference";
-    "bookstack" = "Knowledge & Docs";
-    "wikijs" = "Knowledge & Docs";
-    "zola" = "Knowledge & Docs";
-    "grafana" = "Monitoring & Logs";
-    "loki" = "Monitoring & Logs";
-    "ntfy" = "Monitoring & Logs";
-    "prometheus" = "Monitoring & Logs";
-    "home-assistant" = "Home & Automation";
-    "node-red" = "Home & Automation";
-    "syncthing" = "Sync and Storage";
-    "gotosocial" = "Social & Feeds";
-    "glance" = "Social & Feeds";
-  };
-
-  # ──────────────────────────────────────────────────────────────────────────
   # FILTER & GROUP — no edits needed below this line
   # ──────────────────────────────────────────────────────────────────────────
 
@@ -213,7 +192,7 @@
   # Services active on this host
   activeServices =
     builtins.filter
-    (key: builtins.elem key hostMeta.services)
+    (key: registry.enabled.${key} or false)
     (builtins.attrNames allServices);
 
   # Build a { groupName = [ serviceAttrs... ] } map
@@ -221,7 +200,7 @@
     builtins.foldl'
     (
       acc: key: let
-        group = serviceGroups.${key};
+        group = registry.groups.${key};
       in
         acc // {${group} = (acc.${group} or []) ++ [allServices.${key}];}
     )
