@@ -45,10 +45,10 @@
           description = "Enable HTTPS with Let's Encrypt (requires domain)";
         };
 
-        # OPTIONAL: Where to store ntfy data (default: /var/lib/ntfy-sh)
+        # OPTIONAL: Where to store ntfy data (default: /var/lib/ntfy)
         dataDir = lib.mkOption {
           type = lib.types.path;
-          default = "/var/lib/ntfy-sh";
+          default = "/var/lib/ntfy";
           example = "/data/ntfy";
           description = "Directory for ntfy data storage (cache database, attachments)";
         };
@@ -70,13 +70,13 @@
 
         user = lib.mkOption {
           type = lib.types.str;
-          default = "ntfy-sh";
+          default = "ntfy";
           description = "User to run ntfy as";
         };
 
         group = lib.mkOption {
           type = lib.types.str;
-          default = "ntfy-sh";
+          default = "ntfy";
           description = "Group to run ntfy as";
         };
 
@@ -100,7 +100,7 @@
         cacheFile = lib.mkOption {
           type = lib.types.str;
           default = "";
-          example = "/var/lib/ntfy-sh/cache.db";
+          example = "/var/lib/ntfy/cache.db";
           description = ''
             Path to the SQLite cache database. Empty string uses the in-memory
             cache (messages are lost on restart). Set to a path under dataDir
@@ -282,7 +282,7 @@
       # ----------------------------------------------------------------------------
       # NTFY SERVICE - Configure the systemd service
       # ----------------------------------------------------------------------------
-      systemd.services.ntfy-sh = {
+      systemd.services.ntfy = {
         description = "ntfy Push Notification Server";
         wantedBy = ["multi-user.target"];
         after = ["network.target"];
@@ -456,7 +456,7 @@ services.ntfy-nixlab = {
   enableSSL = true;
 
   # Persist messages across restarts
-  cacheFile    = "/var/lib/ntfy-sh/cache.db";
+  cacheFile    = "/var/lib/ntfy/cache.db";
   cacheDuration = "24h";
 };
 
@@ -467,7 +467,7 @@ services.ntfy-nixlab = {
   enable    = true;
   domain    = "ntfy.example.com";
   enableSSL = true;
-  cacheFile = "/var/lib/ntfy-sh/cache.db";
+  cacheFile = "/var/lib/ntfy/cache.db";
 
   auth = {
     enable        = true;
@@ -476,9 +476,9 @@ services.ntfy-nixlab = {
 };
 
 # After first start, add users via:
-#   sudo -u ntfy-sh ntfy user add --role=admin myuser
-#   sudo -u ntfy-sh ntfy user add myreader
-#   sudo -u ntfy-sh ntfy access myreader mytopic read
+#   sudo -u ntfy ntfy user add --role=admin myuser
+#   sudo -u ntfy ntfy user add myreader
+#   sudo -u ntfy ntfy access myreader mytopic read
 
 
 With file attachments:
@@ -487,7 +487,7 @@ services.ntfy-nixlab = {
   enable    = true;
   domain    = "ntfy.example.com";
   enableSSL = true;
-  cacheFile = "/var/lib/ntfy-sh/cache.db";
+  cacheFile = "/var/lib/ntfy/cache.db";
 
   attachments = {
     enable           = true;
@@ -504,7 +504,7 @@ services.ntfy-nixlab = {
   enable    = true;
   domain    = "ntfy.example.com";
   enableSSL = true;
-  cacheFile = "/var/lib/ntfy-sh/cache.db";
+  cacheFile = "/var/lib/ntfy/cache.db";
 
   smtp = {
     enable        = true;
@@ -526,7 +526,7 @@ services.ntfy-nixlab = {
   domain        = "ntfy.example.com";
   enableSSL     = true;
 
-  cacheFile     = "/var/lib/ntfy-sh/cache.db";
+  cacheFile     = "/var/lib/ntfy/cache.db";
   cacheDuration = "24h";
 
   dataDir = "/data/ntfy";
@@ -570,7 +570,7 @@ INITIAL SETUP
    curl -s http://localhost:2586/test-topic/sse
 
 4. If auth is enabled, create the admin user first:
-   sudo -u ntfy-sh ntfy user add --role=admin admin
+   sudo -u ntfy ntfy user add --role=admin admin
    # then use -u admin:password in curl or the web UI
 
 5. View the web UI (if enableWebUI = true):
@@ -600,19 +600,19 @@ TROUBLESHOOTING
 ================================================================================
 
 Check service status:
-  sudo systemctl status ntfy-sh
+  sudo systemctl status ntfy
 
 View logs:
-  sudo journalctl -u ntfy-sh -f
+  sudo journalctl -u ntfy -f
 
 Inspect the generated config:
-  sudo cat /var/lib/ntfy-sh/server.yml
+  sudo cat /var/lib/ntfy/server.yml
 
 List users (if auth enabled):
-  sudo -u ntfy-sh ntfy user list
+  sudo -u ntfy ntfy user list
 
 Check access control:
-  sudo -u ntfy-sh ntfy access
+  sudo -u ntfy ntfy access
 
 Test publish (no auth):
   curl -d "test" http://localhost:2586/my-topic
