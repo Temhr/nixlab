@@ -3,9 +3,9 @@
 # import this instead of maintaining their own copies.
 {config}: {
   enabled = {
-    "ollama-cpu" = config.services.ollama-stack.enable or false && (config.services.ollama-stack.acceleration or null) == "cpu";
-    "ollama-gpu" = config.services.ollama-stack.enable or false && (config.services.ollama-stack.acceleration or null) == "gpu";
-    "comfyui" = config.services.comfyui-nixlab.enable or false;
+    "ollama-cpu" = config.services.ollama-stack.acceleration or null == "cpu";
+    "ollama-gpu" = config.services.ollama-stack.acceleration or null == "cuda-p5000";
+    "comfyui" = config.services.comfyui-p5000.enable or false;
     "bookstack" = config.services.bookstack-nixlab.enable or false;
     "wikijs" = config.services.wikijs-custom.enable or false;
     "zola" = config.services.zola-nixlab.enable or false;

@@ -3,7 +3,6 @@
     address,
     ethIface,
     wifiIface,
-    services,
     system ? "x86_64-linux",
     gateway ? "10.0.0.1",
     prefixLength ? 24,
@@ -11,7 +10,7 @@
     hostId ? null,
     nixpkgsInput ? "nixpkgs", # defaults to stable
   }: {
-    inherit address system gateway prefixLength nameservers services hostId nixpkgsInput;
+    inherit address system gateway prefixLength nameservers hostId nixpkgsInput;
     interfaces =
       [
         {
@@ -35,7 +34,6 @@ in {
     wifiIface = "";
     hostId = "c6e98cd9";
     nixpkgsInput = "nixpkgs-stable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus" "syncthing"];
   };
   nixnas2 = mkHostMeta {
     address = "10.0.0.252";
@@ -43,7 +41,6 @@ in {
     wifiIface = "wlp1s0";
     hostId = "23d031fa";
     nixpkgsInput = "nixpkgs-stable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus" "syncthing"];
   };
   nixace = mkHostMeta {
     address = "10.0.0.200";
@@ -51,7 +48,6 @@ in {
     wifiIface = "wlp3s0";
     hostId = "dbacbbff";
     nixpkgsInput = "nixpkgs-unstable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus" "bookstack" "comfyui" "ollama-gpu" "home-assistant"];
   };
   nixsun = mkHostMeta {
     address = "10.0.0.201";
@@ -59,7 +55,6 @@ in {
     wifiIface = "wlo1";
     hostId = "eba785f1";
     nixpkgsInput = "nixpkgs-unstable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus"];
   };
   nixtop = mkHostMeta {
     address = "10.0.0.202";
@@ -67,7 +62,6 @@ in {
     wifiIface = "wlp61s0";
     hostId = "4a313e3b";
     nixpkgsInput = "nixpkgs-unstable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus"];
   };
   nixvat = mkHostMeta {
     address = "10.0.0.203";
@@ -75,7 +69,6 @@ in {
     wifiIface = "wlo1";
     hostId = "5845aa8d";
     nixpkgsInput = "nixpkgs-unstable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus" "ollama-cpu" "wikijs" "zola"];
   };
   nixzen = mkHostMeta {
     address = "10.0.0.204";
@@ -83,6 +76,5 @@ in {
     wifiIface = "wlp61s0";
     hostId = "9efcecaf";
     nixpkgsInput = "nixpkgs-unstable";
-    services = ["glance" "grafana" "loki" "ntfy" "prometheus"];
   };
 }
