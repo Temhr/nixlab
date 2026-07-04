@@ -9,7 +9,6 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.nsops--glance
     ];
   };
   flake.nixosModules.hosts--nixsun = {
@@ -52,12 +51,6 @@
     #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
-    services.glance-nixlab = {
-      enable = true;
-      listenAddress = "0.0.0.0";
-      openFirewall = true;
-      dataDir = "/data/glance";
-    };
 
     # Define your Flatpak packages here
     flatpakPackages = [
