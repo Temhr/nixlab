@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.servc--ollama = {
+  flake.nixosModules.servc--ollama-nixlab = {
     config,
     lib,
     pkgs,

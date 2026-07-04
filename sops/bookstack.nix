@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--bookstack = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.bookstack-nixlab;
   in {
+    imports = [self.nixosModules.servc--bookstack-nixlab];
     options.services.bookstack-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./bookstack.yaml;
@@ -18,13 +20,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.bookstack-nixlab ? enable;
-          message = "nsops--bookstack requires servc--bookstack-nixlab to also be imported";
-        }
-      ];
-
       sops.secrets =
         lib.genAttrs
         ["BOOKSTACK_MYSQL_ROOT_PASSWORD" "BOOKSTACK_MYSQL_PASSWORD" "BOOKSTACK_DB_PASSWORD" "BOOKSTACK_APP_KEY"]

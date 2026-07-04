@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--node-red = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.nodered-service;
   in {
+    imports = [self.nixosModules.servc--node-red-nixlab];
     # ══════════════════════════════════════════════════════════════════════════
     # OPTIONS
     # ══════════════════════════════════════════════════════════════════════════
@@ -19,13 +21,6 @@
     # CONFIG
     # ══════════════════════════════════════════════════════════════════════════
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.nodered-service ? enable;
-          message = "nsops--node-red requires servc--node-red-nixlab to also be imported";
-        }
-      ];
-
       # ────────────────────────────────────────────────────────────────────────
       # Declare secrets
       # ────────────────────────────────────────────────────────────────────────

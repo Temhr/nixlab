@@ -9,11 +9,8 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.servc--glance-nixlab
       self.nixosModules.nsops--glance
-      self.nixosModules.servc--ollama
       self.nixosModules.nsops--ollama
-      self.nixosModules.servc--wiki-js-nixlab
       self.nixosModules.nsops--wiki-js
       self.nixosModules.servc--zola-nixlab
     ];

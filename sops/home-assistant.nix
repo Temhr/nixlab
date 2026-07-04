@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--home-assistant = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.homeassistant-custom;
   in {
+    imports = [self.nixosModules.servc--home-assistant-nixlab];
     options.services.homeassistant-custom.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./home-assistant.yaml;
@@ -18,13 +20,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.homeassistant-custom ? enable;
-          message = "nsops--home-assistant requires servc--home-assistant-nixlab to also be imported";
-        }
-      ];
-
       sops.secrets.HA_SECRETS_YAML = {
         sopsFile = cfg.secretsFile;
         owner = config.users.users.hass.name;

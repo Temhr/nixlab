@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--syncthing = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.syncthing-nixlab;
   in {
+    imports = [self.nixosModules.servc--syncthing-nixlab];
     options.services.syncthing-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./syncthing.yaml;
@@ -29,18 +31,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = cfg.enableGuiAuth;
-          message = ''
-            nsops--syncthing is imported but enableGuiAuth is disabled.
-            Either:
-            1. Set services.syncthing-nixlab.enableGuiAuth = true;
-            2. Remove the nsops--syncthing module import (no secrets needed)
-          '';
-        }
-      ];
-
       # Declare a single binary secret — the file content IS the env file.
       # sops-nix decrypts it to a path before any service starts.
       sops.secrets.syncthing-env = {

@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--homepage = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.homepage-nixlab;
   in {
+    imports = [self.nixosModules.servc--homepage-nixlab];
     options.services.homepage-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./homepage.yaml;
@@ -18,13 +20,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.homepage-nixlab ? enable;
-          message = "nsops--homepage requires servc--homepage-nixlab to also be imported";
-        }
-      ];
-
       sops.secrets.HOMEPAGE_ENV = {
         sopsFile = cfg.secretsFile;
         owner = cfg.user;

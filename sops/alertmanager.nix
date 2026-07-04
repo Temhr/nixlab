@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--alertmanager = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.alertmanager-nixlab;
   in {
+    imports = [self.nixosModules.servc--alertmanager-nixlab];
     options.services.alertmanager-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./alertmanager.yaml;
@@ -30,13 +32,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.alertmanager-nixlab ? enable;
-          message = "nsops--alertmanager requires servc--alertmanager-nixlab to also be imported";
-        }
-      ];
-
       sops.secrets.ALERTMANAGER_ENV = {
         sopsFile = cfg.secretsFile;
         # The upstream NixOS alertmanager module uses DynamicUser, so there is

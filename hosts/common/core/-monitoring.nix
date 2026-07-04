@@ -7,9 +7,7 @@
     cfg = config.services.nixlab-monitoring;
   in {
     imports = [
-      self.nixosModules.servc--alertmanager-nixlab
       self.nixosModules.nsops--alertmanager
-      self.nixosModules.servc--grafana-nixlab
       self.nixosModules.nsops--grafana
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab

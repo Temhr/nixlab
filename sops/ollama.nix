@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--ollama = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.ollama-stack;
   in {
+    imports = [self.nixosModules.servc--ollama-nixlab];
     options.services.ollama-stack.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./ollama.yaml;
@@ -18,13 +20,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.ollama-stack ? enable;
-          message = "nsops--ollama requires servc--ollama to also be imported";
-        }
-      ];
-
       sops.secrets.WEBUI_SECRET_KEY = {
         sopsFile = cfg.secretsFile;
         owner = cfg.webuiUser;

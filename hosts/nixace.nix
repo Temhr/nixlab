@@ -9,12 +9,10 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.servc--bookstack-nixlab
       self.nixosModules.nsops--bookstack
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
-      self.nixosModules.servc--ollama
       self.nixosModules.nsops--ollama
     ];
   };

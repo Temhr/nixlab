@@ -29,7 +29,6 @@
       self.nixosModules.hosts--hardw--bluetooth
       self.nixosModules.hosts--hardw--power-management
 
-      self.nixosModules.servc--homepage-nixlab
       self.nixosModules.nsops--homepage
       self.nixosModules.nsops--ssh-keys
     ];

@@ -2,10 +2,12 @@
   flake.nixosModules.nsops--glance = {
     config,
     lib,
+    self,
     ...
   }: let
     cfg = config.services.glance-nixlab;
   in {
+    imports = [self.nixosModules.servc--glance-nixlab];
     options.services.glance-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
       default = ./glance.yaml;
@@ -19,12 +21,6 @@
     };
 
     config = lib.mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = config.services.glance-nixlab ? enable;
-          message = "nsops--glance requires servc--glance-nixlab to also be imported";
-        }
-      ];
       sops.secrets.GLANCE_ENV = {
         sopsFile = cfg.secretsFile;
         owner = cfg.user;
