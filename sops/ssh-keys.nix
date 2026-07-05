@@ -87,11 +87,6 @@
     };
 
     config = lib.mkMerge [
-      # Global sops-nix configuration
-      (lib.mkIf cfg.enable {
-        sops.age.keyFile = "/var/lib/sops-nix/key.txt";
-      })
-
       # GitHub nixlab repository key
       (lib.mkIf (cfg.enable && cfg.githubNixlabKey.enable) {
         sops.secrets."ssh-keys/id_github" = {

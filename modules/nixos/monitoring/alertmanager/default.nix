@@ -198,12 +198,13 @@
         # are not visible inside the Nix build sandbox.
         checkConfig = lib.mkOption {
           type = lib.types.bool;
-          default = true;
+          default = cfg.environmentFile == null;
+          defaultText = lib.literalExpression "environmentFile == null";
           description = ''
             Validate the generated configuration with `amtool check-config`
-            at build time. Set to false when receivers reference $ENV_VAR
-            secrets injected via the sops module — the sandbox cannot read
-            the decrypted secrets file.
+            at build time. Defaults to false automatically when environmentFile
+            is set, since the sandbox cannot read the decrypted secrets file.
+            Set explicitly to override either way.
           '';
         };
 

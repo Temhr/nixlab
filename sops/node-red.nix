@@ -34,33 +34,15 @@
           restartUnits = ["node-red.service"];
         });
 
-      # ────────────────────────────────────────────────────────────────────────
-      # Build env file from secrets
-      # ────────────────────────────────────────────────────────────────────────
-      systemd.services.node-red-secrets = {
-        description = "Write Node-RED credentials env file";
-        wantedBy = ["node-red.service"];
-        before = ["node-red.service"];
-        after = ["sops-nix.service"];
-
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          User = "root";
-        };
-
-        script = ''
-          echo "NODE_RED_CREDENTIAL_SECRET=$(cat ${config.sops.secrets.NODE_RED_CREDENTIAL_SECRET.path})" \
-            > /run/node-red-credentials.env
-          chown ${cfg.user}:${cfg.group} /run/node-red-credentials.env
-          chmod 660 /run/node-red-credentials.env
-        '';
-      };
+      sops.templates."node-red-credentials.env".content = ''
+        NODE_RED_CREDENTIAL_SECRET=${config.sops.placeholder.NODE_RED_CREDENTIAL_SECRET}
+      '';
 
       # ────────────────────────────────────────────────────────────────────────
       # Wire env file to service
       # ────────────────────────────────────────────────────────────────────────
-      services.nodered-service.credentialsEnvFile = "/run/node-red-credentials.env";
+      services.nodered-service.credentialsEnvFile =
+        config.sops.templates."node-red-credentials.env".path;
     };
   };
 }

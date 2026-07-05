@@ -14,6 +14,7 @@
     self.overlays.modifications
   ];
 
+  # actual unconditional list applied to every host regardless of profile
   mkCommonModules = [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.hosts--core--home-manager-config

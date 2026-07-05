@@ -47,12 +47,6 @@
       # EnvironmentFiles= directive picks it up automatically.
       services.alertmanager-nixlab.environmentFile =
         config.sops.secrets.ALERTMANAGER_ENV.path;
-
-      # amtool cannot see the decrypted secrets file inside the Nix build
-      # sandbox, so disable build-time config validation automatically when
-      # this sops module is imported. The operator can re-enable it on hosts
-      # that have no secret references in their receiver configs.
-      services.alertmanager-nixlab.checkConfig = lib.mkDefault false;
     };
   };
 }
