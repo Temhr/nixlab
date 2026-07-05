@@ -81,10 +81,15 @@
   #   writablePaths  — list of paths the service needs read-write access to
   #   allowNetwork   — set false for services that need no network access
   #   allowDevices   — set true for services needing /dev access (e.g. GPU)
+  #   allowJIT       — set true for JIT-compiled runtimes (Next.js, Node.js,
+  #                    eBPF-based tools) that need write+execute memory and
+  #                    syscalls outside @system-service. Relaxes
+  #                    MemoryDenyWriteExecute and SystemCallFilter.
   #
   # Usage:
   #   serviceConfig = nixlabLib.mkServiceHardening {
   #     writablePaths = [ cfg.dataDir ];
+  #     allowJIT = true;
   #   } // {
   #     Type      = "simple";
   #     User      = cfg.user;
@@ -95,6 +100,7 @@
     writablePaths ? [],
     allowNetwork ? true,
     allowDevices ? false,
+    allowJIT ? false,
   }:
     {
       NoNewPrivileges = true;
@@ -115,6 +121,10 @@
     }
     // lib.optionalAttrs (!allowDevices) {
       PrivateDevices = true;
+    }
+    // lib.optionalAttrs allowJIT {
+      MemoryDenyWriteExecute = false;
+      SystemCallFilter = "";
     };
 
   # ---------------------------------------------------------------------------

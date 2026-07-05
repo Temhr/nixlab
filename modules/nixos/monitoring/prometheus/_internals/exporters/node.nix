@@ -11,6 +11,8 @@
   config,
   lib,
   pkgs,
+  nixlabLib,
+  ...
 }: let
   cfg = config.services.prometheus-nixlab;
 
@@ -40,42 +42,23 @@
       "--collector.textfile.directory=/var/lib/node_exporter"
     ]);
 in {
-  # Human-readable service description shown in systemctl status
   description = "Prometheus Node Exporter";
-  # Start this service automatically on system boot as part of multi-user target
   wantedBy = ["multi-user.target"];
-  # Wait for network to be available before starting
   after = ["network.target"];
-  serviceConfig = {
-    # Simple service type - systemd considers it started once ExecStart process begins
-    Type = "simple";
-    # Run as unprivileged prometheus user for security
-    User = "prometheus";
-    Group = "prometheus";
-    # Command to start the node exporter with all collector flags
-    ExecStart =
-      "${pkgs.prometheus-node-exporter}/bin/node_exporter "
-      + "--web.listen-address=localhost:9100 "
-      + collectorFlags;
-    # Automatically restart on failure
-    Restart = "on-failure";
-    RestartSec = "10s";
-    # Automatically create and manage directories
-    StateDirectory = "node_exporter";
-    StateDirectoryMode = "0750";
-
-    # ========================================================================
-    # Security Hardening Options
-    # ========================================================================
-    # Prevent privilege escalation
-    NoNewPrivileges = true;
-    # Filesystem protections
-    PrivateTmp = true; # Use private /tmp directory
-    ProtectSystem = "strict"; # Make system directories read-only
-    ProtectHome = true; # Hide /home directories
-
-    # Resource limits
-    MemoryMax = "256M"; # Limit memory usage
-    TasksMax = "10"; # Limit number of processes
-  };
+  serviceConfig =
+    nixlabLib.mkServiceHardening {
+      writablePaths = []; # StateDirectory handles /var/lib/node_exporter separately
+    }
+    // {
+      Type = "simple";
+      User = "prometheus";
+      Group = "prometheus";
+      ExecStart = "${pkgs.prometheus-node-exporter}/bin/node_exporter " + "--web.listen-address=localhost:9100 " + collectorFlags;
+      Restart = "on-failure";
+      RestartSec = "10s";
+      StateDirectory = "node_exporter";
+      StateDirectoryMode = "0750";
+      MemoryMax = "256M";
+      TasksMax = "10";
+    };
 }

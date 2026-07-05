@@ -221,6 +221,7 @@
         serviceConfig =
           nixlabLib.mkServiceHardening {
             writablePaths = [cfg.dataDir];
+            allowJIT = true;
           }
           // {
             Type = "simple";
@@ -230,13 +231,6 @@
             Restart = "on-failure";
             RestartSec = "10s";
 
-            # homepage-dashboard is a Next.js app — it uses JIT compilation which
-            # requires write+execute memory and syscalls outside @system-service.
-            # These two options from mkServiceHardening must be relaxed.
-            MemoryDenyWriteExecute = false;
-            SystemCallFilter = "";
-
-            # ProtectSystem/ProtectHome need special handling for home directory paths
             ProtectSystem =
               if lib.hasPrefix "/home/" cfg.dataDir
               then "false"
@@ -246,9 +240,7 @@
               then false
               else true;
           }
-          // lib.optionalAttrs (cfg.environmentFile != null) {
-            EnvironmentFile = cfg.environmentFile;
-          };
+          // lib.optionalAttrs (cfg.environmentFile != null) {EnvironmentFile = cfg.environmentFile;};
       };
 
       # ----------------------------------------------------------------------------

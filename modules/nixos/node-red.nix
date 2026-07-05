@@ -185,6 +185,7 @@
         serviceConfig =
           nixlabLib.mkServiceHardening {
             writablePaths = [cfg.dataDir];
+            allowJIT = true;
           }
           // {
             Type = "simple";
@@ -194,13 +195,8 @@
             ExecStart = "${pkgs.nodePackages.node-red}/bin/node-red --userDir ${cfg.dataDir} --port ${toString cfg.port}";
             Restart = "on-failure";
             RestartSec = "10s";
-            # Node-RED uses Node.js/V8 JIT — these must be relaxed
-            MemoryDenyWriteExecute = false;
-            SystemCallFilter = "";
           }
-          // lib.optionalAttrs (cfg.credentialsEnvFile != null) {
-            EnvironmentFile = cfg.credentialsEnvFile;
-          };
+          // lib.optionalAttrs (cfg.credentialsEnvFile != null) {EnvironmentFile = cfg.credentialsEnvFile;};
       };
 
       # ----------------------------------------------------------------------------

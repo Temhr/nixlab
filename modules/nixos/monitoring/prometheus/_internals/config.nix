@@ -6,12 +6,13 @@
   lib,
   pkgs,
   nixlabLib,
+  ...
 }: let
   cfg = config.services.prometheus-nixlab;
 
   # Import specialized configurations
   prometheusService = import ./services/prometheus.nix {inherit config lib pkgs nixlabLib;};
-  nodeExporterService = import ./exporters/node.nix {inherit config lib pkgs;};
+  nodeExporterService = import ./exporters/node.nix {inherit config lib pkgs nixlabLib;};
   maintenanceExporters = import ./exporters/maintenance.nix {inherit config lib pkgs;};
   nginxConfig = import ./extras/nginx.nix {inherit config lib nixlabLib;};
 in {

@@ -333,6 +333,7 @@
         serviceConfig =
           nixlabLib.mkServiceHardening {
             writablePaths = ["/var/lib/alloy"];
+            allowJIT = true;
           }
           // {
             Type = "simple";
@@ -341,10 +342,6 @@
             ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
             Restart = "on-failure";
             RestartSec = "10s";
-            # Alloy uses JIT/eBPF — these two options from mkServiceHardening are too
-            # restrictive and cause the SYS signal core dump
-            MemoryDenyWriteExecute = false;
-            SystemCallFilter = ""; # empty string removes the filter entirely
           };
 
         preStart = let

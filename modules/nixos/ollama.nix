@@ -393,6 +393,7 @@
         serviceConfig =
           nixlabLib.mkServiceHardening {
             writablePaths = [cfg.webuiDataDir];
+            allowJIT = true;
           }
           // {
             Type = "simple";
@@ -405,9 +406,6 @@
             TimeoutStartSec = "120s";
             StandardOutput = "journal";
             StandardError = "journal";
-            # open-webui is a Node.js/Python app — JIT requires these relaxed
-            MemoryDenyWriteExecute = false;
-            SystemCallFilter = "";
             EnvironmentFile = lib.mkIf (cfg.webuiSecretKeyFile != null) cfg.webuiSecretKeyFile;
           };
       };
