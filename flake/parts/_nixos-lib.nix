@@ -107,8 +107,6 @@
       PrivateTmp = true;
       ProtectSystem = "strict";
       ProtectHome = true;
-      ProtectKernelTunables = true;
-      ProtectKernelModules = true;
       ProtectControlGroups = true;
       RestrictNamespaces = true;
       LockPersonality = true;
@@ -121,6 +119,8 @@
     }
     // lib.optionalAttrs (!allowDevices) {
       PrivateDevices = true;
+      ProtectKernelModules = true;
+      ProtectKernelTunables = true;
     }
     // lib.optionalAttrs allowJIT {
       MemoryDenyWriteExecute = false;

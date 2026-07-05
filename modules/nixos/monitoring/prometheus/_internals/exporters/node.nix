@@ -60,8 +60,12 @@ in {
       StateDirectoryMode = "0750";
       MemoryMax = "256M";
       TasksMax = "10";
-      # netdev/netclass need AF_NETLINK; the systemd collector talks to systemd
-      # over AF_UNIX (dbus). Neither was restricted in the original config.
       RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_NETLINK" "AF_UNIX"];
+      # node_exporter's hwmon/pressure/systemd collectors hit syscalls outside
+      # @system-service intermittently (Go's randomized map iteration means
+      # which collector probes first — and hits the restriction — varies
+      # per boot). The original config had no syscall filter at all and was
+      # stable; keep it off here rather than guess at exact syscall groups.
+      SystemCallFilter = "";
     };
 }
