@@ -108,7 +108,6 @@
       ProtectSystem = "strict";
       ProtectHome = true;
       ProtectControlGroups = true;
-      RestrictNamespaces = true;
       LockPersonality = true;
       MemoryDenyWriteExecute = true;
       SystemCallFilter = "@system-service";
@@ -121,6 +120,7 @@
       PrivateDevices = true;
       ProtectKernelModules = true;
       ProtectKernelTunables = true;
+      RestrictNamespaces = true;
     }
     // lib.optionalAttrs allowJIT {
       MemoryDenyWriteExecute = false;
