@@ -47,7 +47,7 @@ in {
   after = ["network.target"];
   serviceConfig =
     nixlabLib.mkServiceHardening {
-      writablePaths = []; # StateDirectory handles /var/lib/node_exporter separately
+      writablePaths = [];
     }
     // {
       Type = "simple";
@@ -60,5 +60,8 @@ in {
       StateDirectoryMode = "0750";
       MemoryMax = "256M";
       TasksMax = "10";
+      # netdev/netclass need AF_NETLINK; the systemd collector talks to systemd
+      # over AF_UNIX (dbus). Neither was restricted in the original config.
+      RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_NETLINK" "AF_UNIX"];
     };
 }

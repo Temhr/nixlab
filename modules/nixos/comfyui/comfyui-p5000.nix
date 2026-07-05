@@ -333,6 +333,7 @@
           nixlabLib.mkServiceHardening {
             writablePaths = [cfg.dataDir];
             allowDevices = true; # sets PrivateDevices = false already
+            allowJIT = true;
           }
           // {
             Type = "simple";
