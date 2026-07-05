@@ -107,8 +107,6 @@
       PrivateTmp = true;
       ProtectSystem = "strict";
       ProtectHome = true;
-      ProtectControlGroups = true;
-      LockPersonality = true;
       MemoryDenyWriteExecute = true;
       SystemCallFilter = "@system-service";
       ReadWritePaths = writablePaths;
@@ -121,6 +119,8 @@
       ProtectKernelModules = true;
       ProtectKernelTunables = true;
       RestrictNamespaces = true;
+      ProtectControlGroups = true;
+      LockPersonality = true;
     }
     // lib.optionalAttrs allowJIT {
       MemoryDenyWriteExecute = false;
