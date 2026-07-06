@@ -1,3 +1,15 @@
+# Port precedence (highest to lowest):
+#   1. Host config files (hosts/<name>.nix) — plain assignment, e.g.
+#        services.glance-nixlab.port = 3005;
+#      Always wins; do NOT use lib.mkDefault here or it will tie with
+#      this file's own mkDefault and cause an eval error.
+#   2. This file (ports.nix / ports-X modules) — lib.mkDefault, e.g.
+#        services.glance-nixlab.port = lib.mkDefault 3004;
+#      The fleet-wide sensible default for hosts that don't override.
+#   3. Each service module's own `options.services.X.port` default —
+#      lowest priority, only takes effect if this file isn't imported
+#      for that service at all (rare; a safety net, not meant to be
+#      kept in sync with #2 by hand).
 {...}: {
   flake.nixosModules.systm--ports-core = {lib, ...}: {
     services.alertmanager-nixlab.port = lib.mkDefault 9093;
