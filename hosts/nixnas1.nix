@@ -10,7 +10,6 @@
       self.nixosModules.hosts--profl--nas
       # Services
       self.nixosModules.servc--syncthing-nixlab
-      #self.nixosModules.nsops--syncthing
     ];
   };
   flake.nixosModules.hosts--nixnas1 = {

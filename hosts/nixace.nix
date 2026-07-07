@@ -10,10 +10,10 @@
       self.nixosModules.hosts--profl--desktop
       # Services
       self.nixosModules.nsops--bookstack
+      self.nixosModules.nsops--ollama
       self.nixosModules.servc--comfyui-p5000
       self.nixosModules.servc--comfyui-extensions
       self.nixosModules.servc--comfyui-models
-      self.nixosModules.nsops--ollama
     ];
   };
   flake.nixosModules.hosts--nixace = {
@@ -34,29 +34,16 @@
     ## GAMING PACKAGES
     steam.enable = true; #Video game digital distribution service and storefront from Valve
     ## PRODUCTIVITY
-    #calibre.enable = true;  #Comprehensive e-book software
     libreoffice.enable = true; #Comprehensive, professional-quality productivity suite
-    #logseq.enable = true; #Privacy-first, open-source platform for knowledge management and collaboration
     ## MEDIA PACKAGES
     obs.enable = true; #Free and open source software for video recording and live streaming
     spotify.enable = true; #Play music from the Spotify music service
     vlc.enable = true; #Cross-platform media player and streaming server
     ## VIRTUALIZATIONS
-    #bottles.enable = true;    #Easy-to-use wineprefix manager
-    #distrobox.enable = true;    #Wrapper around podman or docker to create and start containers
     incus.enable = true; #Powerful system container and virtual machine manager
-    #podman.enable = true;    #A program for managing pods, containers and container images
     quickemu.enable = true; #Quickly create and run optimised Windows, macOS and Linux virtual machines
-    #virt-manager.enable = true;    #Desktop user interface for managing virtual machines
-    #wine.enable = true;    #Open Source implementation of the Windows API on top of X, OpenGL, and Unix
-    #virtualisation.waydroid.enable = true; #requires "$sudo waydroid init" with "-s GAPPS -f" flag option
 
     ## SELF-HOSTED SERVICES
-    #sudo systemctl restart ollama-models #Download Ollama Models
-    #sudo journalctl -u ollama-models -f  #journal
-    ##Remove models
-    #systemctl cat ollama | grep ExecStart
-    #sudo -u ollama OLLAMA_MODELS=/data/ollama/models /nix/store/h10qpb3ac91irs946dzissanbs2klz4a-ollama-cuda-p5000-0.12.11/bin/ollama rm [model]
     services.ollama-stack = {
       enable = true;
       acceleration = "cuda-p5000";
