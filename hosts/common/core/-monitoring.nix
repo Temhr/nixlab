@@ -123,7 +123,7 @@
     config = lib.mkIf cfg.enable {
       services.grafana-nixlab = {
         enable = true;
-        port = cfg.ports.grafana;
+        port = lib.mkDefault cfg.ports.grafana;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/grafana";
         openFirewall = cfg.openFirewall;
@@ -131,8 +131,8 @@
 
       services.loki-nixlab = {
         enable = true;
-        port = cfg.ports.loki;
-        grpcPort = cfg.loki.grpcPort;
+        port = lib.mkDefault cfg.ports.loki;
+        grpcPort = lib.mkDefault cfg.loki.grpcPort;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/loki";
         openFirewall = cfg.openFirewall;
@@ -142,7 +142,7 @@
 
       services.prometheus-nixlab = {
         enable = true;
-        port = cfg.ports.prometheus;
+        port = lib.mkDefault cfg.ports.prometheus;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/prometheus";
         openFirewall = cfg.openFirewall;
@@ -164,7 +164,7 @@
 
       services.alertmanager-nixlab = {
         enable = true;
-        port = cfg.ports.alertmanager;
+        port = lib.mkDefault cfg.ports.alertmanager;
         listenAddress = cfg.listenAddress;
         openFirewall = cfg.openFirewall;
 
@@ -192,7 +192,7 @@
 
       services.ntfy-nixlab = {
         enable = true;
-        port = cfg.ports.ntfy;
+        port = lib.mkDefault cfg.ports.ntfy;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/ntfy";
         openFirewall = cfg.openFirewall;

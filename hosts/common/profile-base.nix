@@ -35,7 +35,6 @@
 
     services.homepage-nixlab = {
       enable = true;
-      port = 3000;
       listenAddress = "0.0.0.0";
       openFirewall = true;
       dataDir = "/data/homepage";
@@ -44,9 +43,6 @@
       enable = true;
       dataDir = "/data";
       openFirewall = true;
-      ports.grafana = 3101;
-      ports.loki = 3100;
-      ports.prometheus = 9090;
       loki.maintenance.enable = true;
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.systemd = true;
