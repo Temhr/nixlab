@@ -522,3 +522,4 @@ CREDITS
 Module structure based on the ollama-p5000.nix pattern.
 ComfyUI: https://github.com/comfyanonymous/ComfyUI
 */
+

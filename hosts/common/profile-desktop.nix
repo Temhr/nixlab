@@ -1,5 +1,9 @@
 {self, ...}: {
-  flake.nixosModules.hosts--profl--desktop = {...}: {
+  flake.nixosModules.hosts--profl--desktop = {
+    config,
+    lib,
+    ...
+  }: {
     imports = [
       self.nixosModules.hosts--apps--development
       self.nixosModules.hosts--apps--education
@@ -14,6 +18,9 @@
       self.nixosModules.hosts--deskt--gui-shells
       self.nixosModules.hosts--deskt--ignore-lid
     ];
+
+    ## Automatic login for this user
+    services.displayManager.autoLogin.user = lib.mkDefault config.nixlab.mainUser;
 
     # Define your Flatpak packages here
     flatpakPackages = [

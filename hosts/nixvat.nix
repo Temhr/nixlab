@@ -24,9 +24,6 @@
     imports = [
       "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
     ];
-    ## Enable automatic login for the user.
-    services.displayManager.autoLogin.user = config.nixlab.mainUser;
-
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 
