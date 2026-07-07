@@ -18,11 +18,9 @@
     pkgs,
     ...
   }: {
-    ## Shared system-wide user option
-    nixlab.mainUser = "temhr";
+    ## SELF-HOSTED SERVICES
     services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
 
-    ## SELF-HOSTED SERVICES
     services.syncthing-nixlab = {
       enable = true;
       enableGuiAuth = false; # No username/password prompt

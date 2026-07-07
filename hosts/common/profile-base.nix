@@ -33,6 +33,9 @@
       self.nixosModules.nsops--ssh-keys
     ];
 
+    ## Shared system-wide default user option
+    nixlab.mainUser = lib.mkDefault "temhr";
+
     services.homepage-nixlab = {
       enable = true;
       listenAddress = "0.0.0.0";

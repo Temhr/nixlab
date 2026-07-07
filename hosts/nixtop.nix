@@ -17,8 +17,6 @@
     pkgs,
     ...
   }: {
-    ## Shared system-wide user option
-    nixlab.mainUser = "temhr";
     ## Enable automatic login for the user.
     services.displayManager.autoLogin.user = config.nixlab.mainUser;
 

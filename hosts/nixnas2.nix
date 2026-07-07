@@ -18,9 +18,6 @@
     pkgs,
     ...
   }: {
-    ## Shared system-wide user option
-    nixlab.mainUser = "temhr";
-
     ## SELF-HOSTED SERVICES
     services.syncthing-nixlab = {
       enable = true;
