@@ -20,7 +20,7 @@
     ];
 
     ## Automatic login for this user
-    services.displayManager.autoLogin.user = lib.mkDefault config.nixlab.mainUser;
+    services.displayManager.autoLogin.user = config.nixlab.mainUser;
 
     # Define your Flatpak packages here
     flatpakPackages = [
