@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--profl--base = {...}: {
+  flake.nixosModules.hosts--profl--base = {lib, ...}: {
     imports = [
       self.nixosModules.systm--ports-core
 
