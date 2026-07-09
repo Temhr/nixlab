@@ -4,8 +4,11 @@
   ...
 }: let
   inherit (inputs.nixpkgs) lib;
-  hostsMeta = import ./_hosts-meta.nix {inherit lib;};
-  nixlabLib = import ./_nixos-lib.nix {inherit lib;};
+  # No more `import ./_hosts-meta.nix` / `import ./_nixos-lib.nix` — both now
+  # arrive pre-merged via flake.lib, same mechanism as nixosModules/homeModules.
+  hostsMeta = self.lib.hostsMeta;
+  nixlabLib = self.lib.nixlabLib;
+  usersMeta = self.lib.usersMeta;
 
   allOverlays = [
     self.overlays.unstable-packages
@@ -14,7 +17,6 @@
     self.overlays.modifications
   ];
 
-  # actual unconditional list applied to every host regardless of profile
   mkCommonModules = [
     inputs.sops-nix.nixosModules.sops
     self.nixosModules.hosts--core--home-manager-config
@@ -81,6 +83,48 @@
               }
             ];
         };
+
+  # NEW — builds a single home-manager user configuration.
+  mkHomeUser = {
+    username,
+    hostName,
+  }: let
+    userMeta = usersMeta.${username};
+    override = userMeta.hostOverrides.${hostName} or {};
+    profile = override.profile or userMeta.defaultProfile;
+  in {
+    imports =
+      [self.homeModules.home--profl--base]
+      ++ lib.optional (profile == "desktop") self.homeModules.home--profl--desktop;
+
+    home = {
+      inherit username;
+      homeDirectory = "/home/${username}";
+      enableNixpkgsReleaseCheck = false;
+      stateVersion = "24.11";
+    };
+    programs.home-manager.enable = true;
+    programs.git.enable = true;
+    programs.git.settings.user.name = userMeta.gitName;
+    programs.git.settings.user.email = userMeta.gitEmail;
+  };
+
+  # NEW — generates the full home-manager.users attrset for one host,
+  # driven entirely by hostsMeta.<host>.homeUsers.
+  mkHomeUsersForHost = hostName:
+    assert lib.assertMsg
+    (builtins.hasAttr hostName hostsMeta)
+    "mkHomeUsersForHost: no hostsMeta entry found for '${hostName}'"; let
+      meta = hostsMeta.${hostName};
+    in
+      lib.genAttrs meta.homeUsers (username:
+        assert lib.assertMsg
+        (builtins.hasAttr username usersMeta)
+        "mkHomeUsersForHost: no usersMeta entry found for user '${username}' (host '${hostName}')";
+          mkHomeUser {inherit username hostName;});
 in {
-  flake.lib = {inherit mkHost hostsMeta nixlabLib;};
+  flake.lib = {inherit mkHost mkHomeUser mkHomeUsersForHost;};
+  # hostsMeta, nixlabLib, usersMeta no longer assigned here — they already
+  # arrived via flake.lib from their own self-registering files, and
+  # flake-parts merges everyone's flake.lib contributions together.
 }

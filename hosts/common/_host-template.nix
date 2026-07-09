@@ -17,8 +17,8 @@
     ];
   };
   flake.nixosModules.hosts--CHANGEME = {
-    config,
-    pkgs,
+    #config,
+    #pkgs,
     ...
   }: {
     ## DEVELOPMENT

@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-optional--terminal-emulators = {
+  flake.homeModules.home--apps--terminal-emulators = {
     config,
     lib,
     pkgs,

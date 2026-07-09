@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-global--utilities = {pkgs, ...}: {
+  flake.homeModules.home--core--utilities = {pkgs, ...}: {
     #1) User-specific
     #2) Don’t require elevated privileges
     #3) Part of user workflows

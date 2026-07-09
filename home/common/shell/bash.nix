@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-optional--bash-files-symlink = {
+  flake.homeModules.home--shell--bash = {
     allHosts,
     flakePath,
     lib,

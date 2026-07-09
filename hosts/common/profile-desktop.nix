@@ -1,9 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--profl--desktop = {
-    config,
-    lib,
-    ...
-  }: {
+  flake.nixosModules.hosts--profl--desktop = {config, ...}: {
     imports = [
       self.nixosModules.hosts--apps--development
       self.nixosModules.hosts--apps--education

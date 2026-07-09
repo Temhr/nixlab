@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-global--config-fastfetch = {...}: {
+  flake.homeModules.home--core--config-fastfetch = {...}: {
     programs.fastfetch.enable = true;
     programs.fastfetch.settings = {
       display = {

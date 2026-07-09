@@ -11,11 +11,7 @@
       # Services
     ];
   };
-  flake.nixosModules.hosts--nixzen = {
-    config,
-    pkgs,
-    ...
-  }: {
+  flake.nixosModules.hosts--nixzen = {pkgs, ...}: {
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 

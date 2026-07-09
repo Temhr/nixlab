@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-optional--browsers = {
+  flake.homeModules.home--apps--browsers = {
     config,
     lib,
     pkgs,

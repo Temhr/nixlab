@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-global--config-git = {pkgs, ...}: {
+  flake.homeModules.home--core--config-git = {pkgs, ...}: {
     home.packages = with pkgs; [
       git
       unstable.git-cola #Sleek and powerful Git GUI

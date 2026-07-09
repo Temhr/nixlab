@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.common-global--config-folders = {lib, ...}: {
+  flake.homeModules.home--core--config-folders = {lib, ...}: {
     home.sessionVariables = {
       # XDG User Directories
       XDG_DESKTOP_DIR = "$HOME/shelf/default/Desktop"; # Graphical desktop files
