@@ -1,5 +1,9 @@
 {self, ...}: {
-  flake.nixosModules.hosts--profl--desktop = {config, ...}: {
+  flake.nixosModules.hosts--profl--desktop = {
+    config,
+    pkgs,
+    ...
+  }: {
     imports = [
       self.nixosModules.hosts--apps--development
       self.nixosModules.hosts--apps--education
@@ -21,6 +25,10 @@
     # Define your Flatpak packages here
     flatpakPackages = [
       "net.davidotek.pupgui2" # ProtonUp-Qt Install Wine- and Proton-based compatibility tools
+    ];
+
+    environment.systemPackages = with pkgs; [
+      nvtopPackages.nvidia # GPU usage monitor for NVIDIA graphics
     ];
   };
 }
