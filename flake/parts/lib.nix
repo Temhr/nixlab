@@ -4,8 +4,6 @@
   ...
 }: let
   inherit (inputs.nixpkgs) lib;
-  # No more `import ./_hosts-meta.nix` / `import ./_nixos-lib.nix` — both now
-  # arrive pre-merged via flake.lib, same mechanism as nixosModules/homeModules.
   hostsMeta = self.lib.hostsMeta;
   nixlabLib = self.lib.nixlabLib;
   usersMeta = self.lib.usersMeta;
@@ -84,7 +82,7 @@
             ];
         };
 
-  # NEW — builds a single home-manager user configuration.
+  # builds a single home-manager user configuration.
   mkHomeUser = {
     username,
     hostName,
@@ -92,10 +90,12 @@
     userMeta = usersMeta.${username};
     override = userMeta.hostOverrides.${hostName} or {};
     profile = override.profile or userMeta.defaultProfile;
+    extraModules = override.extraModules or [];
   in {
     imports =
       [self.homeModules.home--profl--base]
-      ++ lib.optional (profile == "desktop") self.homeModules.home--profl--desktop;
+      ++ lib.optional (profile == "desktop") self.homeModules.home--profl--desktop
+      ++ extraModules;
 
     home = {
       inherit username;
@@ -109,7 +109,7 @@
     programs.git.settings.user.email = userMeta.gitEmail;
   };
 
-  # NEW — generates the full home-manager.users attrset for one host,
+  # generates the full home-manager.users attrset for one host,
   # driven entirely by hostsMeta.<host>.homeUsers.
   mkHomeUsersForHost = hostName:
     assert lib.assertMsg

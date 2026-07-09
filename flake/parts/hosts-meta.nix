@@ -9,7 +9,7 @@
     nameservers ? ["9.9.9.9" "1.1.1.1"],
     hostId ? null,
     nixpkgsInput ? "nixpkgs", # defaults to stable
-    homeUsers ? [], # NEW — usernames from usersMeta that get a home-manager profile on this host
+    homeUsers ? [], # usernames from usersMeta that get a home-manager profile on this host
   }: {
     inherit address system gateway prefixLength nameservers hostId nixpkgsInput homeUsers;
     interfaces =
