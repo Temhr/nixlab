@@ -475,21 +475,14 @@ nixlab/
 │   └── alertmanager, ...
 │
 ├── overlays/                          # flake.overlays.*
-│   ├── default.nix
-│   └── _comfyui-p5000.nix, _ollama-p5000.nix, _pytorch-p5000.nix
+│   └── default.nix, ...
 │
 ├── shells/                            # perSystem.devShells.*
-│   ├── default-shell.nix, minimal.nix, container.nix
-│   ├── data.nix, mesa.nix, nix-dev.nix, python.nix, repast.nix, rust.nix, security.nix
+│   └── default-shell.nix, ...
 │
 ├── cachix/                            # per-cache substituter config
-│   └── cuda-maintainers.nix, ghostty.nix, nix-community.nix
-│
 ├── pkgs/                              # perSystem.packages
-│   └── default.nix
-│
 └── bin/                               # standalone utility scripts, not flake outputs
-    └── home-directory-organizer-script.sh, repast-bs.sh
 ```
 
 </details>
