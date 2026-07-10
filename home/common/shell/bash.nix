@@ -10,7 +10,6 @@
     bashFilesDir = "${flakePath}/home/files/bash";
     aliasesDir = "${bashFilesDir}/.bash/aliases";
 
-    # Every *.sh file under aliases/, keyed by its own filename.
     aliasFileNames =
       builtins.attrNames
       (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".sh" name)
@@ -25,9 +24,13 @@
   in {
     home.file =
       {
-        ".bash_profile".source = "${bashFilesDir}/.bash_profile";
-        ".bashrc".source = "${bashFilesDir}/.bashrc";
+        # These two collide with home-manager's own programs.bash module —
+        # mkForce is genuinely necessary here, not blanket copy-paste.
+        ".bash_profile".source = lib.mkForce "${bashFilesDir}/.bash_profile";
+        ".bashrc".source = lib.mkForce "${bashFilesDir}/.bashrc";
 
+        # Nothing else here is touched by any upstream module — plain
+        # assignment is correct and sufficient.
         ".bash/environment_variables".source = "${bashFilesDir}/.bash/environment_variables";
         ".bash/bash_prompt".source = "${bashFilesDir}/.bash/bash_prompt";
         ".bash/bash_functions".source = "${bashFilesDir}/.bash/bash_functions";
@@ -38,8 +41,6 @@
           executable = true;
         };
 
-        # Generated file — stays hand-written since its content is dynamic,
-        # not a static file on disk.
         ".bash/aliases/ssh.sh".source = pkgs.writeText "ssh.sh" ''
           # aliases/ssh.sh — SSH shortcuts generated from allHosts (managed by Nix)
 
