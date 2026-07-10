@@ -82,6 +82,31 @@
             ];
         };
 
+  # builds a single system user configuration.
+  mkSystemUser = username: let
+    userMeta = usersMeta.${username};
+  in
+    {
+      isNormalUser = userMeta.isNormalUser or true;
+      openssh.authorizedKeys.keys = userMeta.sshAuthorizedKeys or [];
+      extraGroups = userMeta.extraGroups or [];
+    }
+    // lib.optionalAttrs (userMeta.initialPassword or null != null) {
+      initialPassword = userMeta.initialPassword;
+    };
+
+  mkSystemUsersForHost = hostName:
+    assert lib.assertMsg
+    (builtins.hasAttr hostName hostsMeta)
+    "mkSystemUsersForHost: no hostsMeta entry found for '${hostName}'"; let
+      meta = hostsMeta.${hostName};
+    in
+      lib.genAttrs meta.systemUsers (username:
+        assert lib.assertMsg
+        (builtins.hasAttr username usersMeta)
+        "mkSystemUsersForHost: no usersMeta entry found for user '${username}' (host '${hostName}')";
+          mkSystemUser username);
+
   # builds a single home-manager user configuration.
   mkHomeUser = {
     username,
@@ -123,7 +148,7 @@
         "mkHomeUsersForHost: no usersMeta entry found for user '${username}' (host '${hostName}')";
           mkHomeUser {inherit username hostName;});
 in {
-  flake.lib = {inherit mkHost mkHomeUser mkHomeUsersForHost;};
+  flake.lib = {inherit mkHost mkHomeUser mkHomeUsersForHost mkSystemUser mkSystemUsersForHost;};
   # hostsMeta, nixlabLib, usersMeta no longer assigned here — they already
   # arrived via flake.lib from their own self-registering files, and
   # flake-parts merges everyone's flake.lib contributions together.

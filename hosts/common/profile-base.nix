@@ -15,7 +15,9 @@
       self.nixosModules.hosts--core--open-ssh
       self.nixosModules.hosts--core--sops
       self.nixosModules.hosts--core--system
-      self.nixosModules.hosts--core--users
+      self.nixosModules.hosts--core--users-main
+      self.nixosModules.hosts--core--users-hm
+      self.nixosModules.hosts--core--users-sys
       self.nixosModules.hosts--core--utilities
 
       self.nixosModules.hosts--autom--backup-home

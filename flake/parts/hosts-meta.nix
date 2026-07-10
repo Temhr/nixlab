@@ -10,8 +10,10 @@
     hostId ? null,
     nixpkgsInput ? "nixpkgs", # defaults to stable
     homeUsers ? [], # usernames from usersMeta that get a home-manager profile on this host
+    systemUsers ? [],
+    primaryUser ? null, # which systemUser is "the" mainUser on this host
   }: {
-    inherit address system gateway prefixLength nameservers hostId nixpkgsInput homeUsers;
+    inherit address system gateway prefixLength nameservers hostId nixpkgsInput homeUsers systemUsers primaryUser;
     interfaces =
       [
         {
@@ -37,6 +39,8 @@ in {
       hostId = "c6e98cd9";
       nixpkgsInput = "nixpkgs-stable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
     nixnas2 = mkHostMeta {
       address = "10.0.0.252";
@@ -45,6 +49,8 @@ in {
       hostId = "23d031fa";
       nixpkgsInput = "nixpkgs-stable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
     nixace = mkHostMeta {
       address = "10.0.0.200";
@@ -53,6 +59,8 @@ in {
       hostId = "dbacbbff";
       nixpkgsInput = "nixpkgs-unstable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
     nixsun = mkHostMeta {
       address = "10.0.0.201";
@@ -61,6 +69,8 @@ in {
       hostId = "eba785f1";
       nixpkgsInput = "nixpkgs-unstable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
     nixtop = mkHostMeta {
       address = "10.0.0.202";
@@ -69,6 +79,8 @@ in {
       hostId = "4a313e3b";
       nixpkgsInput = "nixpkgs-unstable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
     nixvat = mkHostMeta {
       address = "10.0.0.203";
@@ -77,6 +89,8 @@ in {
       hostId = "5845aa8d";
       nixpkgsInput = "nixpkgs-unstable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
     nixzen = mkHostMeta {
       address = "10.0.0.204";
@@ -85,6 +99,8 @@ in {
       hostId = "9efcecaf";
       nixpkgsInput = "nixpkgs-unstable";
       homeUsers = ["temhr"];
+      systemUsers = ["temhr" "guest"];
+      primaryUser = "temhr";
     };
   };
 }

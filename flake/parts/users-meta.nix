@@ -13,8 +13,20 @@
         nixsun = {extraModules = [self.homeModules.temhr-nixsun-extra];};
         nixzen = {extraModules = [self.homeModules.temhr-nixzen-extra];};
       };
+
+      # NixOS account facts, independent of home-manager.
+      isNormalUser = true;
+      sshAuthorizedKeys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKITqIX76nKk6GvwM//USjaBD+YruF7YiTJxMNXUXVu2 temhr"];
+      extraGroups = ["root" "wheel" "networkmanager" "adbusers" "kvm" "video" "render"];
+      initialPassword = null;
     };
-    # guest = { gitName = "Guest"; gitEmail = "guest@localhost"; defaultProfile = "minimal"; hostOverrides = {}; };
+
+    guest = {
+      isNormalUser = true;
+      sshAuthorizedKeys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKITqIX76nKk6GvwM//USjaBD+YruF7YiTJxMNXUXVu2 guest"];
+      extraGroups = [];
+      initialPassword = "";
+    };
     # rhmet = { gitName = "Rhmet"; gitEmail = "rhmet@example.com"; defaultProfile = "desktop"; hostOverrides = {}; };
   };
 }
