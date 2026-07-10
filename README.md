@@ -428,35 +428,31 @@ nixlab/
 │   └── users-meta.nix                 # flake.lib.usersMeta
 │
 ├── hardware/                          # hardw--* modules, one file per physical machine
-│   ├── m720q-nas1.nix, m720q-nas2.nix
-│   ├── zb15g2-k1.nix, zb17g1-k3.nix, zb17g1-k4.nix, zb17g2-k5.nix, zb17g4-p5.nix
+│   ├── m720q-*.nix, ...
+│   ├── zb*.nix, ...
 │   └── common/
 │       ├── global.nix
 │       ├── _global/                   # default.nix, hardware-configuration.nix, mounts.nix
 │       └── optional/                  # driver-nvidia.nix, zfs-pool-rename.nix, mount-*.nix
 │
 ├── hosts/                             # hosts--* modules + nixosConfigurations
-│   ├── nixace.nix, nixnas1.nix, nixnas2.nix, nixsun.nix, nixtop.nix, nixvat.nix, nixzen.nix
+│   ├── nix*.nix, ...
 │   └── common/
 │       ├── _host-template.nix         # reference menu — never imported by the flake
-│       ├── profile-base.nix, profile-desktop.nix, profile-nas.nix
+│       ├── profile-*.nix, ...
 │       ├── apps/                      # development, education, games, media, productivity, virtualizations
-│       ├── automation/                # backup-home, flake-update, nix-gc, nixlab-gpull, nixos-upgrade,
-│       │                              # ping-watchdog, backup-phone-media
-│       ├── core/                      # boot-loader, display-manager, home-manager-config, journald,
-│       │   │                          # locale, monitoring, networking, nginx, nix, open-ssh, sops,
-│       │   │                          # system, users, utilities
-│       │   └── _users/                # options-main-user.nix, users-hm-dispatch.nix, users-sys.nix
+│       ├── automation/                # backup-home, ...
+│       ├── core/                      # boot-loader, ...
+│       │   └── users.nix              # users-main.nix, users-hm.nix, users-sys.nix
 │       ├── debug/                     # diagnose.nix — opt-in only, never in any profile
 │       ├── desktop/                   # cache-tmpfs, firefox, flatpak, gui-shells, ignore-lid
 │       └── hardware/                  # audio, bluetooth, power-management
 │
 ├── home/                              # home--* modules, mirrors hosts/ structure
 │   ├── common/
-│   │   ├── profile-base.nix, profile-desktop.nix
+│   │   ├── profile-*.nix, ...
 │   │   ├── apps/                      # browsers, terminal-emulators, config-virt-manager
-│   │   ├── core/                      # config-fastfetch, config-folders, config-git, config-ssh,
-│   │   │                              # ephemeral-apps, system, utilities
+│   │   ├── core/                      # config-*, ephemeral-apps, system, utilities
 │   │   └── shell/
 │   │       └── bash.nix               # directory-driven alias loading via readDir
 │   └── files/bash/                    # actual dotfile content — .bash_profile, .bashrc, .bash/*
@@ -464,12 +460,10 @@ nixlab/
 ├── modules/                           # servc--*, systm--* — self-hosted service modules
 │   ├── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
 │   └── nixos/
-│       ├── bookstack.nix, cachix.nix, home-assistant.nix, node-red.nix, ollama.nix,
-│       │   syncthing.nix, waydroid.nix, wiki-js.nix, zola.nix
+│       ├── bookstack.nix, ...
 │       ├── comfyui/                   # comfyui-p5000, comfyui-extensions, comfyui-models
 │       ├── glance/                    # default.nix, _glance-pages.nix
-│       ├── homepage-dashboard/        # default.nix, _service-registry.nix, _services.nix,
-│       │                              # _settings.nix, _widgets.nix
+│       ├── homepage-dashboard/        # default.nix, ...
 │       └── monitoring/
 │           ├── alertmanager/, grafana/ (+ dashboards/*.json), ntfy/
 │           ├── loki/                  # default.nix, maintenance-logger.sh
@@ -477,8 +471,7 @@ nixlab/
 │                                      # scrape-configs, exporters/, extras/, services/)
 │
 ├── sops/                              # nsops--* modules — one .nix + one .yaml per service
-│   └── alertmanager, bookstack, glance, grafana, home-assistant, homepage,
-│       networking, node-red, ollama, ssh-keys, syncthing, wiki-js
+│   └── alertmanager, ...
 │
 ├── overlays/                          # flake.overlays.*
 │   ├── default.nix
