@@ -650,7 +650,7 @@ nixsun = mkHostMeta {
 };
 ```
 
-A `home/users/rhmet-nixsun.nix` extraModules file might be required. `mkHomeUsersForHost` and `mkSystemUsersForHost` will generate both the home-manager profile and the NixOS account automatically on the next rebuild.
+`mkHomeUsersForHost` and `mkSystemUsersForHost` will generate both the home-manager profile and the NixOS account automatically on the next rebuild.
 
 #### 3. (Only if genuinely needed) Add a per-combo extra module
 
