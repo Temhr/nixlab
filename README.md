@@ -455,7 +455,8 @@ nixlab/
 │   │   ├── core/                      # config-*, ephemeral-apps, system, utilities
 │   │   └── shell/
 │   │       └── bash.nix               # directory-driven alias loading via readDir
-│   └── files/bash/                    # actual dotfile content — .bash_profile, .bashrc, .bash/*
+│   ├── files/bash/                    # actual dotfile content — .bash_profile, .bashrc, .bash/*
+│   └── users/                         # user@host extraModules
 │
 ├── modules/                           # servc--*, systm--* — self-hosted service modules
 │   ├── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
@@ -649,7 +650,7 @@ nixsun = mkHostMeta {
 };
 ```
 
-That's it — no `home/users/rhmet-nixsun.nix` file is required. `mkHomeUsersForHost` and `mkSystemUsersForHost` will generate both the home-manager profile and the NixOS account automatically on the next rebuild.
+A `home/users/rhmet-nixsun.nix` extraModules file might be required. `mkHomeUsersForHost` and `mkSystemUsersForHost` will generate both the home-manager profile and the NixOS account automatically on the next rebuild.
 
 #### 3. (Only if genuinely needed) Add a per-combo extra module
 

@@ -8,10 +8,6 @@
         nixnas1 = {profile = "minimal";};
         nixnas2 = {profile = "minimal";};
         nixace = {extraModules = [self.homeModules.temhr-nixace-extra];};
-        nixtop = {extraModules = [self.homeModules.temhr-nixtop-extra];};
-        nixvat = {extraModules = [self.homeModules.temhr-nixvat-extra];};
-        nixsun = {extraModules = [self.homeModules.temhr-nixsun-extra];};
-        nixzen = {extraModules = [self.homeModules.temhr-nixzen-extra];};
       };
 
       # NixOS account facts, independent of home-manager.
