@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Home Directory Organizer Script - Fixed Version
 # Moves default home directories to ~/shelf/default/ and creates symlinks
