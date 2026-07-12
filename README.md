@@ -455,7 +455,7 @@ nixlab/
 │   │   ├── core/                      # config-*, ephemeral-apps, system, utilities
 │   │   └── shell/
 │   │       └── bash.nix               # directory-driven alias loading via readDir
-│   ├── files/bash/                    # actual dotfile content — .bash_profile, .bashrc, .bash/*
+│   ├── files/bash/                    # dotfile content — .bash_profile, .bashrc, .bash/*
 │   └── users/                         # user@host extraModules
 │
 ├── modules/                           # servc--*, systm--* — self-hosted service modules
