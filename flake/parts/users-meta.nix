@@ -18,6 +18,7 @@
     };
 
     guest = {
+      # NixOS account facts, independent of home-manager.
       isNormalUser = true;
       sshAuthorizedKeys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKITqIX76nKk6GvwM//USjaBD+YruF7YiTJxMNXUXVu2 guest"];
       extraGroups = [];
