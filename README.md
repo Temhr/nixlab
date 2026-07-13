@@ -455,18 +455,25 @@ nixlab/
 ├── flake.lock
 ├── .sops.yaml                         # sops-nix age recipient rules
 │
-├── flake/parts/                       # orchestration — see Central Orchestration Files
-│   ├── apps.nix
-│   ├── checks.nix
-│   ├── hardware-meta.nix              # flake.lib.hardwareMeta
-│   ├── hosts-meta.nix                 # flake.lib.hostsMeta
-│   ├── lib.nix                        # mkHost, mkHomeUser(s), mkSystemUser(s), ...
-│   ├── nixos-lib.nix                  # flake.lib.nixlabLib
-│   ├── nixpkgs.nix
-│   ├── options-home.nix
-│   ├── options-lib.nix
-│   ├── packages.nix
-│   └── users-meta.nix                 # flake.lib.usersMeta
+├── flake/
+│   ├── nixos-lib.nix                  # nixlabLib — cross-cutting, not axis-specific
+│   ├── pkgs.nix                       # single flake.lib.overlays / .nixpkgsConfig + perSystem pkgs
+│   ├── data/                          # pure attrsets only — no functions
+│   │   ├── hardware-meta.nix
+│   │   ├── hosts-meta.nix
+│   │   └── users-meta.nix
+│   ├── schema/                        # types + smart constructors for data/
+│   │   ├── options.nix                # flake.lib / flake.homeModules option decls
+│   │   ├── hardware.nix               # mkMachineMeta
+│   │   └── hosts.nix                  # mkHostMeta (incl. interfaces derivation)
+│   ├── builders/                      # one file per independent axis
+│   │   ├── hardware.nix               # mkHardwareProfile
+│   │   ├── hosts.nix                  # mkHost, mkCommonModules
+│   │   └── users.nix                  # mkHomeUser(s), mkSystemUser(s)
+│   └── ci/                            # dev tooling, not repo "meaning"
+│       ├── checks.nix
+│       ├── apps.nix
+│       └── packages.nix
 │
 ├── hardware/                          # hardw--* modules, one per each physical machine
 │   ├── m720q-*.nix, zb*.nix, ... 
