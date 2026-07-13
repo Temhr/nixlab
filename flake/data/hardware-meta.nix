@@ -1,23 +1,5 @@
-{...}: let
-  mkMachineMeta = {
-    cpuVendor ? "intel",
-    initrdAvailableKernelModules ? [],
-    initrdKernelModules ? [],
-    kernelModules ? [],
-    extraModulePackages ? [],
-    enableRedistributableFirmware ? true,
-    extraConfig ? {},
-  }: {
-    inherit
-      cpuVendor
-      initrdAvailableKernelModules
-      initrdKernelModules
-      kernelModules
-      extraModulePackages
-      enableRedistributableFirmware
-      extraConfig
-      ;
-  };
+{self, ...}: let
+  inherit (self.lib) mkMachineMeta;
 in {
   flake.lib.hardwareMeta = {
     m720q-nas1 = mkMachineMeta {
