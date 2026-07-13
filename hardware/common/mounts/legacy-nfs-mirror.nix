@@ -1,5 +1,6 @@
+# candidate to migrate onto the ZFS module later if nixnas2's disks ever get converted
 {...}: {
-  flake.nixosModules.hardw--c-opt--mount-mirror = {config, ...}: {
+  flake.nixosModules.hardw--mounts--legacy-nfs-mirror = {config, ...}: {
     fileSystems."/mirror" = {
       device = "/dev/disk/by-label/mirror";
       fsType = "ext4";

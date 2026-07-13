@@ -1,13 +1,8 @@
 {self, ...}: {
   flake.nixosModules.hardw--zb17g2-k5 = {...}: {
     imports = [
-      self.nixosModules.hardw--c-global
-      self.nixosModules.hardw--c-opt--driver-nvidia
-      self.nixosModules.hardw--c-opt--mount-data
-      self.nixosModules.hardw--c-opt--mount-mirnas1
-      self.nixosModules.hardw--c-opt--mount-mirnas2
+      (self.lib.mkHardwareProfile "zb17g2-k5") # explicit — no config lookup, no ambiguity
+      self.nixosModules.hardw--profl--workstation-nvidia
     ];
-    # Choose between these choices: "none" "l470" "l535" "l580" "stable"
-    driver-nvidia.driver-branch = "l470";
   };
 }

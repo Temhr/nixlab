@@ -1,15 +1,12 @@
 {...}: {
-  flake.nixosModules.hardw--c-opt--zfs-pool-rename = {
+  flake.nixosModules.hardw--mounts--zfs-pool-rename = {
     config,
     lib,
     pkgs,
     ...
   }: {
     options.zfs-pool-rename = {
-      enable = lib.mkEnableOption {
-        description = "Rename a ZFS pool by matching it against a known set of devices";
-        default = false;
-      };
+      enable = lib.mkEnableOption "Rename a ZFS pool by matching it against a known set of devices";
 
       poolName = lib.mkOption {
         type = lib.types.str;

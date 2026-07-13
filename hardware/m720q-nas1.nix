@@ -1,12 +1,12 @@
 {self, ...}: {
   flake.nixosModules.hardw--m720q-nas1 = {...}: {
     imports = [
-      self.nixosModules.hardw--c-global
-      self.nixosModules.hardw--c-opt--mount-4dz1
-      self.nixosModules.hardw--c-opt--mount-mirnas2
+      (self.lib.mkHardwareProfile "m720q-nas1") # explicit — no config lookup, no ambiguity
+      self.nixosModules.hardw--mounts--zfs-raidz1-pool
+      self.nixosModules.hardw--mounts--mirror-peer
     ];
-
-    mount-zfs-4dz1 = {
+    mirrorPeers = ["nixnas2"];
+    zfsRaidz1Pool = {
       enable = true;
       nfs.enable = true;
       poolName = "tanks";

@@ -1,19 +1,17 @@
 {self, ...}: {
-  flake.nixosModules.hardw--c-opt--mount-4dz1 = {
+  flake.nixosModules.hardw--mounts--zfs-raidz1-pool = {
     config,
     lib,
     pkgs,
     ...
   }: {
     imports = [
-      self.nixosModules.hardw--c-opt--zfs-pool-rename
+      self.nixosModules.hardw--mounts--zfs-pool-rename
     ];
     options = {
-      mount-zfs-4dz1 = {
-        enable = lib.mkEnableOption {
-          description = "mounts ZFS RaidZ1 pool with 4 disks";
-          default = false;
-        };
+      zfsRaidz1Pool = {
+        enable = lib.mkEnableOption "mounts ZFS RaidZ1 pool with 4 disks";
+
         poolName = lib.mkOption {
           type = lib.types.str;
           default = "tank";
@@ -25,7 +23,7 @@
         };
         mountPoint = lib.mkOption {
           type = lib.types.str;
-          default = "/${config.mount-zfs-4dz1.poolName}";
+          default = "/${config.zfsRaidz1Pool.poolName}";
           description = "Filesystem path to mount the ZFS pool root dataset. Defaults to /<poolName>.";
         };
         devices = lib.mkOption {
@@ -85,8 +83,8 @@
     };
 
     config = lib.mkMerge [
-      (lib.mkIf config.mount-zfs-4dz1.enable (let
-        cfg = config.mount-zfs-4dz1;
+      (lib.mkIf config.zfsRaidz1Pool.enable (let
+        cfg = config.zfsRaidz1Pool;
         mountPoint = cfg.mountPoint;
       in {
         # Enable ZFS support
@@ -224,7 +222,7 @@
         # To rename: just change poolName — the rename service will detect the
         # old name automatically on next boot and rename it in place.
         #
-        # To enable NFS export, set mount-zfs-4dz1.nfs.enable = true;
+        # To enable NFS export, set zfsRaidz1Pool.nfs.enable = true;
         # This will export ${mountPoint} to the configured network with NFS.
       }))
     ];

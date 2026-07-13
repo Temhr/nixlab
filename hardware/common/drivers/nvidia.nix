@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--c-opt--driver-nvidia = {
+  flake.nixosModules.hardw--core--nvidia = {
     config,
     pkgs,
     lib,
