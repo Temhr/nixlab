@@ -458,8 +458,9 @@ nixlab/
 ├── flake/parts/                       # orchestration — see Central Orchestration Files
 │   ├── apps.nix
 │   ├── checks.nix
+│   ├── hardware-meta.nix              # flake.lib.hardwareMeta
 │   ├── hosts-meta.nix                 # flake.lib.hostsMeta
-│   ├── lib.nix                        # mkHost, mkHomeUser(s), mkSystemUser(s)
+│   ├── lib.nix                        # mkHost, mkHomeUser(s), mkSystemUser(s), ...
 │   ├── nixos-lib.nix                  # flake.lib.nixlabLib
 │   ├── nixpkgs.nix
 │   ├── options-home.nix
@@ -468,34 +469,11 @@ nixlab/
 │   └── users-meta.nix                 # flake.lib.usersMeta
 │
 ├── hardware/                          # hardw--* modules, one file per physical machine
-│   ├── m720q-nas1.nix, m720q-nas2.nix # Lenovo Tiny m720q — hardw--m720q-nas1/2
-│   ├── zb15g2-k1.nix                  # HP ZBook 15 G2, Quadro K1100M
-│   ├── zb17g1-k3.nix, zb17g1-k4.nix   # HP ZBook 17 G1, Quadro K3100M / K4100M
-│   ├── zb17g2-k5.nix                  # HP ZBook 17 G2, Quadro K5100M
-│   ├── zb17g4-p5.nix                  # HP ZBook 17 G4, Quadro P5000
-│   │                                  # ^ each file: (self.lib.mkHardwareProfile "<machine>")
-│   │                                  #   + a hardw--profl--* / hardw--mounts--* import list —
-│   │                                  #   no per-machine hardware-configuration.nix file exists;
-│   │                                  #   boot/kernel-module facts come from hardwareMeta instead
+│   ├── m720q-*.nix, zb*.nix, ... 
 │   └── common/
-│       ├── profile-workstation-nvidia.nix  # hardw--profl--workstation-nvidia
-│       ├── drivers/
-│       │   └── nvidia.nix                  # hardw--core--nvidia (driver-branch enum)
-│       └── mounts/
-│           ├── local-data.nix              # hardw--mounts--local-data (/data)
-│           ├── mirror-peer.nix             # hardw--mounts--mirror-peer — generic,
-│           │                               #   mirrorPeers = [ "nixnas1" "nixnas2" ... ]
-│           │                               #   replaces 4 formerly-duplicated per-peer files
-│           ├── zfs-raidz1-pool.nix         # hardw--mounts--zfs-raidz1-pool — generic 4-disk
-│           │                               #   RAIDZ1 + NFS export + health monitoring
-│           ├── zfs-pool-rename.nix         # hardw--mounts--zfs-pool-rename — self-healing
-│           │                               #   pool import/rename by device fingerprint
-│           └── legacy-nfs-mirror.nix       # hardw--mounts--legacy-nfs-mirror — nixnas2's
-│                                           #   ext4+NFS export; flagged to migrate onto
-│                                           #   zfs-raidz1-pool if its disks are ever converted
-│   # `mkHardwareProfile` itself (in flake/parts/lib.nix) supplies the universal filesystem
-│   # layout (/, /home, /boot, swap) and per-machine boot/initrd facts from hardwareMeta —
-│   # there is no separate hardw--profl--base module; it's a function, not a self-registered one.
+│       ├── profile-*.nix, ...
+│       ├── drivers/                   # hardw--core--nvidia (driver-branch enum)
+│       └── mounts/                    # hardw--mounts--*
 │
 ├── hosts/                             # hosts--* modules + nixosConfigurations
 │   ├── nix*.nix, ...
