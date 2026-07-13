@@ -468,12 +468,12 @@ nixlab/
 │   ├── packages.nix
 │   └── users-meta.nix                 # flake.lib.usersMeta
 │
-├── hardware/                          # hardw--* modules, one file per physical machine
+├── hardware/                          # hardw--* modules, one per each physical machine
 │   ├── m720q-*.nix, zb*.nix, ... 
 │   └── common/
 │       ├── profile-*.nix, ...
-│       ├── drivers/                   # hardw--core--nvidia (driver-branch enum)
-│       └── mounts/                    # hardw--mounts--*
+│       ├── drivers/                   # driver-branch enum
+│       └── mounts/                    # local-data, mirror-peer, zfs-raidz1-pool, ...
 │
 ├── hosts/                             # hosts--* modules + nixosConfigurations
 │   ├── nix*.nix, ...
