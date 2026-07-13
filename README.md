@@ -2,7 +2,7 @@
 
 Modular NixOS configuration for Linux laptops, desktops, and homelab servers. Built on the **Dendritic Pattern** using **flake-parts** for composable, self-registering modules where every file declares its own outputs — including its own metadata and library functions.
 
-Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs) with inspiration from [EmergentMind](https://www.youtube.com/watch?v=YHm7e3f87iY&list=PLAWyx2BxU4OyERRTbzNAaRHK08DQ0DD_l&index=1), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the broader NixOS community. Written almost entirely by Claude.
+Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs) with inspiration from [EmergentMind](https://www.youtube.com/watch?v=YHm7e3f87iY&list=PLAWyx2BxU4OyERRTbzNAaRHK08DQ0DD_l&index=1), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the broader NixOS community. Rewritten almost entirely by Claude.
 
 ---
 
@@ -15,7 +15,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
   - [Self-Exporting Module Schema](#self-exporting-module-schema)
   - [The `flake.lib` Registry](#the-flakelib-registry)
   - [Module Namespace & Naming](#module-namespace--naming)
-  - [Two-Axis Metadata: Hosts & Users](#two-axis-metadata-hosts--users)
+  - [Three-Axis Metadata: Hardware, Hosts & Users](#three-axis-metadata-hardware-hosts--users)
   - [Profile Composition](#profile-composition)
   - [Host Build Flow](#host-build-flow)
   - [Home-Manager Build Flow](#home-manager-build-flow)
@@ -102,9 +102,10 @@ A small number of concerns live in `flake/parts/` as conventional flake-parts fi
 
 | File | Responsibility | Output |
 |------|---------------|--------|
-| `lib.nix` | `mkHost`, `mkHomeUser`, `mkHomeUsersForHost`, `mkSystemUser`, `mkSystemUsersForHost` constructors — reads `self.lib.hostsMeta` / `self.lib.usersMeta` / `self.lib.nixlabLib`, injects nixpkgs, sops-nix, overlays, hostMeta into every host and home-manager user | `flake.lib.mkHost`, `.mkHomeUser`, `.mkHomeUsersForHost`, `.mkSystemUser`, `.mkSystemUsersForHost` |
+| `lib.nix` | `mkHost`, `mkHomeUser`, `mkHomeUsersForHost`, `mkSystemUser`, `mkSystemUsersForHost`, `mkHardwareProfile` constructors — reads `self.lib.hostsMeta` / `self.lib.usersMeta` / `self.lib.hardwareMeta` / `self.lib.nixlabLib`, injects nixpkgs, sops-nix, overlays, hostMeta into every host and home-manager user | `flake.lib.mkHost`, `.mkHomeUser`, `.mkHomeUsersForHost`, `.mkSystemUser`, `.mkSystemUsersForHost`, `.mkHardwareProfile` |
 | `hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection, `homeUsers`, `systemUsers`, `primaryUser` | `flake.lib.hostsMeta` |
 | `users-meta.nix` | Per-user identity: git name/email, default home-manager profile, per-host overrides, SSH authorized keys, NixOS account facts (`isNormalUser`, `extraGroups`, `initialPassword`) | `flake.lib.usersMeta` |
+| `hardware-meta.nix` | Per-machine hardware facts, in nixlab's own schema rather than raw `nixos-generate-config` output: `cpuVendor`, `initrdAvailableKernelModules`, `initrdKernelModules`, `kernelModules`, `extraModulePackages`, an `extraConfig` escape hatch | `flake.lib.hardwareMeta` |
 | `nixos-lib.nix` | Shared NixOS helper functions (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) injected into every module as `nixlabLib` via `specialArgs` | `flake.lib.nixlabLib` |
 | `options-lib.nix` | Declares `flake.lib` as a mergeable `lazyAttrsOf` option — the option declaration that makes the self-registration above possible | *(option declaration only)* |
 | `options-home.nix` | Declares `flake.homeModules` as a mergeable `lazyAttrsOf` option | *(option declaration only)* |
@@ -220,9 +221,14 @@ Because `self` is resolved lazily by flake-parts, `lib.nix` can reference `self.
 
 All NixOS modules register under `flake.nixosModules`; all home-manager modules register under `flake.homeModules`. The double-dash convention encodes a two-level hierarchy in a flat namespace — all cross-file references use `self.nixosModules.*` / `self.homeModules.*`, never filesystem paths.
 
+> **Machine name vs. hostname:** `hardw--<machine>` modules are keyed by a memorable *hardware* nickname (`zb17g1-k3`, `m720q-nas1`) loosely based on model/manufacturer — deliberately **not** the same identifier space as `hostsMeta`'s hostnames (`nixace`, `nixnas1`). A `hosts--<hostname>.nix` file imports whichever `hardw--<machine>` module matches the physical box it runs on. Never look up hardware facts through `config.networking.hostName` — pass the machine name explicitly (see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)).
+
 | Prefix | Layer |
 |--------|-------|
-| `hardw--` | Physical machine hardware |
+| `hardw--<machine>` | One file per physical machine, built via `self.lib.mkHardwareProfile "<machine>"` + machine-specific mount/driver imports |
+| `hardw--profl--` | Hardware profile compositions (workstation-nvidia, etc.) |
+| `hardw--core--` | Universal hardware modules (drivers) |
+| `hardw--mounts--` | Filesystem/NFS/ZFS mount modules |
 | `hosts--<hostname>` | Host identity + feature selections |
 | `hosts--profl--` | NixOS profile compositions (base, desktop, nas) |
 | `hosts--core--` | Universal NixOS modules (all hosts) |
@@ -244,20 +250,46 @@ All NixOS modules register under `flake.nixosModules`; all home-manager modules 
 ├───nixosConfigurations
 │   ├───nixace, nixnas1, nixnas2, nixsun, nixtop, nixvat, nixzen
 ├───nixosModules
-│   ├───hardw--zb17g4-p5, hosts--nixace, hosts--profl--base, servc--glance-nixlab, ...
+│   ├───hardw--zb17g4-p5, hardw--profl--workstation-nvidia, hosts--nixace, servc--glance-nixlab, ...
 ├───homeModules
 │   ├───home--profl--base, home--profl--desktop, home--core--config-git, home--apps--browsers, ...
 ```
 
 </details>
 
-- ### <ins>Two-Axis Metadata: Hosts & Users</ins>
+- ### <ins>Three-Axis Metadata: Hardware, Hosts & Users</ins>
 
 <details>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-User identity and host placement are deliberately independent axes — a user is never hardcoded into a per-combo file. This is what lets any number of users mix and match across any number of hosts (e.g. `temhr` on `nixace`; `temhr` and `guest` on `nixvat`; `guest` and `rhmet` on `nixsun`) without per-combo boilerplate.
+Physical hardware, host identity, and user identity are three deliberately independent axes — none is hardcoded into another. This is what lets any number of users mix and match across any number of hosts (e.g. `temhr` on `nixace`; `temhr` and `guest` on `nixvat`; `guest` and `rhmet` on `nixsun`), and lets the same hardware profile (e.g. `workstation-nvidia`) back multiple distinct machines, without per-combo boilerplate.
+
+**Axis 0 — `hardwareMeta` (physical machine facts, independent of hostname):**
+```nix
+# flake/parts/hardware-meta.nix
+flake.lib.hardwareMeta = {
+  zb17g1-k3 = mkMachineMeta {
+    cpuVendor = "intel";
+    initrdAvailableKernelModules = ["xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "rtsx_pci_sdmmc"];
+    kernelModules = ["kvm-intel"];
+  };
+  # ...one entry per physical machine, in nixlab's own schema —
+  # never a raw nixos-generate-config dump.
+};
+```
+`self.lib.mkHardwareProfile "<machine>"` (in `lib.nix`) reads this metadata directly, keyed by the **machine name passed in explicitly** — never by `config.networking.hostName`, since the machine nickname and the eventual hostname are different identifier spaces (see [Module Namespace & Naming](#module-namespace--naming)):
+```nix
+# hardware/zb17g1-k3.nix
+{ self, ... }: {
+  flake.nixosModules.hardw--zb17g1-k3 = { ... }: {
+    imports = [
+      (self.lib.mkHardwareProfile "zb17g1-k3")   # explicit string — no config lookup
+      self.nixosModules.hardw--profl--workstation-nvidia
+    ];
+  };
+}
+```
 
 **Axis 1 — `usersMeta` (who, independent of where):**
 ```nix
@@ -298,7 +330,7 @@ mkSystemUsersForHost = hostName: lib.genAttrs hostsMeta.${hostName}.systemUsers 
 ```
 `nixlab.mainUser` is itself derived — `lib.mkDefault hostsMeta.<host>.primaryUser` — rather than hand-copied into every host file.
 
-**Real per-combo files are an escape hatch, not the default.** `home/users/<username>-<hostname>.nix` (referenced via `hostOverrides.<host>.extraModules`) is created only when a specific user@host combination has genuinely unique content (e.g. GPU tooling only relevant to `temhr` on `nixace`) — mirroring exactly how sparse `hosts/nixzen.nix` and substantial `hosts/nixace.nix` coexist: file richness tracks real uniqueness, not a uniform template.
+**Real per-combo files are an escape hatch, not the default.** `home/users/<username>-<hostname>.nix` (referenced via `hostOverrides.<host>.extraModules`) is created only when a specific user@host combination has genuinely unique content (e.g. GPU tooling only relevant to `temhr` on `nixace`) — mirroring exactly how sparse `hosts/nixzen.nix` and substantial `hosts/nixace.nix` coexist: file richness tracks real uniqueness, not a uniform template. `hardwareMeta` has the identical escape hatch via each entry's `extraConfig` field, for the rare machine with a genuinely exotic one-off boot requirement.
 
 </details>
 
@@ -309,6 +341,10 @@ mkSystemUsersForHost = hostName: lib.genAttrs hostsMeta.${hostName}.systemUsers 
 <p></p>
 
 Every `nixosConfiguration` and every generated home-manager user composes from the same three-tier shape:
+
+**Hardware side** (`hardware/common/profile-*.nix`):
+- `mkHardwareProfile "<machine>"` (a function, not a self-registered module — called by each machine file, not imported) — universal filesystem layout, per-machine boot/initrd/kernel-module facts sourced from `hardwareMeta`, CPU microcode
+- `hardw--profl--workstation-nvidia` — nvidia driver + local `/data` mount + mirror-peer NFS mounts; imported by the 5 nvidia-equipped workstation/laptop machines
 
 **NixOS side** (`hosts/common/profile-*.nix`):
 - `hosts--profl--base` — boot loader, networking, nix settings, ssh, sops, monitoring stack, home-manager wiring, automation timers; imported by every host
@@ -329,6 +365,10 @@ Every `nixosConfiguration` and every generated home-manager user composes from t
 
 ```
 hosts/<hostname>.nix
+  → modules = [ self.nixosModules.hardw--<machine>, hosts--<hostname>, hosts--profl--*, ... ]
+       hardw--<machine> itself imports (self.lib.mkHardwareProfile "<machine>")
+         → asserts hardwareMeta.<machine> exists
+         → sets fileSystems/swapDevices, boot.initrd/kernelModules from hardwareMeta
   → self.lib.mkHost { name; modules; }
     → asserts hostsMeta.<hostname> exists
     → resolves nixpkgsInput (stable/unstable) + system architecture
@@ -428,12 +468,34 @@ nixlab/
 │   └── users-meta.nix                 # flake.lib.usersMeta
 │
 ├── hardware/                          # hardw--* modules, one file per physical machine
-│   ├── m720q-*.nix, ...
-│   ├── zb*.nix, ...
+│   ├── m720q-nas1.nix, m720q-nas2.nix # Lenovo Tiny m720q — hardw--m720q-nas1/2
+│   ├── zb15g2-k1.nix                  # HP ZBook 15 G2, Quadro K1100M
+│   ├── zb17g1-k3.nix, zb17g1-k4.nix   # HP ZBook 17 G1, Quadro K3100M / K4100M
+│   ├── zb17g2-k5.nix                  # HP ZBook 17 G2, Quadro K5100M
+│   ├── zb17g4-p5.nix                  # HP ZBook 17 G4, Quadro P5000
+│   │                                  # ^ each file: (self.lib.mkHardwareProfile "<machine>")
+│   │                                  #   + a hardw--profl--* / hardw--mounts--* import list —
+│   │                                  #   no per-machine hardware-configuration.nix file exists;
+│   │                                  #   boot/kernel-module facts come from hardwareMeta instead
 │   └── common/
-│       ├── global.nix
-│       ├── _global/                   # default.nix, hardware-configuration.nix, mounts.nix
-│       └── optional/                  # driver-nvidia.nix, zfs-pool-rename.nix, mount-*.nix
+│       ├── profile-workstation-nvidia.nix  # hardw--profl--workstation-nvidia
+│       ├── drivers/
+│       │   └── nvidia.nix                  # hardw--core--nvidia (driver-branch enum)
+│       └── mounts/
+│           ├── local-data.nix              # hardw--mounts--local-data (/data)
+│           ├── mirror-peer.nix             # hardw--mounts--mirror-peer — generic,
+│           │                               #   mirrorPeers = [ "nixnas1" "nixnas2" ... ]
+│           │                               #   replaces 4 formerly-duplicated per-peer files
+│           ├── zfs-raidz1-pool.nix         # hardw--mounts--zfs-raidz1-pool — generic 4-disk
+│           │                               #   RAIDZ1 + NFS export + health monitoring
+│           ├── zfs-pool-rename.nix         # hardw--mounts--zfs-pool-rename — self-healing
+│           │                               #   pool import/rename by device fingerprint
+│           └── legacy-nfs-mirror.nix       # hardw--mounts--legacy-nfs-mirror — nixnas2's
+│                                           #   ext4+NFS export; flagged to migrate onto
+│                                           #   zfs-raidz1-pool if its disks are ever converted
+│   # `mkHardwareProfile` itself (in flake/parts/lib.nix) supplies the universal filesystem
+│   # layout (/, /home, /boot, swap) and per-machine boot/initrd facts from hardwareMeta —
+│   # there is no separate hardw--profl--base module; it's a function, not a self-registered one.
 │
 ├── hosts/                             # hosts--* modules + nixosConfigurations
 │   ├── nix*.nix, ...
@@ -540,7 +602,45 @@ nix fmt                  # run alejandra across the whole tree
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-#### 1. Add host metadata to `flake/parts/hosts-meta.nix`
+A "host" (network identity, users, services — `hostsMeta`) and a "machine" (physical hardware — `hardwareMeta`) are independent concerns here; a new physical box needs both, and an existing machine can in principle be reinstalled under a new hostname without redoing its hardware facts.
+
+#### 1. Capture the machine's hardware facts once, add to `flake/parts/hardware-meta.nix`
+
+Boot the installer on the physical machine and run (non-destructive, doesn't touch anything):
+```bash
+nixos-generate-config --show-hardware-config
+```
+Transcribe only the genuinely machine-specific facts — everything else in nixlab's own schema is either a fleet-wide default or already standardized by consistent partition labels:
+```nix
+# flake/parts/hardware-meta.nix
+<machine> = mkMachineMeta {
+  cpuVendor = "intel";                              # or "amd"
+  initrdAvailableKernelModules = [ "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
+  kernelModules = [ "kvm-intel" ];                   # or [ "kvm-amd" ]
+  # initrdKernelModules / extraModulePackages — only if the generator output listed any
+  # extraConfig = { ... };                          # escape hatch for a genuinely exotic fact
+};
+```
+
+#### 2. Create the machine module `hardware/<machine>.nix`
+
+No raw `hardware-configuration.nix` file is created or pasted anywhere — `mkHardwareProfile` reads the metadata above directly, keyed by the explicit string passed in:
+```nix
+{ self, ... }: {
+  flake.nixosModules.hardw--<machine> = { ... }: {
+    imports = [
+      (self.lib.mkHardwareProfile "<machine>")        # universal fs layout + this machine's boot facts
+      self.nixosModules.hardw--profl--workstation-nvidia  # if it has an nvidia GPU
+      # self.nixosModules.hardw--mounts--local-data       # if it needs /data
+      # self.nixosModules.hardw--mounts--mirror-peer      # if it mirrors NAS peers
+    ];
+    # driver-nvidia.driver-branch = "l580";  # only if it needs to differ from the
+                                              # workstation-nvidia profile's mkDefault "l470"
+  };
+}
+```
+
+#### 3. Add host metadata to `flake/parts/hosts-meta.nix`
 
 ```nix
 <hostname> = mkHostMeta {
@@ -555,28 +655,14 @@ nix fmt                  # run alejandra across the whole tree
 };
 ```
 
-#### 2. Create hardware module `hardware/<model>.nix`
-
-```nix
-{ self, ... }: {
-  flake.nixosModules.hardw--<model> = { lib, ... }: {
-    # Paste output from nixos-generate-config here:
-    boot.initrd.availableKernelModules = [ ... ];
-    fileSystems."/" = { ... };
-    swapDevices = [ ... ];
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  };
-}
-```
-
-#### 3. Create host configuration `hosts/<hostname>.nix`
+#### 4. Create host configuration `hosts/<hostname>.nix`
 
 ```nix
 { self, ... }: {
   flake.nixosConfigurations.<hostname> = self.lib.mkHost {
     name = "<hostname>";
     modules = [
-      self.nixosModules.hardw--<model>
+      self.nixosModules.hardw--<machine>        # note: machine name, not hostname
       self.nixosModules.hosts--<hostname>
       self.nixosModules.hosts--profl--base      # required for all hosts
       self.nixosModules.hosts--profl--desktop   # desktop/laptop machines
@@ -606,12 +692,15 @@ nix fmt                  # run alejandra across the whole tree
 }
 ```
 
-#### 4. Deploy
+#### 5. Deploy
 
 ```bash
 cd ~/nixlab
 git add -A            # new/untracked files are invisible to the flake until staged
 nix flake check
+nix eval .#nixosConfigurations.<hostname>.config.boot.initrd.availableKernelModules --json
+# ^ confirm this matches the machine's own captured facts from Step 1, not another
+#   machine's — this is the correctness check that matters most on first deploy
 sudo nixos-rebuild switch --flake .#<hostname>
 ```
 
