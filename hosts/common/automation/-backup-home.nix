@@ -15,24 +15,24 @@
       SOURCE_DIR="/home/${config.nixlab.mainUser}/"
       BACKUP_DESTINATIONS=(
           "/mirror"
-          "/mnt/mirace"
-          "/mnt/mirsun"
-          "/mnt/mirtop"
-          "/mnt/mirvat"
-          "/mnt/mirzen"
-          "/mnt/mirnas1"
-          "/mnt/mirnas2"
+          "/mnt/mirnixace"
+          "/mnt/mirnixsun"
+          "/mnt/mirnixtop"
+          "/mnt/mirnixvat"
+          "/mnt/mirnixzen"
+          "/mnt/mirnixnas1"
+          "/mnt/mirnixnas2"
       )
 
       # NFS mount points (destinations that require mount verification)
       NFS_MOUNTS=(
-          "/mnt/mirace"
-          "/mnt/mirsun"
-          "/mnt/mirtop"
-          "/mnt/mirvat"
-          "/mnt/mirzen"
-          "/mnt/mirnas1"
-          "/mnt/mirnas2"
+          "/mnt/mirnixace"
+          "/mnt/mirnixsun"
+          "/mnt/mirnixtop"
+          "/mnt/mirnixvat"
+          "/mnt/mirnixzen"
+          "/mnt/mirnixnas1"
+          "/mnt/mirnixnas2"
       )
 
       # Rsync options
