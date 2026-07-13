@@ -5,6 +5,6 @@
     boot.loader.efi.canTouchEfiVariables = true;
 
     ## Limit the number of generations to present
-    boot.loader.systemd-boot.configurationLimit = 7;
+    boot.loader.systemd-boot.configurationLimit = 4;
   };
 }
