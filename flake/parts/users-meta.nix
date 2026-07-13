@@ -1,6 +1,7 @@
 {self, ...}: {
   flake.lib.usersMeta = {
     temhr = {
+      # home-manager which further descibes select user accounts that NixOS has already initialised & defined in host-meta
       gitName = "Temhr";
       gitEmail = "9110264+Temhr@users.noreply.github.com";
       defaultProfile = "desktop";
