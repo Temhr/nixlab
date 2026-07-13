@@ -65,6 +65,15 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 nixlab uses **flake-parts** and the **Dendritic Pattern**: configuration is organized around features rather than hostnames, with every file self-registering its own outputs — no central registry required, for either config modules *or* shared metadata/library functions.
 
+**File organization conventions, at a glance:**
+- **`flake/data/`** — pure attrsets, nothing else. No functions, no `mkOption` calls. Safe to read (or diff, or hand to a non-Nix script) without evaluating any logic.
+- **`flake/schema/`** — option declarations and per-axis smart constructors (`mkMachineMeta`, `mkHostMeta`) that validate and default-fill the attrsets in `data/`. This is where a typo'd field name or wrong type gets caught, with a real error message, instead of failing silently three files later.
+- **`flake/builders/`** — one file per independent axis (hardware, hosts, users), each turning validated metadata into real `nixosConfigurations` / `home-manager.users`. If it *generates* NixOS or home-manager config from metadata, it lives here.
+- **`flake/ci/`** — dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`). This is plumbing for working on the repo, not part of what the repo *means*.
+- **`flake/nixos-lib.nix`** and **`flake/pkgs.nix`** sit outside all four folders because they're cross-cutting rather than axis-specific: `nixos-lib.nix` is helper functions any service module can use, and `pkgs.nix` is the one place `overlays`/`nixpkgsConfig` are defined for every `pkgs` set the flake builds.
+
+The short version: if you're asking "where does this go?", ask "is it data, a type/constructor, a generator, or tooling?" — that answers it.
+
 - ### <ins>Entry Point & Discovery</ins>
 
 <details>

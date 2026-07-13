@@ -41,7 +41,6 @@ in {
             inherit inputs self;
             inherit nixlabLib;
             flakePath = self;
-            outputs = self;
             allHosts = hostsMeta;
             hostMeta = meta;
             nixpkgsSource = nixpkgsSource;
