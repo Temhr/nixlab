@@ -57,6 +57,7 @@
           boot.kernelModules = meta.kernelModules;
           boot.extraModulePackages = meta.extraModulePackages;
           networking.useDHCP = lib.mkDefault true;
+          hardware.enableRedistributableFirmware = lib.mkDefault meta.enableRedistributableFirmware;
         }
         (lib.mkIf (meta.cpuVendor == "intel") {
           hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

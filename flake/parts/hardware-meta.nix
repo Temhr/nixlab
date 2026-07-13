@@ -5,9 +5,11 @@
     initrdKernelModules ? [],
     kernelModules ? [],
     extraModulePackages ? [],
+    enableRedistributableFirmware ? true,
     extraConfig ? {},
   }: {
-    inherit cpuVendor initrdAvailableKernelModules initrdKernelModules kernelModules extraModulePackages extraConfig;
+    inherit cpuVendor initrdAvailableKernelModules initrdKernelModules kernelModules
+    extraModulePackages enableRedistributableFirmware extraConfig;
   };
 in {
   flake.lib.hardwareMeta = {
