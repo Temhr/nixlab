@@ -1,35 +1,5 @@
-{lib, ...}: let
-  mkHostMeta = {
-    address,
-    ethIface,
-    wifiIface,
-    system ? "x86_64-linux",
-    gateway ? "10.0.0.1",
-    prefixLength ? 24,
-    nameservers ? ["9.9.9.9" "1.1.1.1"],
-    hostId ? null,
-    nixpkgsInput ? "nixpkgs", # defaults to stable
-    homeUsers ? [], # usernames from usersMeta that get a home-manager profile on this host
-    systemUsers ? [],
-    primaryUser ? null, # which systemUser is "the" mainUser on this host
-  }: {
-    inherit address system gateway prefixLength nameservers hostId nixpkgsInput homeUsers systemUsers primaryUser;
-    interfaces =
-      [
-        {
-          name = ethIface;
-          inherit address;
-          type = "ethernet";
-        }
-      ]
-      ++ lib.optionals (wifiIface != "") [
-        {
-          name = wifiIface;
-          inherit address;
-          type = "wifi";
-        }
-      ];
-  };
+{self, ...}: let
+  inherit (self.lib) mkHostMeta;
 in {
   flake.lib.hostsMeta = {
     nixnas1 = mkHostMeta {
