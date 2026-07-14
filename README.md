@@ -469,12 +469,12 @@ nixlab/
 ├── .sops.yaml                         # sops-nix age recipient rules
 │
 ├── flake/                             # Orchestration-level flake-parts configurations
-│   ├── nixos-lib.nix                  # service module helper functions
-│   ├── pkgs.nix                       # where overlays / .nixpkgsConfig are defined for pkgs
 │   ├── data/                          # pure attrsets only — no functions
 │   ├── schema/                        # smart constructors (mk<axis>Meta, ...), validates attrsets
 │   ├── builders/                      # generates configs (nixosConfigurations, ...) from metadata
-│   └── ci/                            # dev-facing tooling
+│   ├── ci/                            # dev-facing tooling
+│   ├── nixos-lib.nix                  # service module helper functions
+│   └── pkgs.nix                       # where overlays / .nixpkgsConfig are defined for pkgs
 │
 ├── hardware/                          # Machine-level hardware configurations
 │   ├── common/
@@ -498,26 +498,26 @@ nixlab/
 │
 ├── home/                              # User-level Home Manager config (home--* modules)
 │   ├── common/
-│   │   ├── apps/                      # browsers, terminal-emulators, config-virt-manager
-│   │   ├── core/                      # config-*, ephemeral-apps, system, utilities
-│   │   ├── shell/                     # directory-driven alias loading via readDir
+│   │   ├── apps/                      # Toggleable software modules
+│   │   ├── core/                      # Universal modules
+│   │   ├── shell/
 │   │   |   └── bash.nix
 │   │   └── profile-*.nix, ...
-│   ├── files/bash/                    # dotfile content — .bash_profile, .bashrc, .bash/*
+│   ├── files/bash/
 │   └── users/                         # user@host extraModules
 │
-├── modules/                           # Reusable self-exporting service modules
+├── modules/                           # servc--*, systm--* — self-hosted service modules
 │   ├── home-manager/                  # User-level service modules
-│   ├── nixos/                         # servc--*, systm--* — self-hosted service modules
-│   |   ├── comfyui/                   # comfyui-p5000, comfyui-extensions, comfyui-models
-│   |   ├── glance/                    # default.nix, _glance-pages.nix
-│   |   ├── homepage-dashboard/        # default.nix, _service-registry.nix, ...
+│   ├── nixos/                         # System-level service modules
+│   |   ├── comfyui/
+│   |   ├── glance/
+│   |   ├── homepage-dashboard/
 │   |   ├── monitoring/
 │   |   |   ├── alertmanager/
-│   |   |   ├── grafana/               # dashboards/*.json
+│   |   |   ├── grafana/
 │   |   |   ├── ntfy/
-│   |   |   ├── loki/                  # default.nix, maintenance-logger.sh
-│   |   |   └── prometheus/            # default.nix + _internals/
+│   |   |   ├── loki/
+│   |   |   └── prometheus/
 │   |   └── <service>.nix
 │   └── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
 │
