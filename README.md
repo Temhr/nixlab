@@ -468,72 +468,62 @@ nixlab/
 ├── flake.lock
 ├── .sops.yaml                         # sops-nix age recipient rules
 │
-├── flake/
-│   ├── nixos-lib.nix                  # nixlabLib — cross-cutting, not axis-specific
-│   ├── pkgs.nix                       # single flake.lib.overlays / .nixpkgsConfig + perSystem pkgs
+├── flake/                             # Orchestration-level flake-parts configurations
+│   ├── nixos-lib.nix                  # service module helper functions
+│   ├── pkgs.nix                       # where overlays / .nixpkgsConfig are defined for pkgs
 │   ├── data/                          # pure attrsets only — no functions
-│   │   ├── hardware-meta.nix
-│   │   ├── hosts-meta.nix
-│   │   └── users-meta.nix
-│   ├── schema/                        # types + smart constructors for data/
-│   │   ├── options.nix                # flake.lib / flake.homeModules option decls
-│   │   ├── hardware.nix               # mkMachineMeta
-│   │   └── hosts.nix                  # mkHostMeta (incl. interfaces derivation)
-│   ├── builders/                      # one file per independent axis
-│   │   ├── hardware.nix               # mkHardwareProfile
-│   │   ├── hosts.nix                  # mkHost, mkCommonModules
-│   │   └── users.nix                  # mkHomeUser(s), mkSystemUser(s)
-│   └── ci/                            # dev tooling, not repo "meaning"
-│       ├── checks.nix
-│       ├── apps.nix
-│       └── packages.nix
+│   ├── schema/                        # smart constructors (mk<axis>Meta, ...), validates attrsets
+│   ├── builders/                      # generates configs (nixosConfigurations, ...) from metadata
+│   └── ci/                            # dev-facing tooling
 │
-├── hardware/                          # hardw--* modules, one per each physical machine
-│   ├── m720q-*.nix, zb*.nix, ... 
-│   └── common/
-│       ├── profile-*.nix, ...
-│       ├── drivers/                   # driver-branch enum
-│       └── mounts/                    # local-data, mirror-peer, zfs-raidz1-pool, ...
-│
-├── hosts/                             # hosts--* modules + nixosConfigurations
-│   ├── nix*.nix, ...
-│   └── common/
-│       ├── _host-template.nix         # reference menu — never imported by the flake
-│       ├── profile-*.nix, ...
-│       ├── apps/                      # development, education, games, ...
-│       ├── automation/                # backup-home, flake-update, nix-gc, ...
-│       ├── core/                      # boot-loader, display-manager, home-manager-config, ...
-│       │   └── users.nix              # users-main, users-hm, users-sys
-│       ├── debug/                     # diagnose.nix — opt-in only, never in any profile
-│       ├── desktop/                   # cache-tmpfs, firefox, flatpak, gui-shells, ignore-lid
-│       └── hardware/                  # audio, bluetooth, power-management
-│
-├── home/                              # home--* modules, mirrors hosts/ structure
+├── hardware/                          # Machine-level hardware configurations
 │   ├── common/
-│   │   ├── profile-*.nix, ...
+│   |   ├── drivers/                   # driver-branch enum
+│   |   ├── mounts/                    # local-data, mirror-peer, zfs-raidz1-pool, ...
+│   |   └── profile-*.nix, ...
+│   └── <model>.nix                    # Per-device hardware configuration + module registration
+│
+├── hosts/                             # System-level NixOS configurations
+│   ├── common/
+│   |   ├── apps/                      # Toggleable software modules
+│   |   ├── automation/                # Scheduled tasks
+│   |   ├── core/                      # Universal modules
+│   |   │   └── users.nix              # users-main, users-hm, users-sys
+│   |   ├── debug/                     # diagnose.nix — opt-in only
+│   |   ├── desktop/                   # Desktop-only modules
+│   |   ├── hardware/                  # Physical hardware modules
+│   |   ├── _host-template.nix
+│   |   └── profile-*.nix, ...
+│   └── <hostname>.nix                 # nixosConfiguration + hosts--<hostname> modules
+│
+├── home/                              # User-level Home Manager config (home--* modules)
+│   ├── common/
 │   │   ├── apps/                      # browsers, terminal-emulators, config-virt-manager
 │   │   ├── core/                      # config-*, ephemeral-apps, system, utilities
-│   │   └── shell/
-│   │       └── bash.nix               # directory-driven alias loading via readDir
+│   │   ├── shell/                     # directory-driven alias loading via readDir
+│   │   |   └── bash.nix
+│   │   └── profile-*.nix, ...
 │   ├── files/bash/                    # dotfile content — .bash_profile, .bashrc, .bash/*
 │   └── users/                         # user@host extraModules
 │
-├── modules/                           # servc--*, systm--* — self-hosted service modules
-│   ├── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
-│   └── nixos/
-│       ├── bookstack.nix, ...
-│       ├── comfyui/                   # comfyui-p5000, comfyui-extensions, comfyui-models
-│       ├── glance/                    # default.nix, _glance-pages.nix
-│       ├── homepage-dashboard/        # default.nix, _service-registry.nix, ...
-│       └── monitoring/
-│           ├── alertmanager/
-│           ├── grafana/               # dashboards/*.json
-│           ├── ntfy/
-│           ├── loki/                  # default.nix, maintenance-logger.sh
-│           └── prometheus/            # default.nix + _internals/
+├── modules/                           # Reusable self-exporting service modules
+│   ├── home-manager/                  # User-level service modules
+│   ├── nixos/                         # servc--*, systm--* — self-hosted service modules
+│   |   ├── comfyui/                   # comfyui-p5000, comfyui-extensions, comfyui-models
+│   |   ├── glance/                    # default.nix, _glance-pages.nix
+│   |   ├── homepage-dashboard/        # default.nix, _service-registry.nix, ...
+│   |   ├── monitoring/
+│   |   |   ├── alertmanager/
+│   |   |   ├── grafana/               # dashboards/*.json
+│   |   |   ├── ntfy/
+│   |   |   ├── loki/                  # default.nix, maintenance-logger.sh
+│   |   |   └── prometheus/            # default.nix + _internals/
+│   |   └── <service>.nix
+│   └── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
 │
-├── sops/                              # nsops--* modules — one .nix + one .yaml per service
-│   └── alertmanager, ...
+├── sops/                              # Centralized secrets management
+│   ├── <service>.nix                  # Secret module declarations (nsops--*)
+│   └── <service>.yaml                 # Encrypted secrets per module
 │
 ├── overlays/                          # flake.overlays.*
 │   └── default.nix, ...
