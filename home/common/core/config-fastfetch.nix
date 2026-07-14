@@ -16,7 +16,6 @@
         "os"
         "kernel"
         "InitSystem"
-        "DE"
         "uptime"
         {
           "type" = "command";
