@@ -15,6 +15,8 @@
         "host"
         "os"
         "kernel"
+        "InitSystem"
+        "DE"
         "uptime"
         {
           "type" = "command";
@@ -37,6 +39,7 @@
           "type" = "gpu";
           "driverSpecific" = true;
           "temp" = true;
+          "hideType" = "integrated";
         }
         "memory"
         "physicalmemory"
