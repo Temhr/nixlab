@@ -1,6 +1,6 @@
 # nixlab
 
-Modular NixOS configuration for Linux laptops, desktops, and homelab servers. Built on the **Dendritic Pattern** using **flake-parts** for composable, self-registering modules where every file declares its own outputs — including its own metadata and library functions.
+Modular NixOS configuration for Linux laptops, desktops, and homelab servers. Built on the **Dendritic Pattern** using **flake-parts** for composable, self-registering modules where every file declares its own outputs — including its own metadata and library functions. New here? Start with [Architecture at a Glance](#architecture-at-a-glance) for the one-minute version, or [Core Concepts](#core-concepts) for the canonical explanation of each pattern this document refers back to throughout.
 
 Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs) with inspiration from [EmergentMind](https://www.youtube.com/watch?v=YHm7e3f87iY&list=PLAWyx2BxU4OyERRTbzNAaRHK08DQ0DD_l&index=1), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the broader NixOS community. Rewritten, and rewritten, and rewritten again, almost entirely by Claude.
 
@@ -8,21 +8,25 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 **Table of Contents**
 - [Nix Ecosystem Terminology](#nix-ecosystem-terminology)
-- [Architecture & Import Flow](#architecture--import-flow)
-  - [Entry Point & Discovery](#entry-point--discovery)
-  - [Central Orchestration Files](#central-orchestration-files)
+- [Architecture at a Glance](#architecture-at-a-glance)
+- [Core Concepts](#core-concepts)
+  - [Self-Registering Modules](#self-registering-modules)
   - [The Dendritic Pattern](#the-dendritic-pattern)
+  - [Three-Axis Metadata: Hardware, Hosts & Users](#three-axis-metadata-hardware-hosts--users)
+  - [Builder Functions](#builder-functions)
+- [Architecture & Import Flow](#architecture--import-flow)
+  - [Entry Point & Orchestration Files](#entry-point--orchestration-files)
   - [Self-Exporting Module Schema](#self-exporting-module-schema)
   - [The `flake.lib` Registry](#the-flakelib-registry)
   - [Module Namespace & Naming](#module-namespace--naming)
-  - [Three-Axis Metadata: Hardware, Hosts & Users](#three-axis-metadata-hardware-hosts--users)
   - [Profile Composition](#profile-composition)
   - [Host Build Flow](#host-build-flow)
   - [Home-Manager Build Flow](#home-manager-build-flow)
   - [Coupling Principles](#coupling-principles)
   - [Secrets Management](#secrets-management)
-- [Repository Layout](#repository-layout)
-- [Top-Level Folder Reference](#top-level-folder-reference)
+- [Repository Reference](#repository-reference)
+  - [Repository Layout](#repository-layout)
+  - [Top-Level Folder Reference](#top-level-folder-reference)
 - [Usage](#usage)
   - [First Install](#first-install-on-a-new-machine)
   - [Daily Commands](#daily-commands)
@@ -30,6 +34,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
   - [Adding a New Home User](#adding-a-new-home-user)
   - [Adding a New Service Module](#adding-a-new-service-module)
   - [Adding Secrets for a Service](#adding-secrets-for-a-service)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
@@ -62,225 +67,66 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 
 ---
 
-## Architecture & Import Flow
+## Architecture at a Glance
 
-nixlab uses **flake-parts** and the **Dendritic Pattern**: configuration is organized around features rather than hostnames, with every file self-registering its own outputs — no central registry required, for either config modules *or* shared metadata/library functions.
-
-**File organization conventions, at a glance:**
-- **`flake/data/`** — pure attrsets, nothing else. No functions, no `mkOption` calls. Safe to read (or diff, or hand to a non-Nix script) without evaluating any logic.
-- **`flake/schema/`** — option declarations and per-axis smart constructors (`mkMachineMeta`, `mkHostMeta`) that validate and default-fill the attrsets in `data/`. This is where a typo'd field name or wrong type gets caught, with a real error message, instead of failing silently three files later.
-- **`flake/builders/`** — one file per independent axis (hardware, hosts, users), each turning validated metadata into real `nixosConfigurations` / `home-manager.users`. If it *generates* NixOS or home-manager config from metadata, it lives here.
-- **`flake/ci/`** — dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`). This is plumbing for working on the repo, not part of what the repo *means*.
-- **`flake/nixos-lib.nix`** and **`flake/pkgs.nix`** sit outside all four folders because they're cross-cutting rather than axis-specific: `nixos-lib.nix` is helper functions any service module can use, and `pkgs.nix` is the one place `overlays`/`nixpkgsConfig` are defined for every `pkgs` set the flake builds.
-
-The short version: if you're asking "where does this go?", ask "is it data, a type/constructor, a generator, or tooling?" — that answers it.
-
-- ### <ins>Entry Point & Discovery</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-`flake.nix` is a pure delegation layer. [flake-parts](https://github.com/hercules-ci/flake-parts) structures outputs as composable modules; [import-tree](https://github.com/vic/import-tree) auto-discovers every `.nix` file in each top-level directory. Each discovered file contributes to the shared `flake.*` / `perSystem.*` namespaces — adding a new file requires no changes to `flake.nix`. Files prefixed with `_` are leaf imports consumed by their parent module and hold no independent flake-output registration of their own (they're still discovered and evaluated by `import-tree`, but their content is a helper, not a standalone `flake.nixosModules.*`/`flake.homeModules.*` entry).
-
-```nix
-outputs = inputs @ { flake-parts, ... }:
-  flake-parts.lib.mkFlake { inherit inputs; } {
-    systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-    imports = [
-      (inputs.import-tree ./flake)    # → orchestration (data, schema, builders, nixos-lib, pkgs, ci)
-      (inputs.import-tree ./hardware) # → hardw--* nixosModules
-      (inputs.import-tree ./home)     # → home--* homeModules
-      (inputs.import-tree ./hosts)    # → hosts--* nixosModules + nixosConfigurations
-      (inputs.import-tree ./modules)  # → servc--*, systm--* nixosModules
-      (inputs.import-tree ./stacks)   # → stack--* nixosModules
-      (inputs.import-tree ./overlays) # → flake.overlays.*
-      (inputs.import-tree ./shells)   # → perSystem.devShells.*
-      (inputs.import-tree ./sops)     # → nsops--* nixosModules
-    ];
-  };
-```
-
-</details>
-
-- ### <ins>Central Orchestration Files</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-A small number of concerns live in `flake/` as conventional flake-parts files, organized by *kind of thing* rather than lumped into one folder: `data/` (pure metadata, no functions), `schema/` (types + smart constructors for that data), `builders/` (one file per independent axis that turns metadata into real config), and `ci/` (dev tooling, not repo "meaning"). All of them, including metadata and shared functions, are self-registering — none are imported by hardcoded relative path.
-
-| File | Responsibility | Output |
-|------|---------------|--------|
-| `flake/data/hardware-meta.nix` | Per-machine hardware facts, in nixlab's own schema rather than raw `nixos-generate-config` output: `cpuVendor`, `initrdAvailableKernelModules`, `initrdKernelModules`, `kernelModules`, `extraModulePackages`, an `extraConfig` escape hatch — a pure attrset, built via `mkMachineMeta` | `flake.lib.hardwareMeta` |
-| `flake/data/hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection, `homeUsers`, `systemUsers`, `primaryUser` — a pure attrset, built via `mkHostMeta` | `flake.lib.hostsMeta` |
-| `flake/data/users-meta.nix` | Per-user identity: git name/email, default home-manager profile, per-host overrides, SSH authorized keys, NixOS account facts (`isNormalUser`, `extraGroups`, `initialPassword`) | `flake.lib.usersMeta` |
-| `flake/schema/options.nix` | Declares `flake.lib` and `flake.homeModules` as mergeable `lazyAttrsOf` options — the option declarations that make self-registration possible across the whole repo | *(option declarations only)* |
-| `flake/schema/hardware.nix` | `mkMachineMeta` — the smart constructor consumed by `data/hardware-meta.nix` | `flake.lib.mkMachineMeta` |
-| `flake/schema/hosts.nix` | `mkHostMeta`, including the `interfaces` list derivation (ethernet + optional wifi) — consumed by `data/hosts-meta.nix` | `flake.lib.mkHostMeta` |
-| `flake/builders/hardware.nix` | `mkHardwareProfile` — reads `self.lib.hardwareMeta`, turns a machine name into filesystem layout + boot/initrd/kernel-module config | `flake.lib.mkHardwareProfile` |
-| `flake/builders/hosts.nix` | `mkHost` + `mkCommonModules` — reads `self.lib.hostsMeta` / `self.lib.nixlabLib` / `self.lib.overlays` / `self.lib.nixpkgsConfig`, injects nixpkgs, sops-nix, overlays, and `hostMeta` into every host | `flake.lib.mkHost` |
-| `flake/builders/users.nix` | `mkHomeUser`, `mkHomeUsersForHost`, `mkSystemUser`, `mkSystemUsersForHost` — reads `self.lib.hostsMeta` / `self.lib.usersMeta` | `flake.lib.mkHomeUser`, `.mkHomeUsersForHost`, `.mkSystemUser`, `.mkSystemUsersForHost` |
-| `flake/nixos-lib.nix` | Shared NixOS helper functions (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) injected into every module as `nixlabLib` via `specialArgs` — cross-cutting, not tied to any one axis | `flake.lib.nixlabLib` |
-| `flake/pkgs.nix` | Single source of truth for `flake.lib.overlays` and `flake.lib.nixpkgsConfig` (`allowUnfree` + `nvidia.acceptLicense`), consumed by both `perSystem` pkgs *and* every per-host pkgs set in `builders/hosts.nix` — closes what used to be a hand-copied duplication between the two | `flake.lib.overlays`, `.nixpkgsConfig`, `perSystem._module.args.pkgs` |
-| `flake/ci/checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks`, `flake.formatter` |
-| `flake/ci/apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` |
-| `flake/ci/packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` |
-
-</details>
-
-- ### <ins>The Dendritic Pattern</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-Instead of configuring each machine individually, you assemble it from capabilities. **Features** > **Profiles** > **Hosts** — branching from general to specific: _"which features does this machine require?"_ This applies identically on both the NixOS side and the home-manager side.
-
-1. **Feature Modules** — standalone services (`modules/`), secrets (`sops/`), or modules domain-grouped by shared behaviour
-    - `hosts/common/` — `core/`, `desktop/`, `apps/`, `automation/`, `hardware/`
-    - `home/common/` — `core/`, `apps/`, `shell/`
-1. **Stacks** — `stacks/` composes ≥2 atomic service modules that must communicate (cross-service wiring: datasource provisioning, scrape targets, alert routing) into one working system, exposing a single aggregator option surface. Only warranted when integration logic would otherwise pollute an atomic service module with knowledge of its siblings — see [Top-Level Folder Reference](#top-level-folder-reference)
-1. **Profiles** — (`profile-base`, `profile-desktop`, `profile-nas`) composed from **Feature Modules** and **Stacks** into role-appropriate bundles, mirrored identically in `hosts/common/` and `home/common/`
-1. **Host / User manifest** — metadata entries in `flake/data/hosts-meta.nix` / `flake/data/users-meta.nix` selecting profiles, plus a thin per-host file for genuinely unique feature selections
-1. **`nixosConfigurations.<hostname>`** and **`home-manager.users.<username>`** — fully built outputs, generated by `mkHost` (`flake/builders/hosts.nix`) / `mkHomeUsersForHost` (`flake/builders/users.nix`), with overlays, secrets, and cross-host metadata wired in automatically
-
-</details>
-
-- ### <ins>Self-Exporting Module Schema</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-Every file is a flake-parts module that registers its own outputs directly. No central registry; the name is the only stable contract — files can be freely moved without breaking consumers.
-
-```nix
-# modules/nixos/glance/default.nix
-{ self, ... }: {
-  flake.nixosModules.servc--glance-nixlab = { config, lib, pkgs, nixlabLib, ... }: {
-    imports = [ self.nixosModules.systm--ports-glance ];
-    options.services.glance-nixlab = { enable = lib.mkEnableOption "glance"; ... };
-    config = lib.mkIf cfg.enable { ... };
-  };
-}
-```
-
-```nix
-# hosts/nixace.nix — one file, two outputs
-{ self, ... }: {
-  flake.nixosConfigurations.nixace = self.lib.mkHost {
-    name = "nixace";
-    modules = [
-      self.nixosModules.hardw--zb17g4-p5
-      self.nixosModules.hosts--nixace
-      self.nixosModules.hosts--profl--base
-      self.nixosModules.hosts--profl--desktop
-      self.nixosModules.servc--bookstack-nixlab
-      self.nixosModules.nsops--bookstack
-    ];
-  };
-
-  flake.nixosModules.hosts--nixace = { ... }: {
-    gShells.DE = "plasma6";
-    blender.enable = true;
-    steam.enable = true;
-    # feature selections and genuinely unique service config only —
-    # mainUser, home-manager users, and system accounts are all derived
-    # from hosts-meta.nix / users-meta.nix, not hand-set here.
-  };
-}
-```
-
-</details>
-
-- ### <ins>The `flake.lib` Registry</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-`flake.lib` works exactly like `flake.nixosModules`/`flake.homeModules`: it's a declared `lazyAttrsOf raw` option (in `flake/schema/options.nix`) that flake-parts deep-merges across every file that contributes to it. This means shared metadata (`hostsMeta`, `usersMeta`, `hardwareMeta`), the constructors that build it (`mkHostMeta`, `mkMachineMeta`), and the generators that consume it (`nixlabLib`, `mkHost`, `mkHomeUser`, ...) can each live in their own self-registering file — split across `data/`, `schema/`, and `builders/` by kind — with no file needing to know where another lives or import it by relative path.
-
-```nix
-# flake/data/hosts-meta.nix — pure data, built via a schema constructor
-{self, ...}: let
-  inherit (self.lib) mkHostMeta;
-in {
-  flake.lib.hostsMeta = {
-    nixace = mkHostMeta { address = "10.0.0.200"; homeUsers = ["temhr"]; systemUsers = ["temhr" "guest"]; primaryUser = "temhr"; ... };
-    # ...
-  };
-}
-```
-
-```nix
-# flake/builders/hosts.nix — consumes, never imports by path
-{self, inputs, ...}: let
-  hostsMeta = self.lib.hostsMeta;
-  nixlabLib = self.lib.nixlabLib;
-in {
-  flake.lib.mkHost = { name, modules }: ...;
-}
-```
-
-Because `self` is resolved lazily by flake-parts, `builders/hosts.nix` can reference `self.lib.hostsMeta` before that attribute has "arrived" from its own file — the same laziness trick that already lets any module reference `self.nixosModules.*` regardless of load order. This is why the metadata files (`data/hosts-meta.nix`, `data/users-meta.nix`) can live anywhere in the tree without breaking anything that consumes them — including the `schema/*.nix` constructors they're built from, and the `builders/*.nix` generators that consume them in turn.
-
-</details>
-
-- ### <ins>Module Namespace & Naming</ins>
-
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
-
-All NixOS modules register under `flake.nixosModules`; all home-manager modules register under `flake.homeModules`. The double-dash convention encodes a two-level hierarchy in a flat namespace — all cross-file references use `self.nixosModules.*` / `self.homeModules.*`, never filesystem paths.
-
-> **Machine name vs. hostname:** `hardw--<machine>` modules are keyed by a memorable *hardware* nickname (`zb17g1-k3`, `m720q-nas1`) loosely based on model/manufacturer — deliberately **not** the same identifier space as `hostsMeta`'s hostnames (`nixace`, `nixnas1`). A `hosts--<hostname>.nix` file imports whichever `hardw--<machine>` module matches the physical box it runs on. Never look up hardware facts through `config.networking.hostName` — pass the machine name explicitly (see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)).
-
-| Prefix | Layer |
-|--------|-------|
-| `hardw--<machine>` | One file per physical machine, built via `self.lib.mkHardwareProfile "<machine>"` + machine-specific mount/driver imports |
-| `hardw--profl--` | Hardware profile compositions (workstation-nvidia, etc.) |
-| `hardw--core--` | Universal hardware modules (drivers) |
-| `hardw--mounts--` | Filesystem/NFS/ZFS mount modules |
-| `hosts--<hostname>` | Host identity + feature selections |
-| `hosts--profl--` | NixOS profile compositions (base, desktop, nas) |
-| `hosts--core--` | Universal NixOS modules (all hosts) |
-| `hosts--deskt--` | Desktop-only NixOS modules |
-| `hosts--apps--` | Toggleable NixOS application modules |
-| `hosts--autom--` | Scheduled tasks and automation |
-| `hosts--hardw--` | Shared hardware concerns |
-| `hosts--debug--` | Opt-in diagnostics (never in any profile) |
-| `home--profl--` | Home-manager profile compositions (base, desktop) |
-| `home--core--` | Universal home-manager modules (every user) |
-| `home--apps--` | Toggleable home-manager application modules |
-| `home--shell--` | Shell/dotfile modules |
-| `nsops--` | sops-nix secret wiring modules |
-| `servc--` | Self-hosted service modules — atomic, no knowledge of sibling services |
-| `stack--` | Multi-service integration bundles — imports ≥2 `servc--`/`nsops--` modules and wires them together (see [Top-Level Folder Reference](#top-level-folder-reference)) |
-| `systm--` | Cross-cutting system defaults (e.g. per-service port defaults) |
+The one-minute version: three independent metadata axes describe *what exists* (hardware, hosts, users); three builder functions turn that metadata into *real configuration*; every file that participates — metadata, builder, or module — registers its own output with no central list.
 
 ```
-# nix flake show (abbreviated)
-├───nixosConfigurations
-│   ├───nixace, nixnas1, nixnas2, nixsun, nixtop, nixvat, nixzen
-├───nixosModules
-│   ├───hardw--zb17g4-p5, hardw--profl--workstation-nvidia, hosts--nixace, servc--glance-nixlab, stack--monitoring, ...
-├───homeModules
-│   ├───home--profl--base, home--profl--desktop, home--core--config-git, home--apps--browsers, ...
+                              flake.nix
+              ┌───────────────────┼───────────────────┐
+              ▼                   ▼                   ▼
+        hardwareMeta           hostsMeta          usersMeta          ← data/
+      (physical facts)     (network identity)      (who)
+              ▼                   ▼                   ▼
+      mkHardwareProfile         mkHost          mkHomeUsersForHost   ← builders/
+              └───────────────────┼───────────────────┘
+                                  ▼
+                        Profile Composition
+              (hardware/, hosts/, home/ profile-*.nix)
+                                  ▼
+        flake.nixosConfigurations.<host>  +  home-manager.users.<user>
 ```
 
-</details>
+Everything below is a deeper dive into one part of this picture: [Core Concepts](#core-concepts) explains the four ideas the diagram assumes you already know; [Architecture & Import Flow](#architecture--import-flow) walks the same picture file-by-file.
 
-- ### <ins>Three-Axis Metadata: Hardware, Hosts & Users</ins>
+---
 
-<details>
-<summary><i>(click to expand)</i></summary>
-<p></p>
+## Core Concepts
+
+The four ideas that recur throughout this repo, explained once here. Every other section links back to this one instead of re-explaining them.
+
+### Self-Registering Modules
+
+Every file that contributes to this flake — a NixOS module, a home-manager module, a piece of shared metadata, a library function — registers its own output directly, keyed by its own name. There is no central registry file, and files never import each other by relative path.
+
+| Mechanism | How it works |
+|---|---|
+| **Discovery** | [import-tree](https://github.com/vic/import-tree) walks each top-level directory (`flake/`, `hosts/`, `home/`, ...) and evaluates every `.nix` file it finds. Adding a file requires no edit anywhere else — see [Entry Point & Orchestration Files](#entry-point--orchestration-files). |
+| **Registration** | Each file assigns into `flake.nixosModules.<name>`, `flake.homeModules.<name>`, or `flake.lib.<name>`. All three are declared as mergeable options (`lazyAttrsOf raw`, in `flake/schema/options.nix`), so [flake-parts](https://github.com/hercules-ci/flake-parts) deep-merges every file's contribution into one attrset. |
+| **Consumption** | Other files reference the result only by its registered name (`self.nixosModules.foo`, `self.lib.bar`) — never by path. Because `self` resolves lazily, this works regardless of where in the tree the producing file lives or whether it evaluates before or after its consumer — see [The `flake.lib` Registry](#the-flakelib-registry). |
+| **The contract** | Since nothing is wired by path, a file can move anywhere in the tree without breaking anything that depends on it, as long as its registered name is unchanged. |
+
+This applies identically to config modules (`flake.nixosModules`/`flake.homeModules`) and to shared metadata/library functions (`flake.lib`) — there's exactly one pattern, not two.
+
+### The Dendritic Pattern
+
+Instead of configuring each machine individually, you assemble it from capabilities: **Features → Profiles → Hosts**, branching from general to specific — *"which features does this machine require?"* This applies identically on both the NixOS side and the home-manager side.
+
+1. **Feature Modules** — standalone services (`modules/`), secrets (`sops/`), or modules domain-grouped by shared behaviour (`hosts/common/{core,desktop,apps,automation,hardware}`, `home/common/{core,apps,shell}`)
+2. **Stacks** — `stacks/` composes ≥2 atomic service modules that must communicate (cross-service wiring: datasource provisioning, scrape targets, alert routing) into one working system behind a single aggregator option surface. Only warranted when integration logic would otherwise pollute an atomic service module with knowledge of its siblings — see [Top-Level Folder Reference](#top-level-folder-reference)
+3. **Profiles** — (`profile-base`, `profile-desktop`, `profile-nas`) composed from Feature Modules and Stacks into role-appropriate bundles, mirrored identically in `hosts/common/` and `home/common/` — see [Profile Composition](#profile-composition)
+4. **Host / User manifest** — metadata entries in `flake/data/hosts-meta.nix` / `flake/data/users-meta.nix` selecting profiles, plus a thin per-host file for genuinely unique feature selections — see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)
+5. **Final outputs** — `nixosConfigurations.<hostname>` and `home-manager.users.<username>`, generated by the [Builder Functions](#builder-functions), with overlays, secrets, and cross-host metadata wired in automatically
+
+### Three-Axis Metadata: Hardware, Hosts & Users
 
 Physical hardware, host identity, and user identity are three deliberately independent axes — none is hardcoded into another. This is what lets any number of users mix and match across any number of hosts (e.g. `temhr` on `nixace`; `temhr` and `guest` on `nixvat`; `guest` and `rhmet` on `nixsun`), and lets the same hardware profile (e.g. `workstation-nvidia`) back multiple distinct machines, without per-combo boilerplate.
+
+| Axis | Question it answers | Lives in | Built via | Independent of |
+|---|---|---|---|---|
+| `hardwareMeta` | *What is this physical box?* | `flake/data/hardware-meta.nix` | `mkMachineMeta` (`flake/schema/hardware.nix`) | hostname, users |
+| `hostsMeta` | *Where — which network identity, which users live here?* | `flake/data/hosts-meta.nix` | `mkHostMeta` (`flake/schema/hosts.nix`) | physical hardware |
+| `usersMeta` | *Who — independent of which machine?* | `flake/data/users-meta.nix` | plain attrset (validated by option declarations) | hostname, hardware |
 
 **Axis 0 — `hardwareMeta` (physical machine facts, independent of hostname):**
 ```nix
@@ -295,7 +141,7 @@ flake.lib.hardwareMeta = {
   # never a raw nixos-generate-config dump.
 };
 ```
-`self.lib.mkHardwareProfile "<machine>"` (in `flake/builders/hardware.nix`) reads this metadata directly, keyed by the **machine name passed in explicitly** — never by `config.networking.hostName`, since the machine nickname and the eventual hostname are different identifier spaces (see [Module Namespace & Naming](#module-namespace--naming)):
+`mkHardwareProfile "<machine>"` reads this metadata directly, keyed by the **machine name passed in explicitly** — never by `config.networking.hostName`, since the machine nickname and the eventual hostname are different identifier spaces (see [Module Namespace & Naming](#module-namespace--naming)):
 ```nix
 # hardware/zb17g1-k3.nix
 { self, ... }: {
@@ -349,32 +195,229 @@ mkSystemUsersForHost = hostName: lib.genAttrs hostsMeta.${hostName}.systemUsers 
 
 **Real per-combo files are an escape hatch, not the default.** `home/users/<username>-<hostname>.nix` (referenced via `hostOverrides.<host>.extraModules`) is created only when a specific user@host combination has genuinely unique content (e.g. GPU tooling only relevant to `temhr` on `nixace`) — mirroring exactly how sparse `hosts/nixzen.nix` and substantial `hosts/nixace.nix` coexist: file richness tracks real uniqueness, not a uniform template. `hardwareMeta` has the identical escape hatch via each entry's `extraConfig` field, for the rare machine with a genuinely exotic one-off boot requirement.
 
-</details>
+### Builder Functions
 
-- ### <ins>Profile Composition</ins>
+Three functions turn validated metadata into real `nixosConfigurations` / `home-manager.users`. Each is described once here; elsewhere this README just calls them by name.
+
+| Function | Consumes | Does | Full detail |
+|---|---|---|---|
+| `mkHardwareProfile "<machine>"` | `hardwareMeta` | Turns a machine name into filesystem layout + boot/initrd/kernel-module config | [Entry Point & Orchestration Files](#entry-point--orchestration-files) |
+| `mkHost { name; modules; }` | `hostsMeta`, `nixlabLib`, `overlays`, `nixpkgsConfig` | Assembles the final `nixosConfiguration`: injects nixpkgs, sops-nix, overlays, and `hostMeta`; resolves architecture and nixpkgs channel | [Host Build Flow](#host-build-flow) |
+| `mkHomeUsersForHost` / `mkHomeUser` | `hostsMeta`, `usersMeta` | Generates one home-manager profile per user assigned to a host, resolving per-host overrides | [Home-Manager Build Flow](#home-manager-build-flow) |
+| `mkSystemUsersForHost` / `mkSystemUser` | `hostsMeta`, `usersMeta` | Generates one NixOS system account per user assigned to a host | [Home-Manager Build Flow](#home-manager-build-flow) |
+
+A username existing on a host as a login account (`systemUsers`) and existing as a home-manager profile (`homeUsers`) are two independently-controlled facts — not one hardcoded assumption.
+
+---
+
+## Architecture & Import Flow
+
+**File organization conventions, at a glance:**
+
+| Folder | Contains | Rule of thumb |
+|---|---|---|
+| `flake/data/` | Pure attrsets, nothing else | No functions, no `mkOption` calls — safe to read (or diff, or hand to a non-Nix script) without evaluating any logic |
+| `flake/schema/` | Option declarations and per-axis smart constructors (`mkMachineMeta`, `mkHostMeta`) | Validates and default-fills the attrsets in `data/` — a typo'd field name gets a real error, not a silent failure three files later |
+| `flake/builders/` | One file per independent axis (hardware, hosts, users) | Turns validated metadata into real `nixosConfigurations` / `home-manager.users` — see [Builder Functions](#builder-functions) |
+| `flake/ci/` | Dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`) | Plumbing for working on the repo, not part of what the repo *means* |
+| `flake/nixos-lib.nix`, `flake/pkgs.nix` | Cross-cutting helpers | Outside all four folders above because they're not axis-specific: `nixos-lib.nix` is helpers any service module can use; `pkgs.nix` is the one place `overlays`/`nixpkgsConfig` are defined for every `pkgs` set the flake builds |
+
+The short version: if you're asking "where does this go?", ask "is it data, a type/constructor, a generator, or tooling?" — that answers it.
+
+### Entry Point & Orchestration Files
 
 <details>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Every `nixosConfiguration` and every generated home-manager user composes from the same three-tier shape:
+`flake.nix` is a pure delegation layer. [flake-parts](https://github.com/hercules-ci/flake-parts) structures outputs as composable modules; [import-tree](https://github.com/vic/import-tree) auto-discovers every `.nix` file in each top-level directory (see [Self-Registering Modules](#self-registering-modules)). Files prefixed with `_` are leaf imports consumed by their parent module and hold no independent flake-output registration of their own — they're still discovered and evaluated by `import-tree`, but their content is a helper, not a standalone `flake.nixosModules.*`/`flake.homeModules.*` entry.
 
-**Hardware side** (`hardware/common/profile-*.nix`):
-- `mkHardwareProfile "<machine>"` (a function, not a self-registered module — called by each machine file, not imported) — universal filesystem layout, per-machine boot/initrd/kernel-module facts sourced from `hardwareMeta`, CPU microcode
-- `hardw--profl--workstation-nvidia` — nvidia driver + local `/data` mount + mirror-peer NFS mounts; imported by the 5 nvidia-equipped workstation/laptop machines
+```nix
+outputs = inputs @ { flake-parts, ... }:
+  flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+    imports = [
+      (inputs.import-tree ./flake)    # → orchestration (data, schema, builders, nixos-lib, pkgs, ci)
+      (inputs.import-tree ./hardware) # → hardw--* nixosModules
+      (inputs.import-tree ./home)     # → home--* homeModules
+      (inputs.import-tree ./hosts)    # → hosts--* nixosModules + nixosConfigurations
+      (inputs.import-tree ./modules)  # → servc--*, systm--* nixosModules
+      (inputs.import-tree ./stacks)   # → stack--* nixosModules
+      (inputs.import-tree ./overlays) # → flake.overlays.*
+      (inputs.import-tree ./shells)   # → perSystem.devShells.*
+      (inputs.import-tree ./sops)     # → nsops--* nixosModules
+    ];
+  };
+```
 
-**NixOS side** (`hosts/common/profile-*.nix`):
-- `hosts--profl--base` — boot loader, networking, nix settings, ssh, sops, `stack--monitoring`, home-manager wiring, automation timers; imported by every host
-- `hosts--profl--desktop` — dev/gaming/media/productivity/virtualization toggle modules, desktop-only concerns (firefox, flatpak, gui-shells); imported by desktop/laptop hosts
-- `hosts--profl--nas` — NAS-specific automation (phone media backup); imported by NAS hosts
+A small number of orchestration concerns live under `flake/`, organized by *kind of thing* rather than lumped into one folder. This table is the authoritative, file-by-file reference the rest of this README points back to instead of re-describing:
 
-**Home-manager side** (`home/common/profile-*.nix`):
-- `home--profl--base` — git, ssh, fastfetch, XDG folders, ephemeral-app launchers, bash shell integration; imported by every user
-- `home--profl--desktop` — browsers, terminal emulators, virt-manager dconf tweak; imported when a user's resolved profile is `"desktop"`
+| File | Responsibility | Output |
+|------|---------------|--------|
+| `flake/data/hardware-meta.nix` | Per-machine hardware facts, in nixlab's own schema rather than raw `nixos-generate-config` output: `cpuVendor`, `initrdAvailableKernelModules`, `initrdKernelModules`, `kernelModules`, `extraModulePackages`, an `extraConfig` escape hatch — a pure attrset, built via `mkMachineMeta` | `flake.lib.hardwareMeta` |
+| `flake/data/hosts-meta.nix` | Per-host metadata: IPs, interfaces, architecture, nixpkgs input selection, `homeUsers`, `systemUsers`, `primaryUser` — a pure attrset, built via `mkHostMeta` | `flake.lib.hostsMeta` |
+| `flake/data/users-meta.nix` | Per-user identity: git name/email, default home-manager profile, per-host overrides, SSH authorized keys, NixOS account facts (`isNormalUser`, `extraGroups`, `initialPassword`) | `flake.lib.usersMeta` |
+| `flake/schema/options.nix` | Declares `flake.lib` and `flake.homeModules` as mergeable `lazyAttrsOf` options — the option declarations that make self-registration possible across the whole repo | *(option declarations only)* |
+| `flake/schema/hardware.nix` | `mkMachineMeta` — the smart constructor consumed by `data/hardware-meta.nix` | `flake.lib.mkMachineMeta` |
+| `flake/schema/hosts.nix` | `mkHostMeta`, including the `interfaces` list derivation (ethernet + optional wifi) — consumed by `data/hosts-meta.nix` | `flake.lib.mkHostMeta` |
+| `flake/builders/hardware.nix` | `mkHardwareProfile` — reads `self.lib.hardwareMeta`, turns a machine name into filesystem layout + boot/initrd/kernel-module config | `flake.lib.mkHardwareProfile` |
+| `flake/builders/hosts.nix` | `mkHost` + `mkCommonModules` — reads `self.lib.hostsMeta` / `self.lib.nixlabLib` / `self.lib.overlays` / `self.lib.nixpkgsConfig`, injects nixpkgs, sops-nix, overlays, and `hostMeta` into every host | `flake.lib.mkHost` |
+| `flake/builders/users.nix` | `mkHomeUser`, `mkHomeUsersForHost`, `mkSystemUser`, `mkSystemUsersForHost` — reads `self.lib.hostsMeta` / `self.lib.usersMeta` | `flake.lib.mkHomeUser`, `.mkHomeUsersForHost`, `.mkSystemUser`, `.mkSystemUsersForHost` |
+| `flake/nixos-lib.nix` | Shared NixOS helper functions (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) injected into every module as `nixlabLib` via `specialArgs` — cross-cutting, not tied to any one axis | `flake.lib.nixlabLib` |
+| `flake/pkgs.nix` | Single source of truth for `flake.lib.overlays` and `flake.lib.nixpkgsConfig` (`allowUnfree` + `nvidia.acceptLicense`), consumed by both `perSystem` pkgs *and* every per-host pkgs set in `builders/hosts.nix` — closes what used to be a hand-copied duplication between the two | `flake.lib.overlays`, `.nixpkgsConfig`, `perSystem._module.args.pkgs` |
+| `flake/ci/checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks`, `flake.formatter` |
+| `flake/ci/apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` |
+| `flake/ci/packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` |
 
 </details>
 
-- ### <ins>Host Build Flow</ins>
+### Self-Exporting Module Schema
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+Every file is a flake-parts module that registers its own outputs directly (see [Self-Registering Modules](#self-registering-modules)). Two concrete examples:
+
+```nix
+# modules/nixos/glance/default.nix
+{ self, ... }: {
+  flake.nixosModules.servc--glance-nixlab = { config, lib, pkgs, nixlabLib, ... }: {
+    imports = [ self.nixosModules.systm--ports-glance ];
+    options.services.glance-nixlab = { enable = lib.mkEnableOption "glance"; ... };
+    config = lib.mkIf cfg.enable { ... };
+  };
+}
+```
+
+```nix
+# hosts/nixace.nix — one file, two outputs
+{ self, ... }: {
+  flake.nixosConfigurations.nixace = self.lib.mkHost {
+    name = "nixace";
+    modules = [
+      self.nixosModules.hardw--zb17g4-p5
+      self.nixosModules.hosts--nixace
+      self.nixosModules.hosts--profl--base
+      self.nixosModules.hosts--profl--desktop
+      self.nixosModules.servc--bookstack-nixlab
+      self.nixosModules.nsops--bookstack
+    ];
+  };
+
+  flake.nixosModules.hosts--nixace = { ... }: {
+    gShells.DE = "plasma6";
+    blender.enable = true;
+    steam.enable = true;
+    # feature selections and genuinely unique service config only —
+    # mainUser, home-manager users, and system accounts are all derived
+    # from hosts-meta.nix / users-meta.nix, not hand-set here.
+  };
+}
+```
+
+</details>
+
+### The `flake.lib` Registry
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+`flake.lib` works exactly like `flake.nixosModules`/`flake.homeModules` (see [Self-Registering Modules](#self-registering-modules)): a declared `lazyAttrsOf raw` option that flake-parts deep-merges across every file that contributes to it. This means shared metadata (`hostsMeta`, `usersMeta`, `hardwareMeta`), the constructors that build it (`mkHostMeta`, `mkMachineMeta`), and the generators that consume it (`nixlabLib`, `mkHost`, `mkHomeUser`, ...) can each live in their own self-registering file — split across `data/`, `schema/`, and `builders/` by kind — with no file needing to know where another lives.
+
+```nix
+# flake/data/hosts-meta.nix — pure data, built via a schema constructor
+{self, ...}: let
+  inherit (self.lib) mkHostMeta;
+in {
+  flake.lib.hostsMeta = {
+    nixace = mkHostMeta { address = "10.0.0.200"; homeUsers = ["temhr"]; systemUsers = ["temhr" "guest"]; primaryUser = "temhr"; ... };
+    # ...
+  };
+}
+```
+
+```nix
+# flake/builders/hosts.nix — consumes, never imports by path
+{self, inputs, ...}: let
+  hostsMeta = self.lib.hostsMeta;
+  nixlabLib = self.lib.nixlabLib;
+in {
+  flake.lib.mkHost = { name, modules }: ...;
+}
+```
+
+The one detail worth calling out explicitly: because `self` is resolved lazily by flake-parts, `builders/hosts.nix` can reference `self.lib.hostsMeta` before that attribute has "arrived" from its own file — the same laziness trick that already lets any module reference `self.nixosModules.*` regardless of load order. This is why `data/hosts-meta.nix` and `data/users-meta.nix` can live anywhere in the tree without breaking the `schema/*.nix` constructors they're built from or the `builders/*.nix` generators that consume them in turn.
+
+</details>
+
+### Module Namespace & Naming
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+All NixOS modules register under `flake.nixosModules`; all home-manager modules register under `flake.homeModules`. The double-dash convention encodes a two-level hierarchy in a flat namespace — all cross-file references use `self.nixosModules.*` / `self.homeModules.*`, never filesystem paths.
+
+> **Machine name vs. hostname:** `hardw--<machine>` modules are keyed by a memorable *hardware* nickname (`zb17g1-k3`, `m720q-nas1`) loosely based on model/manufacturer — deliberately **not** the same identifier space as `hostsMeta`'s hostnames (`nixace`, `nixnas1`). A `hosts--<hostname>.nix` file imports whichever `hardw--<machine>` module matches the physical box it runs on. Never look up hardware facts through `config.networking.hostName` — pass the machine name explicitly (see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)).
+
+| Prefix | Layer |
+|--------|-------|
+| `hardw--<machine>` | One file per physical machine, built via `self.lib.mkHardwareProfile "<machine>"` + machine-specific mount/driver imports |
+| `hardw--profl--` | Hardware profile compositions (workstation-nvidia, etc.) |
+| `hardw--core--` | Universal hardware modules (drivers) |
+| `hardw--mounts--` | Filesystem/NFS/ZFS mount modules |
+| `hosts--<hostname>` | Host identity + feature selections |
+| `hosts--profl--` | NixOS profile compositions (base, desktop, nas) |
+| `hosts--core--` | Universal NixOS modules (all hosts) |
+| `hosts--deskt--` | Desktop-only NixOS modules |
+| `hosts--apps--` | Toggleable NixOS application modules |
+| `hosts--autom--` | Scheduled tasks and automation |
+| `hosts--hardw--` | Shared hardware concerns |
+| `hosts--debug--` | Opt-in diagnostics (never in any profile) |
+| `home--profl--` | Home-manager profile compositions (base, desktop) |
+| `home--core--` | Universal home-manager modules (every user) |
+| `home--apps--` | Toggleable home-manager application modules |
+| `home--shell--` | Shell/dotfile modules |
+| `nsops--` | sops-nix secret wiring modules |
+| `servc--` | Self-hosted service modules — atomic, no knowledge of sibling services |
+| `stack--` | Multi-service integration bundles — imports ≥2 `servc--`/`nsops--` modules and wires them together (see [Top-Level Folder Reference](#top-level-folder-reference)) |
+| `systm--` | Cross-cutting system defaults (e.g. per-service port defaults) |
+
+```
+# nix flake show (abbreviated)
+├───nixosConfigurations
+│   ├───nixace, nixnas1, nixnas2, nixsun, nixtop, nixvat, nixzen
+├───nixosModules
+│   ├───hardw--zb17g4-p5, hardw--profl--workstation-nvidia, hosts--nixace, servc--glance-nixlab, stack--monitoring, ...
+├───homeModules
+│   ├───home--profl--base, home--profl--desktop, home--core--config-git, home--apps--browsers, ...
+```
+
+</details>
+
+### Profile Composition
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
+
+Every `nixosConfiguration` and every generated home-manager user composes from the same three-tier shape. `hardware/common/profile-*.nix`, `hosts/common/profile-*.nix`, and `home/common/profile-*.nix` mirror each other structurally — see [The Dendritic Pattern](#the-dendritic-pattern) for why the same Features → Profiles → Hosts shape applies to all three.
+
+| Side | Profile | Composed of | Applies to |
+|---|---|---|---|
+| Hardware | *(function, not a profile module)* `mkHardwareProfile "<machine>"` | Universal filesystem layout, per-machine boot/initrd/kernel-module facts sourced from `hardwareMeta`, CPU microcode | Called by each machine file directly, not imported |
+| Hardware | `hardw--profl--workstation-nvidia` | nvidia driver + local `/data` mount + mirror-peer NFS mounts | The 5 nvidia-equipped workstation/laptop machines |
+| NixOS | `hosts--profl--base` | Boot loader, networking, nix settings, ssh, sops, `stack--monitoring`, home-manager wiring, automation timers | Every host |
+| NixOS | `hosts--profl--desktop` | Dev/gaming/media/productivity/virtualization toggle modules, desktop-only concerns (firefox, flatpak, gui-shells) | Desktop/laptop hosts |
+| NixOS | `hosts--profl--nas` | NAS-specific automation (phone media backup) | NAS hosts |
+| Home-manager | `home--profl--base` | git, ssh, fastfetch, XDG folders, ephemeral-app launchers, bash shell integration | Every user |
+| Home-manager | `home--profl--desktop` | Browsers, terminal emulators, virt-manager dconf tweak | Users whose resolved profile is `"desktop"` |
+
+</details>
+
+### Host Build Flow
 
 <details>
 <summary><i>(click to expand)</i></summary>
@@ -397,7 +440,7 @@ hosts/<hostname>.nix
 
 </details>
 
-- ### <ins>Home-Manager Build Flow</ins>
+### Home-Manager Build Flow
 
 <details>
 <summary><i>(click to expand)</i></summary>
@@ -417,37 +460,34 @@ NixOS system accounts follow the identical shape via `mkSystemUsersForHost` / `h
 
 </details>
 
-- ### <ins>Coupling Principles</ins>
+### Coupling Principles
 
 <details>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-A few conventions in this repo exist specifically to keep coupling visible and manageable rather than accidental:
+A few conventions keep coupling visible and manageable rather than accidental:
 
-**Port precedence** — three tiers, highest to lowest, using NixOS's own priority mechanism rather than convention alone:
-1. **Host file** — plain assignment (`services.foo-nixlab.port = 9999;`) always wins
-2. **`modules/ports.nix`** (`systm--ports-*`) — `lib.mkDefault <value>`, the fleet-wide sensible default
-3. **Service module's own option `default`** — lowest priority, a safety net if `ports.nix` isn't imported for that service at all
-
-**Service hardening** — every service's `serviceConfig` should route through `nixlabLib.mkServiceHardening` rather than hand-rolling `systemd` sandboxing:
-```nix
-serviceConfig = nixlabLib.mkServiceHardening {
-  writablePaths = [ cfg.dataDir ];
-  allowNetwork  = true;   # default; set false for network-isolated services
-  allowDevices  = false;  # set true for GPU/hardware access — also relaxes
-                          # ProtectKernelModules/Tunables/RestrictNamespaces
-  allowJIT      = false;  # set true for JIT-compiled runtimes (Next.js, Node.js,
-                          # CUDA) — relaxes MemoryDenyWriteExecute/SystemCallFilter
-} // { Type = "simple"; ExecStart = "..."; ... };
-```
-A one-off exception (e.g. a specific exporter needing extra syscall families) should still start from this helper and override only the specific field that's genuinely different — not bypass it entirely, which silently drops every other protection the helper provides.
-
-**Single source of truth for generated aggregates** — when multiple files need the same derived fact (e.g. "which services are enabled, and what group do they belong to" for a dashboard), that fact lives in one `_<name>-registry.nix`-style file, imported by every consumer, rather than copy-pasted maps that can silently drift out of sync (see `modules/nixos/homepage-dashboard/_service-registry.nix`).
+- **Port precedence** uses NixOS's own priority mechanism (see [Nix Ecosystem Terminology](#nix-ecosystem-terminology)) rather than convention alone, highest to lowest:
+  1. **Host file** — plain assignment (`services.foo-nixlab.port = 9999;`) always wins
+  2. **`modules/ports.nix`** (`systm--ports-*`) — `lib.mkDefault <value>`, the fleet-wide sensible default
+  3. **Service module's own option `default`** — lowest priority, a safety net if `ports.nix` isn't imported for that service at all
+- **Service hardening** — every service's `serviceConfig` should route through `nixlabLib.mkServiceHardening` rather than hand-rolling `systemd` sandboxing. A one-off exception (e.g. a specific exporter needing extra syscall families) should still start from this helper and override only the specific field that's genuinely different — not bypass it entirely, which silently drops every other protection the helper provides:
+  ```nix
+  serviceConfig = nixlabLib.mkServiceHardening {
+    writablePaths = [ cfg.dataDir ];
+    allowNetwork  = true;   # default; set false for network-isolated services
+    allowDevices  = false;  # set true for GPU/hardware access — also relaxes
+                            # ProtectKernelModules/Tunables/RestrictNamespaces
+    allowJIT      = false;  # set true for JIT-compiled runtimes (Next.js, Node.js,
+                            # CUDA) — relaxes MemoryDenyWriteExecute/SystemCallFilter
+  } // { Type = "simple"; ExecStart = "..."; ... };
+  ```
+- **Single source of truth for generated aggregates** — when multiple files need the same derived fact (e.g. "which services are enabled, and what group do they belong to" for a dashboard), that fact lives in one `_<name>-registry.nix`-style file, imported by every consumer, rather than copy-pasted maps that can silently drift out of sync (see `modules/nixos/homepage-dashboard/_service-registry.nix`).
 
 </details>
 
-- ### <ins>Secrets Management</ins>
+### Secrets Management
 
 <details>
 <summary><i>(click to expand)</i></summary>
@@ -464,7 +504,13 @@ Secrets are managed with [sops-nix](https://github.com/Mic92/sops-nix), age-encr
 
 ---
 
-## Repository Layout
+## Repository Reference
+
+### Repository Layout
+
+<details>
+<summary><i>(click to expand)</i></summary>
+<p></p>
 
 ```
 nixlab/
@@ -540,11 +586,9 @@ nixlab/
 
 </details>
 
----
+### Top-Level Folder Reference
 
-## Top-Level Folder Reference
-
-Every top-level folder answers one question: *what kind of thing does a file in here become?* Before creating a new file anywhere in this repo, find its folder below and check its file requirements — this is what keeps the self-registering, no-central-import architecture from turning into "put it wherever seems fine."
+Every top-level folder answers one question: *what kind of thing does a file in here become?* Before creating a new file anywhere in this repo, find its folder below and check its file requirements — this is what keeps the [self-registering](#self-registering-modules), no-central-import architecture from turning into "put it wherever seems fine."
 
 <details>
 <summary><i>(click to expand)</i></summary>
@@ -552,20 +596,20 @@ Every top-level folder answers one question: *what kind of thing does a file in 
 
 ### `flake/` — orchestration: metadata, constructors, generators, dev tooling
 
-**Why it exists:** every other folder in this repo depends on `flake/` (metadata to describe a host/user/machine, generator functions to build real config from that metadata) but `flake/` depends on nothing else — it's the foundation, so it's the one folder organized by *kind of thing* rather than *feature*.
+**Why it exists:** every other folder in this repo depends on `flake/` (metadata to describe a host/user/machine, generator functions to build real config from that metadata) but `flake/` depends on nothing else — it's the foundation, so it's the one folder organized by *kind of thing* rather than *feature*. See [Entry Point & Orchestration Files](#entry-point--orchestration-files) for the full per-file table.
 
-| Subfolder | Contains | File must... |
-|---|---|---|
-| `data/` | Pure attrsets. No functions, no `mkOption`, no logic. | Contain only calls to a `schema/` constructor (`mkHostMeta {...}`, `mkMachineMeta {...}`) or plain literal values. Never reference `config`, never define a NixOS/home-manager module. Safe to read without evaluating anything beyond basic Nix. |
-| `schema/` | Option declarations and smart constructors (`mk<Axis>Meta`) that validate/default-fill `data/`'s attrsets. | Export exactly one constructor function (or a small option-declaration file like `options.nix`) per axis. A typo'd field name here must produce a real error, not a silent `null`. |
-| `builders/` | One file per independent axis (hardware, hosts, users) — turns validated metadata into real `nixosConfigurations`/`home-manager.users`. | Consume `self.lib.<axis>Meta`, never import another `flake/` file by relative path. Export via `flake.lib.<name>`, never inline logic that belongs in `schema/`. |
-| `ci/` | `checks.nix`, `apps.nix`, `packages.nix` — dev-facing tooling. | Never referenced by any host/user/machine config. This is plumbing for working on the repo, not part of what the repo *means*. |
-| `nixos-lib.nix` (bare file, not a subfolder) | Shared NixOS helper functions (`mkNginxVirtualHost`, `mkServiceHardening`, ...) used across many service modules. | Stay cross-cutting — if a function only makes sense for one service, it belongs in that service's own module, not here. |
-| `pkgs.nix` (bare file) | Single source of truth for overlays + `nixpkgsConfig`, consumed by both `perSystem` and every per-host `pkgs` set. | Never be duplicated — this file exists specifically to close the "hand-copied overlay list" gap. |
+| Subfolder | File must... |
+|---|---|
+| `data/` | Contain only calls to a `schema/` constructor (`mkHostMeta {...}`, `mkMachineMeta {...}`) or plain literal values. Never reference `config`, never define a NixOS/home-manager module. |
+| `schema/` | Export exactly one constructor function (or a small option-declaration file like `options.nix`) per axis. A typo'd field name here must produce a real error, not a silent `null`. |
+| `builders/` | Consume `self.lib.<axis>Meta`, never import another `flake/` file by relative path. Export via `flake.lib.<name>`, never inline logic that belongs in `schema/`. |
+| `ci/` | Never be referenced by any host/user/machine config — plumbing for working on the repo, not part of what the repo *means*. |
+| `nixos-lib.nix` | Stay cross-cutting — if a function only makes sense for one service, it belongs in that service's own module, not here. |
+| `pkgs.nix` | Never be duplicated — this file exists specifically to close the "hand-copied overlay list" gap. |
 
 ### `hardware/` — physical machine facts
 
-**Why it exists:** boot/initrd/kernel-module facts and filesystem layout are properties of a physical box, entirely independent of what hostname or users that box ends up running.
+**Why it exists:** boot/initrd/kernel-module facts and filesystem layout are properties of a physical box, entirely independent of what hostname or users that box ends up running (see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)).
 
 - **One file per machine** (`hardware/<machine>.nix`) — must call `(self.lib.mkHardwareProfile "<machine>")` with the machine's own filename as the string, plus whichever `hardw--profl--*`/`hardw--mounts--*` modules it needs. Must never look up its identity via `config.networking.hostName`.
 - **`common/drivers/`, `common/mounts/`** — atomic, single-purpose, reusable across any machine. A mount module must be parameterized (pool name, peer list, device paths as options) — never hardcode one machine's nickname into a supposedly-generic module's option namespace.
@@ -575,7 +619,7 @@ Every top-level folder answers one question: *what kind of thing does a file in 
 
 **Why it exists:** this is where a physical/logical machine becomes a bootable `nixosConfiguration` — host identity, profile selection, and genuinely unique per-host feature config.
 
-- **`hosts/<hostname>.nix`** — must call `self.lib.mkHost { name; modules; }`. The `hosts--<hostname>` module inside it should contain only feature toggles (`steam.enable = true;`) and config that's *genuinely unique to this host* — never `nixlab.mainUser`, never home-manager user lists (both are derived from `hostsMeta`).
+- **`hosts/<hostname>.nix`** — must call `self.lib.mkHost { name; modules; }`. The `hosts--<hostname>` module inside it should contain only feature toggles (`steam.enable = true;`) and config that's *genuinely unique to this host* — never `nixlab.mainUser`, never home-manager user lists (both are derived from `hostsMeta`; see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)).
 - **`common/core/`** — universal, non-toggleable modules imported by every host via `hosts--profl--base`. A file belongs here only if *every* host needs it unconditionally — if it's optional, it belongs in `apps/` with a real `enable` option instead.
 - **`common/apps/`, `common/desktop/`, `common/automation/`, `common/hardware/`** — toggleable or role-scoped modules, each with `lib.mkEnableOption`-style options, composed into profiles rather than imported directly by host files.
 - **`common/debug/`** — opt-in diagnostics only. Must never appear in any `profile-*.nix` — a debug module that's silently always-on defeats its own purpose.
@@ -583,12 +627,12 @@ Every top-level folder answers one question: *what kind of thing does a file in 
 
 ### `home/` — home-manager user identity & composition
 
-**Why it exists:** mirrors `hosts/` exactly, one layer down — per-user, session-scoped config instead of per-host, system-scoped config. See [System Space vs. User Space](#three-axis-metadata-hardware-hosts--users) for the deciding rule on whether something belongs here or in `hosts/`.
+**Why it exists:** mirrors `hosts/` exactly, one layer down — per-user, session-scoped config instead of per-host, system-scoped config.
 
 - **`common/core/`** — universal home-manager modules, imported by every user via `home--profl--base`. Same "unconditional or it doesn't belong here" rule as `hosts/common/core/`.
 - **`common/apps/`** — toggleable, per-user preference modules (browsers, terminal emulators). If a feature needs a system daemon (e.g. `virtualisation.libvirtd`), that daemon belongs in `hosts/`, not here — only the per-user preference layer on top does.
 - **`common/shell/`** — dotfile/shell-integration modules. Should read directory contents (`builtins.readDir`) rather than hand-listing every file, wherever the underlying file set can grow over time (see `bash.nix`'s alias-loading pattern).
-- **`users/`** — an escape hatch, not a default. A file belongs here only for a specific user@host combination with genuinely unique content, wired in via `usersMeta.<user>.hostOverrides.<host>.extraModules` — never a uniform per-user template.
+- **`users/`** — an escape hatch, not a default. A file belongs here only for a specific user@host combination with genuinely unique content, wired in via `usersMeta.<user>.hostOverrides.<host>.extraModules` — never a uniform per-user template (see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)).
 
 ### `modules/` — atomic service modules
 
@@ -685,7 +729,7 @@ nix fmt                  # run alejandra across the whole tree
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-A "host" (network identity, users, services — `hostsMeta`) and a "machine" (physical hardware — `hardwareMeta`) are independent concerns here; a new physical box needs both, and an existing machine can in principle be reinstalled under a new hostname without redoing its hardware facts.
+A "host" (network identity, users, services — `hostsMeta`) and a "machine" (physical hardware — `hardwareMeta`) are independent concerns here (see [Three-Axis Metadata](#three-axis-metadata-hardware-hosts--users)); a new physical box needs both, and an existing machine can in principle be reinstalled under a new hostname without redoing its hardware facts.
 
 #### 1. Capture the machine's hardware facts once, add to `flake/data/hardware-meta.nix`
 
@@ -795,7 +839,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Home-manager users are **generated**, not hand-written per host. Adding a new user, or adding an existing user to a new host, is a metadata change only.
+Home-manager users are **generated**, not hand-written per host (see [Builder Functions](#builder-functions)). Adding a new user, or adding an existing user to a new host, is a metadata change only.
 
 #### 1. Add the user's identity to `flake/data/users-meta.nix`
 
@@ -859,7 +903,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-Service modules live in `modules/nixos/<service>/`. Secrets are managed separately in `sops/`.
+Service modules live in `modules/nixos/<service>/` (see [Top-Level Folder Reference](#top-level-folder-reference) for the rules that define what belongs here). Secrets are managed separately in `sops/`.
 
 > Shared helpers (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) are available in any module via `{ nixlabLib, ... }:` — see `flake/nixos-lib.nix` for usage examples, and [Coupling Principles](#coupling-principles) for `mkServiceHardening`'s `allowNetwork`/`allowDevices`/`allowJIT` flags.
 
