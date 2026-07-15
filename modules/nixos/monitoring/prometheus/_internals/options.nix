@@ -66,6 +66,23 @@
     description = "Enable Prometheus Node Exporter for system metrics";
   };
 
+  extraScrapeConfigs = lib.mkOption {
+    type = lib.types.listOf lib.types.attrs;
+    default = [];
+    example = [
+      {
+        job_name = "ntfy";
+        static_configs = [{targets = ["127.0.0.1:2586"];}];
+      }
+    ];
+    description = ''
+      Additional raw Prometheus scrape_config entries, merged in verbatim
+      after the base and maintenance scrape configs. Intended to be set by
+      a stack module wiring this Prometheus instance to sibling services it
+      should observe, not typically set by hand on a host.
+    '';
+  };
+
   # OPTIONAL: allow opting out of the mainUser group membership
   # without coupling to a specific external option name
   extraUsers = lib.mkOption {

@@ -25,6 +25,21 @@
       })
       cfg.extraDashboards);
 
+    # Datasource provisioning: one merged YAML file, same JSON→YAML pattern
+    # used by Loki and ntfy's own config generation.
+    datasourcesConfig = {
+      apiVersion = 1;
+      datasources =
+        map (ds: {
+          inherit (ds) name type url access isDefault editable jsonData;
+        })
+        cfg.provisioning.datasources;
+    };
+
+    datasourcesJsonFile =
+      builtins.toFile "grafana-datasources.json"
+      (builtins.toJSON datasourcesConfig);
+
     # Single merged set used everywhere in config.
     allDashboards = cfg.dashboards // extraDashboardAttrs;
 
@@ -200,6 +215,59 @@
             ];
         '';
         example = ["zfs-monitoring" "docker"];
+      };
+
+      # ── Datasource auto-provisioning ─────────────────────────────────────────
+      provisioning.datasources = lib.mkOption {
+        type = lib.types.listOf (lib.types.submodule {
+          options = {
+            name = lib.mkOption {
+              type = lib.types.str;
+              description = "Datasource name shown in the Grafana UI.";
+            };
+            type = lib.mkOption {
+              type = lib.types.str;
+              example = "prometheus";
+              description = "Grafana datasource plugin type (e.g. prometheus, loki).";
+            };
+            url = lib.mkOption {
+              type = lib.types.str;
+              description = "Datasource URL, e.g. http://127.0.0.1:9090.";
+            };
+            access = lib.mkOption {
+              type = lib.types.str;
+              default = "proxy";
+              description = "proxy (Grafana backend proxies requests) or direct.";
+            };
+            isDefault = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+            };
+            editable = lib.mkOption {
+              type = lib.types.bool;
+              default = true;
+            };
+            jsonData = lib.mkOption {
+              type = lib.types.attrs;
+              default = {};
+              description = "Extra jsonData fields passed to the datasource plugin.";
+            };
+          };
+        });
+        default = [];
+        description = ''
+          Datasources to auto-provision via Grafana's file-based provisioning.
+          Intended to be set by a stack module wiring this Grafana instance to
+          sibling services (Prometheus, Loki), not typically set by hand on a host.
+        '';
+        example = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            url = "http://127.0.0.1:9090";
+            isDefault = true;
+          }
+        ];
       };
     };
 
@@ -434,6 +502,16 @@
                   echo "GRAFANA_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
                     > /run/grafana-credentials.env
                   chmod 600 /run/grafana-credentials.env
+                ''
+                # NEW — datasource provisioning
+                + lib.optionalString (cfg.provisioning.datasources != []) ''
+                  ${pkgs.remarshal}/bin/remarshal \
+                    -i ${datasourcesJsonFile} \
+                    -o ${cfg.dataDir}/provisioning/datasources/datasources.yaml.tmp \
+                    -if json \
+                    -of yaml
+                  mv ${cfg.dataDir}/provisioning/datasources/datasources.yaml.tmp \
+                    ${cfg.dataDir}/provisioning/datasources/datasources.yaml
                 ''
                 + lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
                     # ── dashboard: ${name} ──

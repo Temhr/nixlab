@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--core--monitoring = {
+  flake.nixosModules.stack--monitoring = {
     config,
     lib,
     ...
@@ -148,6 +148,32 @@
         openFirewall = cfg.openFirewall;
         maintenance = cfg.prometheus.maintenance;
       };
+
+      # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
+      # This is the missing "synergy" piece: dashboards assume these exist,
+      # nothing previously declared them.
+      services.grafana-nixlab.provisioning.datasources = [
+        {
+          name = "Prometheus";
+          type = "prometheus";
+          url = "http://127.0.0.1:${toString cfg.ports.prometheus}";
+          isDefault = true;
+        }
+        {
+          name = "Loki";
+          type = "loki";
+          url = "http://127.0.0.1:${toString cfg.ports.loki}";
+        }
+      ];
+
+      # NEW — Prometheus scrapes ntfy's own /metrics, closing the last gap
+      # in "every service in this stack is observed by every other."
+      services.prometheus-nixlab.extraScrapeConfigs = [
+        {
+          job_name = "ntfy";
+          static_configs = [{targets = ["127.0.0.1:${toString cfg.ports.ntfy}"];}];
+        }
+      ];
 
       # Point Prometheus at Alertmanager. Neither servc--prometheus-nixlab nor
       # servc--alertmanager-nixlab wire this automatically since they have no

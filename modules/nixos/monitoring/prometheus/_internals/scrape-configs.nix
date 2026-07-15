@@ -75,7 +75,7 @@ in {
   # Export the configs
   base = baseConfigs;
   maintenance = maintenanceConfigs;
-  all = baseConfigs ++ maintenanceConfigs;
+  all = baseConfigs ++ maintenanceConfigs ++ cfg.extraScrapeConfigs;
 
   # Helper function (can be used by services/prometheus.nix)
   inherit mkBlackboxJob;

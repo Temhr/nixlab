@@ -8,7 +8,6 @@
       self.nixosModules.hosts--core--home-manager-config
       self.nixosModules.hosts--core--journald
       self.nixosModules.hosts--core--locale
-      self.nixosModules.hosts--core--monitoring
       self.nixosModules.hosts--core--networking
       self.nixosModules.hosts--core--nginx
       self.nixosModules.hosts--core--nix
@@ -33,6 +32,7 @@
 
       self.nixosModules.nsops--homepage
       self.nixosModules.nsops--ssh-keys
+      self.nixosModules.stack--monitoring
     ];
 
     ## Shared system-wide default user option
