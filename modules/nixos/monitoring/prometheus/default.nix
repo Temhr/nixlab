@@ -31,6 +31,10 @@
     options = import ./_internals/options.nix {inherit lib pkgs;};
     prometheusConfig = import ./_internals/config.nix {inherit config lib pkgs nixlabLib;};
   in {
+    imports = [
+      self.nixosModules.systm--ports-prometheus
+      ];
+
     # Import options from separate file
     options.services.prometheus-nixlab = options;
 

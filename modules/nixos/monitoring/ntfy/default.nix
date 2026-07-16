@@ -8,6 +8,9 @@
   }: let
     cfg = config.services.ntfy-nixlab;
   in {
+    imports = [
+      self.nixosModules.systm--ports-ntfy
+      ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

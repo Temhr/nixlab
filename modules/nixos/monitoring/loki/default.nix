@@ -8,6 +8,9 @@
   }: let
     cfg = config.services.loki-nixlab;
   in {
+    imports = [
+      self.nixosModules.systm--ports-loki
+      ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

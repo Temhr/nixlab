@@ -24,7 +24,8 @@
       builtins.toFile "settings.json" (builtins.toJSON settingsConfig);
   in {
     imports = [
-    ];
+      self.nixosModules.systm--ports-homepage
+      ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
