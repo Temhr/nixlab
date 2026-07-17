@@ -16,17 +16,9 @@
         default = "ollama/llama3.1";
       };
 
-      # Restored — wired through the confirmed `environment` option instead
-      # of a guessed settings.* key.
       ollamaBaseUrl = lib.mkOption {
         type = lib.types.str;
         default = "http://127.0.0.1:11434";
-        description = ''
-          Passed to Hermes as OLLAMA_API_BASE via environment. Verify this
-          is the env var name Hermes's Ollama provider actually reads —
-          check `hermes setup` interactively or the provider docs if the
-          connection doesn't establish.
-        '';
       };
 
       mcpServers = lib.mkOption {
@@ -34,7 +26,9 @@
         default = {};
       };
 
-      telegramEnvFile = lib.mkOption {
+      # Renamed from telegramEnvFile — same option, more accurate name now
+      # that Matrix is the actual channel.
+      messagingEnvFile = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
       };
@@ -49,12 +43,20 @@
       services.hermes-agent = {
         enable = true;
 
+        # Confirmed real option — pulls the "matrix" pyproject extra into
+        # the sealed venv, per the module source (uv-resolved, no PYTHONPATH
+        # patching).
+        extraDependencyGroups = ["matrix"];
+
         settings = {
           inherit (cfg) model;
           approvals.mode = "smart";
           approvals.cron_mode = "deny";
           delegation.orchestrator_enabled = true;
           delegation.max_spawn_depth = 2;
+          # NOTE: unverified key path, same caveat as messaging.telegram.enabled
+          # last time — grep the venv before trusting this.
+          messaging.matrix.enabled = true;
         };
 
         environment = {
@@ -63,8 +65,8 @@
 
         mcpServers = cfg.mcpServers;
 
-        environmentFiles = lib.optionals (cfg.telegramEnvFile != null) [
-          (toString cfg.telegramEnvFile)
+        environmentFiles = lib.optionals (cfg.messagingEnvFile != null) [
+          (toString cfg.messagingEnvFile)
         ];
       };
 

@@ -19,7 +19,7 @@
         format = "dotenv";
         restartUnits = ["hermes-agent.service"];
       };
-      services.nixlab-hermes.telegramEnvFile = config.sops.secrets.HERMES_ENV.path;
+      services.nixlab-hermes.messagingEnvFile = config.sops.secrets.HERMES_ENV.path;
     };
   };
 }
