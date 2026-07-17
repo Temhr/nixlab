@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--alertmanager-nixlab = {
     config,
     lib,
@@ -143,7 +143,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-alertmanager
-      ];
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

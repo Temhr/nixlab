@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--ntfy-nixlab = {
     config,
     lib,
@@ -10,7 +10,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-ntfy
-      ];
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

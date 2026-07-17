@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--homepage-nixlab = {
     config,
     lib,
@@ -25,7 +25,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-homepage
-      ];
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================

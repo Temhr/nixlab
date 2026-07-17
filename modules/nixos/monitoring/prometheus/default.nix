@@ -17,7 +17,7 @@
 # ============================================================================
 # FILE: prometheus/default.nix (main entry point)
 # ============================================================================
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--prometheus-nixlab = {
     config,
     lib,
@@ -33,7 +33,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-prometheus
-      ];
+    ];
 
     # Import options from separate file
     options.services.prometheus-nixlab = options;

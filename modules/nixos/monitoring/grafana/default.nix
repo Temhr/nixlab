@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--grafana-nixlab = {
     config,
     lib,
@@ -84,7 +84,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-grafana
-      ];
+    ];
     # ============================================================================
     # OPTIONS
     # ============================================================================

@@ -63,6 +63,17 @@ creation_rules:
         - *nixvat
         - *nixzen
 
+  - path_regex: sops/hermes\.env$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixnas1
+        - *nixnas2
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
   - path_regex: sops/home-assistant\.yaml$
     key_groups:
       - age:

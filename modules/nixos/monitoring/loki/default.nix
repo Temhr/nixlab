@@ -1,4 +1,4 @@
-{...}: {
+{self, ...}: {
   flake.nixosModules.servc--loki-nixlab = {
     config,
     lib,
@@ -10,7 +10,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-loki
-      ];
+    ];
     # ============================================================================
     # OPTIONS - Define what can be configured
     # ============================================================================
