@@ -65,11 +65,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1784241173,
-        "narHash": "sha256-cQ2+PzLzI70mi6xPYkFmCsV7SL3vvJKIHrri32gijhc=",
+        "lastModified": 1784257005,
+        "narHash": "sha256-arc5F/47J98A1phO3NRq+bYOSfBl/fdXqRu5jTRUiPw=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "75467998f90ba87adf66e1254a4d163345f23a5f",
+        "rev": "7cb2d2cd4acf0c452349968ce8d90908e8fb4cd9",
         "type": "github"
       },
       "original": {
@@ -122,11 +122,11 @@
     },
     "import-tree": {
       "locked": {
-        "lastModified": 1778781969,
-        "narHash": "sha256-Jjuz5CmSkur8KvLDoGa+vylEp+RkQtv4mt/qcMznpH0=",
+        "lastModified": 1784254960,
+        "narHash": "sha256-iI88R3wHz8wTKQb5orvpc51L/Xr64AJyxid/0MKa/b8=",
         "owner": "vic",
         "repo": "import-tree",
-        "rev": "d321337efd0f23a9eb14a42adb7b2c29313ab274",
+        "rev": "4ebb10ae17d5f1ad366e7aef5b92cb8eecf24f69",
         "type": "github"
       },
       "original": {
