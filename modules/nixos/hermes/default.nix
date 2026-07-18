@@ -40,6 +40,11 @@
     };
 
     config = lib.mkIf cfg.enable {
+      systemd.services.hermes-agent = {
+        after = ["continuwuity.service" "matrix-nixlab-init-users.service"];
+        wants = ["matrix-nixlab-init-users.service"];
+      };
+
       services.hermes-agent = {
         enable = true;
 

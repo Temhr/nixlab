@@ -9,6 +9,8 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
+      self.nixosModules.nsops--hermes
+      self.nixosModules.nsops--matrix
     ];
   };
   flake.nixosModules.hosts--nixsun = {pkgs, ...}: {
@@ -29,6 +31,15 @@
     quickemu.enable = true; #Quickly create and run optimised Windows, macOS and Linux virtual machines
 
     ## SELF-HOSTED SERVICES
+    services.matrix-nixlab = {
+      enable = true;
+      #initUsers.enable = false;
+    };
+    services.nixlab-hermes = {
+      enable = true;
+      ollamaBaseUrl = "http://10.0.0.203:11434"; # your existing ollama-stack
+      # mcpServers left empty for now — nothing to register yet
+    };
 
     # Define your Flatpak packages here
     flatpakPackages = [

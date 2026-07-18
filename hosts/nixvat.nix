@@ -9,9 +9,8 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.nsops--hermes
-      self.nixosModules.nsops--glance
       self.nixosModules.nsops--ollama
+      self.nixosModules.nsops--glance
       self.nixosModules.nsops--wiki-js
       self.nixosModules.servc--zola-nixlab
     ];
@@ -65,12 +64,6 @@
         markdown = {};
       };
       extraUsers = [config.nixlab.mainUser];
-    };
-
-    services.nixlab-hermes = {
-      enable = true;
-      ollamaBaseUrl = "http://127.0.0.1:11434"; # your existing ollama-stack
-      # mcpServers left empty for now — nothing to register yet
     };
 
     services.ollama-stack = {
