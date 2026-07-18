@@ -51,7 +51,7 @@
     };
 
     "hermes" = {
-      "hermes" = {
+      "Hermes" = {
         href = "http://${hostMeta.address}:9119";
         icon = "hermes";
         description = "The self-improving AI agent built by Nous Research";
