@@ -9,8 +9,6 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.nsops--hermes
-      self.nixosModules.nsops--matrix
       self.nixosModules.nsops--ollama
       self.nixosModules.nsops--glance
       self.nixosModules.nsops--wiki-js
@@ -68,15 +66,6 @@
       extraUsers = [config.nixlab.mainUser];
     };
 
-    services.matrix-nixlab = {
-      enable = true;
-      #initUsers.enable = false;
-    };
-    services.nixlab-hermes = {
-      enable = true;
-      #ollamaBaseUrl = "http://10.0.0.203:11434"; # your existing ollama-stack
-      # mcpServers left empty for now — nothing to register yet
-    };
     services.ollama-stack = {
       enable = true;
       acceleration = "cpu";
