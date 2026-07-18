@@ -60,4 +60,7 @@
   flake.nixosModules.systm--ports-alertmanager = {lib, ...}: {
     services.alertmanager-nixlab.port = lib.mkDefault 9093;
   };
+  flake.nixosModules.systm--ports-hermes = {lib, ...}: {
+    services.nixlab-hermes.dashboard.port = lib.mkDefault 9119;
+  };
 }

@@ -1,13 +1,21 @@
-{inputs, ...}: {
+{
+  inputs,
+  self,
+  ...
+}: {
   flake.nixosModules.servc--hermes-nixlab = {
     config,
     lib,
     pkgs,
+    nixlabLib,
     ...
   }: let
     cfg = config.services.nixlab-hermes;
   in {
-    imports = [inputs.hermes-agent.nixosModules.default];
+    imports = [
+      inputs.hermes-agent.nixosModules.default
+      self.nixosModules.systm--ports-hermes
+    ];
 
     options.services.nixlab-hermes = {
       enable = lib.mkEnableOption "Hermes Agent (multi-agent supervisor/worker system)";
@@ -45,6 +53,35 @@
       extraUsers = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
+      };
+
+      dashboard = {
+        enable = lib.mkEnableOption "Hermes web UI dashboard";
+
+        port = lib.mkOption {
+          type = lib.types.port;
+          default = 9119;
+          description = "Port the dashboard listens on.";
+        };
+
+        domain = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "hermes.example.com";
+          description = "Domain name for nginx reverse proxy (optional).";
+        };
+
+        enableSSL = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Enable HTTPS with Let's Encrypt (requires a publicly resolvable domain).";
+        };
+
+        openFirewall = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Open firewall ports. Off by default — opt in deliberately.";
+        };
       };
 
       matrixLogin = {
@@ -176,6 +213,44 @@
           echo "logged in as $user_id, updated ${envFile}"
         '';
       };
+
+      # --------------------------------------------------------------------------
+      # DASHBOARD - web UI, opt-in via dashboard.enable
+      # --------------------------------------------------------------------------
+      # NOTE: --skip-build assumes the web UI's `dist` directory is already
+      # built into the hermes-agent package. If it isn't (i.e. this package
+      # never ran `npm run build` at build time), the dashboard will serve a
+      # stale/missing UI. Check web/dist exists under the package's share dir
+      # before relying on this in production, and if not, this needs a
+      # different approach (pre-build step in the Nix package, or dropping
+      # --skip-build and ensuring npm/node are on PATH for the unit instead).
+      systemd.services.hermes-dashboard = lib.mkIf cfg.dashboard.enable {
+        description = "Hermes web UI dashboard";
+        after = ["hermes-agent.service"];
+        wants = ["hermes-agent.service"];
+        wantedBy = ["multi-user.target"];
+        serviceConfig = {
+          Type = "simple";
+          User = config.services.hermes-agent.user;
+          Group = config.services.hermes-agent.group;
+          ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 127.0.0.1 --port ${toString cfg.dashboard.port} --skip-build --no-open";
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+      };
+
+      services.nginx.enable = lib.mkIf (cfg.dashboard.enable && cfg.dashboard.domain != null) true;
+      services.nginx.virtualHosts = lib.mkIf (cfg.dashboard.enable && cfg.dashboard.domain != null) (
+        nixlabLib.mkNginxVirtualHost {
+          inherit (cfg.dashboard) domain enableSSL;
+          listenAddress = "127.0.0.1";
+          port = cfg.dashboard.port;
+        }
+      );
+
+      networking.firewall.allowedTCPPorts =
+        lib.mkIf (cfg.dashboard.enable && cfg.dashboard.openFirewall)
+        [cfg.dashboard.port];
     };
   };
 }

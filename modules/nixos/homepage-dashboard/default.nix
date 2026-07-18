@@ -180,16 +180,33 @@
           PORT = toString cfg.port;
           HOSTNAME = cfg.listenAddress;
           HOMEPAGE_ALLOWED_HOSTS = lib.concatStringsSep "," cfg.allowedHosts;
+          # Homepage/Next.js writes a render/data cache somewhere. Point it at
+          # a systemd-managed CacheDirectory (below) instead of letting it
+          # fall back to an unmanaged, non-declarative /var/cache path that
+          # nothing ever invalidates. This cache is purely disposable.
+          NIXPKGS_HOMEPAGE_CACHE_DIR = "/var/cache/homepage";
         };
 
         preStart = let
           servicesTmp = "/tmp/homepage-services.yaml.tmp";
           widgetsTmp = "/tmp/homepage-widgets.yaml.tmp";
           settingsTmp = "/tmp/homepage-settings.yaml.tmp";
+          # Records which package store path last populated the cache. If the
+          # package has since changed (upgrade, override, etc.) — or we can't
+          # prove it hasn't (first run) — the cache is wiped before Homepage
+          # starts, so a new build can never serve HTML/manifests left over
+          # from an old one, which is exactly what caused nixsun's outage.
+          cachePkgMarker = "/var/cache/homepage/.package-path";
         in ''
           [ -d "${cfg.dataDir}/config" ] || mkdir -p "${cfg.dataDir}/config"
           chown ${cfg.user}:${cfg.group} ${cfg.dataDir}/config/
           chmod 0770 ${cfg.dataDir}/config/
+
+          if [ ! -f "${cachePkgMarker}" ] || [ "$(cat "${cachePkgMarker}" 2>/dev/null)" != "${cfg.package}" ]; then
+            echo "Homepage package changed (or cache marker missing) — clearing stale render cache"
+            rm -rf /var/cache/homepage/*
+            echo -n "${cfg.package}" > "${cachePkgMarker}"
+          fi
 
           # services.yaml
           ${pkgs.remarshal}/bin/remarshal \
@@ -231,6 +248,14 @@
             ExecStart = "${cfg.package}/bin/homepage";
             Restart = "on-failure";
             RestartSec = "10s";
+
+            # Owned, lifecycle-managed cache dir (created fresh with correct
+            # perms on every start; content is cleared/invalidated in
+            # preStart above whenever cfg.package changes). Declaring this
+            # via CacheDirectory means systemd grants write access to it
+            # even with ProtectSystem = "strict" below.
+            CacheDirectory = "homepage";
+            CacheDirectoryMode = "0770";
 
             ProtectSystem =
               if lib.hasPrefix "/home/" cfg.dataDir
