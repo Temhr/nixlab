@@ -89,6 +89,18 @@
         Categories=Graphics;Ephemeral-App;
       '';
 
+      ## Element-desktop
+      ".local/share/applications/element-desktop.desktop".text = ''
+        [Desktop Entry]
+        Name=Element-desktop ⚡ 🫨
+        Comment=Feature-rich client for Matrix.org
+        Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#element-desktop & disown"
+        Icon=element-desktop
+        Terminal=false
+        Type=Application
+        Categories=AudioVideo;Network;Video;Ephemeral-App;
+      '';
+
       ## Gimp
       ".local/share/applications/gimp.desktop".text = ''
         [Desktop Entry]
