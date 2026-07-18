@@ -35,7 +35,7 @@
             owner = "root";
             group = "matrix-nixlab-secrets";
             mode = "0440";
-            restartUnits = ["continuwuity.service" "matrix-nixlab-init-users.service"];
+            restartUnits = ["continuwuity.service" "matrix-nixlab-init-users.service" "hermes-matrix-login.service"];
           };
         };
 

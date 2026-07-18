@@ -17,9 +17,15 @@
       sops.secrets.HERMES_ENV = {
         sopsFile = cfg.secretsFile;
         format = "dotenv";
-        restartUnits = ["hermes-agent.service"];
+        restartUnits = ["hermes-agent.service" "hermes-matrix-login.service"];
       };
       services.nixlab-hermes.messagingEnvFile = config.sops.secrets.HERMES_ENV.path;
+
+      services.nixlab-hermes.matrixLogin = {
+        enable = true;
+        username = "hermes-bot";
+        passwordFile = config.sops.secrets.MATRIX_HERMES-BOT_PASSWORD.path;
+      };
     };
   };
 }
