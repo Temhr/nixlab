@@ -42,11 +42,17 @@
     };
     services.nixlab-hermes = {
       enable = true;
-      modelProvider = "custom";
-      modelBaseUrl = "http://127.0.0.1:11434/v1";
-      modelDefault = "gemma4:e4b";
-      dashboard.enable = true;
-      dashboard.openFirewall = true;
+      model = {
+        provider = "custom";
+        baseUrl = "http://127.0.0.1:11434/v1";
+        default = "gemma4:e4b";
+      };
+      dashboard = {
+        enable = true;
+        listenAddress = "0.0.0.0";
+        openFirewall = true;
+        allowUnauthenticatedLan = true;
+      };
       #ollamaBaseUrl = "http://10.0.0.203:11434"; # your existing ollama-stack
       # mcpServers left empty for now — nothing to register yet
     };
@@ -61,7 +67,7 @@
       ollamaDataDir = "/data/ollama";
       webuiDataDir = "/data/open-webui";
       # Pre-download models
-      models = ["gemma4:e4b" ""];
+      models = ["gemma4:e4b"];
       openFirewall = true;
     };
 
