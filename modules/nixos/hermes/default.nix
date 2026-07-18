@@ -12,9 +12,17 @@
     options.services.nixlab-hermes = {
       enable = lib.mkEnableOption "Hermes Agent (multi-agent supervisor/worker system)";
 
-      model = lib.mkOption {
+      modelProvider = lib.mkOption {
         type = lib.types.str;
-        default = "ollama/llama3.1";
+        default = "custom";
+      };
+      modelBaseUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "http://127.0.0.1:11434/v1";
+      };
+      modelDefault = lib.mkOption {
+        type = lib.types.str;
+        default = "gemma4:e4b";
       };
 
       ollamaBaseUrl = lib.mkOption {
@@ -86,7 +94,11 @@
         extraDependencyGroups = ["matrix"];
 
         settings = {
-          inherit (cfg) model;
+          model = {
+            provider = cfg.modelProvider;
+            base_url = cfg.modelBaseUrl;
+            default = cfg.modelDefault;
+          };
           approvals.mode = "smart";
           approvals.cron_mode = "deny";
           delegation.orchestrator_enabled = true;
@@ -103,8 +115,7 @@
         mcpServers = cfg.mcpServers;
 
         environmentFiles =
-          lib.optionals (cfg.messagingEnvFile != null) [(toString cfg.messagingEnvFile)]
-          ++ lib.optionals cfg.matrixLogin.enable ["/run/hermes-matrix-login/token.env"];
+          lib.optionals (cfg.messagingEnvFile != null) [(toString cfg.messagingEnvFile)];
       };
 
       users.users = lib.mkMerge (
@@ -116,15 +127,13 @@
       systemd.services.hermes-matrix-login = lib.mkIf cfg.matrixLogin.enable {
         description = "Log in as ${cfg.matrixLogin.username} and mint a fresh Matrix access token for hermes-agent";
         after = ["continuwuity.service" "matrix-nixlab-init-users.service" "network-online.target"];
-        wants = ["continuwuity.service" "matrix-nixlab-init-users.service"];
+        wants = ["continuwuity.service" "matrix-nixlab-init-users.service" "network-online.target"];
         wantedBy = ["multi-user.target"];
         path = [pkgs.curl pkgs.jq];
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
           LoadCredential = ["login_pw:${cfg.matrixLogin.passwordFile}"];
-          RuntimeDirectory = "hermes-matrix-login";
-          RuntimeDirectoryMode = "0750";
         };
         script = let
           base = cfg.matrixLogin.homeserverUrl;

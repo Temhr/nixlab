@@ -11,9 +11,14 @@
       # Services
       self.nixosModules.nsops--hermes
       self.nixosModules.nsops--matrix
+      self.nixosModules.nsops--ollama
     ];
   };
-  flake.nixosModules.hosts--nixsun = {pkgs, ...}: {
+  flake.nixosModules.hosts--nixsun = {
+    config,
+    pkgs,
+    ...
+  }: {
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 
@@ -37,8 +42,25 @@
     };
     services.nixlab-hermes = {
       enable = true;
-      ollamaBaseUrl = "http://10.0.0.203:11434"; # your existing ollama-stack
+      modelProvider = "custom";
+      modelBaseUrl = "http://127.0.0.1:11434/v1";
+      modelDefault = "gemma4:e4b";
+      #ollamaBaseUrl = "http://10.0.0.203:11434"; # your existing ollama-stack
       # mcpServers left empty for now — nothing to register yet
+    };
+
+    services.ollama-stack = {
+      enable = true;
+      acceleration = "cpu";
+      extraUsers = [config.nixlab.mainUser];
+      ollamaListenAddress = "0.0.0.0";
+      webuiListenAddress = "0.0.0.0";
+      # Data directories
+      ollamaDataDir = "/data/ollama";
+      webuiDataDir = "/data/open-webui";
+      # Pre-download models
+      models = ["gemma4:e4b" ""];
+      openFirewall = true;
     };
 
     # Define your Flatpak packages here
