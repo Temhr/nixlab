@@ -173,6 +173,7 @@
         Categories=Graphics;2DGraphics;Painting;Ephemeral-App;
       '';
 
+      /*
       ## Logseq
       ".local/share/applications/logseq.desktop".text = ''
         [Desktop Entry]
@@ -184,6 +185,7 @@
         Type=Application
         Categories=Utilities;Ephemeral-App;
       '';
+      */
 
       ## Lutris
       ".local/share/applications/lutris.desktop".text = ''

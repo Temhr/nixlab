@@ -41,6 +41,9 @@ _rantheme="${_themes[$((RANDOM % ${#_themes[@]}))]}"
     echo "selection-background = #$(_randhex)"
     echo "selection-foreground = #$(_randhex)"
 
+
+    echo "window-width = 105"
+    echo "window-height = 35"
     echo "background = 000000"
     echo "background-opacity = 1"
     echo "background-blur = true"
