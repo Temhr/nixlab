@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.home--core--ephemeral-apps = {...}: {
+  flake.homeModules.home--apps--ephemeral-apps = {...}: {
     ## One-time use applications downloaded into store and discarded afterward
 
     home.file = {

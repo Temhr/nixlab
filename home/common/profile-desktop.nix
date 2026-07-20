@@ -6,6 +6,7 @@
   flake.homeModules.home--profl--desktop = {...}: {
     imports = [
       self.homeModules.home--apps--browsers
+      self.homeModules.home--apps--ephemeral-apps
       self.homeModules.home--apps--terminal-emulators
       self.homeModules.home--apps--virtualization
     ];
