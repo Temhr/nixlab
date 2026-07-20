@@ -72,20 +72,11 @@
 
       services.nixlab-hermes = {
         enable = true;
-        mcpServers = [
-          {
-            name = "filesystem";
-            url = "http://${cfg.listenAddress}:${toString cfg.ports.mcpFs}";
-          }
-          {
-            name = "git";
-            url = "http://${cfg.listenAddress}:${toString cfg.ports.mcpGit}";
-          }
-          {
-            name = "ssh";
-            url = "http://${cfg.listenAddress}:${toString cfg.ports.mcpSsh}";
-          }
-        ];
+        mcpServers = {
+          filesystem.url = "http://${cfg.listenAddress}:${toString cfg.ports.mcpFs}";
+          git.url = "http://${cfg.listenAddress}:${toString cfg.ports.mcpGit}";
+          ssh.url = "http://${cfg.listenAddress}:${toString cfg.ports.mcpSsh}";
+        };
       };
     };
   };

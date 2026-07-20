@@ -43,7 +43,6 @@
     services.nixlab-hermes = {
       enable = true;
       model = {
-        provider = "custom";
         baseUrl = "http://127.0.0.1:11434/v1";
         default = "gemma4:e4b";
       };
@@ -53,8 +52,9 @@
         openFirewall = true;
         allowUnauthenticatedLan = true;
       };
-      #ollamaBaseUrl = "http://10.0.0.203:11434"; # your existing ollama-stack
-      # mcpServers left empty for now — nothing to register yet
+      # Phase 2 — flip this on once Ollama is confirmed working, after adding
+      # MATRIX_USER_ID / MATRIX_PASSWORD to sops/hermes.env (see guide):
+      # matrix.enable = true;
     };
 
     services.ollama-stack = {

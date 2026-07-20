@@ -151,6 +151,12 @@
         example = ["alice"];
         description = "Extra users to add to the groups";
       };
+
+      contextLength = lib.mkOption {
+        type = lib.types.int;
+        default = 16384;
+        description = "OLLAMA_CONTEXT_LENGTH — Ollama's own 4096 default is usually too small once a large system prompt is included.";
+      };
     };
 
     # ============================================================================
@@ -222,6 +228,7 @@
           {
             OLLAMA_HOST = "${cfg.ollamaListenAddress}:${toString cfg.ollamaPort}";
             OLLAMA_MODELS = "${cfg.ollamaDataDir}/models";
+            OLLAMA_CONTEXT_LENGTH = toString cfg.contextLength;
           }
           # CPU-specific
           (lib.mkIf (cfg.acceleration == "cpu") {

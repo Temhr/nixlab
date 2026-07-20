@@ -6,15 +6,12 @@
   flake.nixosModules.servc--hermes-nixlab = {
     config,
     lib,
-    pkgs,
     nixlabLib,
     ...
   }: let
     cfg = config.services.nixlab-hermes;
 
     hermesStateDir = "/var/lib/hermes";
-    hermesEnvDir = "${hermesStateDir}/.hermes";
-    hermesEnvFile = "${hermesEnvDir}/.env";
 
     # Fixed internal-only port the dashboard process itself binds to on
     # loopback. Deliberately distinct from cfg.dashboard.port (the
@@ -39,29 +36,24 @@
       enable = lib.mkEnableOption "Hermes Agent (multi-agent supervisor/worker system)";
 
       model = {
-        provider = lib.mkOption {
-          type = lib.types.str;
-          default = "custom";
-          description = "Model provider identifier passed to hermes-agent's settings.model.provider.";
-        };
-
         baseUrl = lib.mkOption {
           type = lib.types.str;
           default = "http://127.0.0.1:11434/v1";
-          description = "OpenAI-compatible base URL hermes-agent uses to reach the model backend.";
+          description = ''
+            OpenAI-compatible base URL hermes-agent uses to reach the model
+            backend. For a local Ollama, this is Ollama's own /v1 endpoint —
+            NOT a separate "ollama" integration. Ollama serves an
+            OpenAI-compatible API at this path; that's the only wiring
+            hermes-agent needs (there is no dedicated OLLAMA_API_BASE-style
+            hook — settings.model.base_url is the single mechanism).
+          '';
         };
 
         default = lib.mkOption {
           type = lib.types.str;
           default = "gemma4:e4b";
-          description = "Default model name hermes-agent requests from the backend.";
+          description = "Model name hermes-agent requests from the backend — must exactly match a model already pulled by Ollama (see services.ollama-stack.models).";
         };
-      };
-
-      ollamaBaseUrl = lib.mkOption {
-        type = lib.types.str;
-        default = "http://127.0.0.1:11434";
-        description = "Base URL of the Ollama API, exported to hermes-agent as OLLAMA_API_BASE.";
       };
 
       mcpServers = lib.mkOption {
@@ -69,21 +61,27 @@
         default = {};
         example = {
           filesystem = {
-            command = "npx";
-            args = ["-y" "@modelcontextprotocol/server-filesystem" "/srv"];
+            url = "http://127.0.0.1:8210";
           };
         };
-        description = "MCP server definitions passed through to services.hermes-agent.mcpServers.";
+        description = ''
+          MCP server definitions passed through to services.hermes-agent.mcpServers.
+          MUST be an attrset keyed by server name (matches upstream's
+          attrsOf-submodule shape) — NOT a list. A list here will fail
+          evaluation.
+        '';
       };
 
       messagingEnvFile = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
         description = ''
-          Path to a static env file with messaging-related secrets, merged into
-          hermes-agent's environment via EnvironmentFile. Use agenix or sops-nix
-          to provision this file. Distinct from the dynamically-minted Matrix
-          token file managed by matrix.login below.
+          Path to a dotenv-format file with LLM/messaging secrets, merged
+          into hermes-agent's environment via environmentFiles. This is
+          the ONLY place messaging credentials live — including Matrix's
+          MATRIX_HOMESERVER / MATRIX_USER_ID / MATRIX_PASSWORD /
+          MATRIX_ALLOWED_USERS. See hermes-agent's own Matrix setup docs
+          for the full set of recognized keys.
         '';
       };
 
@@ -95,33 +93,18 @@
       };
 
       matrix = {
-        enable = lib.mkEnableOption "Matrix as a messaging channel for hermes-agent";
-
-        login = {
-          enable = lib.mkEnableOption "mint a fresh Matrix access token for hermes-agent at boot via password login";
-
-          username = lib.mkOption {
-            type = lib.types.str;
-            description = "Matrix localpart to log in as, e.g. \"hermes-bot\".";
-          };
-
-          passwordFile = lib.mkOption {
-            type = lib.types.path;
-            description = "Path to a file containing the bare password (no KEY= prefix) for this account.";
-          };
-
-          homeserverUrl = lib.mkOption {
-            type = lib.types.str;
-            default = "http://127.0.0.1:6167";
-            description = "Base URL of the homeserver to log in against.";
-          };
-
-          deviceId = lib.mkOption {
-            type = lib.types.str;
-            default = "hermes-agent";
-            description = "Fixed device_id to reuse across boots, so repeated logins don't accumulate new devices.";
-          };
-        };
+        enable = lib.mkEnableOption ''
+          Matrix as a messaging channel for hermes-agent. This is a thin
+          toggle only: it pulls in the "matrix" dependency group and orders
+          hermes-agent after the homeserver + account-registration units.
+          ALL actual credentials (MATRIX_HOMESERVER, MATRIX_USER_ID,
+          MATRIX_PASSWORD, MATRIX_ALLOWED_USERS) come from messagingEnvFile —
+          hermes-agent logs in itself at startup (password-login, per its
+          own docs); there is no separate token-minting step and no
+          settings.yaml key that "enables" Matrix. MATRIX_ALLOWED_USERS is
+          mandatory in practice: without it hermes-agent denies every user
+          as a safety default.
+        '';
       };
 
       dashboard = {
@@ -214,16 +197,13 @@
           message = "services.nixlab-hermes.dashboard.enableSSL requires dashboard.domain to be set";
         }
         {
-          assertion = cfg.dashboard.enable && cfg.dashboard.listenAddress != "127.0.0.1" ->
-            (cfg.dashboard.basicAuth.enable || cfg.dashboard.allowUnauthenticatedLan);
+          assertion =
+            cfg.dashboard.enable
+            && cfg.dashboard.listenAddress != "127.0.0.1"
+            -> (cfg.dashboard.basicAuth.enable || cfg.dashboard.allowUnauthenticatedLan);
           message = ''
             services.nixlab-hermes.dashboard.listenAddress is set to a non-loopback
             address, but neither basicAuth.enable nor allowUnauthenticatedLan is set.
-            The dashboard process itself always stays on loopback, so without one of
-            these there would be nothing exposing it on the LAN at all. Pick one:
-            basicAuth.enable = true (with htpasswdFile) for nginx + a login, or
-            allowUnauthenticatedLan = true if you trust your LAN and just want a
-            lightweight forwarder with no auth.
           '';
         }
         {
@@ -231,48 +211,35 @@
           message = "services.nixlab-hermes.dashboard.basicAuth.enable requires htpasswdFile to be set";
         }
         {
-          assertion = cfg.matrix.login.enable -> cfg.matrix.enable;
-          message = "services.nixlab-hermes.matrix.login.enable requires matrix.enable = true";
+          assertion = cfg.matrix.enable -> cfg.messagingEnvFile != null;
+          message = ''
+            services.nixlab-hermes.matrix.enable requires messagingEnvFile to be
+            set and to contain at least MATRIX_HOMESERVER, MATRIX_USER_ID,
+            MATRIX_PASSWORD, and MATRIX_ALLOWED_USERS — Hermes logs into
+            Matrix itself at startup using these, there is no separate
+            login/token-minting step in this module.
+          '';
         }
-        {
-          assertion = cfg.matrix.login.enable -> builtins.pathExists cfg.matrix.login.passwordFile || true;
-          # The path check is a hint; actual enforcement is at runtime
-          message = "services.nixlab-hermes.matrix.login.passwordFile is set but the file may not exist at evaluation time — ensure it is provisioned before boot";
-        }
-      ];
-
-      # --------------------------------------------------------------------------
-      # DIRECTORIES
-      # --------------------------------------------------------------------------
-      # Ensures the state dir exists (and is owned correctly) before
-      # hermes-matrix-login tries to write/chown the token file into it,
-      # regardless of what order hermes-agent's own activation runs in.
-      systemd.tmpfiles.rules = lib.mkIf cfg.matrix.login.enable [
-        "d ${hermesStateDir} 0750 ${config.services.hermes-agent.user} ${config.services.hermes-agent.group} -"
-        "d ${hermesEnvDir} 0750 ${config.services.hermes-agent.user} ${config.services.hermes-agent.group} -"
       ];
 
       # --------------------------------------------------------------------------
       # HERMES AGENT SERVICE
       # --------------------------------------------------------------------------
       systemd.services.hermes-agent.after =
-        lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"]
-        ++ lib.optional cfg.matrix.login.enable "hermes-matrix-login.service";
+        lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"];
       systemd.services.hermes-agent.wants =
-        lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"]
-        ++ lib.optional cfg.matrix.login.enable "hermes-matrix-login.service";
+        lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"];
 
       services.hermes-agent = {
         enable = true;
-
-        # Confirmed real option — pulls the "matrix" pyproject extra into
-        # the sealed venv, per the module source (uv-resolved, no PYTHONPATH
-        # patching).
+        environment = {
+          OPENAI_API_KEY = "not-needed-for-local-ollama";
+        };
         extraDependencyGroups = lib.optionals cfg.matrix.enable ["matrix"];
 
         settings = {
           model = {
-            provider = cfg.model.provider;
+            provider = "custom";
             base_url = cfg.model.baseUrl;
             default = cfg.model.default;
           };
@@ -280,13 +247,6 @@
           approvals.cron_mode = "deny";
           delegation.orchestrator_enabled = true;
           delegation.max_spawn_depth = 2;
-          # NOTE: unverified key path, same caveat as before — grep the venv
-          # before trusting this if hermes-agent is ever upgraded.
-          messaging.matrix.enabled = cfg.matrix.enable;
-        };
-
-        environment = {
-          OLLAMA_API_BASE = cfg.ollamaBaseUrl;
         };
 
         mcpServers = cfg.mcpServers;
@@ -305,77 +265,8 @@
       );
 
       # --------------------------------------------------------------------------
-      # MATRIX LOGIN — mints a fresh access token at boot, opt-in
-      # --------------------------------------------------------------------------
-      systemd.services.hermes-matrix-login = lib.mkIf cfg.matrix.login.enable {
-        description = "Log in as ${cfg.matrix.login.username} and mint a fresh Matrix access token for hermes-agent";
-        after = ["continuwuity.service" "matrix-nixlab-init-users.service" "network-online.target"];
-        wants = ["continuwuity.service" "matrix-nixlab-init-users.service" "network-online.target"];
-        wantedBy = ["multi-user.target"];
-        path = [pkgs.curl pkgs.jq];
-
-        serviceConfig = lib.mkMerge [
-          (nixlabLib.mkServiceHardening {
-            writablePaths = [hermesEnvDir];
-          })
-          {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            LoadCredential = ["login_pw:${cfg.matrix.login.passwordFile}"];
-          }
-        ];
-
-        script = let
-          base = cfg.matrix.login.homeserverUrl;
-        in ''
-          set -eu
-          pass=$(cat "$CREDENTIALS_DIRECTORY/login_pw")
-
-          for i in $(seq 1 30); do
-            curl -sS -o /dev/null "${base}/_matrix/client/versions" && break
-            sleep 1
-          done
-
-          resp=$(curl -sS -X POST "${base}/_matrix/client/v3/login" \
-            -H 'Content-Type: application/json' \
-            -d "{\"type\":\"m.login.password\",\"identifier\":{\"type\":\"m.id.user\",\"user\":\"${cfg.matrix.login.username}\"},\"password\":\"$pass\",\"device_id\":\"${cfg.matrix.login.deviceId}\",\"initial_device_display_name\":\"hermes-agent\"}")
-
-          token=$(echo "$resp" | jq -r '.access_token // empty')
-          user_id=$(echo "$resp" | jq -r '.user_id // empty')
-
-          if [ -z "$token" ] || [ -z "$user_id" ]; then
-            echo "login failed: $resp"
-            exit 1
-          fi
-
-          # Strip any previous MATRIX_ACCESS_TOKEN/MATRIX_USER_ID lines (left over
-          # from activation-time merge or a prior run of this unit), then append
-          # the freshly minted values. This file is regenerated by NixOS activation
-          # from the static sources, so this script must run *after* activation,
-          # every boot, to layer the dynamic values back on top.
-          if [ -f "${hermesEnvFile}" ]; then
-            grep -v -E '^(MATRIX_ACCESS_TOKEN|MATRIX_USER_ID)=' "${hermesEnvFile}" > "${hermesEnvFile}.tmp"
-          else
-            : > "${hermesEnvFile}.tmp"
-          fi
-          printf 'MATRIX_ACCESS_TOKEN=%s\nMATRIX_USER_ID=%s\n' "$token" "$user_id" >> "${hermesEnvFile}.tmp"
-          mv "${hermesEnvFile}.tmp" "${hermesEnvFile}"
-          chown ${config.services.hermes-agent.user}:${config.services.hermes-agent.group} "${hermesEnvFile}"
-          chmod 0640 "${hermesEnvFile}"
-          echo "logged in as $user_id, updated ${hermesEnvFile}"
-        '';
-      };
-
-      # --------------------------------------------------------------------------
       # DASHBOARD - web UI, opt-in via dashboard.enable
       # --------------------------------------------------------------------------
-      # NOTE: --skip-build assumes the web UI's `dist` directory is already
-      # built into the hermes-agent package. If it isn't (i.e. this package
-      # never ran `npm run build` at build time), the dashboard will serve a
-      # stale/missing UI. Check web/dist exists under the package's share dir
-      # before relying on this in production, and if not, this needs a
-      # different approach (pre-build step in the Nix package, or dropping
-      # --skip-build and ensuring npm/node are on PATH for the unit instead).
       systemd.services.hermes-dashboard = lib.mkIf cfg.dashboard.enable {
         description = "Hermes web UI dashboard";
         after = ["hermes-agent.service"];
@@ -384,13 +275,14 @@
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
-            writablePaths = [];
+            writablePaths = [hermesStateDir];
+            allowJIT = true;
           }
           // {
             Type = "simple";
             User = config.services.hermes-agent.user;
             Group = config.services.hermes-agent.group;
-            ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 127.0.0.1 --port ${toString dashboardInternalPort} --skip-build --no-open";
+            ExecStart = "${config.services.hermes-agent.package}/bin/hermes dashboard --host 127.0.0.1 --port ${toString dashboardInternalPort} --skip-build --no-open --tui";
             Restart = "on-failure";
             RestartSec = 5;
           };
@@ -398,16 +290,12 @@
 
       # --------------------------------------------------------------------------
       # NGINX — required for ANY off-loopback dashboard access, auth or not.
-      # hermes-agent's dashboard validates the HTTP Host header against the
-      # address it's actually bound to (127.0.0.1:dashboardInternalPort); a
-      # raw TCP forwarder like socat can't rewrite that header, so nothing
-      # but an HTTP-aware proxy can satisfy that check. basicAuth.enable vs.
-      # allowUnauthenticatedLan only toggles whether an auth_basic block is
-      # added — both paths go through nginx.
       # --------------------------------------------------------------------------
-      services.nginx.enable = lib.mkIf (
-        cfg.dashboard.enable && (cfg.dashboard.domain != null || cfg.dashboard.listenAddress != "127.0.0.1")
-      ) true;
+      services.nginx.enable =
+        lib.mkIf (
+          cfg.dashboard.enable && (cfg.dashboard.domain != null || cfg.dashboard.listenAddress != "127.0.0.1")
+        )
+        true;
 
       services.nginx.virtualHosts = lib.mkMerge [
         (lib.mkIf (cfg.dashboard.enable && cfg.dashboard.domain != null) (
@@ -435,12 +323,9 @@
             ];
             locations."/" = {
               proxyPass = "http://127.0.0.1:${toString dashboardInternalPort}";
+              proxyWebsockets = true;
               extraConfig =
                 ''
-                  # Deliberately NOT forwarding the original Host header ($host) —
-                  # hermes-agent's dashboard checks Host against the address it's
-                  # bound to internally, not whatever hostname/IP the browser used
-                  # to reach nginx.
                   proxy_set_header Host              127.0.0.1:${toString dashboardInternalPort};
                   proxy_set_header X-Real-IP         $remote_addr;
                   proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;

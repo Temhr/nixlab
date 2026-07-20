@@ -52,10 +52,10 @@
 
     "hermes" = {
       "Hermes" = {
-        href = "http://${hostMeta.address}:9119";
+        href = "http://127.0.0.1:9119";
         icon = "hermes";
         description = "The self-improving AI agent built by Nous Research";
-        ping = "http://${hostMeta.address}:9119";
+        ping = "http://127.0.0.1:9119";
         statusStyle = "dot";
       };
     };

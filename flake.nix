@@ -25,7 +25,7 @@
     nixpkgs-open-webui.url = "github:nixos/nixpkgs/33223e67c440e4e1a885dee343f3c663028f9115";
     # ComfyUI Pin is in nixlab/overlays/_comfyui-p5000.nix
 
-    hermes-agent.url = "github:NousResearch/hermes-agent";
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.7.2";
 
     # User environment management
     home-manager = {
