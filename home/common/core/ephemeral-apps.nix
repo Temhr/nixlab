@@ -173,6 +173,18 @@
         Categories=Graphics;2DGraphics;Painting;Ephemeral-App;
       '';
 
+      ## Logseq
+      ".local/share/applications/logseq.desktop".text = ''
+        [Desktop Entry]
+        Name=Logseq ⚡ 🫨
+        Comment=Privacy-first, open-source platform for knowledge management and collaboration
+        Exec=bash -c "NIXPKGS_ALLOW_UNFREE=1 nix run --impure nixpkgs-unstable#logseq & disown"
+        Icon=logseq
+        Terminal=false
+        Type=Application
+        Categories=Utilities;Ephemeral-App;
+      '';
+
       ## Lutris
       ".local/share/applications/lutris.desktop".text = ''
         [Desktop Entry]
