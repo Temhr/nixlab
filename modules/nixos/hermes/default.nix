@@ -11,7 +11,7 @@
   }: let
     cfg = config.services.nixlab-hermes;
 
-    hermesStateDir = "/var/lib/hermes";
+    hermesStateDir = config.services.hermes-agent.stateDir;
 
     # Fixed internal-only port the dashboard process itself binds to on
     # loopback. Deliberately distinct from cfg.dashboard.port (the

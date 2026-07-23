@@ -9,7 +9,7 @@
       self.nixosModules.hosts--profl--base
       self.nixosModules.hosts--profl--desktop
       # Services
-      self.nixosModules.nsops--hermes
+      self.nixosModules.stack--agent-infra
       self.nixosModules.nsops--matrix
       self.nixosModules.nsops--ollama
     ];
@@ -39,6 +39,13 @@
     services.matrix-nixlab = {
       enable = true;
       #initUsers.enable = false;
+    };
+
+    services.nixlab-agent-infra = {
+      enable = true;
+      fsAllowedPaths = ["/data/agent-infra/workspace"];
+      gitRepoPaths = ["/data/shelf/default/Projects/nixlab"];
+      gitWritable = true;
     };
     services.nixlab-hermes = {
       enable = true;
