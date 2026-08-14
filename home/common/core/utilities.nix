@@ -42,7 +42,6 @@
       kdePackages.kcalc # scientific calculator GUI
       #ffmpeg                   # command-line audio/video converter
       scrcpy # mirror and control Android devices
-      simplescreenrecorder # GUI screen recorder for X11
       keepassxc # secure offline password manager
     ];
   };
