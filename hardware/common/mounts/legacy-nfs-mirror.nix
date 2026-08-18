@@ -4,6 +4,7 @@
     fileSystems."/mirror" = {
       device = "/dev/disk/by-label/mirror";
       fsType = "ext4";
+      options = ["defaults" "auto" "nofail" "x-systemd.device-timeout=10s"];
     };
     services.nfs.server = {
       enable = true;
