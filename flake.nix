@@ -18,11 +18,9 @@
 
     # Version Pinned Apps (2026-05-16).
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ol/ollama/package.nix
-    # https://github.com/NixOS/nixpkgs/commit/33223e67c440e4e1a885dee343f3c663028f9115
     nixpkgs-ollama.url = "github:nixos/nixpkgs/33223e67c440e4e1a885dee343f3c663028f9115";
     # https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/op/open-webui/package.nix
-    # https://github.com/NixOS/nixpkgs/commit/33223e67c440e4e1a885dee343f3c663028f9115
-    nixpkgs-open-webui.url = "github:nixos/nixpkgs/33223e67c440e4e1a885dee343f3c663028f9115";
+    nixpkgs-open-webui.url = "github:nixos/nixpkgs/77cedd026d254d57fdfe11c8e9b25aaafd2407a4";
     # ComfyUI Pin is in nixlab/overlays/_comfyui-p5000.nix
 
     hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.7.2";
