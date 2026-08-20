@@ -187,17 +187,17 @@
     },
     "nixpkgs-ollama": {
       "locked": {
-        "lastModified": 1783019973,
-        "narHash": "sha256-l4uqxvrG2Z6ne3wSy3snhGD4E6azt4rW09opo3ckl24=",
+        "lastModified": 1786754242,
+        "narHash": "sha256-wyFUywypSg+QM2U0iEOZ26P5GfOqQ738xTjd9807RX0=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "33223e67c440e4e1a885dee343f3c663028f9115",
+        "rev": "4055e99dd4df572a1b90ca2aa843c209aaf281c5",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "33223e67c440e4e1a885dee343f3c663028f9115",
+        "rev": "4055e99dd4df572a1b90ca2aa843c209aaf281c5",
         "type": "github"
       }
     },
