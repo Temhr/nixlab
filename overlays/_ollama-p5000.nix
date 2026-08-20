@@ -26,7 +26,7 @@ in {
     }).overrideAttrs (old: {
       pname = "ollama-cuda-p5000";
       name = "ollama-cuda-p5000-${old.version}";
-      vendorHash = "sha256-lZdGzGb9xRjTm1Rm7/wHjqM490gLznLEndmb4mNbCX0=";
+      vendorHash = "sha256-HMwoaFBMbpoy8f0I+O+i7kIa9BslLu3FcVWeaIOkpvs=";
     });
 
   ollama = stablePkgs.ollama;
