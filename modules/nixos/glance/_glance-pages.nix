@@ -183,6 +183,14 @@
                 url = "https://fzakaria.com/feed.xml";
                 title = "NixOS -  Farid Zakaria's Blog";
               }
+              {
+                url = "https://luj.fr/feed.xml";
+                title = "NixOS -  Julien Malka (aka Luj)'s Blog";
+              }
+              {
+                url = "https://point.free/rss.xml";
+                title = "NixOS -  point.free - Christina Sørensen (aka cafkafk)";
+              }
             ];
           }
         ];
