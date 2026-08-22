@@ -31,7 +31,7 @@
         environment.systemPackages = with pkgs; [calibre]; #Comprehensive e-book software
       })
       (lib.mkIf config.libreoffice.enable {
-        environment.systemPackages = with pkgs; [libreoffice-fresh]; #Comprehensive, professional-quality productivity suite
+        environment.systemPackages = with pkgs; [libreoffice-stable]; #Comprehensive, professional-quality productivity suite
       })
       (lib.mkIf config.logseq.enable {
         environment.systemPackages = with pkgs; [logseq]; #Privacy-first, open-source platform for knowledge management and collaboration
