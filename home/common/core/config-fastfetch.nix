@@ -13,27 +13,32 @@
         "title"
         "separator"
         "host"
-        "os"
         "kernel"
+        "os"
         "InitSystem"
-        "uptime"
         {
           "type" = "command";
           "key" = "OS Age";
           "text" = "birth_install=$(stat -c %W /); current=$(date +%s); days_difference=$(( (current - birth_install) / 86400 )); echo $days_difference days";
         }
-        "packages"
+        {
+          "type" = "command";
+          "key" = "Generation";
+          "text" = "readlink /nix/var/nix/profiles/system | cut -d- -f2 | sed 's/^/#/'";
+        }
+        "uptime"
+
+        "break"
         "shell"
         "terminal"
-        "editor"
-        "loadavg"
+        "packages"
         "processes"
+        "cpuusage"
         {
           "type" = "cpu";
           "showPeCoreCount" = true;
           "temp" = true;
         }
-        "cpuusage"
         {
           "type" = "gpu";
           "driverSpecific" = true;
@@ -42,7 +47,6 @@
         }
         "memory"
         "physicalmemory"
-        "swap"
         "disk"
         "btrfs"
         "zpool"
@@ -51,6 +55,8 @@
           "temp" = true;
         }
         "poweradapter"
+
+        "break"
         {
           "type" = "localip";
         }
@@ -60,7 +66,6 @@
           "location" = "Ottawa";
           "timeout" = 1000;
         }
-        "break"
         "colors"
       ];
     };
