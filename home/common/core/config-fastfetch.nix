@@ -54,7 +54,6 @@
           "type" = "battery";
           "temp" = true;
         }
-        "poweradapter"
 
         "break"
         {
