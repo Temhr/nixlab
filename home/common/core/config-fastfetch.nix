@@ -14,8 +14,8 @@
         "separator"
         "host"
         "kernel"
-        "os"
         "InitSystem"
+        "os"
         {
           "type" = "command";
           "key" = "OS Age";
@@ -23,8 +23,8 @@
         }
         {
           "type" = "command";
-          "key" = "Generation";
-          "text" = "readlink /nix/var/nix/profiles/system | cut -d- -f2 | sed 's/^/#/'";
+          "key" = "OS Build";
+          "text" = "readlink /nix/var/nix/profiles/system | cut -d- -f2 | sed 's/^/Generation #/'";
         }
         "uptime"
 
