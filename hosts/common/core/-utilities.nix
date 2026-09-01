@@ -64,6 +64,7 @@
       ## System Resource Monitors
       atop # Advanced system and process resource monitor
       btop # Graphical resource monitor with performance charts
+      glances # Cross-platform curses-based monitoring tool
       iftop # Monitor real-time network traffic by interface
       iotop # Monitor disk I/O usage by process
       htop # Interactive process viewer and manager
