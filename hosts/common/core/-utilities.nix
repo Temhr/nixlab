@@ -29,14 +29,14 @@
       cron # Daemon to run recurring scheduled tasks
 
       ## Network Management
-      bridge-utils # Configure and manage network bridges (deprecated)
+      #bridge-utils # Configure and manage network bridges (superseded by iproute2)
       dig # DNS lookup utility
       ethtool # Control and query Ethernet device settings
       iperf # Measure network throughput via TCP/UDP tests
       iproute2 # Modern networking tools (e.g., ip, tc, ss)
       mtr-gui # GUI traceroute + ping tool for network diagnostics
       nethogs # Real-time bandwidth usage grouped by process
-      nettools # Legacy networking utilities like ifconfig, netstat
+      #nettools # Legacy networking utilities like ifconfig, netstat (superseded by iproute2)
       nfs-utils # NFS client/server user-space support
       nmap # Network discovery and security auditing tool
       tcpdump # Packet capture and analysis tool
@@ -64,7 +64,7 @@
       ## System Resource Monitors
       atop # Advanced system and process resource monitor
       btop # Graphical resource monitor with performance charts
-      glances # Cross-platform curses-based monitoring tool
+      #glances # Cross-platform curses-based monitoring tool
       iftop # Monitor real-time network traffic by interface
       iotop # Monitor disk I/O usage by process
       htop # Interactive process viewer and manager
@@ -80,9 +80,10 @@
 
       ## Disk & Partition Tools
       kdePackages.partitionmanager # GUI for managing partitions and filesystems
+      ncdu # Disk usage analyzer with an ncurses interface
       usbimager # Very minimal GUI app that can write compressed disk images to USB drives
-      gparted # Graphical disk partitioning tool
-      gnome-disk-utility # Udisks graphical front-end
+      #gparted # Graphical disk partitioning tool
+      #gnome-disk-utility # Udisks graphical front-end
     ];
   };
 }
