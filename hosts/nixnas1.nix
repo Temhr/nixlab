@@ -7,6 +7,8 @@
       # Host config
       self.nixosModules.hosts--nixnas1
       self.nixosModules.hosts--profl--base
+      self.nixosModules.hosts--core--journald-old
+      self.nixosModules.hosts--core--nix-old
       self.nixosModules.hosts--profl--nas
       # Services
       self.nixosModules.servc--syncthing-nixlab

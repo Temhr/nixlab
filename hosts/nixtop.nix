@@ -7,6 +7,8 @@
       # Host config
       self.nixosModules.hosts--nixtop
       self.nixosModules.hosts--profl--base
+      self.nixosModules.hosts--core--journald
+      self.nixosModules.hosts--core--nix
       self.nixosModules.hosts--profl--desktop
       # Services
       self.nixosModules.servc--waydroid-nixlab

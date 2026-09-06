@@ -4,11 +4,9 @@
       self.nixosModules.hosts--core--boot-loader
       self.nixosModules.hosts--core--display-manager
       self.nixosModules.hosts--core--home-manager-config
-      self.nixosModules.hosts--core--journald
       self.nixosModules.hosts--core--locale
       self.nixosModules.hosts--core--networking
       self.nixosModules.hosts--core--nginx
-      self.nixosModules.hosts--core--nix
       self.nixosModules.hosts--core--open-ssh
       self.nixosModules.hosts--core--sops
       self.nixosModules.hosts--core--system
