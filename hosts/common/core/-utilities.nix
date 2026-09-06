@@ -48,6 +48,7 @@
       usbutils # Inspect and interact with USB devices
       sysfsutils # Query device information from sysfs
       lshw-gui # Hardware lister with graphical interface
+      iw # Tool to use nl80211
       esptool # ESP8266 and ESP32 serial bootloader utility
 
       ## File Management
