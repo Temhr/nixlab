@@ -16,8 +16,8 @@ alias scrcpy-d3="scrcpy -d -s 92GAX00UA1   $_SCRCPY_COMMON"
 
 # TCP/IP — auto-detect or target a specific IP
 alias scrcpy-e="scrcpy --tcpip             $_SCRCPY_COMMON"
-alias scrcpy-e1="scrcpy -s 192.168.0.191:5555 --tcpip $_SCRCPY_COMMON"
-alias scrcpy-e3="scrcpy -s 192.168.0.193:5555 --tcpip $_SCRCPY_COMMON"
+alias scrcpy-e1="scrcpy -s 10.0.0.191:5555 --tcpip $_SCRCPY_COMMON"
+alias scrcpy-e3="scrcpy -s 10.0.0.193:5555 --tcpip $_SCRCPY_COMMON"
 
 # Camera source (front/rear via scrcpy camera mode)
 alias scrcpycam='scrcpy --video-source=camera --camera-size=1920x1080 -e --render-driver=opengl'
