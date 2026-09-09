@@ -140,6 +140,17 @@ creation_rules:
         - *nixvat
         - *nixzen
 
+  - path_regex: sops/wifi-hotspot\.yaml$
+    key_groups:
+      - age:
+        - *nixace
+        - *nixnas1
+        - *nixnas2
+        - *nixsun
+        - *nixtop
+        - *nixvat
+        - *nixzen
+
   - path_regex: sops/wiki-js\.yaml$
     key_groups:
       - age:

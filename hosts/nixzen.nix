@@ -11,6 +11,7 @@
       self.nixosModules.hosts--core--nix
       self.nixosModules.hosts--profl--desktop
       # Services
+      self.nixosModules.nsops--wifi-hotspot
     ];
   };
   flake.nixosModules.hosts--nixzen = {pkgs, ...}: {
@@ -25,7 +26,10 @@
     ## VIRTUALIZATIONS
 
     ## SELF-HOSTED SERVICES
-
+    services.wifi-hotspot-nixlab = {
+      enable = true;
+      interface = "wlan0";
+    };
     # Define your Flatpak packages here
     flatpakPackages = [
     ];
