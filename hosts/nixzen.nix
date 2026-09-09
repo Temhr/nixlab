@@ -28,7 +28,9 @@
     ## SELF-HOSTED SERVICES
     services.wifi-hotspot-nixlab = {
       enable = true;
-      interface = "wlan0";
+      interface = "wlp61s0";
+      ssid = "nixzen-hotspot";
+      channel = 6;
     };
     # Define your Flatpak packages here
     flatpakPackages = [

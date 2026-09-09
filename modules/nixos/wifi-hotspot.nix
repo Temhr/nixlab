@@ -155,46 +155,51 @@
         after = ["NetworkManager.service"];
         wants = ["NetworkManager.service"];
 
-        serviceConfig =
-          nixlabLib.mkServiceHardening {
-            writablePaths = ["/etc/NetworkManager/system-connections"];
-          }
-          // {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = pkgs.writeShellScript "wifi-hotspot-${cfg.interface}-apply" ''
-              set -euo pipefail
-              install -d -m 0700 /etc/NetworkManager/system-connections
-              psk="$(cat ${lib.escapeShellArg cfg.passwordFile})"
-              umask 077
-              cat > ${connectionFile} <<CONNEOF
-              [connection]
-              id=hotspot-${cfg.interface}
-              type=wifi
-              interface-name=${cfg.interface}
-              autoconnect=${lib.boolToString cfg.autoconnect}
+      serviceConfig =
+        nixlabLib.mkServiceHardening {
+          writablePaths = ["/etc/NetworkManager/system-connections"];
+        }
+        // {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          # nmcli talks to NetworkManager over the system D-Bus (AF_UNIX) and
+          # reads interface state via rtnetlink (AF_NETLINK) — mkServiceHardening's
+          # allowNetwork=true grant only covers AF_INET/AF_INET6, so both must be
+          # restored explicitly or nmcli can't open a socket at all.
+          RestrictAddressFamilies = ["AF_UNIX" "AF_NETLINK" "AF_INET" "AF_INET6"];
+          ExecStart = pkgs.writeShellScript "wifi-hotspot-${cfg.interface}-apply" ''
+            set -euo pipefail
+            install -d -m 0700 /etc/NetworkManager/system-connections
+            psk="$(cat ${lib.escapeShellArg cfg.passwordFile})"
+            umask 077
+            cat > ${connectionFile} <<CONNEOF
+            [connection]
+            id=hotspot-${cfg.interface}
+            type=wifi
+            interface-name=${cfg.interface}
+            autoconnect=${lib.boolToString cfg.autoconnect}
 
-              [wifi]
-              mode=ap
-              ssid=${cfg.ssid}
-              band=${cfg.band}
-              ${lib.optionalString (cfg.channel != null) "channel=${toString cfg.channel}"}
-              hidden=${lib.boolToString cfg.hidden}
+            [wifi]
+            mode=ap
+            ssid=${cfg.ssid}
+            band=${cfg.band}
+            ${lib.optionalString (cfg.channel != null) "channel=${toString cfg.channel}"}
+            hidden=${lib.boolToString cfg.hidden}
 
-              [wifi-security]
-              key-mgmt=wpa-psk
-              psk=$psk
+            [wifi-security]
+            key-mgmt=wpa-psk
+            psk=$psk
 
-              [ipv4]
-              method=shared
+            [ipv4]
+            method=shared
 
-              [ipv6]
-              method=disabled
-              CONNEOF
-              chmod 600 ${connectionFile}
-              ${cfg.package}/bin/nmcli connection reload
-            '';
-          };
+            [ipv6]
+            method=disabled
+            CONNEOF
+            chmod 600 ${connectionFile}
+            ${cfg.package}/bin/nmcli connection reload
+          '';
+        };
       };
 
       # ----------------------------------------------------------------------------
