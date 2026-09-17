@@ -27,7 +27,7 @@ in {
       ethIface = "enp0s31f6";
       wifiIface = "wlp3s0";
       hostId = "dbacbbff";
-      nixpkgsInput = "nixpkgs-unstable";
+      nixpkgsInput = "nixpkgs-stable";
       homeUsers = ["temhr"];
       systemUsers = ["temhr" "guest"];
       primaryUser = "temhr";
