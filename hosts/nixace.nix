@@ -36,7 +36,7 @@
     ## GAMING PACKAGES
     steam.enable = true; #Video game digital distribution service and storefront from Valve
     ## PRODUCTIVITY
-    libreoffice.enable = true; #Comprehensive, professional-quality productivity suite
+    #libreoffice.enable = true; #Comprehensive, professional-quality productivity suite
     ## MEDIA PACKAGES
     obs.enable = true; #Free and open source software for video recording and live streaming
     spotify.enable = true; #Play music from the Spotify music service
