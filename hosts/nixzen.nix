@@ -27,7 +27,7 @@
 
     ## SELF-HOSTED SERVICES
     services.wifi-hotspot-nixlab = {
-      enable = true;
+      enable = false;
       interface = "wlp61s0";
       ssid = "nixzen-hotspot";
       channel = 6;
