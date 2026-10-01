@@ -108,6 +108,11 @@
         "d ${cfg.dataDir}/input 0770 ${cfg.user} ${cfg.group} -"
         "d ${cfg.dataDir}/temp 0770 ${cfg.user} ${cfg.group} -"
         "d ${cfg.dataDir}/user 0770 ${cfg.user} ${cfg.group} -"
+
+        # Recursively re-assert ownership on EVERY boot, fixing UID/GID drift.
+        # Mode is left as "-" (untouched) so we don't clobber intentional
+        # differences in file perms (venv binaries, etc) — only ownership.
+        "Z ${cfg.dataDir} - ${cfg.user} ${cfg.group} -"
       ];
 
       # ----------------------------------------------------------------------------
