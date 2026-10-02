@@ -153,12 +153,23 @@
       users.groups.${cfg.group} = {};
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.glance-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["glance.service"];
+      };
+
+      # ----------------------------------------------------------------------------
       # GLANCE SERVICE - Configure the systemd service
       # ----------------------------------------------------------------------------
       systemd.services.glance = {
         description = "Glance Dashboard";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "glance-permissions.service"];
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
