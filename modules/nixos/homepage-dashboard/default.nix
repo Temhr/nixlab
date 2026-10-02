@@ -168,12 +168,23 @@
       ];
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.homepage-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["homepage.service"];
+      };
+
+      # ----------------------------------------------------------------------------
       # HOMEPAGE SERVICE
       # ----------------------------------------------------------------------------
       systemd.services.homepage = {
         description = "Homepage Dashboard";
         wantedBy = ["multi-user.target"];
-        after = ["network.target" "local-fs.target"];
+        after = ["network.target" "local-fs.target" "homepage-permissions.services"];
 
         environment = {
           HOMEPAGE_CONFIG_DIR = "${cfg.dataDir}/config";
