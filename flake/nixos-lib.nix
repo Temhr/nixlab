@@ -149,5 +149,53 @@
       assertion = !enableSSL || domain != null;
       message = "${moduleName}: enableSSL = true requires domain to be set.";
     };
+    # ---------------------------------------------------------------------------
+    # mkDataDirPermissionsService
+    # Returns a systemd.services.<name> body (a oneshot unit) that recursively
+    # chowns dataDir to user:group on every boot, AFTER dataDir's filesystem is
+    # actually mounted.
+    #
+    # Fixes two related problems:
+    #   1. UID/GID drift — if the service's system user gets reallocated a new
+    #      UID/GID across a nixos-rebuild, files on disk stay stamped with the
+    #      old numeric ID and become inaccessible.
+    #   2. tmpfiles.rules "d"/"Z" ordering — systemd-tmpfiles-setup.service runs
+    #      before local-fs.target, so tmpfiles rules targeting a path on a
+    #      separate mount (e.g. /data) can run before that mount exists and
+    #      silently no-op. RequiresMountsFor sidesteps this by waiting on the
+    #      actual mount unit.
+    #
+    # Runs as root (no User=) so it can always fix ownership regardless of what
+    # currently owns the files.
+    #
+    # Usage:
+    #   systemd.services.comfyui-permissions = nixlabLib.mkDataDirPermissionsService {
+    #     inherit pkgs;
+    #     dataDir = cfg.dataDir;
+    #     user    = cfg.user;
+    #     group   = cfg.group;
+    #   };
+    #
+    #   # then wire it into your existing chain:
+    #   systemd.services.comfyui-patch.requires = ["comfyui-permissions.service"];
+    #   systemd.services.comfyui-patch.after    = ["comfyui-permissions.service"];
+    #   # ...repeat for comfyui-pytorch-setup and comfyui, or use requiredBy below.
+    # ---------------------------------------------------------------------------
+    mkDataDirPermissionsService = {
+      pkgs,
+      dataDir,
+      user,
+      group,
+      requiredBy ? [],
+    }: {
+      description = "Ensure ${dataDir} ownership matches ${user}:${group}";
+      unitConfig.RequiresMountsFor = [dataDir];
+      inherit requiredBy;
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.coreutils}/bin/chown -R ${user}:${group} ${dataDir}";
+      };
+    };
   };
 }

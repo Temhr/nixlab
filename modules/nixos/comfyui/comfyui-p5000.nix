@@ -108,11 +108,6 @@
         "d ${cfg.dataDir}/input 0770 ${cfg.user} ${cfg.group} -"
         "d ${cfg.dataDir}/temp 0770 ${cfg.user} ${cfg.group} -"
         "d ${cfg.dataDir}/user 0770 ${cfg.user} ${cfg.group} -"
-
-        # Recursively re-assert ownership on EVERY boot, fixing UID/GID drift.
-        # Mode is left as "-" (untouched) so we don't clobber intentional
-        # differences in file perms (venv binaries, etc) — only ownership.
-        "Z ${cfg.dataDir} - ${cfg.user} ${cfg.group} -"
       ];
 
       # ----------------------------------------------------------------------------
@@ -137,13 +132,28 @@
       users.groups.${cfg.group} = {};
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.comfyui-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = [
+          "comfyui-patch.service"
+          "comfyui-pytorch-setup.service"
+          "comfyui.service"
+        ];
+      };
+
+      # ----------------------------------------------------------------------------
       # COMFYUI PATCH - Fix PyTorch 2.2 compatibility
       # ----------------------------------------------------------------------------
       systemd.services.comfyui-patch = {
         description = "Patch ComfyUI for PyTorch 2.2 compatibility";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
-        after = ["comfyui-pytorch-setup.service"];
+        after = ["comfyui-pytorch-setup.service" "comfyui-pytorch-setup.service"];
 
         serviceConfig = {
           Type = "oneshot";
@@ -207,6 +217,7 @@
         description = "Install PyTorch 2.2 cu118 for ComfyUI (P5000 / sm_61) from Nix store";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
+        after = ["comfyui-permissions.service"];
 
         # No After = network.target — we don't need the network.
 
@@ -327,7 +338,7 @@
       systemd.services.comfyui = {
         description = "ComfyUI Stable Diffusion Service (GPU - P5000)";
         wantedBy = ["multi-user.target"];
-        after = ["network.target" "comfyui-pytorch-setup.service" "comfyui-patch.service"];
+        after = ["network.target" "comfyui-permissions.service" "comfyui-pytorch-setup.service" "comfyui-patch.service"];
         requires = ["comfyui-pytorch-setup.service" "comfyui-patch.service"];
 
         unitConfig = {
