@@ -268,7 +268,6 @@
       # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
       # ----------------------------------------------------------------------------
       systemd.services.hermes-permissions = nixlabLib.mkDataDirPermissionsService {
-        inherit pkgs;
         dataDir = cfg.dataDir;
         user = cfg.user;
         group = cfg.group;
