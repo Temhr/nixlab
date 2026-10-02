@@ -184,7 +184,7 @@
       systemd.services.homepage = {
         description = "Homepage Dashboard";
         wantedBy = ["multi-user.target"];
-        after = ["network.target" "local-fs.target" "homepage-permissions.services"];
+        after = ["network.target" "local-fs.target" "homepage-permissions.service"];
 
         environment = {
           HOMEPAGE_CONFIG_DIR = "${cfg.dataDir}/config";
