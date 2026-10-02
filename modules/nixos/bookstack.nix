@@ -77,6 +77,20 @@
           description = "Directory for BookStack and MariaDB persistent storage";
         };
 
+        containerUid = lib.mkOption {
+          type = lib.types.int;
+          default = 1000;
+          description = ''
+            UID the BookStack and MariaDB containers run their internal process as (PUID).
+            Host-side data directories are chowned to match before the containers start.
+          '';
+        };
+        containerGid = lib.mkOption {
+          type = lib.types.int;
+          default = 1000;
+          description = "GID the containers run as (PGID). Host dirs are chowned to match.";
+        };
+
         # OPTIONAL: systemd mount unit for the drive that hosts dataDir (default: null)
         # Set this if dataDir lives on a separate drive so systemd waits for the
         # drive to mount before attempting to start the containers.
@@ -178,6 +192,8 @@
         script = ''
           mkdir -p ${cfg.dataDir}/bookstack
           mkdir -p ${cfg.dataDir}/db
+          chown ${toString cfg.containerUid}:${toString cfg.containerGid} \
+            ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
           chmod 750 ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
         '';
       };
@@ -203,8 +219,8 @@
         image = "lscr.io/linuxserver/mariadb:latest";
 
         environment = {
-          PUID = "1000";
-          PGID = "1000";
+          PUID = toString cfg.containerUid;
+          PGID = toString cfg.containerGid;
           MYSQL_DATABASE = "bookstack";
           MYSQL_USER = "bookstack";
           # Passwords injected via /run/bookstack-db.env — not hardcoded here
@@ -246,8 +262,8 @@
         image = "lscr.io/linuxserver/bookstack:latest";
 
         environment = {
-          PUID = "1000";
-          PGID = "1000";
+          PUID = toString cfg.containerUid;
+          PGID = toString cfg.containerGid;
           # These env vars are used by the container's DB connectivity health check.
           # The actual BookStack config is written to .env by the preStart script.
           APP_URL = cfg.appURL;

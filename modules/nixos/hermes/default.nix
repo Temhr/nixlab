@@ -264,12 +264,23 @@
           ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
+      # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.hermes-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["hermes.service"];
+      };
+
       # --------------------------------------------------------------------------
       # DASHBOARD - web UI, opt-in via dashboard.enable
       # --------------------------------------------------------------------------
       systemd.services.hermes-dashboard = lib.mkIf cfg.dashboard.enable {
         description = "Hermes web UI dashboard";
-        after = ["hermes-agent.service"];
+        after = ["hermes-agent.service" "hermes-permissions.service"];
         wants = ["hermes-agent.service"];
         wantedBy = ["multi-user.target"];
 
