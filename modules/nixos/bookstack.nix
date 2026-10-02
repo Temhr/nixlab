@@ -89,6 +89,33 @@
           description = "Group to run the BookStack and MariaDB containers as";
         };
 
+        # REQUIRED to be a concrete number: this is passed directly into the
+        # containers' PUID env var. A NixOS system user created without an
+        # explicit uid gets one dynamically allocated during activation — a
+        # value that doesn't exist yet at evaluation time, so
+        # config.users.users.${cfg.user}.uid can't be resolved to a real
+        # number for the container. Pinning it here fixes that, and also
+        # keeps the host directory ownership and the container's internal
+        # user in sync across rebuilds, since both are now driven by the
+        # same fixed number instead of one side guessing at the other.
+        uid = lib.mkOption {
+          type = lib.types.int;
+          default = 2015;
+          description = ''
+            Fixed UID for the bookstack user. Pick a number not already in
+            use on the host (check with: getent passwd <uid>).
+          '';
+        };
+
+        gid = lib.mkOption {
+          type = lib.types.int;
+          default = 2015;
+          description = ''
+            Fixed GID for the bookstack group. Pick a number not already in
+            use on the host (check with: getent group <gid>).
+          '';
+        };
+
         extraUsers = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
@@ -188,6 +215,7 @@
               group = cfg.group;
               home = cfg.dataDir;
               description = "BookStack service user";
+              uid = cfg.uid;
             };
           }
         ]
@@ -196,7 +224,7 @@
           ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
-      users.groups.${cfg.group} = {};
+      users.groups.${cfg.group}.gid = cfg.gid;
       # --------------------------------------------------------------------------
       # DIRECTORY INIT SERVICE
       # A dedicated oneshot service creates the data directories before the
@@ -245,8 +273,8 @@
         image = "lscr.io/linuxserver/mariadb:latest";
 
         environment = {
-          PUID = toString config.users.users.${cfg.user}.uid;
-          PGID = toString config.users.groups.${cfg.group}.gid;
+          PUID = toString cfg.uid;
+          PGID = toString cfg.gid;
           MYSQL_DATABASE = "bookstack";
           MYSQL_USER = "bookstack";
           # Passwords injected via /run/bookstack-db.env — not hardcoded here
@@ -288,8 +316,8 @@
         image = "lscr.io/linuxserver/bookstack:latest";
 
         environment = {
-          PUID = toString config.users.users.${cfg.user}.uid;
-          PGID = toString config.users.groups.${cfg.group}.gid;
+          PUID = toString cfg.uid;
+          PGID = toString cfg.gid;
           # These env vars are used by the container's DB connectivity health check.
           # The actual BookStack config is written to .env by the preStart script.
           APP_URL = cfg.appURL;
