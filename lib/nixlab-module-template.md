@@ -60,6 +60,7 @@ populated.
 | NixOS option namespace | `services.<service>-nixlab` (matches the flake attr suffix) | `services.zola-nixlab` |
 | systemd unit | `systemd.services.<short-name>` (no `-nixlab` suffix, human-friendly) | `systemd.services.zola` |
 | dedicated system user/group | same as the systemd unit name | `zola` / `zola` |
+| ownership-fixup oneshot unit | `systemd.services.<short-name>-permissions` | `systemd.services.zola-permissions` |
 
 The `-nixlab` / `-custom` suffix on the option namespace exists so it never
 collides with an upstream `services.<name>` option shipped by nixpkgs
@@ -307,12 +308,29 @@ config = lib.mkIf cfg.enable {
   );
 
   # ----------------------------------------------------------------------------
+  # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+  #
+  # tmpfiles' "d" rule above only creates dataDir if missing — it never fixes
+  # ownership on an already-existing directory, and even a "Z" rule can run
+  # before dataDir's mount is up if dataDir lives on a separate drive. This
+  # oneshot waits for the real mount (RequiresMountsFor) and then recursively
+  # chowns, fixing both that race and any UID/GID drift from a rebuild.
+  # ----------------------------------------------------------------------------
+  systemd.services.<service>-permissions = nixlabLib.mkDataDirPermissionsService {
+    inherit pkgs;
+    dataDir = cfg.dataDir;
+    user = cfg.user;
+    group = cfg.group;
+    requiredBy = ["<service>.service"];
+  };
+
+  # ----------------------------------------------------------------------------
   # <SERVICE> SERVICE - systemd unit
   # ----------------------------------------------------------------------------
   systemd.services.<service> = {
     description = "<Human-readable description>";
     wantedBy = ["multi-user.target"];
-    after = ["network.target"];
+    after = ["network.target" "<service>-permissions.service"];
 
     serviceConfig =
       nixlabLib.mkServiceHardening {
@@ -367,7 +385,16 @@ Two comment-banner styles are used and both are fine, pick by weight:
 Non-web services (waydroid-style) drop the NGINX and FIREWALL blocks
 entirely and replace the systemd-service block with whatever the service
 actually needs (kernel modules/params, activation scripts, etc.), but keep
-the OPTIONS → ASSERTIONS → directories → users → main-config ordering.
+the OPTIONS → ASSERTIONS → directories → users → permissions → main-config
+ordering.
+
+`requiredBy` on the permissions unit pulls it into the transaction
+(`Requires=`) but grants **no ordering guarantee** by itself — you must also
+add `<service>-permissions.service` to the main unit's own `after` (as
+above), or the two can start in parallel and race on the same files. Any
+other oneshot/init service that runs before the main unit (DB migrations,
+pytorch-setup-style installers, etc.) needs the same addition to its own
+`after` list.
 
 ## 6. `let ... in` computed-values conventions
 
@@ -501,6 +528,42 @@ mkSslAssertion = {
   assertion = !enableSSL || domain != null;
   message = "${moduleName}: enableSSL = true requires domain to be set.";
 };
+
+# ---------------------------------------------------------------------------
+# mkDataDirPermissionsService
+# Returns a systemd.services.<name> body (a oneshot unit) that recursively
+# chowns dataDir to user:group on every boot, AFTER dataDir's filesystem is
+# actually mounted (via unitConfig.RequiresMountsFor, not tmpfiles).
+#
+# Fixes two related problems that `systemd.tmpfiles.rules` "d"/"Z" entries
+# do NOT reliably fix on their own:
+#   1. UID/GID drift — a dynamically-allocated system user can get a
+#      different uid/gid across a rebuild; files on disk stay stamped with
+#      the old numeric id and become inaccessible.
+#   2. Mount-ordering — systemd-tmpfiles-setup.service runs before
+#      local-fs.target, so a tmpfiles rule targeting a path on a separate
+#      mount (e.g. dataDir = "/data/<service>") can silently run before
+#      that mount exists and no-op. RequiresMountsFor sidesteps this.
+#
+# Runs as root (no User=) so it can always fix ownership regardless of what
+# currently owns the files.
+# ---------------------------------------------------------------------------
+mkDataDirPermissionsService = {
+  pkgs,
+  dataDir,
+  user,
+  group,
+  requiredBy ? [],
+}: {
+  description = "Ensure ${dataDir} ownership matches ${user}:${group}";
+  unitConfig.RequiresMountsFor = [dataDir];
+  inherit requiredBy;
+  serviceConfig = {
+    Type = "oneshot";
+    RemainAfterExit = true;
+    ExecStart = "${pkgs.coreutils}/bin/chown -R ${user}:${group} ${dataDir}";
+  };
+};
 ```
 
 `mkServiceHardening`'s base return (before the optional attrs above) always
@@ -519,6 +582,22 @@ needs it relaxed.
 Always call `mkServiceHardening` first and `// { ... }` your unit-specific
 `serviceConfig` on top of it — never write sandboxing flags by hand in a new
 module.
+
+`mkDataDirPermissionsService` is **required boilerplate in every module that
+has a `dataDir` and a dedicated `user`/`group`** (§5's PERMISSIONS
+sub-section) — not optional, even for services whose default `dataDir` sits
+under `/var/lib` on the root filesystem. The option is almost always
+user-overridable to a separate mount (e.g. `/data/<service>`), and the
+ownership bug this fixes only reproduces on a reboot, not on a plain
+`nixos-rebuild switch` — so it's easy to ship a module that looks fine in
+testing and silently breaks on the next cold boot if this is skipped. The one
+case to use judgment on: don't point the recursive `chown -R` at a directory
+that's a **live, actively-written database datadir** (MariaDB, Postgres,
+etc.) — recursing over that on every boot is wasted I/O that scales with
+data size for no benefit, since most database container images already
+re-assert ownership of their own datadir on startup. Scope the permissions
+service to the directories your own `preStart`/init script actually creates,
+not ones a downstream container/process manages itself.
 
 ## 9. Trailing doc-comment block
 
@@ -703,10 +782,22 @@ Copy this, replace every `<...>` placeholder, delete what doesn't apply
           ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
+      # Required boilerplate (§5/§8): fixes ownership every boot, after
+      # dataDir's mount actually exists. Do not skip this even for a
+      # /var/lib-default dataDir — it's user-overridable to a separate
+      # mount, and the bug it prevents only reproduces on reboot.
+      systemd.services.<service>-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["<service>.service"];
+      };
+
       systemd.services.<service> = {
         description = "<Human-readable description>";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "<service>-permissions.service"];
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
@@ -912,8 +1003,10 @@ module generated in this exact house style:
 > listenAddress, domain, enableSSL, dataDir, package, user, group,
 > extraUsers, openFirewall, secretsEnvFile-style sink option) plus these
 > service-specific options: `<list>`. Use `nixlabLib.mkSslAssertion`,
-> `nixlabLib.mkServiceHardening`, `nixlabLib.mkNginxVirtualHost`, and
-> `nixlabLib.mkFirewallPorts` exactly as the template calls them. Add a
+> `nixlabLib.mkServiceHardening`, `nixlabLib.mkNginxVirtualHost`,
+> `nixlabLib.mkFirewallPorts`, and `nixlabLib.mkDataDirPermissionsService`
+> (wired as `<service>-permissions.service`, `requiredBy`'d by the main unit
+> and added to its `after`) exactly as the template calls them. Add a
 > matching `systm--ports-<service>` block for `ports.nix` with port
 > `<port>`. Also generate the companion `/nixlab/sops/<service>.nix`
 > `nsops--<service>` joiner module for these secrets: `<list, with a note on
