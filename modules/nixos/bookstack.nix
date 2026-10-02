@@ -77,18 +77,23 @@
           description = "Directory for BookStack and MariaDB persistent storage";
         };
 
-        containerUid = lib.mkOption {
-          type = lib.types.int;
-          default = 1000;
-          description = ''
-            UID the BookStack and MariaDB containers run their internal process as (PUID).
-            Host-side data directories are chowned to match before the containers start.
-          '';
+        user = lib.mkOption {
+          type = lib.types.str;
+          default = "bookstack";
+          description = "User to run the BookStack and MariaDB containers as";
         };
-        containerGid = lib.mkOption {
-          type = lib.types.int;
-          default = 1000;
-          description = "GID the containers run as (PGID). Host dirs are chowned to match.";
+
+        group = lib.mkOption {
+          type = lib.types.str;
+          default = "bookstack";
+          description = "Group to run the BookStack and MariaDB containers as";
+        };
+
+        extraUsers = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["alice"];
+          description = "Extra users to add to the group";
         };
 
         # OPTIONAL: systemd mount unit for the drive that hosts dataDir (default: null)
@@ -171,6 +176,27 @@
     # CONFIG - What is created when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
+
+      # ----------------------------------------------------------------------------
+      # USER SETUP - Create dedicated system user
+      # ----------------------------------------------------------------------------
+      users.users = lib.mkMerge (
+        [
+          {
+            ${cfg.user} = {
+              isSystemUser = true;
+              group = cfg.group;
+              home = cfg.dataDir;
+              description = "BookStack service user";
+            };
+          }
+        ]
+        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+        (map (u: {${u} = {extraGroups = [cfg.group];};})
+          ([config.nixlab.mainUser] ++ cfg.extraUsers))
+      );
+
+      users.groups.${cfg.group} = {};
       # --------------------------------------------------------------------------
       # DIRECTORY INIT SERVICE
       # A dedicated oneshot service creates the data directories before the
@@ -192,7 +218,7 @@
         script = ''
           mkdir -p ${cfg.dataDir}/bookstack
           mkdir -p ${cfg.dataDir}/db
-          chown ${toString cfg.containerUid}:${toString cfg.containerGid} \
+          chown ${cfg.user}:${cfg.group} \
             ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
           chmod 750 ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
         '';
@@ -219,8 +245,8 @@
         image = "lscr.io/linuxserver/mariadb:latest";
 
         environment = {
-          PUID = toString cfg.containerUid;
-          PGID = toString cfg.containerGid;
+          PUID = toString config.users.users.${cfg.user}.uid;
+          PGID = toString config.users.groups.${cfg.group}.gid;
           MYSQL_DATABASE = "bookstack";
           MYSQL_USER = "bookstack";
           # Passwords injected via /run/bookstack-db.env — not hardcoded here
@@ -262,8 +288,8 @@
         image = "lscr.io/linuxserver/bookstack:latest";
 
         environment = {
-          PUID = toString cfg.containerUid;
-          PGID = toString cfg.containerGid;
+          PUID = toString config.users.users.${cfg.user}.uid;
+          PGID = toString config.users.groups.${cfg.group}.gid;
           # These env vars are used by the container's DB connectivity health check.
           # The actual BookStack config is written to .env by the preStart script.
           APP_URL = cfg.appURL;
@@ -330,7 +356,8 @@
           MAIL_PASSWORD=null
           MAIL_ENCRYPTION=null
           ENVEOF
-                  chmod 640 ${cfg.dataDir}/bookstack/www/.env
+            chmod 640 ${cfg.dataDir}/bookstack/www/.env
+            chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}/bookstack/www
         '';
       };
 
