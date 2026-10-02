@@ -77,52 +77,6 @@
           description = "Directory for BookStack and MariaDB persistent storage";
         };
 
-        user = lib.mkOption {
-          type = lib.types.str;
-          default = "bookstack";
-          description = "User to run the BookStack and MariaDB containers as";
-        };
-
-        group = lib.mkOption {
-          type = lib.types.str;
-          default = "bookstack";
-          description = "Group to run the BookStack and MariaDB containers as";
-        };
-
-        # REQUIRED to be a concrete number: this is passed directly into the
-        # containers' PUID env var. A NixOS system user created without an
-        # explicit uid gets one dynamically allocated during activation — a
-        # value that doesn't exist yet at evaluation time, so
-        # config.users.users.${cfg.user}.uid can't be resolved to a real
-        # number for the container. Pinning it here fixes that, and also
-        # keeps the host directory ownership and the container's internal
-        # user in sync across rebuilds, since both are now driven by the
-        # same fixed number instead of one side guessing at the other.
-        uid = lib.mkOption {
-          type = lib.types.int;
-          default = 2015;
-          description = ''
-            Fixed UID for the bookstack user. Pick a number not already in
-            use on the host (check with: getent passwd <uid>).
-          '';
-        };
-
-        gid = lib.mkOption {
-          type = lib.types.int;
-          default = 2015;
-          description = ''
-            Fixed GID for the bookstack group. Pick a number not already in
-            use on the host (check with: getent group <gid>).
-          '';
-        };
-
-        extraUsers = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [];
-          example = ["alice"];
-          description = "Extra users to add to the group";
-        };
-
         # OPTIONAL: systemd mount unit for the drive that hosts dataDir (default: null)
         # Set this if dataDir lives on a separate drive so systemd waits for the
         # drive to mount before attempting to start the containers.
@@ -204,32 +158,17 @@
     # ============================================================================
     config = lib.mkIf cfg.enable {
 
-      # ----------------------------------------------------------------------------
-      # USER SETUP - Create dedicated system user
-      # ----------------------------------------------------------------------------
-      users.users = lib.mkMerge (
-        [
-          {
-            ${cfg.user} = {
-              isSystemUser = true;
-              group = cfg.group;
-              home = cfg.dataDir;
-              description = "BookStack service user";
-              uid = cfg.uid;
-            };
-          }
-        ]
-        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = [cfg.group];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
-      );
-
-      users.groups.${cfg.group}.gid = cfg.gid;
       # --------------------------------------------------------------------------
       # DIRECTORY INIT SERVICE
       # A dedicated oneshot service creates the data directories before the
       # containers start. This is used instead of systemd.tmpfiles so that we can
       # correctly wait for a separate drive mount (dataMountUnit) if needed.
+      #
+      # Directories are left root-owned on the host; the linuxserver.io images'
+      # own entrypoint (running as root inside the container, since
+      # virtualisation.podman runs rootful with no userns remap here) chowns
+      # /config to PUID:PGID itself on every container start before dropping
+      # privileges — so there's no need to manage ownership on the host side.
       # --------------------------------------------------------------------------
       systemd.services.bookstack-init-dirs = {
         description = "Create BookStack data directories";
@@ -246,8 +185,6 @@
         script = ''
           mkdir -p ${cfg.dataDir}/bookstack
           mkdir -p ${cfg.dataDir}/db
-          chown ${cfg.user}:${cfg.group} \
-            ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
           chmod 750 ${cfg.dataDir} ${cfg.dataDir}/bookstack ${cfg.dataDir}/db
         '';
       };
@@ -273,8 +210,8 @@
         image = "lscr.io/linuxserver/mariadb:latest";
 
         environment = {
-          PUID = toString cfg.uid;
-          PGID = toString cfg.gid;
+          PUID = "1000";
+          PGID = "1000";
           MYSQL_DATABASE = "bookstack";
           MYSQL_USER = "bookstack";
           # Passwords injected via /run/bookstack-db.env — not hardcoded here
@@ -316,8 +253,8 @@
         image = "lscr.io/linuxserver/bookstack:latest";
 
         environment = {
-          PUID = toString cfg.uid;
-          PGID = toString cfg.gid;
+          PUID = "1000";
+          PGID = "1000";
           # These env vars are used by the container's DB connectivity health check.
           # The actual BookStack config is written to .env by the preStart script.
           APP_URL = cfg.appURL;
@@ -385,7 +322,6 @@
           MAIL_ENCRYPTION=null
           ENVEOF
             chmod 640 ${cfg.dataDir}/bookstack/www/.env
-            chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}/bookstack/www
         '';
       };
 
