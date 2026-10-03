@@ -48,6 +48,24 @@ in {
 
   users.groups.prometheus = {};
 
+  # ----------------------------------------------------------------------------
+  # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+  #
+  # This module hardcodes the "prometheus" user/group rather than exposing
+  # cfg.user/cfg.group options, so the permissions service does the same —
+  # fixes both the tmpfiles-vs-separate-mount race and any UID/GID drift on
+  # cfg.dataDir across a rebuild. Does not cover /var/lib/node_exporter: that
+  # directory is managed by systemd's own StateDirectory= mechanism on the
+  # node-exporter unit, which already re-asserts ownership at every start.
+  # ----------------------------------------------------------------------------
+  systemd.services.prometheus-permissions = nixlabLib.mkDataDirPermissionsService {
+    inherit pkgs;
+    dataDir = cfg.dataDir;
+    user = "prometheus";
+    group = "prometheus";
+    requiredBy = ["prometheus.service"];
+  };
+
   # Import service configurations
   systemd.services =
     {

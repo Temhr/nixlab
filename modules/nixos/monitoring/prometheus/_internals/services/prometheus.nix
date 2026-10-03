@@ -85,7 +85,7 @@
 in {
   description = "Prometheus Monitoring System";
   wantedBy = ["multi-user.target"];
-  after = ["network.target"];
+  after = ["network.target" "prometheus-permissions.service"];
 
   serviceConfig =
     nixlabLib.mkServiceHardening {

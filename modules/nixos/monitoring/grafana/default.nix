@@ -359,11 +359,29 @@
 
       users.groups.${cfg.group} = {};
 
+      # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      #
+      # The ExecStartPre script below creates and chowns several subdirectories
+      # itself at every start, but only ones it knows to create — it doesn't
+      # recursively fix ownership on the whole tree (e.g. existing dashboard
+      # JSON/db files left behind from a UID that has since drifted). This
+      # oneshot does that, and also correctly waits for a separate-mount
+      # dataDir instead of racing it the way tmpfiles "d" rules can.
+      # ----------------------------------------------------------------------------
+      systemd.services.grafana-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["grafana.service"];
+      };
+
       # ── Grafana systemd service ───────────────────────────────────────────────
       systemd.services.grafana = {
         description = "Grafana Monitoring and Visualization Platform";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "grafana-permissions.service"];
 
         environment = {
           GF_PATHS_DATA = "${cfg.dataDir}/data";
@@ -490,7 +508,7 @@
                   ${cfg.dataDir}/provisioning/dashboards \
                   ${cfg.dataDir}/provisioning/datasources \
                   ${cfg.dataDir}/provisioning/notifiers \
-                  ${lib.concatStringsSep " \\\n                  " (
+                  ${lib.concatStringsSep " \\\n                " (
                   lib.mapAttrsToList (
                     name: _: "${cfg.dataDir}/dashboards/${name}"
                   )

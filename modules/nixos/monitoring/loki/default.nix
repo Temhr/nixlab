@@ -197,12 +197,40 @@
       users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      #
+      # tmpfiles' "d" rules above only create these directories if missing — they
+      # never fix ownership on an already-existing one, and a separate-mount
+      # dataDir can race tmpfiles at boot before the mount exists. This oneshot
+      # waits for the real mount and then recursively chowns, fixing both that
+      # race and any UID/GID drift from a rebuild. Two instances here since Loki
+      # and Alloy are two independently-owned data directories.
+      # ----------------------------------------------------------------------------
+      systemd.services.loki-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["loki.service"];
+      };
+
+      systemd.services.alloy-permissions = lib.mkIf cfg.enableAlloy (
+        nixlabLib.mkDataDirPermissionsService {
+          inherit pkgs;
+          dataDir = "/var/lib/alloy";
+          user = "alloy";
+          group = "alloy";
+          requiredBy = ["alloy.service"];
+        }
+      );
+
+      # ----------------------------------------------------------------------------
       # LOKI SERVICE - Configure the systemd service
       # ----------------------------------------------------------------------------
       systemd.services.loki = {
         description = "Loki Log Aggregation System";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "loki-permissions.service"];
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
@@ -331,7 +359,7 @@
       systemd.services.alloy = lib.mkIf cfg.enableAlloy {
         description = "Grafana Alloy Telemetry Collector";
         wantedBy = ["multi-user.target"];
-        after = ["network.target" "loki.service"];
+        after = ["network.target" "loki.service" "alloy-permissions.service"];
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
@@ -810,4 +838,3 @@ SECURITY BEST PRACTICES
 8. Use TLS for remote Alloy instances
 9. Backup configuration files
 */
-

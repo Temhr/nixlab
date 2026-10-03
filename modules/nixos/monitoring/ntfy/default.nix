@@ -283,12 +283,23 @@
       users.groups.${cfg.group} = {};
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.ntfy-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["ntfy.service"];
+      };
+
+      # ----------------------------------------------------------------------------
       # NTFY SERVICE - Configure the systemd service
       # ----------------------------------------------------------------------------
       systemd.services.ntfy = {
         description = "ntfy Push Notification Server";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "ntfy-permissions.service"];
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
@@ -629,4 +640,3 @@ Common issues:
   - Attachments fail: Ensure cacheFile is set (required for attachment support)
   - Port 25 blocked:  Many cloud providers block port 25; check security groups
 */
-
