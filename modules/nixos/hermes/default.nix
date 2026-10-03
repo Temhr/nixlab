@@ -6,6 +6,7 @@
   flake.nixosModules.servc--hermes-nixlab = {
     config,
     lib,
+    pkgs,
     nixlabLib,
     ...
   }: let
@@ -222,13 +223,33 @@
         }
       ];
 
+      # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after stateDir is actually mounted
+      #
+      # This module declares no cfg.dataDir/cfg.user/cfg.group of its own — it
+      # delegates entirely to the upstream services.hermes-agent module, so the
+      # permissions service targets that module's own stateDir/user/group
+      # (already referenced elsewhere in this file as hermesStateDir and
+      # config.services.hermes-agent.user/group) rather than nonexistent
+      # options on cfg.
+      # ----------------------------------------------------------------------------
+      systemd.services.hermes-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = hermesStateDir;
+        user = config.services.hermes-agent.user;
+        group = config.services.hermes-agent.group;
+        requiredBy = ["hermes-agent.service"];
+      };
+
       # --------------------------------------------------------------------------
       # HERMES AGENT SERVICE
       # --------------------------------------------------------------------------
       systemd.services.hermes-agent.after =
-        lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"];
+        ["hermes-permissions.service"]
+        ++ lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"];
       systemd.services.hermes-agent.wants =
-        lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"];
+        ["hermes-permissions.service"]
+        ++ lib.optionals cfg.matrix.enable ["continuwuity.service" "matrix-nixlab-init-users.service"];
 
       services.hermes-agent = {
         enable = true;
@@ -263,16 +284,6 @@
         (map (u: {${u} = {extraGroups = [config.services.hermes-agent.group];};})
           ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
-
-      # ----------------------------------------------------------------------------
-      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
-      # ----------------------------------------------------------------------------
-      systemd.services.hermes-permissions = nixlabLib.mkDataDirPermissionsService {
-        dataDir = cfg.dataDir;
-        user = cfg.user;
-        group = cfg.group;
-        requiredBy = ["hermes.service"];
-      };
 
       # --------------------------------------------------------------------------
       # DASHBOARD - web UI, opt-in via dashboard.enable
