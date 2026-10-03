@@ -1,11 +1,30 @@
+# nixlab/modules/nixos/syncthing.nix
 {self, ...}: {
   flake.nixosModules.servc--syncthing-nixlab = {
     config,
     lib,
+    pkgs,
     nixlabLib,
     ...
   }: let
     cfg = config.services.syncthing-nixlab;
+
+    # The effective data directory. Priority: explicit dataDir option >
+    # /var/lib/syncthing when using the module-created default user >
+    # ~/.config/syncthing under cfg.user when running as an existing,
+    # externally-managed user. Hoisted here (rather than left duplicated
+    # inline in both systemd.tmpfiles.rules and services.syncthing.dataDir,
+    # as it originally was) so both stay in sync automatically if this
+    # derivation logic ever changes.
+    actualDataDir =
+      if cfg.dataDir != null
+      then cfg.dataDir
+      else
+        (
+          if cfg.user == "syncthing"
+          then "/var/lib/syncthing"
+          else "/home/${cfg.user}/.config/syncthing"
+        );
   in {
     imports = [
       self.nixosModules.systm--ports-syncthing
@@ -297,19 +316,20 @@
       # ----------------------------------------------------------------------------
       # DIRECTORY SETUP - Create necessary directories with proper permissions
       # ----------------------------------------------------------------------------
-      systemd.tmpfiles.rules = let
-        actualDataDir =
-          if cfg.dataDir != null
-          then cfg.dataDir
-          else
-            (
-              if cfg.user == "syncthing"
-              then "/var/lib/syncthing"
-              else "/home/${cfg.user}/.config/syncthing"
-            );
-      in [
+      systemd.tmpfiles.rules = [
         "d ${actualDataDir} 0770 ${cfg.user} ${cfg.group} -"
       ];
+
+      # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.syncthing-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = actualDataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["syncthing.service"];
+      };
 
       # ----------------------------------------------------------------------------
       # SYNCTHING SERVICE - Configure the built-in NixOS Syncthing module
@@ -322,15 +342,7 @@
         group = cfg.group;
 
         # Data directory (main working directory)
-        dataDir =
-          if cfg.dataDir != null
-          then cfg.dataDir
-          else
-            (
-              if cfg.user == "syncthing"
-              then "/var/lib/syncthing"
-              else "/home/${cfg.user}/.config/syncthing"
-            );
+        dataDir = actualDataDir;
 
         # Config directory (where config.xml is stored)
         configDir = cfg.configDir;
@@ -399,6 +411,7 @@
       # SERVICE CUSTOMIZATION - Additional systemd service configuration
       # ----------------------------------------------------------------------------
       systemd.services.syncthing = {
+        after = ["syncthing-permissions.service"];
         serviceConfig =
           {
             Restart = "on-failure";

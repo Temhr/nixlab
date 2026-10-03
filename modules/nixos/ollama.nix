@@ -1,3 +1,4 @@
+# nixlab/modules/nixos/ollama.nix
 {self, ...}: {
   flake.nixosModules.servc--ollama-nixlab = {
     config,
@@ -216,12 +217,35 @@
       users.groups.open-webui = {};
 
       # --------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      #
+      # Two independent units since ollama and open-webui are two separately
+      # owned data directories in this one module (the same shape as Loki +
+      # Alloy in the monitoring stack).
+      # --------------------------------------------------------------------------
+      systemd.services.ollama-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.ollamaDataDir;
+        user = "ollama";
+        group = "ollama";
+        requiredBy = ["ollama.service"];
+      };
+
+      systemd.services.open-webui-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.webuiDataDir;
+        user = cfg.webuiUser;
+        group = cfg.webuiGroup;
+        requiredBy = ["open-webui.service"];
+      };
+
+      # --------------------------------------------------------------------------
       # OLLAMA SERVICE
       # --------------------------------------------------------------------------
       systemd.services.ollama = {
         description = "Ollama LLM Service (${cfg.acceleration})";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "ollama-permissions.service"];
 
         environment = lib.mkMerge [
           # Shared environment
@@ -382,7 +406,7 @@
       systemd.services.open-webui = {
         description = "Open WebUI for Ollama";
         wantedBy = ["multi-user.target"];
-        after = ["network.target" "ollama.service"];
+        after = ["network.target" "ollama.service" "open-webui-permissions.service"];
         requires = ["ollama.service"];
         environment = lib.mkMerge [
           {

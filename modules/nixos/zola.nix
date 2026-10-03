@@ -1,3 +1,4 @@
+# nixlab/modules/nixos/zola.nix
 {self, ...}: {
   flake.nixosModules.servc--zola-nixlab = {
     config,
@@ -217,6 +218,27 @@
       );
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after siteDir is actually mounted
+      #
+      # This module hardcodes the "zola" user/group rather than exposing
+      # cfg.user/cfg.group options, so the permissions service does the same.
+      # siteDir is a REQUIRED, user-supplied path with no default — a strong
+      # candidate for living on its own mount — and the existing
+      # activationScripts.initZolaSite below only chowns once, the first time
+      # it scaffolds a missing config.toml. It never re-asserts ownership on
+      # a directory that already has content, so this is the only thing that
+      # fixes ownership drift (UID reallocation, a restored backup with
+      # different ownership, etc.) on every subsequent boot.
+      # ----------------------------------------------------------------------------
+      systemd.services.zola-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.siteDir;
+        user = "zola";
+        group = "zola";
+        requiredBy = ["zola.service"];
+      };
+
+      # ----------------------------------------------------------------------------
       # SITE SCAFFOLDING - Only runs when configToml is NOT set
       # ----------------------------------------------------------------------------
       # When configToml is set the module fully manages config.toml via
@@ -228,13 +250,13 @@
       # siteDir is usable immediately, but we never overwrite an existing file.
       system.activationScripts.initZolaSite = lib.mkIf (cfg.configToml == null) {
         text = ''
-                    SITE_DIR="${cfg.siteDir}"
+                  SITE_DIR="${cfg.siteDir}"
 
-                    if [ ! -f "$SITE_DIR/config.toml" ]; then
-                      echo "Initializing Zola site scaffold at $SITE_DIR..."
-                      mkdir -p "$SITE_DIR"/{content,templates,static,themes}
+                  if [ ! -f "$SITE_DIR/config.toml" ]; then
+                    echo "Initializing Zola site scaffold at $SITE_DIR..."
+                    mkdir -p "$SITE_DIR"/{content,templates,static,themes}
 
-                      cat > "$SITE_DIR/content/_index.md" << 'EOF'
+                    cat > "$SITE_DIR/content/_index.md" << 'EOF'
           +++
           title = "Home"
           +++
@@ -244,7 +266,7 @@
           This is my Zola site. Edit siteDir and add a config.toml to get started.
           EOF
 
-                      cat > "$SITE_DIR/templates/index.html" << 'EOF'
+                    cat > "$SITE_DIR/templates/index.html" << 'EOF'
           <!DOCTYPE html>
           <html>
           <head>
@@ -258,10 +280,10 @@
           </html>
           EOF
 
-                      chown -R zola:zola "$SITE_DIR"
-                      chmod -R 775 "$SITE_DIR"
-                      echo "Scaffold created. Add a config.toml or set services.zola-nixlab.configToml."
-                    fi
+                    chown -R zola:zola "$SITE_DIR"
+                    chmod -R 775 "$SITE_DIR"
+                    echo "Scaffold created. Add a config.toml or set services.zola-nixlab.configToml."
+                  fi
         '';
       };
 
@@ -271,7 +293,7 @@
       systemd.services.zola = {
         description = "Zola Static Site Server";
         wantedBy = ["multi-user.target"];
-        after = ["network.target"];
+        after = ["network.target" "zola-permissions.service"];
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
@@ -495,4 +517,3 @@ Validate site (checks links, templates, etc.):
 Verbose build:
   cd /var/www/my-blog && zola build --verbose
 */
-

@@ -1,7 +1,9 @@
+# nixlab/modules/nixos/wiki-js.nix
 {self, ...}: {
   flake.nixosModules.servc--wiki-js-nixlab = {
     config,
     lib,
+    pkgs,
     nixlabLib,
     ...
   }: let
@@ -173,6 +175,22 @@
         ];
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      #
+      # Covers cfg.dataDir only. uploadsPath, when set, already gets chowned
+      # on every service start by wiki-js's own preStart below, so it does
+      # not need a separate unit. backupPath is owned by postgres and managed
+      # by services.postgresqlBackup, outside this module's concern.
+      # ----------------------------------------------------------------------------
+      systemd.services.wiki-js-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["wiki-js.service"];
+      };
+
+      # ----------------------------------------------------------------------------
       # DATABASE SETUP - Wiki.js requires PostgreSQL
       # ----------------------------------------------------------------------------
       services.postgresql = {
@@ -250,12 +268,13 @@
       };
 
       systemd.services.wiki-js = {
-        # Ensure PostgreSQL is running before Wiki.js starts
+        # Ensure PostgreSQL and the dataDir permissions fixup run before
+        # Wiki.js starts.
         requires =
-          ["postgresql.service"]
+          ["postgresql.service" "wiki-js-permissions.service"]
           ++ lib.optionals (cfg.appSecretFile != null) ["wiki-js-secrets.service"];
         after =
-          ["postgresql.service"]
+          ["postgresql.service" "wiki-js-permissions.service"]
           ++ lib.optionals (cfg.appSecretFile != null) ["wiki-js-secrets.service"];
 
         # Custom preStart script for uploads directory (only if custom path specified)
@@ -644,4 +663,3 @@ Analytics:
   - Matomo
   - Fathom
 */
-

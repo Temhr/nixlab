@@ -1,3 +1,4 @@
+# nixlab/modules/nixos/node-red.nix
 {self, ...}: {
   flake.nixosModules.servc--node-red-nixlab = {
     config,
@@ -134,14 +135,25 @@
       users.groups.${cfg.group} = {};
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      # ----------------------------------------------------------------------------
+      systemd.services.node-red-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = cfg.user;
+        group = cfg.group;
+        requiredBy = ["node-red.service"];
+      };
+
+      # ----------------------------------------------------------------------------
       # NODE-RED SERVICE - Configure the systemd service
       # ----------------------------------------------------------------------------
       systemd.services.node-red = {
         description = "Node-RED Flow-based Programming";
         # Start automatically on boot
         wantedBy = ["multi-user.target"];
-        # Start after network is available
-        after = ["network.target"];
+        # Start after network is available and dataDir ownership is correct
+        after = ["network.target" "node-red-permissions.service"];
 
         # Make Node.js available to the service
         path = with pkgs; [nodejs];
@@ -371,4 +383,3 @@ Reset to defaults (WARNING: deletes all flows):
   sudo rm -rf /var/lib/node-red/*
   sudo systemctl start node-red
 */
-

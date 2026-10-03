@@ -1,7 +1,9 @@
+# nixlab/modules/nixos/home-assistant.nix
 {self, ...}: {
   flake.nixosModules.servc--home-assistant-nixlab = {
     config,
     lib,
+    pkgs,
     nixlabLib,
     ...
   }: let
@@ -184,10 +186,35 @@
       };
 
       # ----------------------------------------------------------------------------
+      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+      #
+      # Only needed when dataDir is overridden away from the default
+      # /var/lib/hass. At the default path, ownership is managed entirely by
+      # systemd's own StateDirectory= mechanism on the upstream
+      # services.home-assistant unit, which already re-asserts hass:hass
+      # ownership on every start — adding a second mechanism there would be
+      # redundant. Once dataDir is overridden, StateDirectory is force-unset
+      # below (see CUSTOM DATA DIRECTORY) and nothing else fixes ownership on
+      # that path, which is exactly the gap this service closes. Hardcodes
+      # "hass"/"hass" to match the upstream module's own user, since this
+      # module declares no cfg.user/cfg.group of its own.
+      # ----------------------------------------------------------------------------
+      systemd.services.home-assistant-permissions =
+        lib.mkIf (cfg.dataDir != "/var/lib/hass")
+        (nixlabLib.mkDataDirPermissionsService {
+          inherit pkgs;
+          dataDir = cfg.dataDir;
+          user = "hass";
+          group = "hass";
+          requiredBy = ["home-assistant.service"];
+        });
+
+      # ----------------------------------------------------------------------------
       # CUSTOM DATA DIRECTORY - Override default if specified
       # ----------------------------------------------------------------------------
       systemd.services.home-assistant = lib.mkMerge [
         (lib.mkIf (cfg.dataDir != "/var/lib/hass") {
+          after = ["home-assistant-permissions.service"];
           serviceConfig = {
             StateDirectory = lib.mkForce "";
             WorkingDirectory = lib.mkForce cfg.dataDir;
@@ -371,4 +398,3 @@ Check configuration:
 Access via local network:
   http://10.0.x.x:8123
 */
-
