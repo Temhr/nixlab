@@ -49,26 +49,31 @@ in {
   users.groups.prometheus = {};
 
   # ----------------------------------------------------------------------------
-  # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+  # SERVICES - main unit, node exporter, maintenance exporters, and the
+  # PERMISSIONS oneshot that fixes dataDir ownership every boot, after
+  # dataDir is actually mounted.
   #
   # This module hardcodes the "prometheus" user/group rather than exposing
-  # cfg.user/cfg.group options, so the permissions service does the same —
+  # cfg.user/cfg.group options, so prometheus-permissions does the same —
   # fixes both the tmpfiles-vs-separate-mount race and any UID/GID drift on
   # cfg.dataDir across a rebuild. Does not cover /var/lib/node_exporter: that
   # directory is managed by systemd's own StateDirectory= mechanism on the
   # node-exporter unit, which already re-asserts ownership at every start.
+  #
+  # All merged into one assignment: this file returns a plain attrset, not
+  # something passed through lib.mkMerge, so systemd.services can only be
+  # assigned once here or Nix sees two definitions of the same attribute
+  # path and throws.
   # ----------------------------------------------------------------------------
-  systemd.services.prometheus-permissions = nixlabLib.mkDataDirPermissionsService {
-    inherit pkgs;
-    dataDir = cfg.dataDir;
-    user = "prometheus";
-    group = "prometheus";
-    requiredBy = ["prometheus.service"];
-  };
-
-  # Import service configurations
   systemd.services =
     {
+      prometheus-permissions = nixlabLib.mkDataDirPermissionsService {
+        inherit pkgs;
+        dataDir = cfg.dataDir;
+        user = "prometheus";
+        group = "prometheus";
+        requiredBy = ["prometheus.service"];
+      };
       prometheus = prometheusService;
       prometheus-node-exporter = lib.mkIf cfg.enableNodeExporter nodeExporterService;
     }
