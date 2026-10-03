@@ -2,7 +2,7 @@
 {...}: {
   flake.homeModules.home--core--config-ssh = {allHosts, ...}: let
     knownHostsContent = ''
-      ${allHosts.nixace.address} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINb+dep4WR66B6pN1RnD4zOaaXbQ7BeP4kMYEogxm4uw
+      ${allHosts.nixace.address} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHCreYjOLUq1oZLO2b2AIcXraemxfxJAxhdrSNWwIL2w
       ${allHosts.nixsun.address} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAbIHaFx/TMMHN0u3nCPkWsRRZftuo13SqBQl7t8aJQB
       ${allHosts.nixvat.address} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINcqvMDczeLZ30PYuO84CVmSgZtALxDsRe4FW/NhMu3U
       ${allHosts.nixtop.address} ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBGw2308+cJc73xCDEP0Nwcmq4ukXF3n+URNi+5/F/oH
