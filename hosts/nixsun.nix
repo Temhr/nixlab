@@ -31,7 +31,7 @@
     ## GAMING PACKAGES
     steam.enable = true; #Video game digital distribution service and storefront from Valve
     ## PRODUCTIVITY
-    office.suite = "both"; # "none"" "libreoffice" "collabora" "both"
+    office.suite = "libreoffice"; # "none"" "libreoffice" "collabora" "both"
     ## MEDIA PACKAGES
     obs.enable = true; #Free and open source software for video recording and live streaming
     ## VIRTUALIZATIONS
