@@ -93,7 +93,7 @@ The four recurring ideas in this repo, explained once here — every other secti
 
 ### Self-Registering Modules
 
-Every contributing file — NixOS module, home-manager module, shared metadata, library function — registers its own output, keyed by its own name. No central registry file; files never import each other by relative path.
+Every contributing file — NixOS module, home-manager module, shared metadata, library function — registers its own output, keyed by its own name; only _files & _directories are imported by relative path.
 
 | Mechanism | How it works |
 |---|---|
