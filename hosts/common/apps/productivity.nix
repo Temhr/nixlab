@@ -28,7 +28,7 @@
         environment.systemPackages = with pkgs; [libreoffice-stable]; # Comprehensive, professional-quality productivity suite
       })
       (lib.mkIf (cfg.suite == "collabora" || cfg.suite == "both") {
-        environment.systemPackages = with pkgs; [collabora-desktop]; # Collaborative Office for desktop, based on LibreOffice technology
+        environment.systemPackages = with pkgs; [stable.collabora-desktop]; # Collaborative Office for desktop, based on LibreOffice technology
       })
       (lib.mkIf config.logseq.enable {
         environment.systemPackages = with pkgs; [logseq]; # Privacy-first, open-source knowledge management
