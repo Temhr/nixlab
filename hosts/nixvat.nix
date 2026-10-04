@@ -34,6 +34,7 @@
     ## EDUCATION
     ## GAMING PACKAGES
     ## PRODUCTIVITY
+    office.suite = "none"; # "none" "libreoffice" "collabora" "both"
     ## MEDIA PACKAGES
     vlc.enable = true; #Cross-platform media player and streaming server
     ## VIRTUALIZATIONS

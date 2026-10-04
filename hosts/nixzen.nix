@@ -22,6 +22,7 @@
     ## EDUCATION
     ## GAMING PACKAGES
     ## PRODUCTIVITY
+    office.suite = "none"; # "none" "libreoffice" "collabora" "both"
     ## MEDIA PACKAGES
     ## VIRTUALIZATIONS
 
