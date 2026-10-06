@@ -96,8 +96,6 @@
           #"--include=.bash/***"             # Bash config
           "--include=.keychain/***"          # Keychain
           "--include=bin/***"                # Personal scripts
-          #"--include=.mozilla/***"          # Firefox (optional)
-          #"--include=.zen/***"          # Firefox (optional)
 
           # EXPLICITLY PROTECT shelf from deletion (must come BEFORE --exclude=*)
           "--filter=protect shelf/"
