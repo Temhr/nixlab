@@ -108,8 +108,16 @@
                 title = "Freebooters (podcast)";
               }
               {
-                url = "https://video.thepolarbear.co.uk/feeds/videos.xml";
-                title = "PolarBear TV (peertube)";
+                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=2";
+                title = "PolarBear TV";
+              }
+              {
+                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=6097";
+                title = "Freebooters (Peertube)";
+              }
+              {
+                url = "https://video.fedihost.co/feeds/videos.xml?videoChannelId=8";
+                title = "FediHost Podcast (Peertube)";
               }
             ];
           }
