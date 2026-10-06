@@ -108,20 +108,8 @@
                 title = "Freebooters (podcast)";
               }
               {
-                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=5005";
-                title = "Freebooters (Peertube)";
-              }
-              {
-                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=1268";
-                title = "Space Virgins (Peertube)";
-              }
-              {
-                url = "https://video.thepolarbear.co.uk/feeds/videos.xml?videoChannelId=1344";
-                title = "Fedi Player One (Chris Were's Peertube)";
-              }
-              {
-                url = "https://video.fedihost.co/feeds/videos.xml?videoChannelId=8";
-                title = "FediHost Podcast (Peertube)";
+                url = "https://video.thepolarbear.co.uk/feeds/videos.xml";
+                title = "PolarBear TV (peertube)";
               }
             ];
           }
