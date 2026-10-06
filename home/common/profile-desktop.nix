@@ -12,6 +12,7 @@
     ];
     brave.enable = lib.mkDefault true;
     chrome.enable = lib.mkDefault true;
+    firefox.enable = lib.mkDefault true;
     zen.enable = lib.mkDefault true;
     ghostty.enable = lib.mkDefault true;
   };

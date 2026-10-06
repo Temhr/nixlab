@@ -5,50 +5,63 @@
     pkgs,
     inputs,
     ...
-  }: {
+  }: let
+    nasRoot = "/mnt/mirnixnas1/home/nixALL";
+    link = config.lib.file.mkOutOfStoreSymlink;
+
+    # Build home.file entries that symlink into a NAS directory.
+    # target: dir under $HOME, source: dir on the NAS, files: relative paths
+    nasLinks = target: source: files:
+      lib.listToAttrs (map (f: {
+          name = "${target}/${f}";
+          value = {
+            source = link "${source}/${f}";
+            force = true; # replace existing files/dirs at the target
+          };
+        })
+        files);
+  in {
     options = {
-      brave = {
-        enable = lib.mkEnableOption "enables Brave browser";
-      };
-      chrome = {
-        enable = lib.mkEnableOption "enables Chrome browser";
-      };
-      edge = {
-        enable = lib.mkEnableOption "enables Edge browser";
-      };
-      zen = {
-        enable = lib.mkEnableOption "enables Zen browser";
-      };
+      brave.enable = lib.mkEnableOption "enables Brave browser";
+      chrome.enable = lib.mkEnableOption "enables Chrome browser";
+      edge.enable = lib.mkEnableOption "enables Edge browser";
+      zen.enable = lib.mkEnableOption "enables Zen browser";
+      firefox.enable = lib.mkEnableOption "links Firefox profile files to the NAS (package is installed by the NixOS module)";
     };
 
     config = lib.mkMerge [
       (lib.mkIf config.brave.enable {
-        home.packages = with pkgs; [brave]; #Privacy-oriented browser for Desktop and Laptop computerse
+        home.packages = with pkgs; [brave];
       })
       (lib.mkIf config.chrome.enable {
-        home.packages = with pkgs; [google-chrome]; #Freeware web browser developed by Google
+        home.packages = with pkgs; [google-chrome];
       })
       (lib.mkIf config.edge.enable {
-        home.packages = [pkgs.unstable.microsoft-edge]; #The web browser from Microsoft
+        home.packages = [pkgs.unstable.microsoft-edge];
       })
-      (lib.mkIf config.zen.enable (let
-        nas = "/mnt/mirnixnas1/home/nixALL/.zen";
-        link = config.lib.file.mkOutOfStoreSymlink;
-        managed = path: {
-          source = link "${nas}/${path}";
-          force = true; # replace existing files/dirs at the target
-        };
-      in {
-        home.packages = [inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta]; #
-        home.file = {
-          ".config/zen/profiles.ini"                     = managed "profiles.ini";
-          ".config/zen/uni.default/bookmarkbackups"      = managed "uni.default/bookmarkbackups";
-          ".config/zen/uni.default/containers.json"      = managed "uni.default/containers.json";
-          ".config/zen/uni.default/favicons.sqlite"      = managed "uni.default/favicons.sqlite";
-          ".config/zen/uni.default/places.sqlite"        = managed "uni.default/places.sqlite";
-          ".config/zen/uni.default/prefs.js"             = managed "uni.default/prefs.js";
-        };
-      }))
+      (lib.mkIf config.zen.enable {
+        home.packages = [inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta];
+        home.file =
+          nasLinks ".config/zen" "${nasRoot}/zen" ["profiles.ini"]
+          // nasLinks ".config/zen/uni.default" "${nasRoot}/zen/uni.default" [
+            "bookmarkbackups"
+            "containers.json"
+            "favicons.sqlite"
+            "places.sqlite"
+            "prefs.js"
+          ];
+      })
+      (lib.mkIf config.firefox.enable {
+        home.file =
+          nasLinks ".config/mozilla/firefox" "${nasRoot}/mozilla/firefox" ["profiles.ini"]
+          // nasLinks ".config/mozilla/firefox/uni.default" "${nasRoot}/mozilla/firefox/uni.default" [
+            "bookmarkbackups"
+            "containers.json"
+            "favicons.sqlite"
+            "places.sqlite"
+            "prefs.js"
+          ];
+      })
     ];
   };
 }
