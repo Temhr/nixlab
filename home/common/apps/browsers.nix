@@ -49,6 +49,7 @@
             "favicons.sqlite"
             "places.sqlite"
             "prefs.js"
+            "zen-sessions.jsonlz4"
           ];
       })
       (lib.mkIf config.firefox.enable {
