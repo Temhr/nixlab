@@ -1,5 +1,5 @@
 {...}: {
-  flake.homeModules.temhr-nixat-extra = {pkgs, ...}: {
+  flake.homeModules.temhr-nixvat-extra = {pkgs, ...}: {
     # Let home Manager install and manage itself.
     programs.home-manager.enable = true;
     #firefox.enable = true;
