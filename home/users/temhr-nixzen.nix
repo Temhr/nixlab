@@ -1,8 +1,8 @@
 {...}: {
-  flake.homeModules.temhr-nixace-extra = {pkgs, ...}: {
+  flake.homeModules.temhr-nixzen-extra = {pkgs, ...}: {
     # Let home Manager install and manage itself.
     programs.home-manager.enable = true;
-    firefox.enable = lib.mkDefault true;
+    #firefox.enable = lib.mkDefault true;
 
     home.packages = with pkgs; [
       # steam
