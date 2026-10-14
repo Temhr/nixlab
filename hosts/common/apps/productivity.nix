@@ -24,7 +24,7 @@
       (lib.mkIf config.calibre.enable {
         environment.systemPackages = with pkgs; [calibre]; # Comprehensive e-book software
       })
-      (lib.mkIf (cfg.suite == "calligra" || cfg.suite == "cc" || cfg.suite == "lca" || || cfg.suite == "all") {
+      (lib.mkIf (cfg.suite == "calligra" || cfg.suite == "cc" || cfg.suite == "lca" || cfg.suite == "all") {
         environment.systemPackages = with pkgs; [kdePackages.calligra]; # Office and graphic art suite by KDE
       })
       (lib.mkIf (cfg.suite == "collabora" || cfg.suite == "cc" || cfg.suite == "all" || cfg.suite == "lco") {
