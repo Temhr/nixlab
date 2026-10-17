@@ -346,6 +346,7 @@
             enable-signup = false;
             enable-login = cfg.auth.enable;
             enable-reservations = cfg.auth.enable;
+            enable-metrics = true;
           };
 
           cacheConfig = lib.optionalAttrs (cfg.cacheFile != "") {
