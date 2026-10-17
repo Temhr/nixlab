@@ -26,13 +26,14 @@
 
       # NFS mount points (destinations that require mount verification)
       NFS_MOUNTS=(
-          "/mnt/mirnixace"
-          "/mnt/mirnixsun"
-          "/mnt/mirnixtop"
-          "/mnt/mirnixvat"
-          "/mnt/mirnixzen"
-          "/mnt/mirnixnas1"
-          "/mnt/mirnixnas2"
+        "/mirror"
+        "/mnt/mirnixace"
+        "/mnt/mirnixsun"
+        "/mnt/mirnixtop"
+        "/mnt/mirnixvat"
+        "/mnt/mirnixzen"
+        "/mnt/mirnixnas1"
+        "/mnt/mirnixnas2"
       )
 
       # Rsync options

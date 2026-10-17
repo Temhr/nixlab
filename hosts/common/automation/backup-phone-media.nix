@@ -6,9 +6,8 @@
       src="/mirror/phshare/photos"
       dst="/mirror/Hard-Drive-Backup/Pictures/phshare"
 
-      mkdir -p "$dst"
-
       if [ -d "$src" ]; then
+        mkdir -p "$dst"
         shopt -s nullglob
         for f in "$src"/*; do
           [ -e "$f" ] || continue  # nothing to do
@@ -36,6 +35,7 @@
   in {
     systemd.services.backup-phone-media = {
       description = "Move photos from phshare to Hard-Drive-Backup";
+      unitConfig.RequiresMountsFor = ["/mirror"];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${photoMoveScript}/bin/backup-phone-media";

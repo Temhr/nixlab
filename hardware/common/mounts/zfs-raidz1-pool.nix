@@ -202,6 +202,16 @@
           extraNfsdConfig = "";
         });
 
+        # Don't start the NFS server (and its exportfs) until the pool is mounted,
+        # otherwise it exports the bare /mirror directory on the root disk.
+        systemd.services.nfs-server.unitConfig.RequiresMountsFor = lib.mkIf cfg.nfs.enable [
+          (
+            if cfg.nfs.exportPath != ""
+            then cfg.nfs.exportPath
+            else cfg.mountPoint
+          )
+        ];
+
         # Open firewall ports for NFS
         networking.firewall = lib.mkIf cfg.nfs.enable {
           allowedTCPPorts = [111 2049 cfg.nfs.statdPort cfg.nfs.lockdPort cfg.nfs.mountdPort 20048];
