@@ -147,32 +147,29 @@
         # ZFS health monitoring service
         systemd.services.zfs-health-check = lib.mkIf cfg.enableMonitoring {
           description = "ZFS Pool Health Check";
-          path = [config.boot.zfs.package];
+          path =
+            [config.boot.zfs.package pkgs.util-linux]
+            ++ lib.optional (cfg.alertEmail != "") pkgs.mailutils;
           serviceConfig = {
             Type = "oneshot";
             ExecStart = toString (pkgs.writeShellScript "zfs-health-check" ''
               POOL="${cfg.poolName}"
 
               # Check pool status
-              STATUS=$(zpool status -x "$POOL")
+              HEALTH=$(zpool list -H -o health "$POOL" 2>&1)
 
-              if [ "$STATUS" != "all pools are healthy" ]; then
-                echo "WARNING: ZFS pool $POOL is not healthy!"
-                echo "$STATUS"
-
-                # Log to journal
-                logger -t zfs-health-check "ZFS pool $POOL health issue detected"
-
+              if [ "$HEALTH" != "ONLINE" ]; then
+                echo "WARNING: ZFS pool $POOL health is: $HEALTH"
+                zpool status "$POOL"
+                logger -t zfs-health-check "ZFS pool $POOL health: $HEALTH"
                 ${lib.optionalString (cfg.alertEmail != "") ''
                 # Send email alert if configured
-                echo "$STATUS" | mail -s "ZFS Pool Alert: $POOL degraded" ${cfg.alertEmail}
+                zpool status "$POOL" | mail -s "ZFS Pool Alert: $POOL $HEALTH" ${cfg.alertEmail}
               ''}
-
                 exit 1
               fi
 
               echo "ZFS pool $POOL is healthy"
-              exit 0
             '');
           };
         };
