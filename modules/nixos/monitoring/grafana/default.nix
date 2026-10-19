@@ -216,7 +216,7 @@
             folder = "maintenance";
           };
           system-overview = {
-            path = "${dashboardsDir}/system-overview-v3.json";
+            path = "${dashboardsDir}/system-overview-v4.json";
             folder = "maintenance";
           };
         };
