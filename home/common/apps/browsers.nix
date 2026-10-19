@@ -41,27 +41,27 @@
       })
       (lib.mkIf config.zen.enable {
         home.packages = [inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.beta];
-        home.file =
-          nasLinks ".config/zen" "${nasRoot}/zen" ["profiles.ini"]
-          // nasLinks ".config/zen/uni.default" "${nasRoot}/zen/uni.default" [
+        #home.file =
+          #nasLinks ".config/zen" "${nasRoot}/zen" ["profiles.ini"]
+          #// nasLinks ".config/zen/uni.default" "${nasRoot}/zen/uni.default" [
             #"bookmarkbackups"
-            "containers.json"
-            "favicons.sqlite"
-            "places.sqlite"
-            "prefs.js"
-            "zen-sessions.jsonlz4"
-          ];
+            #"containers.json"
+            #"favicons.sqlite"
+            #"places.sqlite"
+            #"prefs.js"
+            #"zen-sessions.jsonlz4"
+          #];
       })
       (lib.mkIf config.firefox.enable {
-        home.file =
-          nasLinks ".config/mozilla/firefox" "${nasRoot}/mozilla/firefox" ["profiles.ini"]
-          // nasLinks ".config/mozilla/firefox/uni.default" "${nasRoot}/mozilla/firefox/uni.default" [
+        #home.file =
+          #nasLinks ".config/mozilla/firefox" "${nasRoot}/mozilla/firefox" ["profiles.ini"]
+          #// nasLinks ".config/mozilla/firefox/uni.default" "${nasRoot}/mozilla/firefox/uni.default" [
             #"bookmarkbackups"
-            "containers.json"
-            "favicons.sqlite"
-            "places.sqlite"
-            "prefs.js"
-          ];
+            #"containers.json"
+            #"favicons.sqlite"
+            #"places.sqlite"
+            #"prefs.js"
+          #];
       })
     ];
   };
