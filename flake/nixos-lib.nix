@@ -197,5 +197,105 @@
         ExecStart = "${pkgs.coreutils}/bin/chown -R ${user}:${group} ${dataDir}";
       };
     };
+
+    # ---------------------------------------------------------------------------
+    # mkWalSelfHeal
+    # Returns a NixOS config fragment (merge it into the service module's config
+    # with lib.mkMerge) that recovers a service whose write-ahead log is corrupt.
+    #
+    # How it works:
+    #   1. The service gets a start limit (3 failed starts in 5 minutes). When
+    #      it trips, systemd marks the unit failed and fires OnFailure.
+    #   2. <unit>-wal-recover.service runs as root. It only acts if the unit's
+    #      recent journal matches errorPattern, so unrelated failures never get
+    #      data moved around.
+    #   3. It moves walDir aside as walDir.broken-<timestamp>, recreates an empty
+    #      walDir with the right ownership, resets the failed state and starts
+    #      the unit again.
+    #   4. At most `keep` quarantined copies are retained, and recovery runs at
+    #      most once per cooldownSeconds, so a persistent fault (full disk, bad
+    #      hardware) cannot loop forever and eat data.
+    #
+    # Cost: whatever was only in the WAL (the last few minutes of data) is lost.
+    # This is a safety net, not a repair. If it fires often, find the cause.
+    #
+    # Usage (in a service module):
+    #   config = lib.mkIf cfg.enable (lib.mkMerge [
+    #     { ...existing config... }
+    #     (nixlabLib.mkWalSelfHeal {
+    #       inherit pkgs;
+    #       unit  = "loki";
+    #       walDir = "${cfg.dataDir}/wal";
+    #       user  = cfg.user;
+    #       group = cfg.group;
+    #     })
+    #   ]);
+    # ---------------------------------------------------------------------------
+    mkWalSelfHeal = {
+      pkgs,
+      unit,
+      walDir,
+      user,
+      group,
+      # Extended regex, matched case-insensitively against the unit's journal.
+      errorPattern ? "segments are not sequential|wal.*corrupt|corrupt.*wal|checkpoint.*corrupt",
+      keep ? 2,
+      cooldownSeconds ? 3600,
+    }: let
+      recoverUnit = "${unit}-wal-recover";
+      script = pkgs.writeShellScript recoverUnit ''
+        set -eu
+        export PATH=${lib.makeBinPath [pkgs.coreutils pkgs.gnugrep pkgs.systemd]}
+
+        stamp=/var/lib/${recoverUnit}/last-recovery
+        now=$(date +%s)
+
+        if [ -f "$stamp" ]; then
+          last=$(cat "$stamp")
+          if [ $((now - last)) -lt ${toString cooldownSeconds} ]; then
+            echo "${recoverUnit}: last recovery was under ${toString cooldownSeconds}s ago, not recovering again"
+            exit 0
+          fi
+        fi
+
+        if ! journalctl -u ${unit}.service --since "-15min" --no-pager -o cat \
+            | grep -qiE ${lib.escapeShellArg errorPattern}; then
+          echo "${recoverUnit}: no WAL error in recent ${unit} logs, leaving data alone"
+          exit 0
+        fi
+
+        if [ ! -d ${lib.escapeShellArg walDir} ]; then
+          echo "${recoverUnit}: ${walDir} does not exist, nothing to move"
+          exit 0
+        fi
+
+        dest=${lib.escapeShellArg walDir}.broken-$(date +%Y%m%d-%H%M%S)
+        echo "${recoverUnit}: moving ${walDir} to $dest"
+        mv ${lib.escapeShellArg walDir} "$dest"
+        install -d -m 0770 -o ${user} -g ${group} ${lib.escapeShellArg walDir}
+        echo "$now" > "$stamp"
+
+        # Keep only the newest ${toString keep} quarantined copies.
+        ls -1d ${lib.escapeShellArg walDir}.broken-* 2>/dev/null | sort | head -n -${toString keep} | xargs -r rm -rf || true
+
+        systemctl reset-failed ${unit}.service
+        systemctl start ${unit}.service
+      '';
+    in {
+      systemd.services.${unit}.unitConfig = {
+        StartLimitIntervalSec = 300;
+        StartLimitBurst = 3;
+        OnFailure = ["${recoverUnit}.service"];
+      };
+
+      systemd.services.${recoverUnit} = {
+        description = "Recover ${unit} from a corrupt write-ahead log";
+        serviceConfig = {
+          Type = "oneshot";
+          StateDirectory = recoverUnit;
+          ExecStart = script;
+        };
+      };
+    };
   };
 }

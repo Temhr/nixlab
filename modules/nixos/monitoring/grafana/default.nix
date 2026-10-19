@@ -27,11 +27,16 @@
 
     # Datasource provisioning: one merged YAML file, same JSON→YAML pattern
     # used by Loki and ntfy's own config generation.
+    #
+    # Grafana plugin ids are case-sensitive and lowercase ("prometheus",
+    # "loki"). A type such as "Loki" provisions fine but shows up as a
+    # missing plugin, so the type is normalised here.
     datasourcesConfig = {
       apiVersion = 1;
       datasources =
         map (ds: {
-          inherit (ds) name type url access isDefault editable jsonData;
+          inherit (ds) name url access isDefault editable jsonData;
+          type = lib.toLower ds.type;
         })
         cfg.provisioning.datasources;
     };
@@ -85,6 +90,7 @@
     imports = [
       self.nixosModules.systm--ports-grafana
     ];
+
     # ============================================================================
     # OPTIONS
     # ============================================================================
@@ -163,13 +169,36 @@
         description = "Extra users to add to the groups";
       };
 
+      # ── Secrets ──────────────────────────────────────────────────────────────
+      # Both options are plain strings on purpose: a `path` type would copy a
+      # literal path into the world-readable Nix store. Point them at runtime
+      # files (sops-nix, agenix, ...) that the grafana user can read.
       credentialsFile = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
+        type = lib.types.nullOr lib.types.str;
         default = null;
+        example = "/run/secrets/GRAFANA_ADMIN_PASSWORD";
         description = ''
-          Path to a file containing the raw admin password (no KEY=VALUE wrapper).
-          The service reads it at start time and writes a temporary credentials env
-          file owned by the grafana user. If null, Grafana uses its built-in default.
+          Path to a file containing the raw admin password (no KEY=VALUE
+          wrapper). Passed to Grafana via GF_SECURITY_ADMIN_PASSWORD__FILE.
+
+          Note that Grafana only applies this when it first creates its
+          database. To change the password of an existing instance use
+          `grafana cli admin reset-admin-password`.
+        '';
+      };
+
+      secretKeyFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "/run/secrets/GRAFANA_SECRET_KEY";
+        description = ''
+          Path to a file containing Grafana's `secret_key`, used to encrypt
+          secrets stored in the database. Passed to Grafana via
+          GF_SECURITY_SECRET_KEY__FILE. If null, Grafana falls back to its
+          well-known built-in default key, which is insecure.
+
+          WARNING: changing the key on an existing instance makes secrets
+          already stored in the database unreadable. Back up grafana.db first.
         '';
       };
 
@@ -231,7 +260,10 @@
             type = lib.mkOption {
               type = lib.types.str;
               example = "prometheus";
-              description = "Grafana datasource plugin type (e.g. prometheus, loki).";
+              description = ''
+                Grafana datasource plugin id (e.g. prometheus, loki). Plugin
+                ids are lowercase; the value is lowercased before provisioning.
+              '';
             };
             url = lib.mkOption {
               type = lib.types.str;
@@ -278,6 +310,10 @@
     # CONFIG
     # ============================================================================
     config = lib.mkIf cfg.enable {
+      warnings =
+        lib.optional (cfg.secretKeyFile == null)
+        "services.grafana-nixlab: secretKeyFile is not set, so Grafana uses its insecure built-in default secret_key.";
+
       # Guard: catch unknown dashboard names before anything tries to run.
       assertions = [
         (nixlabLib.mkSslAssertion {
@@ -309,14 +345,12 @@
         {
           assertion = let
             baseKeys = builtins.attrNames cfg.dashboards;
-            extraKeys = cfg.extraDashboards;
-            dupes = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
+            dupes = builtins.filter (k: builtins.elem k baseKeys) cfg.extraDashboards;
           in
             dupes == [];
           message = let
             baseKeys = builtins.attrNames cfg.dashboards;
-            extraKeys = cfg.extraDashboards;
-            dupes = builtins.filter (k: builtins.elem k baseKeys) extraKeys;
+            dupes = builtins.filter (k: builtins.elem k baseKeys) cfg.extraDashboards;
           in ''
             services.grafana-nixlab.extraDashboards names that clash with
             built-in dashboards: ${lib.concatStringsSep ", " dupes}.
@@ -383,22 +417,31 @@
         wantedBy = ["multi-user.target"];
         after = ["network.target" "grafana-permissions.service"];
 
-        environment = {
-          GF_PATHS_DATA = "${cfg.dataDir}/data";
-          GF_PATHS_LOGS = "${cfg.dataDir}/logs";
-          GF_PATHS_PLUGINS = "${cfg.dataDir}/plugins";
-          GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
-          GF_LOG_MODE = "console file";
-          GF_LOG_LEVEL = "info";
-          GF_SERVER_HTTP_PORT = toString cfg.port;
-          GF_SERVER_HTTP_ADDR = cfg.listenAddress;
-          GF_SERVER_DOMAIN = serverDomain;
-          GF_SERVER_ROOT_URL = rootUrl;
-          GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
-          GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
-          GF_DATABASE_TYPE = "sqlite3";
-          GF_DATABASE_PATH = "${cfg.dataDir}/data/grafana.db";
-        };
+        environment =
+          {
+            GF_PATHS_DATA = "${cfg.dataDir}/data";
+            GF_PATHS_LOGS = "${cfg.dataDir}/logs";
+            GF_PATHS_PLUGINS = "${cfg.dataDir}/plugins";
+            GF_PATHS_PROVISIONING = "${cfg.dataDir}/provisioning";
+            GF_LOG_MODE = "console file";
+            GF_LOG_LEVEL = "info";
+            GF_SERVER_HTTP_PORT = toString cfg.port;
+            GF_SERVER_HTTP_ADDR = cfg.listenAddress;
+            GF_SERVER_DOMAIN = serverDomain;
+            GF_SERVER_ROOT_URL = rootUrl;
+            GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
+            GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
+            GF_DATABASE_TYPE = "sqlite3";
+            GF_DATABASE_PATH = "${cfg.dataDir}/data/grafana.db";
+          }
+          # Grafana reads any GF_*__FILE variable from the named file, so the
+          # secrets never enter the Nix store or the unit's environment.
+          // lib.optionalAttrs (cfg.secretKeyFile != null) {
+            GF_SECURITY_SECRET_KEY__FILE = cfg.secretKeyFile;
+          }
+          // lib.optionalAttrs (cfg.credentialsFile != null) {
+            GF_SECURITY_ADMIN_PASSWORD__FILE = cfg.credentialsFile;
+          };
 
         serviceConfig =
           nixlabLib.mkServiceHardening {
@@ -412,6 +455,12 @@
             ExecStart = "${cfg.package}/bin/grafana server --homepath=${cfg.package}/share/grafana";
             Restart = "on-failure";
             RestartSec = "10s";
+
+            # Grafana talks to backend plugins (prometheus, loki, ...) over
+            # unix domain sockets (hashicorp go-plugin). mkServiceHardening only
+            # allows AF_INET/AF_INET6, which makes every plugin binary fail its
+            # startup handshake. This overrides the hardening default.
+            RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
 
             ExecStartPre = [
               # Step 1 — runs as root (+):
@@ -454,14 +503,16 @@
                   done
                 fi
 
-                # ── clean Grafana SQLite database ────────────────────────
+                # ── clean Grafana SQLite database ────────────────────────────
                 db="${cfg.dataDir}/data/grafana.db"
                 if [ -f "$db" ]; then
-                  known_sql="${lib.concatStringsSep ","
-                  (map (n: "'${n}'") (builtins.attrNames allDashboards))}"
+                  known_sql="${
+                  lib.concatStringsSep ","
+                  (map (n: "'${n}'") (builtins.attrNames allDashboards))
+                }"
 
                   # Delete provisioned dashboards whose provider is no longer known.
-                  ${pkgs.sqlite}/bin/sqlite3 "$db"                     "DELETE FROM dashboard
+                  ${pkgs.sqlite}/bin/sqlite3 "$db" "DELETE FROM dashboard
                       WHERE id IN (
                         SELECT d.id FROM dashboard d
                         INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
@@ -473,23 +524,22 @@
                   # This catches the case where a dashboard file was replaced with
                   # a new version that has a different uid — Grafana won't update
                   # the title or uid itself, so we force a clean re-provision.
-                  ${lib.concatStringsSep "
-                " (lib.mapAttrsToList (name: dashboard: ''
-                      json_uid=$(${pkgs.jq}/bin/jq -r '.uid // empty' ${dashboard.path} 2>/dev/null || true)
-                      if [ -n "$json_uid" ]; then
-                        ${pkgs.sqlite}/bin/sqlite3 "$db"                         "DELETE FROM dashboard
-                            WHERE id IN (
-                              SELECT d.id FROM dashboard d
-                              INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
-                              WHERE dp.name = '${name}' AND d.uid != '$json_uid'
-                            );"
-                      fi
-                    '')
-                    allDashboards)}
+                  ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
+                    json_uid=$(${pkgs.jq}/bin/jq -r '.uid // empty' ${dashboard.path} 2>/dev/null || true)
+                    if [ -n "$json_uid" ]; then
+                      ${pkgs.sqlite}/bin/sqlite3 "$db" "DELETE FROM dashboard
+                          WHERE id IN (
+                            SELECT d.id FROM dashboard d
+                            INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
+                            WHERE dp.name = '${name}' AND d.uid != '$json_uid'
+                          );"
+                    fi
+                  '')
+                  allDashboards)}
 
                   # Delete orphaned folder records — folders with no remaining
                   # child dashboards and no provisioning entry of their own.
-                  ${pkgs.sqlite}/bin/sqlite3 "$db"                     "DELETE FROM dashboard
+                  ${pkgs.sqlite}/bin/sqlite3 "$db" "DELETE FROM dashboard
                       WHERE is_folder = 1
                         AND id NOT IN (
                           SELECT DISTINCT folder_id FROM dashboard
@@ -516,16 +566,10 @@
                 )}
               ''}"
 
-              # Step 2 — runs as grafana user: copy JSON files and write
-              # provisioning YAML configs for every dashboard in allDashboards.
+              # Step 2 — runs as grafana user: write the datasource config and
+              # copy JSON files + write provisioning YAML for every dashboard.
               (pkgs.writeShellScript "grafana-provision" (
-                lib.optionalString (cfg.credentialsFile != null) ''
-                  echo "GRAFANA_ADMIN_PASSWORD=$(cat ${cfg.credentialsFile})" \
-                    > /run/grafana-credentials.env
-                  chmod 600 /run/grafana-credentials.env
-                ''
-                # NEW — datasource provisioning
-                + lib.optionalString (cfg.provisioning.datasources != []) ''
+                lib.optionalString (cfg.provisioning.datasources != []) ''
                   ${pkgs.remarshal}/bin/remarshal \
                     -i ${datasourcesJsonFile} \
                     -o ${cfg.dataDir}/provisioning/datasources/datasources.yaml.tmp \
@@ -561,9 +605,6 @@
                   allDashboards)
               ))
             ];
-          }
-          // lib.optionalAttrs (cfg.credentialsFile != null) {
-            EnvironmentFile = "/run/grafana-credentials.env";
           };
       };
 

@@ -136,7 +136,7 @@
     # ============================================================================
     # CONFIG - What happens when the service is enabled
     # ============================================================================
-    config = lib.mkIf cfg.enable {
+    config = lib.mkIf cfg.enable (lib.mkMerge [{
       # ============================================================================
       # ASSERTIONS - Catch invalid option combinations at eval time
       # ============================================================================
@@ -243,6 +243,9 @@
             ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
             Restart = "on-failure";
             RestartSec = "10s";
+            # Loki flushes in-memory data to chunks on stop; the default 90s
+            # timeout can SIGKILL it mid-flush and leave a damaged WAL.
+            TimeoutStopSec = "5min";
           };
 
         preStart = let
@@ -317,6 +320,7 @@
               wal = {
                 enabled = true;
                 dir = "${cfg.dataDir}/wal";
+                flush_on_shutdown = true;
               };
               lifecycler = {
                 address = "127.0.0.1";
@@ -535,7 +539,15 @@
         '')
         pkgs.jq
       ];
-    };
+    }
+    # Automatic recovery from a corrupt write-ahead log.
+    (nixlabLib.mkWalSelfHeal {
+      inherit pkgs;
+      unit = "loki";
+      walDir = "${cfg.dataDir}/wal";
+      user = cfg.user;
+      group = cfg.group;
+    })]);
   };
 }
 /*
@@ -838,3 +850,4 @@ SECURITY BEST PRACTICES
 8. Use TLS for remote Alloy instances
 9. Backup configuration files
 */
+

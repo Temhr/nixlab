@@ -11,6 +11,10 @@ alias nixs='nix search'
 alias nixsh='nix shell'
 alias nscowsay='nix shell nixpkgs#cowsay'
 
+# --- Nix dev commands ---
+alias nfmt='nix fmt .'
+alias ncheck='nix flake check'
+
 # --- NixOS rebuild — local flake ($NIXLAB) ---
 alias lswitch="sudo nixos-rebuild switch --flake $NIXLAB"
 alias ltest="sudo nixos-rebuild test   --flake $NIXLAB"

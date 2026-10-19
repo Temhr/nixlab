@@ -7,7 +7,7 @@
       options = "--delete-older-than 5d";
     };
 
-    environment.systemPackages = [ pkgs.nix ]; # ensure nix-collect-garbage is available
+    environment.systemPackages = [pkgs.nix]; # ensure nix-collect-garbage is available
 
     systemd.services.boot-gc = {
       description = "Garbage-collect old generations when /boot is nearly full";
@@ -50,10 +50,10 @@
 
     systemd.timers.boot-gc = {
       description = "Timer for boot-gc";
-      wantedBy = [ "timers.target" ];
+      wantedBy = ["timers.target"];
       timerConfig = {
-        OnActiveSec = "10min";    # 10 min after the timer itself starts/is enabled
-        OnUnitActiveSec = "1h";   # then hourly after each run
+        OnActiveSec = "10min"; # 10 min after the timer itself starts/is enabled
+        OnUnitActiveSec = "1h"; # then hourly after each run
         Persistent = true;
       };
     };

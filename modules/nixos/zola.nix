@@ -517,3 +517,4 @@ Validate site (checks links, templates, etc.):
 Verbose build:
   cd /var/www/my-blog && zola build --verbose
 */
+

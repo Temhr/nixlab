@@ -157,7 +157,6 @@
     # CONFIG - What is created when the service is enabled
     # ============================================================================
     config = lib.mkIf cfg.enable {
-
       # --------------------------------------------------------------------------
       # DIRECTORY INIT SERVICE
       # A dedicated oneshot service creates the data directories before the
