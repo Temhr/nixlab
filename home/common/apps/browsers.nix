@@ -44,7 +44,7 @@
         home.file =
           nasLinks ".config/zen" "${nasRoot}/zen" ["profiles.ini"]
           // nasLinks ".config/zen/uni.default" "${nasRoot}/zen/uni.default" [
-            "bookmarkbackups"
+            #"bookmarkbackups"
             "containers.json"
             "favicons.sqlite"
             "places.sqlite"
@@ -56,7 +56,7 @@
         home.file =
           nasLinks ".config/mozilla/firefox" "${nasRoot}/mozilla/firefox" ["profiles.ini"]
           // nasLinks ".config/mozilla/firefox/uni.default" "${nasRoot}/mozilla/firefox/uni.default" [
-            "bookmarkbackups"
+            #"bookmarkbackups"
             "containers.json"
             "favicons.sqlite"
             "places.sqlite"
