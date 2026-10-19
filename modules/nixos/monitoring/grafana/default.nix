@@ -215,8 +215,8 @@
             path = "${dashboardsDir}/maintenance-checklist.json";
             folder = "maintenance";
           };
-          system-overview = {
-            path = "${dashboardsDir}/system-overview-v4.json";
+          system-overview-v5 = {
+            path = "${dashboardsDir}/system-overview-v5.json";
             folder = "maintenance";
           };
         };
