@@ -24,20 +24,20 @@
 
     ## DEVELOPMENT
     blender.enable = true; #3D Creation/Animation/Publishing System
-    godot.enable = true; #Free and Open Source 2D and 3D game engine
-    vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
+    #godot.enable = true; #Free and Open Source 2D and 3D game engine
+    #vscodium.enable = true; #VS Code without MS branding/telemetry/licensing
     ## EDUCATION
     anki.enable = true; #Spaced repetition flashcard program
     ## GAMING PACKAGES
-    steam.enable = true; #Video game digital distribution service and storefront from Valve
+    #steam.enable = true; #Video game digital distribution service and storefront from Valve
     ## PRODUCTIVITY
     office.suite = "none"; # "none" "libreoffice" "collabora" "both"
     ## MEDIA PACKAGES
-    obs.enable = true; #Free and open source software for video recording and live streaming
-    spotify.enable = true; #Play music from the Spotify music service
+    #obs.enable = true; #Free and open source software for video recording and live streaming
+    #spotify.enable = true; #Play music from the Spotify music service
     vlc.enable = true; #Cross-platform media player and streaming server
     ## VIRTUALIZATIONS
-    quickemu.enable = true; #Quickly create and run optimised Windows, macOS and Linux virtual machines
+    #quickemu.enable = true; #Quickly create and run optimised Windows, macOS and Linux virtual machines
 
     ## SELF-HOSTED SERVICES
     services.waydroid-nixlab = {
