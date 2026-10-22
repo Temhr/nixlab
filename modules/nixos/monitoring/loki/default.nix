@@ -136,418 +136,420 @@
     # ============================================================================
     # CONFIG - What happens when the service is enabled
     # ============================================================================
-    config = lib.mkIf cfg.enable (lib.mkMerge [{
-      # ============================================================================
-      # ASSERTIONS - Catch invalid option combinations at eval time
-      # ============================================================================
-      assertions = [
-        (nixlabLib.mkSslAssertion {
-          inherit (cfg) enableSSL domain;
-          moduleName = "services.loki-nixlab";
-        })
-      ];
-
-      # ----------------------------------------------------------------------------
-      # DIRECTORY SETUP - Create necessary directories with proper permissions
-      # ----------------------------------------------------------------------------
-      systemd.tmpfiles.rules =
-        [
-          "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/chunks 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/index 0770 ${cfg.user} ${cfg.group} -"
-          "d ${cfg.dataDir}/wal 0770 ${cfg.user} ${cfg.group} -"
-        ]
-        ++ lib.optionals cfg.enableAlloy [
-          "d /var/lib/alloy 0750 alloy alloy -"
-          "d /var/lib/alloy/data 0750 alloy alloy -"
-        ]
-        ++ lib.optionals cfg.maintenance.enable [
-          "f ${cfg.maintenance.logPath} 0666 root root - -"
+    config = lib.mkIf cfg.enable (lib.mkMerge [
+      {
+        # ============================================================================
+        # ASSERTIONS - Catch invalid option combinations at eval time
+        # ============================================================================
+        assertions = [
+          (nixlabLib.mkSslAssertion {
+            inherit (cfg) enableSSL domain;
+            moduleName = "services.loki-nixlab";
+          })
         ];
 
-      # ----------------------------------------------------------------------------
-      # USER SETUP - Create dedicated system users
-      # ----------------------------------------------------------------------------
-      users.users = lib.mkMerge (
-        [
+        # ----------------------------------------------------------------------------
+        # DIRECTORY SETUP - Create necessary directories with proper permissions
+        # ----------------------------------------------------------------------------
+        systemd.tmpfiles.rules =
+          [
+            "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
+            "d ${cfg.dataDir}/chunks 0770 ${cfg.user} ${cfg.group} -"
+            "d ${cfg.dataDir}/index 0770 ${cfg.user} ${cfg.group} -"
+            "d ${cfg.dataDir}/wal 0770 ${cfg.user} ${cfg.group} -"
+          ]
+          ++ lib.optionals cfg.enableAlloy [
+            "d /var/lib/alloy 0750 alloy alloy -"
+            "d /var/lib/alloy/data 0750 alloy alloy -"
+          ]
+          ++ lib.optionals cfg.maintenance.enable [
+            "f ${cfg.maintenance.logPath} 0666 root root - -"
+          ];
+
+        # ----------------------------------------------------------------------------
+        # USER SETUP - Create dedicated system users
+        # ----------------------------------------------------------------------------
+        users.users = lib.mkMerge (
+          [
+            {
+              ${cfg.user} = {
+                isSystemUser = true;
+                group = cfg.group;
+                home = cfg.dataDir;
+                description = "Loki service user";
+              };
+            }
+          ]
+          ++ lib.optional cfg.enableAlloy
           {
-            ${cfg.user} = {
+            alloy = {
               isSystemUser = true;
-              group = cfg.group;
-              home = cfg.dataDir;
-              description = "Loki service user";
+              group = "alloy";
+              description = "Grafana Alloy service user";
+              extraGroups = ["systemd-journal"];
             };
           }
-        ]
-        ++ lib.optional cfg.enableAlloy
-        {
-          alloy = {
-            isSystemUser = true;
-            group = "alloy";
-            description = "Grafana Alloy service user";
-            extraGroups = ["systemd-journal"];
-          };
-        }
-        ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = [cfg.group "alloy"];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
-      );
+          ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
+          (map (u: {${u} = {extraGroups = [cfg.group "alloy"];};})
+            ([config.nixlab.mainUser] ++ cfg.extraUsers))
+        );
 
-      users.groups.${cfg.group} = {};
-      users.groups.alloy = lib.mkIf cfg.enableAlloy {};
+        users.groups.${cfg.group} = {};
+        users.groups.alloy = lib.mkIf cfg.enableAlloy {};
 
-      # ----------------------------------------------------------------------------
-      # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
-      #
-      # tmpfiles' "d" rules above only create these directories if missing — they
-      # never fix ownership on an already-existing one, and a separate-mount
-      # dataDir can race tmpfiles at boot before the mount exists. This oneshot
-      # waits for the real mount and then recursively chowns, fixing both that
-      # race and any UID/GID drift from a rebuild. Two instances here since Loki
-      # and Alloy are two independently-owned data directories.
-      # ----------------------------------------------------------------------------
-      systemd.services.loki-permissions = nixlabLib.mkDataDirPermissionsService {
-        inherit pkgs;
-        dataDir = cfg.dataDir;
-        user = cfg.user;
-        group = cfg.group;
-        requiredBy = ["loki.service"];
-      };
-
-      systemd.services.alloy-permissions = lib.mkIf cfg.enableAlloy (
-        nixlabLib.mkDataDirPermissionsService {
+        # ----------------------------------------------------------------------------
+        # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
+        #
+        # tmpfiles' "d" rules above only create these directories if missing — they
+        # never fix ownership on an already-existing one, and a separate-mount
+        # dataDir can race tmpfiles at boot before the mount exists. This oneshot
+        # waits for the real mount and then recursively chowns, fixing both that
+        # race and any UID/GID drift from a rebuild. Two instances here since Loki
+        # and Alloy are two independently-owned data directories.
+        # ----------------------------------------------------------------------------
+        systemd.services.loki-permissions = nixlabLib.mkDataDirPermissionsService {
           inherit pkgs;
-          dataDir = "/var/lib/alloy";
-          user = "alloy";
-          group = "alloy";
-          requiredBy = ["alloy.service"];
-        }
-      );
+          dataDir = cfg.dataDir;
+          user = cfg.user;
+          group = cfg.group;
+          requiredBy = ["loki.service"];
+        };
 
-      # ----------------------------------------------------------------------------
-      # LOKI SERVICE - Configure the systemd service
-      # ----------------------------------------------------------------------------
-      systemd.services.loki = {
-        description = "Loki Log Aggregation System";
-        wantedBy = ["multi-user.target"];
-        after = ["network.target" "loki-permissions.service"];
-
-        serviceConfig =
-          nixlabLib.mkServiceHardening {
-            writablePaths = [cfg.dataDir];
+        systemd.services.alloy-permissions = lib.mkIf cfg.enableAlloy (
+          nixlabLib.mkDataDirPermissionsService {
+            inherit pkgs;
+            dataDir = "/var/lib/alloy";
+            user = "alloy";
+            group = "alloy";
+            requiredBy = ["alloy.service"];
           }
-          // {
-            Type = "simple";
-            User = cfg.user;
-            Group = cfg.group;
-            ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
-            Restart = "on-failure";
-            RestartSec = "10s";
-            # Loki flushes in-memory data to chunks on stop; the default 90s
-            # timeout can SIGKILL it mid-flush and leave a damaged WAL.
-            TimeoutStopSec = "5min";
-          };
+        );
 
-        preStart = let
-          lokiConfig = {
-            auth_enabled = false;
+        # ----------------------------------------------------------------------------
+        # LOKI SERVICE - Configure the systemd service
+        # ----------------------------------------------------------------------------
+        systemd.services.loki = {
+          description = "Loki Log Aggregation System";
+          wantedBy = ["multi-user.target"];
+          after = ["network.target" "loki-permissions.service"];
 
-            server = {
-              http_listen_address = cfg.listenAddress;
-              http_listen_port = cfg.port;
-              grpc_listen_port = cfg.grpcPort;
-              log_level = "info";
+          serviceConfig =
+            nixlabLib.mkServiceHardening {
+              writablePaths = [cfg.dataDir];
+            }
+            // {
+              Type = "simple";
+              User = cfg.user;
+              Group = cfg.group;
+              ExecStart = "${cfg.package}/bin/loki --config.file=${cfg.dataDir}/loki.yaml";
+              Restart = "on-failure";
+              RestartSec = "10s";
+              # Loki flushes in-memory data to chunks on stop; the default 90s
+              # timeout can SIGKILL it mid-flush and leave a damaged WAL.
+              TimeoutStopSec = "5min";
             };
 
-            common = {
-              instance_addr = "127.0.0.1";
-              path_prefix = cfg.dataDir;
-              storage = {
-                filesystem = {
-                  chunks_directory = "${cfg.dataDir}/chunks";
-                  rules_directory = "${cfg.dataDir}/rules";
-                };
-              };
-              replication_factor = 1;
-              ring = {
-                kvstore = {
-                  store = "inmemory";
-                };
-              };
-            };
+          preStart = let
+            lokiConfig = {
+              auth_enabled = false;
 
-            query_range = {
-              results_cache = {
-                cache = {
-                  embedded_cache = {
-                    enabled = true;
-                    max_size_mb = 100;
+              server = {
+                http_listen_address = cfg.listenAddress;
+                http_listen_port = cfg.port;
+                grpc_listen_port = cfg.grpcPort;
+                log_level = "info";
+              };
+
+              common = {
+                instance_addr = "127.0.0.1";
+                path_prefix = cfg.dataDir;
+                storage = {
+                  filesystem = {
+                    chunks_directory = "${cfg.dataDir}/chunks";
+                    rules_directory = "${cfg.dataDir}/rules";
                   };
                 };
-              };
-            };
-
-            schema_config = {
-              configs = [
-                {
-                  from = "2023-01-01";
-                  store = "tsdb";
-                  object_store = "filesystem";
-                  schema = "v13";
-                  index = {
-                    prefix = "index_";
-                    period = "24h";
-                  };
-                }
-              ];
-            };
-
-            limits_config = {
-              retention_period = cfg.retention;
-              max_query_series = 10000;
-              max_query_lookback = "720h";
-            };
-
-            compactor = {
-              working_directory = "${cfg.dataDir}/compactor";
-              retention_enabled = true;
-              retention_delete_delay = "2h";
-              retention_delete_worker_count = 150;
-              delete_request_store = "filesystem";
-            };
-
-            ingester = {
-              wal = {
-                enabled = true;
-                dir = "${cfg.dataDir}/wal";
-                flush_on_shutdown = true;
-              };
-              lifecycler = {
-                address = "127.0.0.1";
+                replication_factor = 1;
                 ring = {
                   kvstore = {
                     store = "inmemory";
                   };
-                  replication_factor = 1;
                 };
+              };
+
+              query_range = {
+                results_cache = {
+                  cache = {
+                    embedded_cache = {
+                      enabled = true;
+                      max_size_mb = 100;
+                    };
+                  };
+                };
+              };
+
+              schema_config = {
+                configs = [
+                  {
+                    from = "2023-01-01";
+                    store = "tsdb";
+                    object_store = "filesystem";
+                    schema = "v13";
+                    index = {
+                      prefix = "index_";
+                      period = "24h";
+                    };
+                  }
+                ];
+              };
+
+              limits_config = {
+                retention_period = cfg.retention;
+                max_query_series = 10000;
+                max_query_lookback = "720h";
+              };
+
+              compactor = {
+                working_directory = "${cfg.dataDir}/compactor";
+                retention_enabled = true;
+                retention_delete_delay = "2h";
+                retention_delete_worker_count = 150;
+                delete_request_store = "filesystem";
+              };
+
+              ingester = {
+                wal = {
+                  enabled = true;
+                  dir = "${cfg.dataDir}/wal";
+                  flush_on_shutdown = true;
+                };
+                lifecycler = {
+                  address = "127.0.0.1";
+                  ring = {
+                    kvstore = {
+                      store = "inmemory";
+                    };
+                    replication_factor = 1;
+                  };
+                };
+              };
+
+              memberlist = {
+                join_members = [];
               };
             };
 
-            memberlist = {
-              join_members = [];
+            jsonFile =
+              builtins.toFile "loki.json"
+              (builtins.toJSON lokiConfig);
+
+            yamlTmp = "${cfg.dataDir}/loki.yaml.tmp";
+          in ''
+            ${pkgs.remarshal}/bin/remarshal \
+              -i ${jsonFile} \
+              -o ${yamlTmp} \
+              -if json \
+              -of yaml
+
+            install -m 660 -o ${cfg.user} -g ${cfg.group} ${yamlTmp} ${cfg.dataDir}/loki.yaml
+
+            mkdir -p ${cfg.dataDir}/data ${cfg.dataDir}/chunks ${cfg.dataDir}/wal ${cfg.dataDir}/compactor
+            chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}
+          '';
+        };
+
+        # ----------------------------------------------------------------------------
+        # GRAFANA ALLOY SERVICE - Enable if requested
+        # ----------------------------------------------------------------------------
+        systemd.services.alloy = lib.mkIf cfg.enableAlloy {
+          description = "Grafana Alloy Telemetry Collector";
+          wantedBy = ["multi-user.target"];
+          after = ["network.target" "loki.service" "alloy-permissions.service"];
+
+          serviceConfig =
+            nixlabLib.mkServiceHardening {
+              writablePaths = ["/var/lib/alloy"];
+              allowJIT = true;
+            }
+            // {
+              Type = "simple";
+              User = "alloy";
+              Group = "alloy";
+              ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
+              Restart = "on-failure";
+              RestartSec = "10s";
             };
-          };
 
-          jsonFile =
-            builtins.toFile "loki.json"
-            (builtins.toJSON lokiConfig);
-
-          yamlTmp = "${cfg.dataDir}/loki.yaml.tmp";
-        in ''
-          ${pkgs.remarshal}/bin/remarshal \
-            -i ${jsonFile} \
-            -o ${yamlTmp} \
-            -if json \
-            -of yaml
-
-          install -m 660 -o ${cfg.user} -g ${cfg.group} ${yamlTmp} ${cfg.dataDir}/loki.yaml
-
-          mkdir -p ${cfg.dataDir}/data ${cfg.dataDir}/chunks ${cfg.dataDir}/wal ${cfg.dataDir}/compactor
-          chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}
-        '';
-      };
-
-      # ----------------------------------------------------------------------------
-      # GRAFANA ALLOY SERVICE - Enable if requested
-      # ----------------------------------------------------------------------------
-      systemd.services.alloy = lib.mkIf cfg.enableAlloy {
-        description = "Grafana Alloy Telemetry Collector";
-        wantedBy = ["multi-user.target"];
-        after = ["network.target" "loki.service" "alloy-permissions.service"];
-
-        serviceConfig =
-          nixlabLib.mkServiceHardening {
-            writablePaths = ["/var/lib/alloy"];
-            allowJIT = true;
-          }
-          // {
-            Type = "simple";
-            User = "alloy";
-            Group = "alloy";
-            ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
-            Restart = "on-failure";
-            RestartSec = "10s";
-          };
-
-        preStart = let
-          # Base configuration in Alloy's River configuration language
-          baseAlloyConfig = ''
-            // Loki client for sending logs
-            loki.write "local" {
-              endpoint {
-                url = "http://localhost:${toString cfg.port}/loki/api/v1/push"
-              }
-            }
-
-            // Collect systemd journal logs
-            loki.source.journal "systemd" {
-              max_age = "12h"
-              labels = {
-                job  = "systemd-journal",
-                host = "${config.networking.hostName}",
+          preStart = let
+            # Base configuration in Alloy's River configuration language
+            baseAlloyConfig = ''
+              // Loki client for sending logs
+              loki.write "local" {
+                endpoint {
+                  url = "http://localhost:${toString cfg.port}/loki/api/v1/push"
+                }
               }
 
-              forward_to = [loki.process.systemd.receiver]
-            }
-
-            loki.process "systemd" {
-              forward_to = [loki.write.local.receiver]
-
-              stage.static_labels {
-                values = {
+              // Collect systemd journal logs
+              loki.source.journal "systemd" {
+                max_age = "12h"
+                labels = {
                   job  = "systemd-journal",
                   host = "${config.networking.hostName}",
                 }
+
+                forward_to = [loki.process.systemd.receiver]
               }
 
-              stage.label_keep {
-                values = ["job", "host", "unit"]
-              }
-            }
+              loki.process "systemd" {
+                forward_to = [loki.write.local.receiver]
 
-            // Collect system log files
-            local.file_match "varlogs" {
-              path_targets = [{
-                __address__ = "localhost",
-                __path__    = "/var/log/*.log",
-              }]
-            }
+                stage.static_labels {
+                  values = {
+                    job  = "systemd-journal",
+                    host = "${config.networking.hostName}",
+                  }
+                }
 
-            loki.source.file "varlogs" {
-              targets    = local.file_match.varlogs.targets
-              forward_to = [loki.process.varlogs.receiver]
-            }
-
-            loki.process "varlogs" {
-              forward_to = [loki.write.local.receiver]
-
-              stage.static_labels {
-                values = {
-                  job  = "varlogs",
-                  host = "${config.networking.hostName}",
+                stage.label_keep {
+                  values = ["job", "host", "unit"]
                 }
               }
-            }
+
+              // Collect system log files
+              local.file_match "varlogs" {
+                path_targets = [{
+                  __address__ = "localhost",
+                  __path__    = "/var/log/*.log",
+                }]
+              }
+
+              loki.source.file "varlogs" {
+                targets    = local.file_match.varlogs.targets
+                forward_to = [loki.process.varlogs.receiver]
+              }
+
+              loki.process "varlogs" {
+                forward_to = [loki.write.local.receiver]
+
+                stage.static_labels {
+                  values = {
+                    job  = "varlogs",
+                    host = "${config.networking.hostName}",
+                  }
+                }
+              }
+            '';
+
+            # Maintenance log configuration
+            maintenanceAlloyConfig = lib.optionalString cfg.maintenance.enable ''
+              // Collect maintenance logs
+              local.file_match "maintenance" {
+                path_targets = [{
+                  __address__ = "localhost",
+                  __path__    = "${cfg.maintenance.logPath}",
+                }]
+              }
+
+              loki.source.file "maintenance" {
+                targets    = local.file_match.maintenance.targets
+                forward_to = [loki.process.maintenance.receiver]
+              }
+
+              loki.process "maintenance" {
+                forward_to = [loki.write.local.receiver]
+
+                // Parse JSON logs
+                stage.json {
+                  expressions = {
+                    timestamp = "timestamp",
+                    level     = "level",
+                    section   = "section",
+                    task      = "task",
+                    status    = "status",
+                    notes     = "notes",
+                    user      = "user",
+                  }
+                }
+
+                // Extract labels
+                stage.labels {
+                  values = {
+                    job     = "maintenance-log",
+                    host    = "${config.networking.hostName}",
+                    level   = "",
+                    section = "",
+                    status  = "",
+                    user    = "",
+                  }
+                }
+
+                // Parse timestamp
+                stage.timestamp {
+                  source = "timestamp"
+                  format = "RFC3339"
+                }
+              }
+            '';
+
+            alloyConfig = baseAlloyConfig + maintenanceAlloyConfig;
+
+            # Write config to file using writeText to avoid shell escaping issues
+            configFile = pkgs.writeText "alloy-config.alloy" alloyConfig;
+          in ''
+            # Copy Alloy configuration
+            install -m 640 -o alloy -g alloy ${configFile} /var/lib/alloy/config.alloy
+
+            # Ensure data directory exists
+            mkdir -p /var/lib/alloy/data
+            chown -R alloy:alloy /var/lib/alloy
           '';
+        };
 
-          # Maintenance log configuration
-          maintenanceAlloyConfig = lib.optionalString cfg.maintenance.enable ''
-            // Collect maintenance logs
-            local.file_match "maintenance" {
-              path_targets = [{
-                __address__ = "localhost",
-                __path__    = "${cfg.maintenance.logPath}",
-              }]
-            }
-
-            loki.source.file "maintenance" {
-              targets    = local.file_match.maintenance.targets
-              forward_to = [loki.process.maintenance.receiver]
-            }
-
-            loki.process "maintenance" {
-              forward_to = [loki.write.local.receiver]
-
-              // Parse JSON logs
-              stage.json {
-                expressions = {
-                  timestamp = "timestamp",
-                  level     = "level",
-                  section   = "section",
-                  task      = "task",
-                  status    = "status",
-                  notes     = "notes",
-                  user      = "user",
-                }
-              }
-
-              // Extract labels
-              stage.labels {
-                values = {
-                  job     = "maintenance-log",
-                  host    = "${config.networking.hostName}",
-                  level   = "",
-                  section = "",
-                  status  = "",
-                  user    = "",
-                }
-              }
-
-              // Parse timestamp
-              stage.timestamp {
-                source = "timestamp"
-                format = "RFC3339"
-              }
-            }
+        # ----------------------------------------------------------------------------
+        # NGINX REVERSE PROXY - Only configured if domain is set
+        # ----------------------------------------------------------------------------
+        services.nginx.enable = lib.mkIf (cfg.domain != null) true;
+        services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
+          inherit (cfg) domain listenAddress port enableSSL;
+          extraConfig = ''
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
           '';
+        };
 
-          alloyConfig = baseAlloyConfig + maintenanceAlloyConfig;
+        # ----------------------------------------------------------------------------
+        # FIREWALL - Open necessary ports if requested
+        # ----------------------------------------------------------------------------
+        networking.firewall.allowedTCPPorts =
+          lib.mkIf cfg.openFirewall
+          (nixlabLib.mkFirewallPorts {
+            inherit (cfg) domain listenAddress;
+            servicePort = cfg.port;
+            extraPorts = lib.optionals (cfg.domain == null) [cfg.grpcPort];
+          });
 
-          # Write config to file using writeText to avoid shell escaping issues
-          configFile = pkgs.writeText "alloy-config.alloy" alloyConfig;
-        in ''
-          # Copy Alloy configuration
-          install -m 640 -o alloy -g alloy ${configFile} /var/lib/alloy/config.alloy
-
-          # Ensure data directory exists
-          mkdir -p /var/lib/alloy/data
-          chown -R alloy:alloy /var/lib/alloy
-        '';
-      };
-
-      # ----------------------------------------------------------------------------
-      # NGINX REVERSE PROXY - Only configured if domain is set
-      # ----------------------------------------------------------------------------
-      services.nginx.enable = lib.mkIf (cfg.domain != null) true;
-      services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
-        inherit (cfg) domain listenAddress port enableSSL;
-        extraConfig = ''
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
-        '';
-      };
-
-      # ----------------------------------------------------------------------------
-      # FIREWALL - Open necessary ports if requested
-      # ----------------------------------------------------------------------------
-      networking.firewall.allowedTCPPorts =
-        lib.mkIf cfg.openFirewall
-        (nixlabLib.mkFirewallPorts {
-          inherit (cfg) domain listenAddress;
-          servicePort = cfg.port;
-          extraPorts = lib.optionals (cfg.domain == null) [cfg.grpcPort];
-        });
-
-      # ----------------------------------------------------------------------------
-      # MAINTENANCE LOG HELPER SCRIPT
-      # ----------------------------------------------------------------------------
-      environment.systemPackages = lib.optionals cfg.maintenance.enable [
-        (pkgs.writeScriptBin "maintenance-log" ''
-          #!${pkgs.bash}/bin/bash
-          ${builtins.readFile ./maintenance-logger.sh}
-        '')
-        pkgs.jq
-      ];
-    }
-    # Automatic recovery from a corrupt write-ahead log.
-    (nixlabLib.mkWalSelfHeal {
-      inherit pkgs;
-      unit = "loki";
-      walDir = "${cfg.dataDir}/wal";
-      user = cfg.user;
-      group = cfg.group;
-    })]);
+        # ----------------------------------------------------------------------------
+        # MAINTENANCE LOG HELPER SCRIPT
+        # ----------------------------------------------------------------------------
+        environment.systemPackages = lib.optionals cfg.maintenance.enable [
+          (pkgs.writeScriptBin "maintenance-log" ''
+            #!${pkgs.bash}/bin/bash
+            ${builtins.readFile ./maintenance-logger.sh}
+          '')
+          pkgs.jq
+        ];
+      }
+      # Automatic recovery from a corrupt write-ahead log.
+      (nixlabLib.mkWalSelfHeal {
+        inherit pkgs;
+        unit = "loki";
+        walDir = "${cfg.dataDir}/wal";
+        user = cfg.user;
+        group = cfg.group;
+      })
+    ]);
   };
 }
 /*
