@@ -34,6 +34,8 @@
     ## Shared system-wide default user option
     nixlab.mainUser = lib.mkDefault "temhr";
 
+    services.timesyncd.enable = true;
+
     services.homepage-nixlab = {
       enable = true;
       listenAddress = "0.0.0.0";
