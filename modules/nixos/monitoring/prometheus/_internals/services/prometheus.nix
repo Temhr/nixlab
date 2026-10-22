@@ -33,12 +33,8 @@
       external_labels = {monitor = "prometheus";};
     };
 
-    alerting = {
-      alertmanagers = [
-        {
-          static_configs = [{targets = [];}];
-        }
-      ];
+    alerting.alertmanagers = lib.optional (cfg.alertmanagerTargets != []) {
+      static_configs = [{targets = cfg.alertmanagerTargets;}];
     };
 
     rule_files = ["${cfg.dataDir}/rules/*.yml"];

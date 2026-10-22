@@ -178,14 +178,8 @@
       # Point Prometheus at Alertmanager. Neither servc--prometheus-nixlab nor
       # servc--alertmanager-nixlab wire this automatically since they have no
       # knowledge of each other — it has to happen at the aggregator level.
-      services.prometheus.alertmanagers = [
-        {
-          static_configs = [
-            {
-              targets = ["127.0.0.1:${toString cfg.ports.alertmanager}"];
-            }
-          ];
-        }
+      services.prometheus-nixlab.alertmanagerTargets = [
+        "127.0.0.1:${toString cfg.ports.alertmanager}"
       ];
 
       services.alertmanager-nixlab = {

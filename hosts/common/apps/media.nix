@@ -41,9 +41,11 @@
         # v4l2loopback, with the stray modules.* index files removed
         boot.extraModulePackages = [
           (config.boot.kernelPackages.v4l2loopback.overrideAttrs (old: {
-            postInstall = (old.postInstall or "") + ''
-              find $out/lib/modules -maxdepth 2 -name 'modules.*' -delete
-            '';
+            postInstall =
+              (old.postInstall or "")
+              + ''
+                find $out/lib/modules -maxdepth 2 -name 'modules.*' -delete
+              '';
           }))
         ];
         boot.kernelModules = ["v4l2loopback"];

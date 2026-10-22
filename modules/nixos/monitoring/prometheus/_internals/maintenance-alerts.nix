@@ -269,6 +269,23 @@ in {
             description = ''System clock is {{ $value | printf "%.2f" }}s off - check NTP/chrony/timesyncd'';
           };
         }
+        # 5. Clock not synchronised (new)
+        # ClockDrift only fires if timesyncd/chrony reports a large offset. This
+        # catches the case where the kernel itself says the clock is unsynced.
+        {
+          alert = "ClockNotSynced";
+          expr = "node_timex_sync_status == 0";
+          for = "15m";
+          labels = {
+            severity = "warning";
+            category = "os";
+            checklist_section = "II.5";
+          };
+          annotations = {
+            summary = "Clock not synchronised on {{ $labels.instance }}";
+            description = "Kernel reports the system clock is not NTP-synchronised. A bad clock can poison the Prometheus TSDB with future-dated samples.";
+          };
+        }
         # 6. CPU Load
         {
           alert = "HighCPULoad";
@@ -580,6 +597,86 @@ in {
           annotations = {
             summary = "Container {{ $labels.name }} high memory usage";
             description = ''{{ $labels.name }} on {{ $labels.instance }} is using {{ $value | printf "%.1f" }}% of its memory limit (threshold 90%)'';
+          };
+        }
+      ];
+    }
+
+    # ═══════════════════════════════════════════════════════
+    # VII. Monitoring Stack Self-Health
+    #
+    # Prometheus stores its own metrics (and the ALERTS series) in the same TSDB
+    # that can go bad, so "metric X is high" rules are unreliable for this
+    # failure class: the samples that would trigger them are the ones being
+    # rejected. The absent_over_time rule is the dependable one, because it
+    # fires on *missing* data. Make sure Alertmanager (-> ntfy) is wired up:
+    # notifications still go out even when ALERTS can't be stored for Grafana.
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "monitoring_stack";
+      interval = "1m";
+      rules = [
+        # 19. Prometheus has stopped recording its own samples. This is the
+        # Aug-Oct 2026 incident: every scrape rejected as out-of-bounds, so
+        # `up` was empty everywhere while /-/healthy still returned OK.
+        {
+          alert = "PrometheusNoRecentSamples";
+          expr = ''absent_over_time(up{job="prometheus"}[10m])'';
+          for = "5m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.19";
+          };
+          annotations = {
+            summary = "Prometheus has no recent samples for itself";
+            description = "No up{job=\"prometheus\"} sample in 10m. Check `journalctl -u prometheus | grep -i 'out of bounds'` and /api/v1/status/tsdb (headStats.minTime vs now).";
+          };
+        }
+        # 19. Samples rejected for bad timestamps (best-effort: only fires while
+        # some of this metric's own samples are still being accepted).
+        {
+          alert = "PrometheusSamplesOutOfBounds";
+          expr = "increase(prometheus_target_scrapes_sample_out_of_bounds_total[10m]) > 0";
+          for = "10m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.19";
+          };
+          annotations = {
+            summary = "Prometheus is rejecting samples as out of bounds";
+            description = ''{{ $value | printf "%.0f" }} samples rejected in 10m - usually a clock jump. Compare the host clock with the TSDB head time range.'';
+          };
+        }
+        # 19. TSDB head newer than wall clock (clock was ahead, then corrected).
+        {
+          alert = "PrometheusHeadInFuture";
+          expr = "prometheus_tsdb_head_max_time_seconds - time() > 3600";
+          for = "5m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.19";
+          };
+          annotations = {
+            summary = "Prometheus TSDB head is in the future";
+            description = ''Head max time is {{ $value | humanizeDuration }} ahead of now. New samples will be rejected until the WAL/head is cleared.'';
+          };
+        }
+        # 19. Rule evaluation errors: a rule that errors silently never fires.
+        {
+          alert = "PrometheusRuleEvaluationFailures";
+          expr = "increase(prometheus_rule_evaluation_failures_total[15m]) > 0";
+          for = "5m";
+          labels = {
+            severity = "warning";
+            category = "monitoring";
+            checklist_section = "VII.19";
+          };
+          annotations = {
+            summary = "Prometheus rule evaluation is failing";
+            description = "Some alert or recording rules are erroring and silently not firing.";
           };
         }
       ];

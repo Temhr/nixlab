@@ -83,6 +83,13 @@
     '';
   };
 
+  alertmanagerTargets = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [];
+    example = ["127.0.0.1:9093"];
+    description = "Alertmanager host:port targets. Empty disables alert delivery.";
+  };
+
   # OPTIONAL: allow opting out of the mainUser group membership
   # without coupling to a specific external option name
   extraUsers = lib.mkOption {
