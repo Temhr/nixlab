@@ -5,6 +5,17 @@
     ...
   }: let
     cfg = config.services.nixlab-monitoring;
+    svc = config.services;
+
+    # Resolved ports. Single source of truth: ports.nix (mkDefault) or a plain
+    # assignment in a host file. The stack never owns port numbers.
+    port = {
+      grafana = svc.grafana-nixlab.port;
+      loki = svc.loki-nixlab.port;
+      prometheus = svc.prometheus-nixlab.port;
+      alertmanager = svc.alertmanager-nixlab.port;
+      ntfy = svc.ntfy-nixlab.port;
+    };
   in {
     imports = [
       self.nixosModules.nsops--alertmanager
@@ -35,40 +46,7 @@
         description = "Root directory; each service gets a subdirectory.";
       };
 
-      ports = {
-        grafana = lib.mkOption {
-          type = lib.types.port;
-          default = 3101;
-          description = "Grafana HTTP port.";
-        };
-        loki = lib.mkOption {
-          type = lib.types.port;
-          default = 3100;
-          description = "Loki HTTP port.";
-        };
-        prometheus = lib.mkOption {
-          type = lib.types.port;
-          default = 9090;
-          description = "Prometheus HTTP port.";
-        };
-        alertmanager = lib.mkOption {
-          type = lib.types.port;
-          default = 9093;
-          description = "Alertmanager HTTP port.";
-        };
-        ntfy = lib.mkOption {
-          type = lib.types.port;
-          default = 2586;
-          description = "Port for ntfy to listen on.";
-        };
-      };
-
       loki = {
-        grpcPort = lib.mkOption {
-          type = lib.types.port;
-          default = 9096;
-          description = "Loki gRPC port.";
-        };
         retention = lib.mkOption {
           type = lib.types.str;
           default = "744h";
@@ -123,7 +101,6 @@
     config = lib.mkIf cfg.enable {
       services.grafana-nixlab = {
         enable = true;
-        port = lib.mkDefault cfg.ports.grafana;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/grafana";
         openFirewall = cfg.openFirewall;
@@ -131,8 +108,6 @@
 
       services.loki-nixlab = {
         enable = true;
-        port = lib.mkDefault cfg.ports.loki;
-        grpcPort = lib.mkDefault cfg.loki.grpcPort;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/loki";
         openFirewall = cfg.openFirewall;
@@ -142,7 +117,6 @@
 
       services.prometheus-nixlab = {
         enable = true;
-        port = lib.mkDefault cfg.ports.prometheus;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/prometheus";
         openFirewall = cfg.openFirewall;
@@ -156,13 +130,13 @@
         {
           name = "Prometheus";
           type = "prometheus";
-          url = "http://127.0.0.1:${toString cfg.ports.prometheus}";
+          url = "http://127.0.0.1:${toString port.prometheus}";
           isDefault = true;
         }
         {
           name = "Loki";
           type = "loki";
-          url = "http://127.0.0.1:${toString cfg.ports.loki}";
+          url = "http://127.0.0.1:${toString port.loki}";
         }
       ];
 
@@ -171,7 +145,7 @@
       services.prometheus-nixlab.extraScrapeConfigs = [
         {
           job_name = "ntfy";
-          static_configs = [{targets = ["127.0.0.1:${toString cfg.ports.ntfy}"];}];
+          static_configs = [{targets = ["127.0.0.1:${toString port.ntfy}"];}];
         }
       ];
 
@@ -179,12 +153,11 @@
       # servc--alertmanager-nixlab wire this automatically since they have no
       # knowledge of each other — it has to happen at the aggregator level.
       services.prometheus-nixlab.alertmanagerTargets = [
-        "127.0.0.1:${toString cfg.ports.alertmanager}"
+        "127.0.0.1:${toString port.alertmanager}"
       ];
 
       services.alertmanager-nixlab = {
         enable = true;
-        port = lib.mkDefault cfg.ports.alertmanager;
         listenAddress = cfg.listenAddress;
         openFirewall = cfg.openFirewall;
 
@@ -202,7 +175,7 @@
                 {
                   # Loopback, not cfg.listenAddress: alertmanager talks to ntfy
                   # on the same host regardless of ntfy's external bind address.
-                  url = "http://127.0.0.1:${toString cfg.ports.ntfy}/${cfg.notifications.ntfyTopic}";
+                  url = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
                   send_resolved = true;
                 }
               ];
@@ -212,7 +185,6 @@
 
       services.ntfy-nixlab = {
         enable = true;
-        port = lib.mkDefault cfg.ports.ntfy;
         listenAddress = cfg.listenAddress;
         dataDir = "${cfg.dataDir}/ntfy";
         openFirewall = cfg.openFirewall;
