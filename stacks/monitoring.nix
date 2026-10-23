@@ -30,6 +30,29 @@
         description = "host:port of the ${what} metrics endpoint.";
       };
     };
+
+    ntfyUrl = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
+    ntfyTemplate = {
+      title = "[{{.status}}] {{(index .alerts 0).labels.alertname}}";
+      message = ''{{range .alerts}}{{.annotations.summary}}{{"\n"}}{{.annotations.description}}{{"\n\n"}}{{end}}'';
+    };
+    mkNtfyReceiver = name: extraParams: let
+      params =
+        lib.optionals cfg.notifications.formatMessages [
+          "tpl=1"
+          "t=${lib.escapeURL ntfyTemplate.title}"
+          "m=${lib.escapeURL ntfyTemplate.message}"
+        ]
+        ++ extraParams;
+    in {
+      inherit name;
+      webhook_configs = [
+        {
+          url = ntfyUrl + lib.optionalString (params != []) "?${lib.concatStringsSep "&" params}";
+          send_resolved = true;
+        }
+      ];
+    };
   in {
     imports = [
       self.nixosModules.nsops--alertmanager
@@ -109,6 +132,16 @@
           default = "alerts";
           description = "ntfy topic that alertmanager will publish to.";
         };
+        formatMessages = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Use ntfy message templating so notifications show alert summary/description instead of raw JSON. Requires ntfy >= 2.10.";
+        };
+        separateCritical = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Route severity=critical to a separate ntfy receiver with max priority and a warning tag.";
+        };
       };
 
       integrations = {
@@ -164,19 +197,19 @@
           else "null";
         receivers =
           [{name = "null";}]
-          ++ lib.optionals cfg.notifications.useNtfy [
-            {
-              name = "ntfy";
-              webhook_configs = [
-                {
-                  # Loopback, not cfg.listenAddress: alertmanager talks to ntfy
-                  # on the same host regardless of ntfy's external bind address.
-                  url = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
-                  send_resolved = true;
-                }
-              ];
-            }
+          ++ lib.optionals cfg.notifications.useNtfy [(mkNtfyReceiver "ntfy" ["tags=warning"])]
+          ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
+            (mkNtfyReceiver "ntfy-critical" ["p=5" "tags=rotating_light"])
           ];
+
+        route.routes = lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
+          {
+            receiver = "ntfy-critical";
+            matchers = ["severity=\"critical\""];
+            groupWait = "10s";
+            repeatInterval = "1h";
+          }
+        ];
       };
 
       services.ntfy-nixlab = {
