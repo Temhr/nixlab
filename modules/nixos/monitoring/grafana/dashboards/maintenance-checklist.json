@@ -108,7 +108,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "ALERTS{checklist_section=~\"I\\\\.*\", alertstate=\"firing\"}",
+          "expr": "ALERTS{checklist_section=~\"I\\\\..*\", alertstate=\"firing\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -204,7 +204,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
       "targets": [
         {
-          "expr": "ALERTS{checklist_section=~\"II\\\\.*\", alertstate=\"firing\"}",
+          "expr": "ALERTS{checklist_section=~\"II\\\\..*\", alertstate=\"firing\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -244,7 +244,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
       "targets": [
         {
-          "expr": "ALERTS{checklist_section=~\"III\\\\.*\", alertstate=\"firing\"}",
+          "expr": "ALERTS{checklist_section=~\"III\\\\..*\", alertstate=\"firing\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -268,7 +268,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
       "targets": [
         {
-          "expr": "ALERTS{checklist_section=~\"IV\\\\.*\", alertstate=\"firing\"}",
+          "expr": "ALERTS{checklist_section=~\"IV\\\\..*\", alertstate=\"firing\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -319,7 +319,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 52 },
       "targets": [
         {
-          "expr": "ALERTS{checklist_section=~\"V\\\\.*\", alertstate=\"firing\"}",
+          "expr": "ALERTS{checklist_section=~\"V\\\\..*\", alertstate=\"firing\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -369,7 +369,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 68 },
       "targets": [
         {
-          "expr": "ALERTS{checklist_section=~\"VI\\\\.*\", alertstate=\"firing\"}",
+          "expr": "ALERTS{checklist_section=~\"VI\\\\..*\", alertstate=\"firing\"}",
           "format": "table",
           "instant": true,
           "refId": "A"
