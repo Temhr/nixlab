@@ -16,6 +16,11 @@
       alertmanager = svc.alertmanager-nixlab.port;
       ntfy = svc.ntfy-nixlab.port;
     };
+    scrapeJob = name: target: {
+      job_name = name;
+      static_configs = [{targets = [target];}];
+    };
+    loopback = p: "127.0.0.1:${toString p}";
   in {
     imports = [
       self.nixosModules.nsops--alertmanager
@@ -186,12 +191,15 @@
 
       # NEW — Prometheus scrapes ntfy's own /metrics, closing the last gap
       # in "every service in this stack is observed by every other."
-      services.prometheus-nixlab.extraScrapeConfigs = [
-        {
-          job_name = "ntfy";
-          static_configs = [{targets = ["127.0.0.1:${toString port.ntfy}"];}];
-        }
-      ];
+      services.prometheus-nixlab.extraScrapeConfigs =
+        [
+          (scrapeJob "ntfy" (loopback port.ntfy))
+          (scrapeJob "loki" (loopback port.loki))
+          (scrapeJob "grafana" (loopback port.grafana))
+          (scrapeJob "alertmanager" (loopback port.alertmanager))
+        ]
+        ++ lib.optional svc.loki-nixlab.enableAlloy
+        (scrapeJob "alloy" (loopback svc.loki-nixlab.alloyPort));
 
       # Point Prometheus at Alertmanager. Neither servc--prometheus-nixlab nor
       # servc--alertmanager-nixlab wire this automatically since they have no
