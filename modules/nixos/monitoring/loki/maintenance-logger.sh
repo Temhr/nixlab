@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Configuration
-LOG_FILE="/var/log/maintenance.log"
+LOG_FILE="${MAINTENANCE_LOG:-/var/log/maintenance.log}"
 CHECKLIST_SECTIONS=(
   "I.1:Hardware Health"
   "I.2:Storage Capacity"
@@ -49,22 +49,20 @@ NC='\033[0m' # No Color
 
 # Functions
 log_maintenance() {
-  local section="$1"
-  local task="$2"
-  local status="$3"
-  local notes="${4:-}"
+  local section="$1" task="$2" status="$3" notes="${4:-}"
+  local timestamp hostname user json_log
+  timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  hostname=$(uname -n)
+  user=$(whoami)
 
-  local timestamp=$(date -Iseconds)
-  local hostname=$(hostname)
-  local user=$(whoami)
+  json_log=$(jq -cn \
+    --arg timestamp "$timestamp" --arg level "info" \
+    --arg section "$section" --arg task "$task" \
+    --arg status "$status" --arg notes "$notes" \
+    --arg hostname "$hostname" --arg user "$user" \
+    '{timestamp:$timestamp,level:$level,section:$section,task:$task,status:$status,notes:$notes,hostname:$hostname,user:$user}')
 
-  # JSON format for Loki
-  local json_log=$(cat <<EOF
-{"timestamp":"$timestamp","level":"info","section":"$section","task":"$task","status":"$status","notes":"$notes","hostname":"$hostname","user":"$user"}
-EOF
-)
-
-  echo "$json_log" >> "$LOG_FILE"
+  printf '%s\n' "$json_log" >> "$LOG_FILE"
   echo -e "${GREEN}✓${NC} Logged: $section - $task [$status]"
 }
 
@@ -89,72 +87,57 @@ show_menu() {
 
 quick_log() {
   echo -e "\n${YELLOW}Quick Log Entry${NC}"
-  read -p "Task description: " task
-  read -p "Status (completed/skipped/failed): " status
-  read -p "Notes (optional): " notes
-
+  local task status notes
+  read -r -p "Task description: " task
+  while true; do
+    read -r -p "Status (completed/skipped/failed): " status
+    case "$status" in completed|skipped|failed) break ;; *) echo "Enter completed, skipped or failed." ;; esac
+  done
+  read -r -p "Notes (optional): " notes
   log_maintenance "QUICK" "$task" "$status" "$notes"
 }
 
 view_recent() {
   echo -e "\n${BLUE}Recent Maintenance Logs (last 20)${NC}"
   echo "════════════════════════════════════════════════════"
+  if [[ ! -s "$LOG_FILE" ]]; then echo "No logs found."; return; fi
 
-  if [[ -f "$LOG_FILE" ]]; then
-    tail -n 20 "$LOG_FILE" | while read -r line; do
-      local timestamp=$(echo "$line" | jq -r '.timestamp' 2>/dev/null || echo "N/A")
-      local section=$(echo "$line" | jq -r '.section' 2>/dev/null || echo "N/A")
-      local task=$(echo "$line" | jq -r '.task' 2>/dev/null || echo "N/A")
-      local status=$(echo "$line" | jq -r '.status' 2>/dev/null || echo "N/A")
-
-      case "$status" in
-        completed) color=$GREEN ;;
-        failed) color=$RED ;;
-        skipped) color=$YELLOW ;;
-        *) color=$NC ;;
-      esac
-
-      echo -e "${color}[$timestamp]${NC} $section: $task [$status]"
-    done
-  else
-    echo "No logs found."
-  fi
+  local timestamp section task status color
+  # fromjson? skips any malformed legacy line instead of aborting
+  tail -n 20 "$LOG_FILE" \
+    | jq -rR 'fromjson? | [.timestamp,.section,.task,.status] | @tsv' \
+    | while IFS=$'\t' read -r timestamp section task status; do
+        case "$status" in
+          completed) color=$GREEN ;;
+          failed)    color=$RED ;;
+          skipped)   color=$YELLOW ;;
+          *)         color=$NC ;;
+        esac
+        echo -e "${color}[$timestamp]${NC} $section: $task [$status]"
+      done
 }
 
 show_stats() {
   echo -e "\n${BLUE}Maintenance Completion Statistics${NC}"
   echo "════════════════════════════════════════════════════"
+  [[ -s "$LOG_FILE" ]] || { echo "No logs found."; return; }
 
-  if [[ ! -f "$LOG_FILE" ]]; then
-    echo "No logs found."
-    return
-  fi
+  local cutoff
+  cutoff=$(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ)
 
   echo -e "\n${YELLOW}Tasks by Status (Last 30 Days):${NC}"
-  local cutoff=$(date -d '30 days ago' -Iseconds 2>/dev/null || date -v-30d -Iseconds)
-
-  if [[ -s "$LOG_FILE" ]]; then
-    grep '"status"' "$LOG_FILE" 2>/dev/null | \
-      cut -d'"' -f4 | \
-      sort | uniq -c | sort -rn || echo "  No data available"
-  fi
+  jq -r --arg c "$cutoff" 'select(.timestamp >= $c) | .status' "$LOG_FILE" 2>/dev/null \
+    | sort | uniq -c | sort -rn
 
   echo -e "\n${YELLOW}Tasks by Section (Last 30 Days):${NC}"
-  if [[ -s "$LOG_FILE" ]]; then
-    grep '"section"' "$LOG_FILE" 2>/dev/null | \
-      cut -d'"' -f4 | \
-      sort | uniq -c | sort -rn | head -10 || echo "  No data available"
-  fi
+  jq -r --arg c "$cutoff" 'select(.timestamp >= $c) | .section' "$LOG_FILE" 2>/dev/null \
+    | sort | uniq -c | sort -rn | head -10
 
   echo -e "\n${YELLOW}Last Completion Dates by Section:${NC}"
-  for section in "${CHECKLIST_SECTIONS[@]}"; do
-    IFS=':' read -r code name <<< "$section"
-    last_date=$(grep "\"section\":\"$code\"" "$LOG_FILE" 2>/dev/null | \
-                tail -1 | jq -r '.timestamp' 2>/dev/null | cut -d'T' -f1)
-    if [[ -n "$last_date" && "$last_date" != "null" ]]; then
-      echo "  $code: $last_date"
-    fi
-  done
+  jq -r 'select(.status=="completed") | [.section,.timestamp] | @tsv' "$LOG_FILE" 2>/dev/null \
+    | sort -k1,1 -k2,2 \
+    | awk -F'\t' '{last[$1]=$2} END {for (s in last) print "  " s ": " substr(last[s],1,10)}' \
+    | sort
 }
 
 log_section_task() {
@@ -188,14 +171,14 @@ log_section_task() {
   esac
 
   echo ""
-  read -p "Task performed: " task
+  read -r -p "Task performed: " task
 
   echo ""
   echo "Status:"
   echo "  1) completed"
   echo "  2) skipped"
   echo "  3) failed"
-  read -p "Select (1-3): " status_choice
+  read -r -p "Select (1-3): " status_choice
 
   case "$status_choice" in
     1) status="completed" ;;
@@ -204,28 +187,52 @@ log_section_task() {
     *) status="unknown" ;;
   esac
 
-  read -p "Notes (optional): " notes
+  read -r -p "Notes (optional): " notes
 
   log_maintenance "$section_code" "$task" "$status" "$notes"
 }
 
-# Main loop
-main() {
-  # Ensure log file exists
+ensure_log_file() {
   if [[ ! -f "$LOG_FILE" ]]; then
     if [[ -w "$(dirname "$LOG_FILE")" ]]; then
-      touch "$LOG_FILE"
-      chmod 666 "$LOG_FILE"
+      touch "$LOG_FILE" && chmod 666 "$LOG_FILE"
     else
-      echo -e "${RED}Error: Cannot create log file at $LOG_FILE${NC}"
-      echo "Run with sudo or check permissions"
+      echo -e "${RED}Error: Cannot create log file at $LOG_FILE${NC}" >&2
+      echo "Run with sudo or check permissions" >&2
       exit 1
     fi
   fi
+}
 
+noninteractive() {
+  local section="" task="" status="completed" notes=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --section) section="${2:?}"; shift 2 ;;
+      --task)    task="${2:?}";    shift 2 ;;
+      --status)  status="${2:?}";  shift 2 ;;
+      --notes)   notes="${2:-}";   shift 2 ;;
+      *) echo "unknown argument: $1" >&2; exit 2 ;;
+    esac
+  done
+  [[ -n $section && -n $task ]] || {
+    echo "usage: maintenance-log --section CODE --task TEXT [--status completed|skipped|failed] [--notes TEXT]" >&2
+    exit 2
+  }
+  case "$status" in completed|skipped|failed) ;; *) echo "invalid status: $status" >&2; exit 2 ;; esac
+  local valid=0 entry
+  for entry in "${CHECKLIST_SECTIONS[@]}"; do [[ "${entry%%:*}" == "$section" ]] && valid=1; done
+  [[ $section == QUICK ]] && valid=1
+  (( valid )) || { echo "unknown section: $section (codes are listed in the menu)" >&2; exit 2; }
+  ensure_log_file
+  log_maintenance "$section" "$task" "$status" "$notes"
+}
+
+# Main loop
+main() {
   while true; do
     show_menu
-    read -p "Select option: " choice
+    read -r -p "Select option: " choice
 
     case "$choice" in
       q|Q)
@@ -233,27 +240,23 @@ main() {
         ;;
       v|V)
         view_recent
-        read -p "Press Enter to continue..."
+        read -r -p "Press Enter to continue..."
         ;;
       s|S)
         show_stats
-        read -p "Press Enter to continue..."
+        read -r -p "Press Enter to continue..."
         ;;
       x|X)
         echo -e "\n${GREEN}Goodbye!${NC}\n"
         exit 0
         ;;
-      [0-9]*)
-        if [[ $choice -ge 1 && $choice -le ${#CHECKLIST_SECTIONS[@]} ]]; then
+      *)
+        if [[ $choice =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#CHECKLIST_SECTIONS[@]} )); then
           log_section_task $((choice - 1))
         else
-          echo -e "${RED}Invalid selection${NC}"
+          echo -e "${RED}Invalid option${NC}"
           sleep 1
         fi
-        ;;
-      *)
-        echo -e "${RED}Invalid option${NC}"
-        sleep 1
         ;;
     esac
   done
@@ -266,5 +269,11 @@ if ! command -v jq &> /dev/null; then
   echo "Or ensure jq is in your system packages"
   exit 1
 fi
+
+if [[ $# -gt 0 ]]; then
+  noninteractive "$@"
+  exit 0
+fi
+ensure_log_file
 
 main

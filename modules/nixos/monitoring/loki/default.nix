@@ -534,8 +534,9 @@
         # MAINTENANCE LOG HELPER SCRIPT
         # ----------------------------------------------------------------------------
         environment.systemPackages = lib.optionals cfg.maintenance.enable [
-          (pkgs.writeScriptBin "maintenance-log" ''
-            #!${pkgs.bash}/bin/bash
+          (pkgs.writeShellScriptBin "maintenance-log" ''
+            export PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gawk pkgs.gnugrep]}:$PATH
+            export MAINTENANCE_LOG=''${MAINTENANCE_LOG:-${lib.escapeShellArg cfg.maintenance.logPath}}
             ${builtins.readFile ./maintenance-logger.sh}
           '')
           pkgs.jq
