@@ -99,28 +99,72 @@
     };
 
     config = lib.mkIf cfg.enable {
+      # Override contract (hosts/<name>.nix):
+      #   * Tunables set here are lib.mkDefault: override via services.nixlab-monitoring.*
+      #     OR directly on services.<x>-nixlab.* — both work.
+      #   * Wiring (datasources, scrape jobs, receivers, alertmanagerTargets) is plain and
+      #     additive; extend it, don't replace it.
+      #   * Ports are never set here; see ports.nix / host plain assignment.
+
       services.grafana-nixlab = {
         enable = true;
-        listenAddress = cfg.listenAddress;
-        dataDir = "${cfg.dataDir}/grafana";
-        openFirewall = cfg.openFirewall;
+        listenAddress = lib.mkDefault cfg.listenAddress;
+        dataDir = lib.mkDefault "${cfg.dataDir}/grafana";
+        openFirewall = lib.mkDefault cfg.openFirewall;
       };
 
       services.loki-nixlab = {
         enable = true;
-        listenAddress = cfg.listenAddress;
-        dataDir = "${cfg.dataDir}/loki";
-        openFirewall = cfg.openFirewall;
-        retention = cfg.loki.retention;
-        maintenance = cfg.loki.maintenance;
+        listenAddress = lib.mkDefault cfg.listenAddress;
+        dataDir = lib.mkDefault "${cfg.dataDir}/loki";
+        openFirewall = lib.mkDefault cfg.openFirewall;
+        retention = lib.mkDefault cfg.loki.retention;
+        maintenance.enable = lib.mkDefault cfg.loki.maintenance.enable;
       };
 
       services.prometheus-nixlab = {
         enable = true;
-        listenAddress = cfg.listenAddress;
-        dataDir = "${cfg.dataDir}/prometheus";
-        openFirewall = cfg.openFirewall;
-        maintenance = cfg.prometheus.maintenance;
+        listenAddress = lib.mkDefault cfg.listenAddress;
+        dataDir = lib.mkDefault "${cfg.dataDir}/prometheus";
+        openFirewall = lib.mkDefault cfg.openFirewall;
+        maintenance = {
+          enable = lib.mkDefault cfg.prometheus.maintenance.enable;
+          exporters.systemd = lib.mkDefault cfg.prometheus.maintenance.exporters.systemd;
+          exporters.smartctl.enable = lib.mkDefault cfg.prometheus.maintenance.exporters.smartctl.enable;
+        };
+      };
+
+      services.alertmanager-nixlab = {
+        enable = true;
+        listenAddress = lib.mkDefault cfg.listenAddress;
+        openFirewall = lib.mkDefault cfg.openFirewall;
+        defaultReceiver =
+          if cfg.notifications.useNtfy
+          then "ntfy"
+          else "null";
+        receivers =
+          [{name = "null";}]
+          ++ lib.optionals cfg.notifications.useNtfy [
+            {
+              name = "ntfy";
+              webhook_configs = [
+                {
+                  # Loopback, not cfg.listenAddress: alertmanager talks to ntfy
+                  # on the same host regardless of ntfy's external bind address.
+                  url = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
+                  send_resolved = true;
+                }
+              ];
+            }
+          ];
+      };
+
+      services.ntfy-nixlab = {
+        enable = true;
+        listenAddress = lib.mkDefault cfg.listenAddress;
+        dataDir = lib.mkDefault "${cfg.dataDir}/ntfy";
+        openFirewall = lib.mkDefault cfg.openFirewall;
+        cacheFile = lib.mkIf cfg.ntfy.cachePersist (lib.mkDefault "${cfg.dataDir}/ntfy/cache.db");
       };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
@@ -155,41 +199,6 @@
       services.prometheus-nixlab.alertmanagerTargets = [
         "127.0.0.1:${toString port.alertmanager}"
       ];
-
-      services.alertmanager-nixlab = {
-        enable = true;
-        listenAddress = cfg.listenAddress;
-        openFirewall = cfg.openFirewall;
-
-        defaultReceiver =
-          if cfg.notifications.useNtfy
-          then "ntfy"
-          else "null";
-
-        receivers =
-          [{name = "null";}]
-          ++ lib.optionals cfg.notifications.useNtfy [
-            {
-              name = "ntfy";
-              webhook_configs = [
-                {
-                  # Loopback, not cfg.listenAddress: alertmanager talks to ntfy
-                  # on the same host regardless of ntfy's external bind address.
-                  url = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
-                  send_resolved = true;
-                }
-              ];
-            }
-          ];
-      };
-
-      services.ntfy-nixlab = {
-        enable = true;
-        listenAddress = cfg.listenAddress;
-        dataDir = "${cfg.dataDir}/ntfy";
-        openFirewall = cfg.openFirewall;
-        cacheFile = lib.mkIf cfg.ntfy.cachePersist "${cfg.dataDir}/ntfy/cache.db";
-      };
     };
   };
 }
