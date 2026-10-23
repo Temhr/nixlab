@@ -18,6 +18,14 @@
           method: GET
           preferred_ip_protocol: "ip4"
 
+      dns_a:
+        prober: dns
+        timeout: 5s
+        dns:
+          query_name: "${cfg.maintenance.exporters.blackbox.dnsQueryName}"
+          query_type: "A"
+          preferred_ip_protocol: "ip4"
+
       icmp:
         prober: icmp
         timeout: 5s
@@ -41,12 +49,16 @@
       {
         if [[ -f "${cfg.maintenance.exporters.backup.timestampFile}" ]]; then
           LAST_BACKUP=$(cat "${cfg.maintenance.exporters.backup.timestampFile}")
-          echo "backup_job_last_success_timestamp $LAST_BACKUP"
+          if [[ "$LAST_BACKUP" =~ ^[0-9]+$ ]]; then
+            echo "backup_job_last_success_timestamp{job_name=\"${cfg.maintenance.exporters.backup.jobName}\"} $LAST_BACKUP"
+          fi
         fi
 
         if [[ -f "${cfg.maintenance.exporters.backup.sizeFile}" ]]; then
           BACKUP_SIZE=$(cat "${cfg.maintenance.exporters.backup.sizeFile}")
-          echo "backup_job_size_bytes $BACKUP_SIZE"
+          if [[ "$BACKUP_SIZE" =~ ^[0-9]+$ ]]; then
+            echo "backup_job_size_bytes{job_name=\"${cfg.maintenance.exporters.backup.jobName}\"} $BACKUP_SIZE"
+          fi
         fi
       } > "$METRICS_FILE.tmp"
 

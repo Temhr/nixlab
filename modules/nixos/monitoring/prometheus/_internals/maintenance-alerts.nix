@@ -1,4 +1,4 @@
-let
+{features ? {}}: let
   # ── Helpers ────────────────────────────────────────────────────────────────
   # Collapse whitespace so multi-line exprs become a single readable line.
   squash = s:
@@ -30,6 +30,18 @@ let
       }
     else rule;
 
+  # Rules may carry `requires = "<feature>";`. They load only when that
+  # feature flag is true. The attribute is stripped before output.
+  isEnabled = r: !(r ? requires) || (features.${r.requires} or false);
+  stripGate = r: removeAttrs r ["requires"];
+  prune = gs:
+    builtins.filter (g: g.rules != []) (map (g:
+      g
+      // {
+        rules = map (r: stripGate (withCondition r)) (builtins.filter isEnabled g.rules);
+      })
+    gs);
+
   # Filesystems that should never alert (virtual / duplicate mounts).
   # /nix/store is a bind mount of the root fs on NixOS and would double-alert.
   fsFilter = ''fstype!~"tmpfs|overlay|squashfs|ramfs|devtmpfs|nsfs|erofs|fusectl|fuse.gvfsd-fuse|fuse.portal",mountpoint!~"/nix/store|/run/.*"'';
@@ -37,7 +49,7 @@ let
   # Virtual network interfaces that routinely show drops/errors.
   netFilter = ''device!~"lo|veth.*|docker.*|br-.*|virbr.*"'';
 in {
-  groups = map (g: g // {rules = map withCondition g.rules;}) [
+  groups = prune [
     # ═══════════════════════════════════════════════════════
     # I. Hardware & Physical Layer
     # ═══════════════════════════════════════════════════════
@@ -362,6 +374,7 @@ in {
         # Rewritten as `time() - ts` so $value is the age and can be shown.
         {
           alert = "BackupJobFailed";
+          requires = "backup";
           expr = "time() - backup_job_last_success_timestamp > 86400";
           for = "1h";
           labels = {
@@ -377,6 +390,7 @@ in {
         # 7. Backup Size Anomaly
         {
           alert = "BackupSizeAnomaly";
+          requires = "backup";
           expr = "abs(backup_job_size_bytes - backup_job_size_bytes offset 7d) / backup_job_size_bytes offset 7d > 0.3";
           for = "1h";
           labels = {
@@ -387,6 +401,21 @@ in {
           annotations = {
             summary = "Backup size changed significantly for {{ $labels.job_name }}";
             description = "Backup size differs by {{ $value | humanizePercentage }} from last week (threshold 30%)";
+          };
+        }
+        {
+          alert = "BackupMetricsMissing";
+          requires = "backup";
+          expr = "absent(backup_job_last_success_timestamp)";
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "backup";
+            checklist_section = "III.7";
+          };
+          annotations = {
+            summary = "Backup metrics are missing";
+            description = "backup_job_last_success_timestamp is absent: the timestamp file is missing or invalid, or the exporter is not running. BackupJobFailed cannot fire without it.";
           };
         }
       ];
@@ -402,6 +431,7 @@ in {
         # 12. DNS Resolution Failures
         {
           alert = "DNSResolutionFailure";
+          requires = "dns";
           expr = ''probe_success{job="blackbox-dns"} == 0'';
           for = "3m";
           labels = {
@@ -519,6 +549,7 @@ in {
         # 15. Database Replication Lag (PostgreSQL example)
         {
           alert = "PostgresReplicationLag";
+          requires = "postgres";
           expr = "pg_replication_lag_seconds > 300";
           for = "5m";
           labels = {
@@ -536,6 +567,7 @@ in {
         # Requires >0.05 req/s so idle services don't flap on a single 5xx.
         {
           alert = "HighHTTPErrorRate";
+          requires = "traefik";
           expr = ''
             (
               sum by (service) (rate(traefik_service_requests_total{code=~"5.."}[5m]))
@@ -571,6 +603,7 @@ in {
         # running container (the old rule fired for all of them). Count start-time changes instead.
         {
           alert = "ContainerRestartLoop";
+          requires = "containers";
           expr = ''changes(container_start_time_seconds{name!=""}[15m]) > 2'';
           for = "5m";
           labels = {
@@ -587,6 +620,7 @@ in {
         # Fixed: containers with no limit report limit=0 (division -> +Inf -> always firing).
         {
           alert = "ContainerHighMemory";
+          requires = "containers";
           expr = ''(container_memory_working_set_bytes{name!=""} / (container_spec_memory_limit_bytes{name!=""} > 0)) * 100 > 90'';
           for = "5m";
           labels = {
@@ -626,7 +660,7 @@ in {
           labels = {
             severity = "critical";
             category = "monitoring";
-            checklist_section = "VII.19";
+            checklist_section = "VII.21";
           };
           annotations = {
             summary = "Prometheus has no recent samples for itself";
@@ -642,7 +676,7 @@ in {
           labels = {
             severity = "critical";
             category = "monitoring";
-            checklist_section = "VII.19";
+            checklist_section = "VII.21";
           };
           annotations = {
             summary = "Prometheus is rejecting samples as out of bounds";
@@ -657,7 +691,7 @@ in {
           labels = {
             severity = "critical";
             category = "monitoring";
-            checklist_section = "VII.19";
+            checklist_section = "VII.21";
           };
           annotations = {
             summary = "Prometheus TSDB head is in the future";
@@ -672,7 +706,7 @@ in {
           labels = {
             severity = "warning";
             category = "monitoring";
-            checklist_section = "VII.19";
+            checklist_section = "VII.22";
           };
           annotations = {
             summary = "Prometheus rule evaluation is failing";

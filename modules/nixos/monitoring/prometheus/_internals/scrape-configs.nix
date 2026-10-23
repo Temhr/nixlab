@@ -70,6 +70,8 @@
     (mkBlackboxJob "blackbox-icmp" "icmp" cfg.maintenance.exporters.blackbox.icmpTargets)
     ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.sslTargets != [])
     (mkBlackboxJob "blackbox-ssl" "http_2xx" cfg.maintenance.exporters.blackbox.sslTargets)
+    ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.dnsTargets != [])
+    (mkBlackboxJob "blackbox-dns" "dns_a" cfg.maintenance.exporters.blackbox.dnsTargets)
   );
 in {
   # Export the configs

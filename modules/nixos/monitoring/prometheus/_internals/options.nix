@@ -103,6 +103,24 @@
   maintenance = {
     enable = lib.mkEnableOption "maintenance monitoring exporters and alerts";
 
+    alerts.features = {
+      traefik = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Load HighHTTPErrorRate. Requires a scrape job exposing traefik_service_requests_total.";
+      };
+      containers = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Load ContainerRestartLoop/ContainerHighMemory. Requires cAdvisor-style container_* metrics.";
+      };
+      postgres = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Load PostgresReplicationLag. Requires a postgres exporter (pg_replication_lag_seconds).";
+      };
+    };
+
     exporters = {
       systemd = lib.mkOption {
         type = lib.types.bool;
@@ -132,6 +150,17 @@
           default = [];
           example = ["https://example.com"];
           description = "SSL certificate targets to monitor";
+        };
+        dnsTargets = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["1.1.1.1" "192.168.1.1"];
+          description = "DNS servers to probe by resolving dnsQueryName. Enables DNSResolutionFailure.";
+        };
+        dnsQueryName = lib.mkOption {
+          type = lib.types.str;
+          default = "example.com";
+          description = "Name resolved by the DNS probe.";
         };
       };
 
@@ -164,6 +193,11 @@
           type = lib.types.str;
           default = "/var/backups/last_backup_size";
           description = "File containing last backup size in bytes";
+        };
+        jobName = lib.mkOption {
+          type = lib.types.str;
+          default = "backup";
+          description = "Value of the job_name label on backup metrics (used in alert text).";
         };
       };
     };

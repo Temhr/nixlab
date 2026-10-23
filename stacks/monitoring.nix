@@ -21,6 +21,15 @@
       static_configs = [{targets = [target];}];
     };
     loopback = p: "127.0.0.1:${toString p}";
+
+    mkIntegration = defaultTarget: what: {
+      enable = lib.mkEnableOption "scraping and alerting for ${what}";
+      target = lib.mkOption {
+        type = lib.types.str;
+        default = defaultTarget;
+        description = "host:port of the ${what} metrics endpoint.";
+      };
+    };
   in {
     imports = [
       self.nixosModules.nsops--alertmanager
@@ -100,6 +109,12 @@
           default = "alerts";
           description = "ntfy topic that alertmanager will publish to.";
         };
+      };
+
+      integrations = {
+        traefik = mkIntegration "127.0.0.1:8082" "traefik";
+        cadvisor = mkIntegration "127.0.0.1:8080" "cAdvisor container metrics";
+        postgres = mkIntegration "127.0.0.1:9187" "the PostgreSQL exporter";
       };
     };
 
@@ -199,7 +214,16 @@
           (scrapeJob "alertmanager" (loopback port.alertmanager))
         ]
         ++ lib.optional svc.loki-nixlab.enableAlloy
-        (scrapeJob "alloy" (loopback svc.loki-nixlab.alloyPort));
+        (scrapeJob "alloy" (loopback svc.loki-nixlab.alloyPort))
+        ++ lib.optional cfg.integrations.traefik.enable (scrapeJob "traefik" cfg.integrations.traefik.target)
+        ++ lib.optional cfg.integrations.cadvisor.enable (scrapeJob "cadvisor" cfg.integrations.cadvisor.target)
+        ++ lib.optional cfg.integrations.postgres.enable (scrapeJob "postgres" cfg.integrations.postgres.target);
+
+      services.prometheus-nixlab.maintenance.alerts.features = {
+        traefik = lib.mkDefault cfg.integrations.traefik.enable;
+        containers = lib.mkDefault cfg.integrations.cadvisor.enable;
+        postgres = lib.mkDefault cfg.integrations.postgres.enable;
+      };
 
       # Point Prometheus at Alertmanager. Neither servc--prometheus-nixlab nor
       # servc--alertmanager-nixlab wire this automatically since they have no

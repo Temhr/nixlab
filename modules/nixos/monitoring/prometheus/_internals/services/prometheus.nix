@@ -12,15 +12,19 @@
 
   # Alert rules
   alertRulesConfig = import ../alerts.nix;
+  alertFeatures =
+    cfg.maintenance.alerts.features
+    // {
+      backup = cfg.maintenance.exporters.backup.enable;
+      dns = cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.dnsTargets != [];
+    };
   maintenanceAlertRules =
     if cfg.maintenance.enable
-    then import ../maintenance-alerts.nix
+    then import ../maintenance-alerts.nix {features = alertFeatures;}
     else {groups = [];};
-
   combinedAlertRules = {
     groups = alertRulesConfig.groups ++ maintenanceAlertRules.groups;
   };
-
   alertRulesJsonFile =
     builtins.toFile "alerts.json"
     (builtins.toJSON combinedAlertRules);
