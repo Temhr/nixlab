@@ -121,14 +121,21 @@
 
           logPath = lib.mkOption {
             type = lib.types.str;
-            default = "/var/log/maintenance.log";
-            description = "Path to maintenance log file";
+            default = "/var/log/maintenance.jsonl";
+            description = "Path to the maintenance log (JSON lines). Must NOT end in .log or it will also be picked up by the /var/log/*.log pipeline.";
           };
         };
+
         grpcPort = lib.mkOption {
           type = lib.types.port;
           default = 9096;
           description = "gRPC port for Loki internal communication. Only relevant for multi-instance deployments.";
+        };
+
+        alloyPort = lib.mkOption {
+          type = lib.types.port;
+          default = 12345;
+          description = "Port for Alloy's HTTP server (UI, /metrics). Bound to loopback.";
         };
       };
     };
@@ -146,6 +153,10 @@
             inherit (cfg) enableSSL domain;
             moduleName = "services.loki-nixlab";
           })
+          {
+            assertion = !(cfg.maintenance.enable && lib.hasSuffix ".log" cfg.maintenance.logPath);
+            message = "services.loki-nixlab.maintenance.logPath must not end in .log (it would also be tailed by the /var/log/*.log pipeline and ingested twice).";
+          }
         ];
 
         # ----------------------------------------------------------------------------
@@ -375,7 +386,7 @@
               Type = "simple";
               User = "alloy";
               Group = "alloy";
-              ExecStart = "${cfg.alloyPackage}/bin/alloy run --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
+              ExecStart = "${cfg.alloyPackage}/bin/alloy run --server.http.listen-addr=127.0.0.1:${toString cfg.alloyPort} --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
               Restart = "on-failure";
               RestartSec = "10s";
             };
@@ -386,13 +397,29 @@
               // Loki client for sending logs
               loki.write "local" {
                 endpoint {
-                  url = "http://localhost:${toString cfg.port}/loki/api/v1/push"
+                  url = "http://127.0.0.1:${toString cfg.port}/loki/api/v1/push"
                 }
               }
 
               // Collect systemd journal logs
+              // journald exposes metadata as internal __journal_* labels. They are dropped
+              // unless relabelled to a name without the "__" prefix.
+              loki.relabel "journal" {
+                forward_to = []
+
+                rule {
+                  source_labels = ["__journal__systemd_unit"]
+                  target_label  = "unit"
+                }
+                rule {
+                  source_labels = ["__journal_priority_keyword"]
+                  target_label  = "level"
+                }
+              }
+
               loki.source.journal "systemd" {
-                max_age = "12h"
+                max_age       = "12h"
+                relabel_rules = loki.relabel.journal.rules
                 labels = {
                   job  = "systemd-journal",
                   host = "${config.networking.hostName}",
@@ -412,7 +439,7 @@
                 }
 
                 stage.label_keep {
-                  values = ["job", "host", "unit"]
+                  values = ["job", "host", "unit", "level"]
                 }
               }
 
@@ -473,14 +500,21 @@
                 }
 
                 // Extract labels
+                // Labels taken from the parsed JSON fields (empty string = same key name)
                 stage.labels {
                   values = {
-                    job     = "maintenance-log",
-                    host    = "${config.networking.hostName}",
                     level   = "",
                     section = "",
                     status  = "",
                     user    = "",
+                  }
+                }
+
+                // Constant labels
+                stage.static_labels {
+                  values = {
+                    job  = "maintenance-log",
+                    host = "${config.networking.hostName}",
                   }
                 }
 
@@ -625,7 +659,7 @@ services.loki-nixlab = {
 
   maintenance = {
     enable = true;
-    logPath = "/var/log/maintenance.log";
+    logPath = "/var/log/maintenance.jsonl";
   };
 };
 

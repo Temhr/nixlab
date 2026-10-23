@@ -38,6 +38,7 @@
   flake.nixosModules.systm--ports-loki = {lib, ...}: {
     services.loki-nixlab.port = lib.mkDefault 3100;
     services.loki-nixlab.grpcPort = lib.mkDefault 9096;
+    services.loki-nixlab.alloyPort = lib.mkDefault 12345;
   };
   flake.nixosModules.systm--ports-grafana = {lib, ...}: {
     services.grafana-nixlab.port = lib.mkDefault 3101;
