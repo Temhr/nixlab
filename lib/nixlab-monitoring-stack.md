@@ -49,14 +49,14 @@ interactive `maintenance-log` CLI that writes JSON task records into Loki.
   smartctl_exp  :9633 ──┼┼─► │   :9090    │  alerts  │    :9093      │  /alerts  │ :2586  │ │
   blackbox      :9115 ──┤│   └─────┬──────┘          └───────────────┘           └───┬────┘ │
   ntfy /metrics :2586 ──┘│         │ scrapes itself + above                          │      │
-                         │         │                                    Prometheus scrapes │
-                         │         ▼                                    ntfy /metrics ◄────┘      │
-                         │   ┌──────────┐  datasource   ┌─────────┐   datasource  ┌──────┐│
-                         │   │ Grafana  │ ◄──────────── │  (both) │ ────────────► │ Loki ││
-                         │   │  :3101   │               └─────────┘               │:3100 ││
-                         │   └──────────┘                                         └──▲───┘│
-                         │                       journald + /var/log/*.log ──► Alloy ┘    │
-                         │                       /var/log/maintenance.log (opt-in)        │
+                         │         │                                    Prometheus scrapes  │
+                         │         ▼                                    ntfy /metrics ◄────┘│
+                         │   ┌──────────┐  datasource   ┌─────────┐   datasource  ┌──────┐  │
+                         │   │ Grafana  │ ◄──────────── │  (both) │ ────────────► │ Loki │  │
+                         │   │  :3101   │               └─────────┘               │:3100 │  │
+                         │   └──────────┘                                         └──▲───┘  │
+                         │                       journald + /var/log/*.log ──► Alloy ┘      │
+                         │                       /var/log/maintenance.log (opt-in)          │
                          └──────────────────────────────────────────────────────────────────┘
 ```
 
