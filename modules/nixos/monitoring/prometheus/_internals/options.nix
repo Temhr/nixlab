@@ -17,7 +17,7 @@
   listenAddress = lib.mkOption {
     type = lib.types.str;
     default = "127.0.0.1";
-    description = "IP address for ComfyUI to bind to (use 0.0.0.0 for all interfaces)";
+    description = "IP address for Prometheus to bind to (use 0.0.0.0 for all interfaces)";
   };
 
   domain = lib.mkOption {
