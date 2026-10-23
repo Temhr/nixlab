@@ -317,7 +317,7 @@
               limits_config = {
                 retention_period = cfg.retention;
                 max_query_series = 10000;
-                max_query_lookback = "720h";
+                max_query_lookback = cfg.retention;
               };
 
               compactor = {
