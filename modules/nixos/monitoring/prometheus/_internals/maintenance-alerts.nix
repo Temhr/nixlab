@@ -348,7 +348,7 @@ in {
         # so the alert could never fire. Now average iowait across cores per host.
         {
           alert = "HighIOWait";
-          expr = ''avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 20'';
+          expr = ''avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 30'';
           for = "10m";
           labels = {
             severity = "warning";
@@ -357,7 +357,7 @@ in {
           };
           annotations = {
             summary = "High I/O wait on {{ $labels.instance }}";
-            description = ''CPU spending {{ $value | printf "%.1f" }}% of its time waiting for I/O (threshold 20%)'';
+            description = ''CPU spending {{ $value | printf "%.1f" }}% of its time waiting for I/O (threshold 30%)'';
           };
         }
       ];
