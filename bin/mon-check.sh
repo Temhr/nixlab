@@ -31,15 +31,17 @@ check "loki has labels" bash -c "curl -fsS http://$H:$L/loki/api/v1/labels | jq 
 
 if [ "${1:-}" = "--fire-test" ]; then
   echo "end-to-end alert path"
+  id=$(date +%H%M%S); name="MonCheckTest$id"        # unique per run, so an old notification can never satisfy the grep
   now=$(date -u +%FT%TZ); end=$(date -u -d '+3 min' +%FT%TZ)
   cu -XPOST "http://$H:$A/api/v2/alerts" -H 'Content-Type: application/json' \
-    -d "[{\"labels\":{\"alertname\":\"MonCheckTest\",\"severity\":\"warning\",\"instance\":\"moncheck\"},\"startsAt\":\"$now\",\"endsAt\":\"$end\"}]" \
-    && ok "alert posted" || bad "post failed"
-  for _ in $(seq 1 18); do
-    if cu ${MON_NTFY_AUTH:+-u "$MON_NTFY_AUTH"} "http://$H:$N/$T/json?poll=1&since=5m" | grep -q MonCheckTest; then
-      ok "alert reached ntfy"; exit $fail; fi
-    sleep 5
+    -d "[{\"labels\":{\"alertname\":\"$name\",\"severity\":\"warning\",\"instance\":\"moncheck\"},\"startsAt\":\"$now\",\"endsAt\":\"$end\"}]" \
+    && ok "alert posted as $name" || bad "post failed"
+  echo "  waiting for delivery: Alertmanager's group_wait is 30 s, so expect 30 to 60 s; gives up at 90 s. Do not Ctrl-C."
+  for i in $(seq 1 18); do
+    if cu ${MON_NTFY_AUTH:+-u "$MON_NTFY_AUTH"} "http://$H:$N/$T/json?poll=1&since=5m" | grep -q "$name"; then
+      echo; ok "alert reached ntfy after about $((i*5)) s"; exit $fail; fi
+    printf '.'; sleep 5
   done
-  bad "alert did NOT reach ntfy within 90s"
+  echo; bad "alert did NOT reach ntfy within 90 s"
 fi
 exit $fail
