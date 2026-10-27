@@ -132,6 +132,12 @@
           description = "gRPC port for Loki internal communication. Only relevant for multi-instance deployments.";
         };
 
+        openGrpcFirewall = lib.mkOption {
+          type = lib.types.bool;
+          default = false;
+          description = "Open the gRPC port in the firewall. Only needed for multi-instance Loki deployments.";
+        };
+
         alloyPort = lib.mkOption {
           type = lib.types.port;
           default = 12345;
@@ -268,6 +274,7 @@
               server = {
                 http_listen_address = cfg.listenAddress;
                 http_listen_port = cfg.port;
+                grpc_listen_address = "127.0.0.1";
                 grpc_listen_port = cfg.grpcPort;
                 log_level = "info";
               };
@@ -558,7 +565,7 @@
           (nixlabLib.mkFirewallPorts {
             inherit (cfg) domain listenAddress;
             servicePort = cfg.port;
-            extraPorts = lib.optionals (cfg.domain == null) [cfg.grpcPort];
+            extraPorts = lib.optionals cfg.openGrpcFirewall [cfg.grpcPort];
           });
 
         # ----------------------------------------------------------------------------
