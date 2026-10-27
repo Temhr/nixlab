@@ -44,7 +44,7 @@
         };
         repeatInterval = lib.mkOption {
           type = lib.types.str;
-          default = "4h";
+          default = "12h";
           description = "How long to wait before re-sending an already-sent notification.";
         };
         continue = lib.mkOption {
@@ -405,16 +405,24 @@
         inhibitRules = lib.mkOption {
           type = lib.types.listOf inhibitRuleSubmodule;
           default = [
+            # A critical on a host suppresses warnings in the same category on that host.
             {
               sourceMatchers = ["severity=\"critical\""];
               targetMatchers = ["severity=\"warning\""];
-              equal = ["alertname" "instance"];
+              equal = ["instance" "category"];
+            }
+            # When Prometheus has stopped recording its own samples, everything else it says is unreliable.
+            {
+              sourceMatchers = ["alertname=\"PrometheusNoRecentSamples\""];
+              targetMatchers = ["category=\"monitoring\"" "alertname!=\"PrometheusNoRecentSamples\""];
+              equal = ["instance"];
             }
           ];
           description = ''
             Inhibition rules that suppress target alerts when source alerts
             are firing. The default suppresses warnings when a critical fires
-            for the same alertname + instance.
+            for the same instance and category. A critical on one mountpoint
+            therefore also suppresses warnings on other mountpoints of that host.
           '';
         };
 
