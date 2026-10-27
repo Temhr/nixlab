@@ -39,7 +39,17 @@
     options.services.prometheus-nixlab = options;
 
     # Import configuration from separate file
-    config = lib.mkIf cfg.enable prometheusConfig;
+    config = lib.mkIf cfg.enable (lib.mkMerge [
+      prometheusConfig
+      # Automatic recovery when Prometheus crashes on a corrupt WAL.
+      (nixlabLib.mkWalSelfHeal {
+        inherit pkgs;
+        unit = "prometheus";
+        walDir = "${cfg.dataDir}/data/wal";
+        user = "prometheus";
+        group = "prometheus";
+      })
+    ]);
   };
 
   # Exposed for flake/ci/monitoring-checks.nix, which consumes them by name.
