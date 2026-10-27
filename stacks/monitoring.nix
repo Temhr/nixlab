@@ -2,6 +2,7 @@
   flake.nixosModules.stack--monitoring = {
     config,
     lib,
+    hostMeta ? {},
     ...
   }: let
     cfg = config.services.nixlab-monitoring;
@@ -69,6 +70,17 @@
         type = lib.types.str;
         default = "0.0.0.0";
         description = "IP address all services bind to.";
+      };
+
+      publicHost = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = hostMeta.address or null;
+        description = ''
+          Host name or address that links in notifications and the UIs use.
+          Defaults to this host's static address from hostsMeta. Set a name here
+          (or a `domain` on a service) once nginx fronts it. Null leaves each
+          service's own fallback.
+        '';
       };
 
       openFirewall = lib.mkOption {
@@ -219,6 +231,12 @@
         openFirewall = lib.mkDefault cfg.openFirewall;
         cacheFile = lib.mkIf cfg.ntfy.cachePersist (lib.mkDefault "${cfg.dataDir}/ntfy/cache.db");
       };
+
+      # Links in notifications, redirects and the web UIs.
+      services.grafana-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.grafana}/");
+      services.alertmanager-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.alertmanager}/");
+      services.prometheus-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.prometheus}/");
+      services.ntfy-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.ntfy}");
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
       # This is the missing "synergy" piece: dashboards assume these exist,

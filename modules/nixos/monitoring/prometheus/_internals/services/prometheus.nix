@@ -8,6 +8,7 @@
   nixlabLib,
 }: let
   cfg = config.services.prometheus-nixlab;
+  externalUrlFlag = lib.optionalString (cfg.externalUrl != null) " --web.external-url=${cfg.externalUrl}";
   rendered = import ../rendered.nix {inherit config lib;};
 
   alertRulesJsonFile =
@@ -70,7 +71,7 @@ in {
           --config.file=${cfg.dataDir}/prometheus.yml \
           --storage.tsdb.path=${cfg.dataDir}/data \
           --storage.tsdb.retention.time=${cfg.retention} \
-          --web.listen-address=${cfg.listenAddress}:${toString cfg.port}
+          --web.listen-address=${cfg.listenAddress}:${toString cfg.port}${externalUrlFlag}
       '';
       ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
       Restart = "on-failure";

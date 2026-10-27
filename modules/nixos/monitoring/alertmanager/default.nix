@@ -170,6 +170,13 @@
           description = "Domain name for nginx reverse proxy (optional)";
         };
 
+        externalUrl = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "http://10.0.0.251:9093/";
+          description = "URL that links, redirects and notifications point to when no domain is set. Null keeps the previous fallback.";
+        };
+
         enableSSL = lib.mkOption {
           type = lib.types.bool;
           default = false;
@@ -546,6 +553,8 @@
             then "https"
             else "http"
           }://${cfg.domain}/"
+          else if cfg.externalUrl != null
+          then cfg.externalUrl
           else "http://${cfg.listenAddress}:${toString cfg.port}/";
 
         clusterPeers = cfg.clusterPeers;
