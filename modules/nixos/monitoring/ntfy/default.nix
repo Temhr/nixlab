@@ -184,7 +184,7 @@
 
           listenAddress = lib.mkOption {
             type = lib.types.str;
-            default = "0.0.0.0:25";
+            default = ":2525";
             description = "Address and port for the SMTP listener";
           };
 
@@ -204,6 +204,17 @@
               addresses on the same domain (e.g. "ntfy-" → ntfy-mytopic@example.com).
             '';
           };
+        };
+
+        upstreamBaseUrl = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "https://ntfy.sh";
+          description = ''
+            Relay poll requests through this server so the official ntfy mobile
+            apps get instant push notifications from a self-hosted instance.
+            Only a message id is sent upstream, never the message content.
+          '';
         };
 
         # ── Firebase (optional upstream relay) ────────────────────────────────
@@ -379,10 +390,8 @@
             }
           );
 
-          firebaseConfig = lib.optionalAttrs (cfg.firebaseKeyFile != null) {
-            # The actual path is injected via the Environment= unit directive
-            # above; this key tells ntfy to look for it in the environment.
-            firebase-key-file = "\${NTFY_FIREBASE_KEY_FILE}";
+          upstreamConfig = lib.optionalAttrs (cfg.upstreamBaseUrl != null) {
+            upstream-base-url = cfg.upstreamBaseUrl;
           };
 
           subscriberRateConfig = lib.optionalAttrs cfg.rateLimit.subscriberRateLimit {
@@ -396,7 +405,7 @@
             // authConfig
             // webConfig
             // smtpConfig
-            // firebaseConfig
+            // upstreamConfig
             // subscriberRateConfig;
 
           jsonFile =
@@ -441,7 +450,7 @@
             inherit (cfg) domain listenAddress;
             servicePort = cfg.port;
           }
-          ++ lib.optionals cfg.smtp.enable [25]);
+          ++ lib.optionals cfg.smtp.enable [(lib.toInt (lib.last (lib.splitString ":" cfg.smtp.listenAddress)))]);
     };
   };
 }

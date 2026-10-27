@@ -670,7 +670,7 @@ INITIAL SETUP
   # Should return "ready"
 
 2. Check Alloy is sending logs:
-  curl http://localhost:3100/loki/api/v1/label/__name__/values
+  curl http://localhost:3100/loki/api/v1/labels
   # Should show log stream labels
 
 3. View Alloy UI (for debugging):
@@ -783,7 +783,7 @@ Alloy debug UI:
   - See pipeline data flow
 
 Check Alloy configuration syntax:
-  alloy fmt --write /var/lib/alloy/config.alloy
+  alloy fmt /var/lib/alloy/config.alloy
 
 Test Loki API:
   curl http://localhost:3100/ready
@@ -821,8 +821,6 @@ If you have custom Promtail configs, use the converter:
 Key differences:
   - Promtail: YAML configuration
   - Alloy: River configuration (HCL-like)
-  - Promtail: /var/lib/promtail/positions.yaml
-  - Alloy: /var/lib/alloy/data/positions/
 
 Metrics changes:
   - Promtail metrics: promtail_*

@@ -193,7 +193,7 @@
           type = lib.types.listOf lib.types.str;
           default = [];
           example = ["alice"];
-          description = "Extra users to add to the alertmanager group";
+          description = "Unused: the upstream module runs Alertmanager as a DynamicUser, so there is no persistent group to join.";
         };
 
         # OPTIONAL: Validate config with amtool at build time (default: true).
@@ -556,15 +556,6 @@
 
         configuration = amConfig;
       };
-
-      # ----------------------------------------------------------------------------
-      # GROUP MEMBERSHIP
-      # ----------------------------------------------------------------------------
-      users.users = lib.mkMerge (
-        lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-        (map (u: {${u} = {extraGroups = ["alertmanager"];};})
-          ([config.nixlab.mainUser] ++ cfg.extraUsers))
-      );
 
       # ----------------------------------------------------------------------------
       # NGINX REVERSE PROXY - Only configured if domain is set
