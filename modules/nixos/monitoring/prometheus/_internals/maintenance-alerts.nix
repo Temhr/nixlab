@@ -700,8 +700,7 @@ in rec {
       core = true;
       interval = "1m";
       rules = [
-        # 19. Prometheus has stopped recording its own samples. This is the
-        # Aug-Oct 2026 incident: every scrape rejected as out-of-bounds, so
+        # 19. Prometheus has stopped recording its own samples: every scrape rejected as out-of-bounds, so
         # `up` was empty everywhere while /-/healthy still returned OK.
         {
           alert = "PrometheusNoRecentSamples";

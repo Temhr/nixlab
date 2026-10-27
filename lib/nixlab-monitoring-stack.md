@@ -596,12 +596,6 @@ alert must appear in the CLI's `CHECKLIST_SECTIONS`; check with
 against `grep -oE '"[IVX]+\.[0-9]+:' …/maintenance-logger.sh | tr -d '":' | sort -u`
 (`comm -23` must print nothing).
 
-The `monitoring_stack` group exists because of an incident (Aug–Oct 2026): a
-clock jump made Prometheus reject every scrape as out-of-bounds while
-`/-/healthy` still said OK. `absent_over_time` is the dependable detector
-because it fires on *missing* data; "metric X is high" rules can't be trusted
-when the samples are the thing being rejected.
-
 **Optional-exporter alerts** are gated so they only load when their data
 source exists. To enable one: set the matching `integrations.<x>.enable` in the
 stack (traefik, cadvisor, postgres), `blackbox.dnsTargets` (DNS) or
@@ -796,8 +790,8 @@ Signatures are in template §8; the full source is `flake/nixos-lib.nix`.
    `/var/lib/loki-wal-recover/last-recovery`), so a persistent fault can't loop.
 4. Cost: anything that existed only in the WAL (the last few minutes) is lost.
    It covers WAL corruption only, not chunk/index damage, and it only triggers
-   on start-failure loops, so it would not have caught the Prometheus
-   "running but rejecting samples" incident. If it fires often, find the cause;
+   on start-failure loops, so it would not catch Prometheus
+   "running but rejecting samples" incidents. If it fires often, find the cause;
    check for `wal.broken-*` directories next to the WAL.
 
 ---
