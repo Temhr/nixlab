@@ -559,9 +559,11 @@
 
         clusterPeers = cfg.clusterPeers;
 
-        extraFlags = lib.optionals (cfg.clusterPeers != []) [
-          "--cluster.listen-address=0.0.0.0:${toString cfg.clusterPort}"
-        ];
+        # With no peers, disable clustering entirely (an empty address turns the gossip listener off).
+        extraFlags =
+          if cfg.clusterPeers != []
+          then ["--cluster.listen-address=0.0.0.0:${toString cfg.clusterPort}"]
+          else ["--cluster.listen-address="];
 
         configuration = amConfig;
       };

@@ -73,8 +73,14 @@
 
       listenAddress = lib.mkOption {
         type = lib.types.str;
-        default = "0.0.0.0";
-        description = "IP address all services bind to.";
+        default =
+          if cfg.access.interfaces == []
+          then "127.0.0.1"
+          else "0.0.0.0";
+        description = ''
+          IP address all services bind to. Loopback unless access.interfaces names
+          at least one network interface to expose services on.
+        '';
       };
 
       publicHost = lib.mkOption {
@@ -88,10 +94,31 @@
         '';
       };
 
+      access = {
+        interfaces = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["eno1"];
+          description = ''
+            Network interfaces on which the services in `expose` are reachable.
+            Empty means loopback only. Use the wired interface (hostMeta.interfaces
+            entries with type "ethernet"); never list a Wi-Fi interface.
+          '';
+        };
+        expose = lib.mkOption {
+          type = lib.types.listOf (lib.types.enum ["grafana" "ntfy" "alertmanager" "prometheus" "loki"]);
+          default = ["grafana" "ntfy"];
+          description = "Which services to open on access.interfaces.";
+        };
+      };
+
       openFirewall = lib.mkOption {
         type = lib.types.bool;
-        default = true;
-        description = "Open firewall ports for all services.";
+        default = false;
+        description = ''
+          Open each service's port on every interface (the old behaviour).
+          Prefer access.interfaces, which scopes the rules to chosen interfaces.
+        '';
       };
 
       dataDir = lib.mkOption {
@@ -242,6 +269,11 @@
       services.alertmanager-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.alertmanager}/");
       services.prometheus-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.prometheus}/");
       services.ntfy-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.ntfy}");
+
+      # Interface-scoped exposure: only the chosen services, only on the chosen interfaces.
+      networking.firewall.interfaces = lib.genAttrs cfg.access.interfaces (_: {
+        allowedTCPPorts = map (name: port.${name}) cfg.access.expose;
+      });
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
       # This is the missing "synergy" piece: dashboards assume these exist,

@@ -55,7 +55,9 @@
     services.nixlab-monitoring = {
       enable = true;
       dataDir = "/data";
-      openFirewall = true;
+      # Pinned to the old behaviour while S15 is rolled out host by host. Removed in commit E.
+      listenAddress = lib.mkDefault "0.0.0.0";
+      openFirewall = lib.mkDefault true;
       loki.maintenance.enable = true;
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
