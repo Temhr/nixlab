@@ -242,7 +242,8 @@
         systemd.services.loki = {
           description = "Loki Log Aggregation System";
           wantedBy = ["multi-user.target"];
-          after = ["network.target" "loki-permissions.service"];
+          after = ["network.target" "loki-permissions.service" "time-sync.target"];
+          wants = ["time-sync.target"];
 
           serviceConfig =
             nixlabLib.mkServiceHardening {
@@ -375,7 +376,8 @@
         systemd.services.alloy = lib.mkIf cfg.enableAlloy {
           description = "Grafana Alloy Telemetry Collector";
           wantedBy = ["multi-user.target"];
-          after = ["network.target" "loki.service" "alloy-permissions.service"];
+          after = ["network.target" "loki.service" "alloy-permissions.service" "time-sync.target"];
+          wants = ["time-sync.target"];
 
           serviceConfig =
             nixlabLib.mkServiceHardening {

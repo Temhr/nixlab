@@ -35,10 +35,15 @@
     nixlab.mainUser = lib.mkDefault "temhr";
 
     services.timesyncd.enable = true;
+
+    # Make time-sync.target mean "the clock is actually set". NixOS does not ship
+    # systemd-time-wait-sync by default, so without this nothing waits for NTP and
+    # services ordered after the target start on a wrong clock.
     systemd.additionalUpstreamSystemUnits = ["systemd-time-wait-sync.service"];
     systemd.services.systemd-time-wait-sync = {
       wantedBy = ["time-sync.target"];
-      serviceConfig.TimeoutStartSec = "2min"; # offline laptops still boot
+      # An offline laptop would otherwise wait this long before the login screen.
+      serviceConfig.TimeoutStartSec = "60s";
     };
 
     services.homepage-nixlab = {
