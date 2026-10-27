@@ -456,12 +456,6 @@
             Restart = "on-failure";
             RestartSec = "10s";
 
-            # Grafana talks to backend plugins (prometheus, loki, ...) over
-            # unix domain sockets (hashicorp go-plugin). mkServiceHardening only
-            # allows AF_INET/AF_INET6, which makes every plugin binary fail its
-            # startup handshake. This overrides the hardening default.
-            RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
-
             ExecStartPre = [
               # Step 1 — runs as root (+):
               #   a) Remove any dashboard directories and provisioning configs

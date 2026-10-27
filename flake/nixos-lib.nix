@@ -81,6 +81,7 @@
     # Options:
     #   writablePaths  — list of paths the service needs read-write access to
     #   allowNetwork   — set false for services that need no network access
+    #   allowUnixSockets — set false to also forbid AF_UNIX (default true; plugin sockets, notify sockets)
     #   allowDevices   — set true for services needing /dev access (e.g. GPU)
     #   allowJIT       — set true for JIT-compiled runtimes (Next.js, Node.js,
     #                    eBPF-based tools) that need write+execute memory and
@@ -100,6 +101,7 @@
     mkServiceHardening = {
       writablePaths ? [],
       allowNetwork ? true,
+      allowUnixSockets ? true,
       allowDevices ? false,
       allowJIT ? false,
     }:
@@ -112,9 +114,16 @@
         SystemCallFilter = "@system-service";
         ReadWritePaths = writablePaths;
       }
-      // lib.optionalAttrs allowNetwork {
-        RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
-      }
+      // (
+        if allowNetwork
+        then {
+          RestrictAddressFamilies = ["AF_INET" "AF_INET6"] ++ lib.optional allowUnixSockets "AF_UNIX";
+        }
+        else {
+          PrivateNetwork = true;
+          RestrictAddressFamilies = ["AF_UNIX"];
+        }
+      )
       // lib.optionalAttrs (!allowDevices) {
         PrivateDevices = true;
         ProtectKernelModules = true;
