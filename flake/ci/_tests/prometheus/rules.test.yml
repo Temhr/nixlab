@@ -47,3 +47,20 @@ tests:
       - eval_time: 10m
         alertname: LowDiskSpace
         exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'probe_success{job="blackbox-http", instance="http://x"}'
+        values: '0x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ProbeFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: network
+              checklist_section: IV.12
+              job: blackbox-http
+              instance: "http://x"
+            exp_annotations:
+              summary: "Probe failing: http://x"
+              description: "blackbox-http probe to http://x has failed for 5+ minutes"

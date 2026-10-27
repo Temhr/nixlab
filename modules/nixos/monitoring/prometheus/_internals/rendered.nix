@@ -10,19 +10,21 @@
   scrapeConfigs = import ./scrape-configs.nix {inherit config lib;};
 
   alertRulesConfig = import ./alerts.nix;
+  bb = cfg.maintenance.exporters.blackbox;
   alertFeatures =
     cfg.maintenance.alerts.features
     // {
       backup = cfg.maintenance.exporters.backup.enable;
-      dns = cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.dnsTargets != [];
+      dns = bb.enable && bb.dnsTargets != [];
+      blackboxProbes = bb.enable && (bb.httpTargets != [] || bb.icmpTargets != [] || bb.sslTargets != []);
     };
-  maintenanceAlertRules =
-    if cfg.maintenance.enable
-    then import ./maintenance-alerts.nix {features = alertFeatures;}
-    else {groups = [];};
+  alertGroups = import ./maintenance-alerts.nix {features = alertFeatures;};
 in {
   rules = {
-    groups = alertRulesConfig.groups ++ maintenanceAlertRules.groups;
+    groups =
+      alertRulesConfig.groups
+      ++ alertGroups.core
+      ++ lib.optionals cfg.maintenance.enable alertGroups.maintenance;
   };
 
   prometheusConfig = {

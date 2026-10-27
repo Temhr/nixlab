@@ -40,7 +40,7 @@
   stripGate = r: removeAttrs r ["requires"];
   prune = gs:
     builtins.filter (g: g.rules != []) (map (g:
-      g
+      (removeAttrs g ["core"])
       // {
         rules = map (r:
           stripGate (
@@ -57,8 +57,8 @@
 
   # Virtual network interfaces that routinely show drops/errors.
   netFilter = ''device!~"lo|veth.*|docker.*|br-.*|virbr.*"'';
-in {
-  groups = prune [
+in rec {
+  allGroups = [
     # ═══════════════════════════════════════════════════════
     # I. Hardware & Physical Layer
     # ═══════════════════════════════════════════════════════
@@ -646,6 +646,46 @@ in {
     }
 
     # ═══════════════════════════════════════════════════════
+    # IV/V. Blackbox probes (HTTP, ICMP, TCP, TLS)
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "probes";
+      interval = "1m";
+      rules = [
+        {
+          alert = "ProbeFailed";
+          requires = "blackboxProbes";
+          expr = ''probe_success{job=~"blackbox-http|blackbox-icmp"} == 0'';
+          for = "5m";
+          labels = {
+            severity = "warning";
+            category = "network";
+            checklist_section = "IV.12";
+          };
+          annotations = {
+            summary = "Probe failing: {{ $labels.instance }}";
+            description = "{{ $labels.job }} probe to {{ $labels.instance }} has failed for 5+ minutes";
+          };
+        }
+        {
+          alert = "SSLProbeFailed";
+          requires = "blackboxProbes";
+          expr = ''probe_success{job="blackbox-ssl"} == 0'';
+          for = "10m";
+          labels = {
+            severity = "warning";
+            category = "security";
+            checklist_section = "IV.13";
+          };
+          annotations = {
+            summary = "TLS probe failing: {{ $labels.instance }}";
+            description = "Handshake or HTTP check failed; certificate expiry alerts cannot evaluate.";
+          };
+        }
+      ];
+    }
+
+    # ═══════════════════════════════════════════════════════
     # VII. Monitoring Stack Self-Health
     #
     # Prometheus stores its own metrics (and the ALERTS series) in the same TSDB
@@ -657,6 +697,7 @@ in {
     # ═══════════════════════════════════════════════════════
     {
       name = "monitoring_stack";
+      core = true;
       interval = "1m";
       rules = [
         # 19. Prometheus has stopped recording its own samples. This is the
@@ -731,6 +772,7 @@ in {
     # ═══════════════════════════════════════════════════════
     {
       name = "maintenance_metrics";
+      core = true;
       interval = "1m";
       rules = [
         # Overall system health score (0-100), clamped so it can't go negative
@@ -774,4 +816,11 @@ in {
       ];
     }
   ];
+
+  # Everything (used by the unit-test harness and the all-features check).
+  groups = prune allGroups;
+  # Always loaded, even when maintenance.enable = false.
+  core = prune (builtins.filter (g: g.core or false) allGroups);
+  # Loaded only when maintenance.enable = true.
+  maintenance = prune (builtins.filter (g: !(g.core or false)) allGroups);
 }
