@@ -56,6 +56,21 @@
         prom-rules-all-features = pkgs.runCommand "prom-rules-all-features" {nativeBuildInputs = tools;} ''
           remarshal -i ${toJson "rules-all.json" {groups = (prometheusMaintenanceAlerts {features = allFeatures;}).groups;}} -if json -of yaml -o rules.yml
           promtool check rules rules.yml
+            touch $out
+        '';
+
+        # Runs the unit tests in ./_tests/prometheus against the rules (without the condition label).
+        prom-rule-tests = pkgs.runCommand "prom-rule-tests" {nativeBuildInputs = tools;} ''
+          mkdir work && cd work
+          remarshal -i ${toJson "rules-no-condition.json" {
+            groups =
+              (prometheusMaintenanceAlerts {
+                features = allFeatures;
+                conditionLabel = false;
+              }).groups;
+          }} -if json -of yaml -o alerts.yml
+          cp ${./_tests/prometheus}/*.test.yml .
+          promtool test rules *.test.yml
           touch $out
         '';
       }

@@ -1,4 +1,8 @@
-{features ? {}}: let
+{
+  features ? {},
+  # Tests set this to false so expected labels do not have to contain the long `condition` label.
+  conditionLabel ? true,
+}: let
   # ── Helpers ────────────────────────────────────────────────────────────────
   # Collapse whitespace so multi-line exprs become a single readable line.
   squash = s:
@@ -38,7 +42,12 @@
     builtins.filter (g: g.rules != []) (map (g:
       g
       // {
-        rules = map (r: stripGate (withCondition r)) (builtins.filter isEnabled g.rules);
+        rules = map (r:
+          stripGate (
+            if conditionLabel
+            then withCondition r
+            else r
+          )) (builtins.filter isEnabled g.rules);
       })
     gs);
 

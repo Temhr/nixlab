@@ -1,0 +1,49 @@
+rule_files:
+  - alerts.yml
+evaluation_interval: 1m
+
+tests:
+  # HostDown fires after 5 minutes of up==0 on the node job.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="node", instance="localhost"}'
+        values: '0x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: HostDown
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: service
+              checklist_section: V.14
+              job: node
+              instance: localhost
+            exp_annotations:
+              summary: "Host localhost is unreachable"
+              description: "node_exporter on localhost has not responded for 5+ minutes (machine off, asleep or network down)"
+
+  # 5% free is critical, and must NOT also trigger the warning band (10 to 20%).
+  - interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{instance="h", mountpoint="/", device="d", fstype="ext4"}'
+        values: '5x20'
+      - series: 'node_filesystem_size_bytes{instance="h", mountpoint="/", device="d", fstype="ext4"}'
+        values: '100x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CriticalDiskSpace
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: I.2
+              instance: h
+              mountpoint: /
+              device: d
+              fstype: ext4
+            exp_annotations:
+              summary: "CRITICAL: Disk almost full on h"
+              description: "/ (d) only has 5.0% free"
+      - eval_time: 10m
+        alertname: LowDiskSpace
+        exp_alerts: []
