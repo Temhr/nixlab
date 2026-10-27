@@ -422,11 +422,6 @@
       services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
         inherit (cfg) domain listenAddress port enableSSL;
         extraConfig = ''
-          # ntfy requires long-lived connections for SSE/WebSocket subscriptions
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
-
           # Disable buffering so SSE messages are flushed immediately
           proxy_buffering off;
           proxy_read_timeout 1800s;

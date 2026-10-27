@@ -607,9 +607,6 @@
       services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
         inherit (cfg) domain listenAddress port enableSSL;
         extraConfig = ''
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
           proxy_buffer_size       128k;
           proxy_buffers         4 256k;
           proxy_busy_buffers_size 256k;

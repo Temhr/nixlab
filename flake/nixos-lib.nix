@@ -27,13 +27,21 @@
       enableSSL,
       extraConfig ? "",
       proxyWebsockets ? true,
-    }:
+    }: let
+      # A wildcard bind address cannot be proxied to; use loopback instead.
+      upstreamHost =
+        if listenAddress == "0.0.0.0"
+        then "127.0.0.1"
+        else if listenAddress == "::"
+        then "[::1]"
+        else listenAddress;
+    in
       lib.optionalAttrs (domain != null) {
         ${domain} = {
           forceSSL = enableSSL;
           enableACME = enableSSL;
           locations."/" = {
-            proxyPass = "http://${listenAddress}:${toString port}";
+            proxyPass = "http://${upstreamHost}:${toString port}";
             inherit proxyWebsockets;
             extraConfig =
               ''

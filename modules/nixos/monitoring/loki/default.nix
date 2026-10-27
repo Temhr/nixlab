@@ -546,11 +546,6 @@
         services.nginx.enable = lib.mkIf (cfg.domain != null) true;
         services.nginx.virtualHosts = nixlabLib.mkNginxVirtualHost {
           inherit (cfg) domain listenAddress port enableSSL;
-          extraConfig = ''
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-          '';
         };
 
         # ----------------------------------------------------------------------------
