@@ -34,9 +34,13 @@
 
     ntfyUrl = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
     ntfyTemplate = {
-      title = "[{{.status}}] {{(index .alerts 0).labels.alertname}}";
+      title = "[{{.status}}] {{(index .alerts 0).labels.host}}: {{(index .alerts 0).labels.alertname}}";
       message = ''{{range .alerts}}{{.annotations.summary}}{{"\n"}}{{.annotations.description}}{{"\n\n"}}{{end}}'';
     };
+
+    # Tapping a notification opens Grafana (only when an external URL is resolved).
+    clickParams = lib.optional (svc.grafana-nixlab.externalUrl != null) "click=${lib.escapeURL svc.grafana-nixlab.externalUrl}";
+
     mkNtfyReceiver = name: extraParams: let
       params =
         lib.optionals cfg.notifications.formatMessages [
@@ -44,6 +48,7 @@
           "t=${lib.escapeURL ntfyTemplate.title}"
           "m=${lib.escapeURL ntfyTemplate.message}"
         ]
+        ++ clickParams
         ++ extraParams;
     in {
       inherit name;

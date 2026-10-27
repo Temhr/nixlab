@@ -31,7 +31,10 @@ in {
     global = {
       scrape_interval = "15s";
       evaluation_interval = "15s";
-      external_labels = {monitor = "prometheus";};
+      external_labels = {
+        monitor = "prometheus";
+        host = config.networking.hostName;
+      };
     };
 
     alerting.alertmanagers = lib.optional (cfg.alertmanagerTargets != []) {
