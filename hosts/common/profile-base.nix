@@ -38,7 +38,7 @@
     systemd.additionalUpstreamSystemUnits = ["systemd-time-wait-sync.service"];
     systemd.services.systemd-time-wait-sync = {
       wantedBy = ["time-sync.target"];
-      serviceConfig.TimeoutStartSec = "2min";   # offline laptops still boot
+      serviceConfig.TimeoutStartSec = "2min"; # offline laptops still boot
     };
 
     services.homepage-nixlab = {

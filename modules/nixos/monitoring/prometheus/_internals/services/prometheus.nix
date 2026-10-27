@@ -8,46 +8,15 @@
   nixlabLib,
 }: let
   cfg = config.services.prometheus-nixlab;
-  scrapeConfigs = import ../scrape-configs.nix {inherit config lib;};
+  rendered = import ../rendered.nix {inherit config lib;};
 
-  # Alert rules
-  alertRulesConfig = import ../alerts.nix;
-  alertFeatures =
-    cfg.maintenance.alerts.features
-    // {
-      backup = cfg.maintenance.exporters.backup.enable;
-      dns = cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.dnsTargets != [];
-    };
-  maintenanceAlertRules =
-    if cfg.maintenance.enable
-    then import ../maintenance-alerts.nix {features = alertFeatures;}
-    else {groups = [];};
-  combinedAlertRules = {
-    groups = alertRulesConfig.groups ++ maintenanceAlertRules.groups;
-  };
   alertRulesJsonFile =
     builtins.toFile "alerts.json"
-    (builtins.toJSON combinedAlertRules);
-
-  # Prometheus configuration
-  prometheusConfig = {
-    global = {
-      scrape_interval = "15s";
-      evaluation_interval = "15s";
-      external_labels = {monitor = "prometheus";};
-    };
-
-    alerting.alertmanagers = lib.optional (cfg.alertmanagerTargets != []) {
-      static_configs = [{targets = cfg.alertmanagerTargets;}];
-    };
-
-    rule_files = ["${cfg.dataDir}/rules/*.yml"];
-    scrape_configs = scrapeConfigs.all;
-  };
+    (builtins.toJSON rendered.rules);
 
   prometheusJsonFile =
     builtins.toFile "prometheus.json"
-    (builtins.toJSON prometheusConfig);
+    (builtins.toJSON rendered.prometheusConfig);
 
   # Config installer helper
   mkConfigInstaller = {

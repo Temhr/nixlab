@@ -41,6 +41,10 @@
     # Import configuration from separate file
     config = lib.mkIf cfg.enable prometheusConfig;
   };
+
+  # Exposed for flake/ci/monitoring-checks.nix, which consumes them by name.
+  flake.lib.prometheusRendered = import ./_internals/rendered.nix;
+  flake.lib.prometheusMaintenanceAlerts = import ./_internals/maintenance-alerts.nix;
 }
 # ============================================================================
 # USAGE in configuration.nix:
