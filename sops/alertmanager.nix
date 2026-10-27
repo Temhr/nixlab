@@ -10,11 +10,11 @@
     imports = [self.nixosModules.servc--alertmanager-nixlab];
     options.services.alertmanager-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
-      default = ./alertmanager.yaml;
-      defaultText = lib.literalExpression "./alertmanager.yaml";
+      default = ./alertmanager.env;
+      defaultText = lib.literalExpression "./alertmanager.env";
       description = ''
         Path to the sops-encrypted alertmanager secrets file.
-        Defaults to alertmanager.yaml co-located with this module.
+        Defaults to alertmanager.env co-located with this module.
         Override per-host if needed.
 
         The decrypted file is rendered as KEY=VALUE pairs and injected

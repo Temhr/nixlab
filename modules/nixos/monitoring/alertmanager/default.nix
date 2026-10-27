@@ -529,6 +529,7 @@
         # service fails to start (start-limit-hit after repeated crashes).
         listenAddress = cfg.listenAddress;
         checkConfig = cfg.checkConfig;
+        environmentFile = cfg.environmentFile;
 
         webExternalUrl =
           if cfg.domain != null
@@ -546,12 +547,6 @@
         ];
 
         configuration = amConfig;
-      };
-
-      # Inject the sops-decrypted environment file into the upstream unit.
-      # mkAfter ensures we append rather than clobber the unit's own settings.
-      systemd.services.alertmanager = lib.mkIf (cfg.environmentFile != null) {
-        serviceConfig.EnvironmentFiles = lib.mkAfter [cfg.environmentFile];
       };
 
       # ----------------------------------------------------------------------------
