@@ -29,6 +29,8 @@
       # System statistics from /proc
       "--collector.processes" # Process counts and states
       "--collector.systemd" # Systemd unit states and metrics
+      "--collector.systemd.enable-restarts-metrics" # restart counters
+      "--collector.systemd.unit-include=.+[.](service|timer)" # drop mount/scope/slice series
       # Hardware monitoring
       "--collector.hwmon" # Hardware sensors (temp, voltage, fans)
       # Network details
@@ -56,10 +58,8 @@ in {
       ExecStart = "${pkgs.prometheus-node-exporter}/bin/node_exporter " + "--web.listen-address=localhost:9100 " + collectorFlags;
       Restart = "on-failure";
       RestartSec = "10s";
-      StateDirectory = "node_exporter";
-      StateDirectoryMode = "0750";
       MemoryMax = "256M";
-      TasksMax = "10";
+      TasksMax = "128";
       RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_NETLINK" "AF_UNIX"];
       # node_exporter's hwmon/pressure/systemd collectors hit syscalls outside
       # @system-service intermittently (Go's randomized map iteration means

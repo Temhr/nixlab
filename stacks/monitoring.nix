@@ -96,7 +96,7 @@
         maintenance.enable = lib.mkEnableOption "maintenance monitoring integration";
         maintenance.exporters.systemd = lib.mkOption {
           type = lib.types.bool;
-          default = true;
+          default = false;
           description = "Enable systemd unit exporter.";
         };
         maintenance.exporters.smartctl.enable = lib.mkOption {

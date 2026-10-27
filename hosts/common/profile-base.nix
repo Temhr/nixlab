@@ -53,7 +53,6 @@
       openFirewall = true;
       loki.maintenance.enable = true;
       prometheus.maintenance.enable = true;
-      prometheus.maintenance.exporters.systemd = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
   };

@@ -124,8 +124,8 @@
     exporters = {
       systemd = lib.mkOption {
         type = lib.types.bool;
-        default = true;
-        description = "Enable systemd exporter for service status monitoring";
+        default = false;
+        description = "Enable the separate systemd exporter (port 9558). The node exporter's own systemd collector already provides the node_systemd_* series that the alerts and dashboards use.";
       };
 
       blackbox = {
