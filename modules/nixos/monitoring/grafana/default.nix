@@ -33,12 +33,13 @@
     # missing plugin, so the type is normalised here.
     datasourcesConfig = {
       apiVersion = 1;
-      datasources =
-        map (ds: {
+      datasources = map (ds:
+        {
           inherit (ds) name url access isDefault editable jsonData;
           type = lib.toLower ds.type;
-        })
-        cfg.provisioning.datasources;
+        }
+        // lib.optionalAttrs (ds.uid != null) {inherit (ds) uid;})
+      cfg.provisioning.datasources;
     };
 
     datasourcesJsonFile =
@@ -266,6 +267,11 @@
               type = lib.types.str;
               description = "Datasource name shown in the Grafana UI.";
             };
+            uid = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Stable datasource uid (lets dashboards reference it by id). Null lets Grafana generate one.";
+            };
             type = lib.mkOption {
               type = lib.types.str;
               example = "prometheus";
@@ -440,6 +446,15 @@
             GF_SERVER_ROOT_URL = rootUrl;
             GF_AUTH_ANONYMOUS_ENABLED = lib.boolToString cfg.allowAnonymous;
             GF_AUTH_ANONYMOUS_ORG_ROLE = "Viewer";
+            GF_ANALYTICS_REPORTING_ENABLED = "false";
+            GF_ANALYTICS_CHECK_FOR_UPDATES = "false";
+            GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES = "false";
+            GF_USERS_ALLOW_SIGN_UP = "false";
+            GF_SECURITY_DISABLE_GRAVATAR = "true";
+            GF_SECURITY_COOKIE_SECURE = lib.boolToString cfg.enableSSL;
+            GF_SECURITY_COOKIE_SAMESITE = "lax";
+            GF_SNAPSHOTS_EXTERNAL_ENABLED = "false";
+            GF_NEWS_NEWS_FEED_ENABLED = "false";
             GF_DATABASE_TYPE = "sqlite3";
             GF_DATABASE_PATH = "${cfg.dataDir}/data/grafana.db";
           }

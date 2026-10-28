@@ -353,13 +353,25 @@
         {
           name = "Prometheus";
           type = "prometheus";
+          uid = "prometheus";
           url = "http://127.0.0.1:${toString port.prometheus}";
           isDefault = true;
         }
         {
           name = "Loki";
           type = "loki";
+          uid = "loki";
           url = "http://127.0.0.1:${toString port.loki}";
+        }
+        {
+          name = "Alertmanager";
+          type = "alertmanager";
+          uid = "alertmanager";
+          url = "http://127.0.0.1:${toString port.alertmanager}";
+          jsonData = {
+            implementation = "prometheus";
+            handleGrafanaManagedAlerts = false;
+          };
         }
       ];
 
