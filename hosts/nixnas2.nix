@@ -19,7 +19,6 @@
     pkgs,
     ...
   }: {
-
     ## SELF-HOSTED SERVICES
     services.syncthing-nixlab = {
       enable = true;

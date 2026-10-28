@@ -21,7 +21,6 @@
     pkgs,
     ...
   }: {
-
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 

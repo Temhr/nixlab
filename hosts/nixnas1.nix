@@ -19,7 +19,6 @@
     pkgs,
     ...
   }: {
-
     ## SELF-HOSTED SERVICES
     services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
 

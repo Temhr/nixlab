@@ -23,6 +23,14 @@
     };
     loopback = p: "127.0.0.1:${toString p}";
 
+    # Only services someone must reach leave loopback; the firewall still decides who.
+    bindAddress = name:
+      if cfg.listenAddress != null
+      then cfg.listenAddress
+      else if (cfg.access.interfaces != [] && lib.elem name cfg.access.expose) || lib.elem name cfg.access.peerReachable
+      then "0.0.0.0"
+      else "127.0.0.1";
+
     mkIntegration = defaultTarget: what: {
       enable = lib.mkEnableOption "scraping and alerting for ${what}";
       target = lib.mkOption {
@@ -72,14 +80,13 @@
       enable = lib.mkEnableOption "nixlab monitoring stack (Prometheus + Loki + Grafana + Alertmanager + ntfy)";
 
       listenAddress = lib.mkOption {
-        type = lib.types.str;
-        default =
-          if cfg.access.interfaces == []
-          then "127.0.0.1"
-          else "0.0.0.0";
+        type = lib.types.nullOr lib.types.str;
+        default = null;
         description = ''
-          IP address all services bind to. Loopback unless access.interfaces names
-          at least one network interface to expose services on.
+          Force one bind address for every service. Null (the default) binds each
+          service on its own: services in access.expose (when access.interfaces is
+          non-empty) and in access.peerReachable listen on 0.0.0.0, everything
+          else on loopback.
         '';
       };
 
@@ -109,6 +116,15 @@
           type = lib.types.listOf (lib.types.enum ["grafana" "ntfy" "alertmanager" "prometheus" "loki"]);
           default = ["grafana" "ntfy"];
           description = "Which services to open on access.interfaces.";
+        };
+        peerReachable = lib.mkOption {
+          type = lib.types.listOf (lib.types.enum ["grafana" "ntfy" "alertmanager" "prometheus" "loki"]);
+          default = [];
+          description = ''
+            Services that must listen beyond loopback because a source-restricted
+            firewall rule admits specific peers (agents pushing logs to a hub, a hub
+            probing the other hub). Unlike `expose`, this opens no firewall port.
+          '';
         };
       };
 
@@ -205,14 +221,14 @@
 
       services.grafana-nixlab = {
         enable = true;
-        listenAddress = lib.mkDefault cfg.listenAddress;
+        listenAddress = lib.mkDefault (bindAddress "grafana");
         dataDir = lib.mkDefault "${cfg.dataDir}/grafana";
         openFirewall = lib.mkDefault cfg.openFirewall;
       };
 
       services.loki-nixlab = {
         enable = true;
-        listenAddress = lib.mkDefault cfg.listenAddress;
+        listenAddress = lib.mkDefault (bindAddress "loki");
         dataDir = lib.mkDefault "${cfg.dataDir}/loki";
         openFirewall = lib.mkDefault cfg.openFirewall;
         retention = lib.mkDefault cfg.loki.retention;
@@ -221,7 +237,7 @@
 
       services.prometheus-nixlab = {
         enable = true;
-        listenAddress = lib.mkDefault cfg.listenAddress;
+        listenAddress = lib.mkDefault (bindAddress "prometheus");
         dataDir = lib.mkDefault "${cfg.dataDir}/prometheus";
         openFirewall = lib.mkDefault cfg.openFirewall;
         maintenance = {
@@ -233,7 +249,7 @@
 
       services.alertmanager-nixlab = {
         enable = true;
-        listenAddress = lib.mkDefault cfg.listenAddress;
+        listenAddress = lib.mkDefault (bindAddress "alertmanager");
         openFirewall = lib.mkDefault cfg.openFirewall;
         defaultReceiver =
           if cfg.notifications.useNtfy
@@ -258,7 +274,7 @@
 
       services.ntfy-nixlab = {
         enable = true;
-        listenAddress = lib.mkDefault cfg.listenAddress;
+        listenAddress = lib.mkDefault (bindAddress "ntfy");
         dataDir = lib.mkDefault "${cfg.dataDir}/ntfy";
         openFirewall = lib.mkDefault cfg.openFirewall;
         cacheFile = lib.mkIf cfg.ntfy.cachePersist (lib.mkDefault "${cfg.dataDir}/ntfy/cache.db");
