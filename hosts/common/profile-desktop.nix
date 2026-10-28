@@ -2,6 +2,7 @@
   flake.nixosModules.hosts--profl--desktop = {
     config,
     pkgs,
+    hostMeta ? {},
     ...
   }: {
     imports = [
@@ -18,6 +19,12 @@
       self.nixosModules.hosts--deskt--gui-shells
       self.nixosModules.hosts--deskt--ignore-lid
     ];
+
+    services.nixlab-monitoring = {
+      openFirewall = false;
+      access.interfaces = [hostMeta.wifiIface];
+      # access.expose defaults to ["grafana" "ntfy"]. Add "prometheus" here if you still want its UI from the LAN.
+    };
 
     ## Automatic login for this user
     services.displayManager.autoLogin.user = config.nixlab.mainUser;

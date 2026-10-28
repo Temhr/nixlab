@@ -20,13 +20,6 @@
     ...
   }: {
 
-    # S15: hub. Reachable only on the wired interface, and only Grafana and ntfy.
-    services.nixlab-monitoring = {
-      openFirewall = false;
-      access.interfaces = ["eno1"];
-      # access.expose defaults to ["grafana" "ntfy"]. Add "prometheus" here if you still want its UI from the LAN.
-    };
-
     ## SELF-HOSTED SERVICES
     services.syncthing-nixlab = {
       enable = true;

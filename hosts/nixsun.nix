@@ -22,13 +22,6 @@
     ...
   }: {
 
-    # S15: loopback only. nixsun routes over Wi-Fi, so nothing is exposed.
-    services.nixlab-monitoring = {
-      listenAddress = "127.0.0.1";
-      openFirewall = false;
-      access.interfaces = [];
-    };
-
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 
