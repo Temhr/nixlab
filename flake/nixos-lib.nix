@@ -226,7 +226,7 @@
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${pkgs.coreutils}/bin/chown -R ${user}:${group} ${dataDir}";
+        ExecStart = "${pkgs.findutils}/bin/find ${dataDir} -xdev ( ! -user ${user} -o ! -group ${group} ) -exec ${pkgs.coreutils}/bin/chown -h ${user}:${group} {} +";
       };
     };
 
