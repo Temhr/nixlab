@@ -7,6 +7,40 @@
     ...
   }: let
     cfg = config.services.ntfy-nixlab;
+
+    userSubmodule = lib.types.submodule {
+      options = {
+        name = lib.mkOption {
+          type = lib.types.str;
+          description = "ntfy user name.";
+        };
+        role = lib.mkOption {
+          type = lib.types.enum ["user" "admin"];
+          default = "user";
+          description = "ntfy role.";
+        };
+        passwordEnvVar = lib.mkOption {
+          type = lib.types.str;
+          description = "Name of the variable in auth.environmentFile that holds this user's password.";
+        };
+        topics = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              topic = lib.mkOption {type = lib.types.str;};
+              access = lib.mkOption {type = lib.types.enum ["read-write" "read-only" "write-only" "deny-all"];};
+            };
+          });
+          default = [];
+          description = "Per-topic access for this user.";
+        };
+      };
+    };
+
+    provisionScript = lib.concatMapStringsSep "\n" (u: ''
+        NTFY_PASSWORD="''${${u.passwordEnvVar}}" ntfy user --config ${cfg.dataDir}/server.yml add --ignore-exists --role=${u.role} '${u.name}'
+        NTFY_PASSWORD="''${${u.passwordEnvVar}}" ntfy user --config ${cfg.dataDir}/server.yml change-pass '${u.name}'
+        ${lib.concatMapStringsSep "\n" (t: "ntfy access --config ${cfg.dataDir}/server.yml '${u.name}' '${t.topic}' ${t.access}") u.topics}
+      '') cfg.auth.users;
   in {
     imports = [
       self.nixosModules.systm--ports-ntfy
@@ -176,6 +210,18 @@
               "read-write" allows anonymous publish and subscribe.
             '';
           };
+
+          environmentFile = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = "KEY=VALUE file holding the passwords named by users.*.passwordEnvVar (read by systemd as root).";
+          };
+
+          users = lib.mkOption {
+            type = lib.types.listOf userSubmodule;
+            default = [];
+            description = "Users and access rules created at start (idempotent).";
+          };
         };
 
         # ── Web UI ─────────────────────────────────────────────────────────────
@@ -251,6 +297,10 @@
           inherit (cfg) enableSSL domain;
           moduleName = "services.ntfy-nixlab";
         })
+        {
+          assertion = cfg.auth.users == [] || (cfg.auth.enable && cfg.auth.environmentFile != null);
+          message = "services.ntfy-nixlab.auth.users needs auth.enable = true and auth.environmentFile set.";
+        }
         {
           assertion = !(cfg.smtp.enable && cfg.smtp.domain == "");
           message = ''
@@ -367,6 +417,7 @@
             enable-login = cfg.auth.enable;
             enable-reservations = cfg.auth.enable;
             enable-metrics = true;
+            behind-proxy = cfg.domain != null;
           };
 
           cacheConfig = lib.optionalAttrs (cfg.cacheFile != "") {
@@ -430,6 +481,31 @@
             -of yaml
 
           install -m 640 -o ${cfg.user} -g ${cfg.group} ${yamlTmp} ${cfg.dataDir}/server.yml
+        '';
+      };
+
+      systemd.services.ntfy-provision = lib.mkIf (cfg.auth.enable && cfg.auth.users != []) {
+        description = "Provision ntfy users and access rules";
+        wantedBy = ["multi-user.target"];
+        after = ["ntfy.service"];
+        wants = ["ntfy.service"];
+        path = [cfg.package pkgs.gnugrep pkgs.curl pkgs.coreutils];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          User = cfg.user;
+          Group = cfg.group;
+          EnvironmentFile = cfg.auth.environmentFile;
+        };
+        script = ''
+          set -eu
+          for _ in $(seq 1 30); do
+            curl -sf http://127.0.0.1:${toString cfg.port}/v1/health >/dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:${toString cfg.port}/v1/health >/dev/null \
+            || { echo "ntfy not healthy after 30s; see journalctl -u ntfy" >&2; exit 1; }
+          ${provisionScript}
         '';
       };
 

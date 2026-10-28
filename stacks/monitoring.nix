@@ -61,10 +61,16 @@
     in {
       inherit name;
       webhook_configs = [
-        {
-          url = ntfyUrl + lib.optionalString (params != []) "?${lib.concatStringsSep "&" params}";
-          send_resolved = true;
-        }
+        ({
+            url = ntfyUrl + lib.optionalString (params != []) "?${lib.concatStringsSep "&" params}";
+            send_resolved = true;
+          }
+          // lib.optionalAttrs cfg.notifications.ntfyAuth.enable {
+            http_config.basic_auth = {
+              username = "alertmanager";
+              password = "$NTFY_ALERTMANAGER_PASSWORD";
+            };
+          })
       ];
     };
   in {
@@ -197,6 +203,7 @@
           default = true;
           description = "Use ntfy message templating so notifications show alert summary/description instead of raw JSON. Requires ntfy >= 2.10.";
         };
+        ntfyAuth.enable = lib.mkEnableOption "ntfy authentication with an Alertmanager writer and a reader account (needs NTFY_*_PASSWORD in the alertmanager secrets file)";
         separateCritical = lib.mkOption {
           type = lib.types.bool;
           default = true;
@@ -290,6 +297,34 @@
       networking.firewall.interfaces = lib.genAttrs cfg.access.interfaces (_: {
         allowedTCPPorts = map (name: port.${name}) cfg.access.expose;
       });
+
+      services.ntfy-nixlab.auth = lib.mkIf cfg.notifications.ntfyAuth.enable {
+        enable = true;
+        defaultAccess = "deny-all";
+        environmentFile = config.sops.secrets.ALERTMANAGER_ENV.path;
+        users = [
+          {
+            name = "alertmanager";
+            passwordEnvVar = "NTFY_ALERTMANAGER_PASSWORD";
+            topics = [
+              {
+                topic = cfg.notifications.ntfyTopic;
+                access = "write-only";
+              }
+            ];
+          }
+          {
+            name = "reader";
+            passwordEnvVar = "NTFY_READER_PASSWORD";
+            topics = [
+              {
+                topic = cfg.notifications.ntfyTopic;
+                access = "read-only";
+              }
+            ];
+          }
+        ];
+      };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
       # This is the missing "synergy" piece: dashboards assume these exist,
