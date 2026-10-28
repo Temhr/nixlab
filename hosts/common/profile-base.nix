@@ -1,5 +1,9 @@
 {self, ...}: {
-  flake.nixosModules.hosts--profl--base = {lib, ...}: {
+  flake.nixosModules.hosts--profl--base = {
+    lib,
+    hostMeta ? {},
+    ...
+  }: {
     imports = [
       self.nixosModules.hosts--core--boot-loader
       self.nixosModules.hosts--core--display-manager
@@ -35,7 +39,6 @@
     nixlab.mainUser = lib.mkDefault "temhr";
 
     services.timesyncd.enable = true;
-
     # Make time-sync.target mean "the clock is actually set". NixOS does not ship
     # systemd-time-wait-sync by default, so without this nothing waits for NTP and
     # services ordered after the target start on a wrong clock.
@@ -54,7 +57,10 @@
     };
     services.nixlab-monitoring = {
       enable = true;
+      openFirewall = false;
       dataDir = "/data";
+      access.expose = ["grafana" "ntfy" "prometheus"];
+      access.interfaces = [hostMeta.ethIface hostMeta.wifiIface];
       loki.maintenance.enable = true;
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
