@@ -95,6 +95,8 @@
     #                    eBPF-based tools) that need write+execute memory and
     #                    syscalls outside @system-service. Relaxes
     #                    MemoryDenyWriteExecute and SystemCallFilter.
+    #   extraHardening — set true for the extra sandboxing set (capabilities, proc, clock, umask...).
+    #                    Callers override single keys that a service genuinely needs.
     #
     # Usage:
     #   serviceConfig = nixlabLib.mkServiceHardening {
@@ -112,6 +114,7 @@
       allowUnixSockets ? true,
       allowDevices ? false,
       allowJIT ? false,
+      extraHardening ? false,
     }:
       {
         NoNewPrivileges = true;
@@ -143,6 +146,18 @@
       // lib.optionalAttrs allowJIT {
         MemoryDenyWriteExecute = false;
         SystemCallFilter = "";
+      }
+      // lib.optionalAttrs extraHardening {
+        CapabilityBoundingSet = "";
+        RestrictSUIDSGID = true;
+        ProtectKernelLogs = true;
+        ProtectClock = true;
+        ProtectHostname = true;
+        ProtectProc = "invisible";
+        ProcSubset = "pid";
+        SystemCallArchitectures = "native";
+        RemoveIPC = true;
+        UMask = "0077";
       };
 
     # ---------------------------------------------------------------------------
