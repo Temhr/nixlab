@@ -271,6 +271,10 @@
             lokiConfig = {
               auth_enabled = false;
 
+              analytics = {
+                reporting_enabled = false;
+              };
+
               server = {
                 http_listen_address = cfg.listenAddress;
                 http_listen_port = cfg.port;
@@ -326,6 +330,14 @@
                 retention_period = cfg.retention;
                 max_query_series = 10000;
                 max_query_lookback = cfg.retention;
+                # Guardrails: a runaway unit must not fill /data on a laptop.
+                ingestion_rate_mb = 4;
+                ingestion_burst_size_mb = 8;
+                per_stream_rate_limit = "3MB";
+                per_stream_rate_limit_burst = "10MB";
+                reject_old_samples = true;
+                reject_old_samples_max_age = "168h";
+                max_entries_limit_per_query = 5000;
               };
 
               compactor = {
@@ -395,7 +407,7 @@
               Type = "simple";
               User = "alloy";
               Group = "alloy";
-              ExecStart = "${cfg.alloyPackage}/bin/alloy run --server.http.listen-addr=127.0.0.1:${toString cfg.alloyPort} --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
+              ExecStart = "${cfg.alloyPackage}/bin/alloy run --disable-reporting --server.http.listen-addr=127.0.0.1:${toString cfg.alloyPort} --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
               Restart = "on-failure";
               RestartSec = "10s";
             };
