@@ -21,8 +21,6 @@
     pkgs,
     ...
   }: {
-    services.nixlab-monitoring.notifications.ntfyAuth.enable = true;
-
     ## Graphical Shells ("none" "gnome" "plasma6")
     gShells.DE = "plasma6";
 
