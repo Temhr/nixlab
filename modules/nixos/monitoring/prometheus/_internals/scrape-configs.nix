@@ -10,6 +10,7 @@
   # Helper for blackbox exporter jobs
   mkBlackboxJob = jobName: module: targets: {
     job_name = jobName;
+    scrape_interval = cfg.slowScrapeInterval;
     metrics_path = "/probe";
     params.module = [module];
     static_configs = [{inherit targets;}];
@@ -62,6 +63,7 @@
     }
     ++ lib.optional cfg.maintenance.exporters.smartctl.enable {
       job_name = "smartctl";
+      scrape_interval = cfg.slowScrapeInterval;
       static_configs = [{targets = ["localhost:9633"];}];
     }
     ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.httpTargets != [])

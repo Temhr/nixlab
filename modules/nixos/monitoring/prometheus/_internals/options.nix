@@ -54,6 +54,31 @@
     description = "How long to retain metrics data";
   };
 
+  retentionSize = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    example = "8GB";
+    description = "Cap on TSDB size (--storage.tsdb.retention.size). Null means no size cap. Useful on laptops.";
+  };
+
+  scrapeInterval = lib.mkOption {
+    type = lib.types.str;
+    default = "15s";
+    description = "Global scrape interval.";
+  };
+
+  evaluationInterval = lib.mkOption {
+    type = lib.types.str;
+    default = "15s";
+    description = "Global rule evaluation interval.";
+  };
+
+  slowScrapeInterval = lib.mkOption {
+    type = lib.types.str;
+    default = "60s";
+    description = "Scrape interval for slow-changing jobs (smartctl, blackbox probes).";
+  };
+
   package = lib.mkOption {
     type = lib.types.package;
     default = pkgs.prometheus;

@@ -9,6 +9,7 @@
 }: let
   cfg = config.services.prometheus-nixlab;
   externalUrlFlag = lib.optionalString (cfg.externalUrl != null) " --web.external-url=${cfg.externalUrl}";
+  retentionSizeFlag = lib.optionalString (cfg.retentionSize != null) " --storage.tsdb.retention.size=${cfg.retentionSize}";
   rendered = import ../rendered.nix {inherit config lib;};
 
   alertRulesJsonFile =
@@ -70,7 +71,7 @@ in {
         ${cfg.package}/bin/prometheus \
           --config.file=${cfg.dataDir}/prometheus.yml \
           --storage.tsdb.path=${cfg.dataDir}/data \
-          --storage.tsdb.retention.time=${cfg.retention} \
+          --storage.tsdb.retention.time=${cfg.retention}${retentionSizeFlag} \
           --web.listen-address=${cfg.listenAddress}:${toString cfg.port}${externalUrlFlag}
       '';
       ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";

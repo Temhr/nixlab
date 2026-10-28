@@ -29,8 +29,8 @@ in {
 
   prometheusConfig = {
     global = {
-      scrape_interval = "15s";
-      evaluation_interval = "15s";
+      scrape_interval = cfg.scrapeInterval;
+      evaluation_interval = cfg.evaluationInterval;
       external_labels = {
         monitor = "prometheus";
         host = config.networking.hostName;

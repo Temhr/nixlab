@@ -160,6 +160,22 @@
 
       prometheus = {
         maintenance.enable = lib.mkEnableOption "maintenance monitoring integration";
+        scrapeInterval = lib.mkOption {
+          type = lib.types.str;
+          default = "30s";
+          description = "Prometheus scrape and evaluation interval.";
+        };
+        retention = lib.mkOption {
+          type = lib.types.str;
+          default = "15d";
+          description = "Prometheus retention time.";
+        };
+        retentionSize = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "8GB";
+          description = "Prometheus size cap; set on laptops.";
+        };
         maintenance.exporters.systemd = lib.mkOption {
           type = lib.types.bool;
           default = false;
@@ -244,6 +260,10 @@
 
       services.prometheus-nixlab = {
         enable = true;
+        scrapeInterval = lib.mkDefault cfg.prometheus.scrapeInterval;
+        evaluationInterval = lib.mkDefault cfg.prometheus.scrapeInterval;
+        retention = lib.mkDefault cfg.prometheus.retention;
+        retentionSize = lib.mkDefault cfg.prometheus.retentionSize;
         listenAddress = lib.mkDefault (bindAddress "prometheus");
         dataDir = lib.mkDefault "${cfg.dataDir}/prometheus";
         openFirewall = lib.mkDefault cfg.openFirewall;
