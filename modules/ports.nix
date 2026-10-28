@@ -57,9 +57,13 @@
   };
   flake.nixosModules.systm--ports-prometheus = {lib, ...}: {
     services.prometheus-nixlab.port = lib.mkDefault 9090;
+    services.prometheus-nixlab.blackboxPort = lib.mkDefault 9115;
+    services.prometheus-nixlab.smartctlPort = lib.mkDefault 9633;
+    services.prometheus-nixlab.systemdExporterPort = lib.mkDefault 9558;
   };
   flake.nixosModules.systm--ports-alertmanager = {lib, ...}: {
     services.alertmanager-nixlab.port = lib.mkDefault 9093;
+    services.alertmanager-nixlab.clusterPort = lib.mkDefault 9094;
   };
   flake.nixosModules.systm--ports-hermes = {lib, ...}: {
     services.nixlab-hermes.dashboard.port = lib.mkDefault 9119;

@@ -92,6 +92,24 @@
     description = "Open firewall ports";
   };
 
+  blackboxPort = lib.mkOption {
+    type = lib.types.port;
+    default = 9115;
+    description = "Port of the blackbox exporter.";
+  };
+
+  smartctlPort = lib.mkOption {
+    type = lib.types.port;
+    default = 9633;
+    description = "Port of the smartctl exporter.";
+  };
+
+  systemdExporterPort = lib.mkOption {
+    type = lib.types.port;
+    default = 9558;
+    description = "Port of the systemd exporter.";
+  };
+
   enableNodeExporter = lib.mkOption {
     type = lib.types.bool;
     default = true;

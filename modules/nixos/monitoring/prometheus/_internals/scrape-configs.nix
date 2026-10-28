@@ -24,7 +24,7 @@
         target_label = "instance";
       }
       {
-        replacement = "localhost:9115";
+        replacement = "localhost:${toString cfg.blackboxPort}";
         target_label = "__address__";
       }
     ];
@@ -59,12 +59,12 @@
   maintenanceConfigs = lib.optionals cfg.maintenance.enable (
     lib.optional cfg.maintenance.exporters.systemd {
       job_name = "systemd";
-      static_configs = [{targets = ["localhost:9558"];}];
+      static_configs = [{targets = ["localhost:${toString cfg.systemdExporterPort}"];}];
     }
     ++ lib.optional cfg.maintenance.exporters.smartctl.enable {
       job_name = "smartctl";
       scrape_interval = cfg.slowScrapeInterval;
-      static_configs = [{targets = ["localhost:9633"];}];
+      static_configs = [{targets = ["localhost:${toString cfg.smartctlPort}"];}];
     }
     ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.httpTargets != [])
     (mkBlackboxJob "blackbox-http" "http_2xx" cfg.maintenance.exporters.blackbox.httpTargets)

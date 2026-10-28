@@ -71,20 +71,20 @@ in {
   exporters = {
     systemd = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.systemd) {
       enable = true;
-      port = 9558;
+      port = cfg.systemdExporterPort;
       listenAddress = lib.mkDefault "127.0.0.1";
     };
 
     blackbox = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.blackbox.enable) {
       enable = true;
-      port = 9115;
+      port = cfg.blackboxPort;
       listenAddress = lib.mkDefault "127.0.0.1";
       configFile = blackboxConfig;
     };
 
     smartctl = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
       enable = true;
-      port = 9633;
+      port = cfg.smartctlPort;
       listenAddress = lib.mkDefault "127.0.0.1";
       devices = cfg.maintenance.exporters.smartctl.devices;
     };
