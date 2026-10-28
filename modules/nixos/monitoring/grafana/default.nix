@@ -259,6 +259,12 @@
         example = ["zfs-monitoring" "docker"];
       };
 
+      prometheusUrl = lib.mkOption {
+        type = lib.types.str;
+        default = "http://localhost:9090";
+        description = "Prometheus URL written into the dashboards' prometheus_url variable (used by the Open in Prometheus links). Must be reachable from the browser.";
+      };
+
       # ── Datasource auto-provisioning ─────────────────────────────────────────
       provisioning.datasources = lib.mkOption {
         type = lib.types.listOf (lib.types.submodule {
@@ -523,49 +529,42 @@
 
                 # ── clean Grafana SQLite database ────────────────────────────
                 db="${cfg.dataDir}/data/grafana.db"
+                # Run sqlite as the grafana user so no root-owned journal files are left behind.
+                sq() { ${pkgs.util-linux}/bin/runuser -u ${cfg.user} -- ${pkgs.sqlite}/bin/sqlite3 -cmd '.timeout 5000' "$db" "$@"; }
                 if [ -f "$db" ]; then
+                  # One backup per day, before anything is deleted.
+                  cp -n "$db" "$db.pre-cleanup-$(date +%F)" 2>/dev/null || true
                   known_sql="${
                   lib.concatStringsSep ","
                   (map (n: "'${n}'") (builtins.attrNames allDashboards))
                 }"
 
-                  # Delete provisioned dashboards whose provider is no longer known.
-                  ${pkgs.sqlite}/bin/sqlite3 "$db" "DELETE FROM dashboard
-                      WHERE id IN (
-                        SELECT d.id FROM dashboard d
-                        INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
-                        WHERE dp.name NOT IN ($known_sql)
-                      );"
-
-                  # Delete provisioned dashboards whose provider IS known but whose
-                  # uid in the DB does not match the uid in the current JSON file.
-                  # This catches the case where a dashboard file was replaced with
-                  # a new version that has a different uid — Grafana won't update
-                  # the title or uid itself, so we force a clean re-provision.
+                  # A dashboard whose provisioned uid in the DB differs from the JSON file's uid is
+                  # also removed so it re-provisions cleanly.
+                  mismatch_sql=""
                   ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
                     json_uid=$(${pkgs.jq}/bin/jq -r '.uid // empty' ${dashboard.path} 2>/dev/null || true)
                     if [ -n "$json_uid" ]; then
-                      ${pkgs.sqlite}/bin/sqlite3 "$db" "DELETE FROM dashboard
-                          WHERE id IN (
-                            SELECT d.id FROM dashboard d
-                            INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
-                            WHERE dp.name = '${name}' AND d.uid != '$json_uid'
-                          );"
+                      mismatch_sql="$mismatch_sql OR (dp.name = '${name}' AND d.uid != '$json_uid')"
                     fi
                   '')
                   allDashboards)}
 
-                  # Delete orphaned folder records — folders with no remaining
-                  # child dashboards and no provisioning entry of their own.
-                  ${pkgs.sqlite}/bin/sqlite3 "$db" "DELETE FROM dashboard
-                      WHERE is_folder = 1
-                        AND id NOT IN (
-                          SELECT DISTINCT folder_id FROM dashboard
-                          WHERE folder_id IS NOT NULL AND is_folder = 0
-                        )
-                        AND id NOT IN (
-                          SELECT dashboard_id FROM dashboard_provisioning
-                        );"
+                  sq "
+                  BEGIN;
+                  CREATE TEMP TABLE doomed AS
+                    SELECT d.id AS id FROM dashboard d
+                    INNER JOIN dashboard_provisioning dp ON dp.dashboard_id = d.id
+                    WHERE dp.name NOT IN ($known_sql) $mismatch_sql;
+                  DELETE FROM dashboard_version      WHERE dashboard_id IN (SELECT id FROM doomed);
+                  DELETE FROM dashboard_tag          WHERE dashboard_id IN (SELECT id FROM doomed);
+                  DELETE FROM star                   WHERE dashboard_id IN (SELECT id FROM doomed);
+                  DELETE FROM dashboard_provisioning WHERE dashboard_id IN (SELECT id FROM doomed);
+                  DELETE FROM dashboard              WHERE id IN (SELECT id FROM doomed);
+                  DELETE FROM dashboard WHERE is_folder = 1
+                    AND id NOT IN (SELECT DISTINCT folder_id FROM dashboard WHERE folder_id IS NOT NULL AND is_folder = 0)
+                    AND id NOT IN (SELECT dashboard_id FROM dashboard_provisioning);
+                  COMMIT;"
 
                   echo "grafana-setup: database cleanup complete"
                 fi
@@ -599,8 +598,11 @@
                 + lib.concatStringsSep "\n" (lib.mapAttrsToList (name: dashboard: ''
                     # ── dashboard: ${name} ──
                     if [ -f ${dashboard.path} ]; then
-                      install -m 644 ${dashboard.path} \
-                        ${cfg.dataDir}/dashboards/${name}/dashboard.json
+                      ${pkgs.jq}/bin/jq --arg u "${cfg.prometheusUrl}" \
+                        '(.templating.list[]? | select(.name=="prometheus_url")) |= (.query=$u | .current={text:$u,value:$u})' \
+                        ${dashboard.path} > ${cfg.dataDir}/dashboards/${name}/dashboard.json.tmp
+                      chmod 644 ${cfg.dataDir}/dashboards/${name}/dashboard.json.tmp
+                      mv ${cfg.dataDir}/dashboards/${name}/dashboard.json.tmp ${cfg.dataDir}/dashboards/${name}/dashboard.json
                     else
                       echo "WARNING: dashboard file not found: ${dashboard.path}" >&2
                     fi

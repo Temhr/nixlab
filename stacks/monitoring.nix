@@ -312,6 +312,11 @@
       services.alertmanager-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.alertmanager}/");
       services.prometheus-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.prometheus}/");
       services.ntfy-nixlab.externalUrl = lib.mkIf (cfg.publicHost != null) (lib.mkDefault "http://${cfg.publicHost}:${toString port.ntfy}");
+      services.grafana-nixlab.prometheusUrl = lib.mkDefault (
+        if svc.prometheus-nixlab.externalUrl != null
+        then svc.prometheus-nixlab.externalUrl
+        else "http://localhost:${toString port.prometheus}"
+      );
 
       # Interface-scoped exposure: only the chosen services, only on the chosen interfaces.
       networking.firewall.interfaces = lib.genAttrs cfg.access.interfaces (_: {
