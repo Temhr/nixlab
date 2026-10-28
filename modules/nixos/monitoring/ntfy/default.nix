@@ -36,11 +36,13 @@
       };
     };
 
-    provisionScript = lib.concatMapStringsSep "\n" (u: ''
+    provisionScript =
+      lib.concatMapStringsSep "\n" (u: ''
         NTFY_PASSWORD="''${${u.passwordEnvVar}}" ntfy user --config ${cfg.dataDir}/server.yml add --ignore-exists --role=${u.role} '${u.name}'
         NTFY_PASSWORD="''${${u.passwordEnvVar}}" ntfy user --config ${cfg.dataDir}/server.yml change-pass '${u.name}'
         ${lib.concatMapStringsSep "\n" (t: "ntfy access --config ${cfg.dataDir}/server.yml '${u.name}' '${t.topic}' ${t.access}") u.topics}
-      '') cfg.auth.users;
+      '')
+      cfg.auth.users;
   in {
     imports = [
       self.nixosModules.systm--ports-ntfy
