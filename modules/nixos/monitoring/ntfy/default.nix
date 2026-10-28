@@ -374,6 +374,7 @@
         serviceConfig =
           nixlabLib.mkServiceHardening {
             writablePaths = [cfg.dataDir];
+            extraHardening = true;
           }
           // {
             Type = "simple";

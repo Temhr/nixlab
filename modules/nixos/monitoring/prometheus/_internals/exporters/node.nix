@@ -50,6 +50,7 @@ in {
   serviceConfig =
     nixlabLib.mkServiceHardening {
       writablePaths = [];
+      extraHardening = true;
     }
     // {
       Type = "simple";
@@ -67,5 +68,10 @@ in {
       # per boot). The original config had no syscall filter at all and was
       # stable; keep it off here rather than guess at exact syscall groups.
       SystemCallFilter = "";
+      # The timex collector needs adjtimex (read-only use); ProtectClock would block it and silently
+      # kill the ClockDrift metrics. The pressure, vmstat and netstat collectors read /proc widely.
+      ProtectClock = false;
+      ProtectProc = "default";
+      ProcSubset = "all";
     };
 }

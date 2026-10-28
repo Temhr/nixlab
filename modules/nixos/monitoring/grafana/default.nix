@@ -476,9 +476,12 @@
         serviceConfig =
           nixlabLib.mkServiceHardening {
             writablePaths = [cfg.dataDir];
+            extraHardening = true;
           }
           // {
             Type = "simple";
+            # Dashboards and provisioning files are group-readable (tmpfiles modes 0775/0770).
+            UMask = "0027";
             User = cfg.user;
             Group = cfg.group;
             WorkingDirectory = cfg.dataDir;

@@ -254,6 +254,7 @@
           serviceConfig =
             nixlabLib.mkServiceHardening {
               writablePaths = [cfg.dataDir];
+              extraHardening = true;
             }
             // {
               Type = "simple";
@@ -402,11 +403,15 @@
             nixlabLib.mkServiceHardening {
               writablePaths = ["/var/lib/alloy"];
               allowJIT = true;
+              extraHardening = true;
             }
             // {
               Type = "simple";
               User = "alloy";
               Group = "alloy";
+              # Alloy reads process and journal metadata; keep /proc fully visible.
+              ProtectProc = "default";
+              ProcSubset = "all";
               ExecStart = "${cfg.alloyPackage}/bin/alloy run --disable-reporting --server.http.listen-addr=127.0.0.1:${toString cfg.alloyPort} --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
               Restart = "on-failure";
               RestartSec = "10s";
