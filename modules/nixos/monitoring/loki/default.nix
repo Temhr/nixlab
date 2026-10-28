@@ -106,6 +106,30 @@
           description = "Group to run Loki as";
         };
 
+        uid = lib.mkOption {
+          type = lib.types.nullOr lib.types.int;
+          default = null;
+          description = "Pinned uid for the loki user (null = allocate dynamically).";
+        };
+
+        gid = lib.mkOption {
+          type = lib.types.nullOr lib.types.int;
+          default = null;
+          description = "Pinned gid for the loki group.";
+        };
+
+        alloyUid = lib.mkOption {
+          type = lib.types.nullOr lib.types.int;
+          default = null;
+          description = "Pinned uid for the alloy user.";
+        };
+
+        alloyGid = lib.mkOption {
+          type = lib.types.nullOr lib.types.int;
+          default = null;
+          description = "Pinned gid for the alloy group.";
+        };
+
         # OPTIONAL: allow opting out of the mainUser group membership
         # without coupling to a specific external option name
         extraUsers = lib.mkOption {
@@ -194,6 +218,7 @@
                 group = cfg.group;
                 home = cfg.dataDir;
                 description = "Loki service user";
+                uid = cfg.uid;
               };
             }
           ]
@@ -212,7 +237,7 @@
         );
 
         users.groups.${cfg.group} = {};
-        users.groups.alloy = lib.mkIf cfg.enableAlloy {};
+        users.groups.alloy = lib.mkIf cfg.enableAlloy {gid = cfg.alloyGid;};
 
         # ----------------------------------------------------------------------------
         # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted

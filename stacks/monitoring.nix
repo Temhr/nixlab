@@ -244,6 +244,8 @@
 
       services.grafana-nixlab = {
         enable = true;
+        uid = lib.mkDefault 742;
+        gid = lib.mkDefault 742;
         listenAddress = lib.mkDefault (bindAddress "grafana");
         dataDir = lib.mkDefault "${cfg.dataDir}/grafana";
         openFirewall = lib.mkDefault cfg.openFirewall;
@@ -251,6 +253,10 @@
 
       services.loki-nixlab = {
         enable = true;
+        uid = lib.mkDefault 740;
+        gid = lib.mkDefault 740;
+        alloyUid = lib.mkDefault 741;
+        alloyGid = lib.mkDefault 741;
         listenAddress = lib.mkDefault (bindAddress "loki");
         dataDir = lib.mkDefault "${cfg.dataDir}/loki";
         openFirewall = lib.mkDefault cfg.openFirewall;
@@ -260,6 +266,8 @@
 
       services.prometheus-nixlab = {
         enable = true;
+        uid = lib.mkDefault 743;
+        gid = lib.mkDefault 743;
         scrapeInterval = lib.mkDefault cfg.prometheus.scrapeInterval;
         evaluationInterval = lib.mkDefault cfg.prometheus.scrapeInterval;
         retention = lib.mkDefault cfg.prometheus.retention;
@@ -301,6 +309,8 @@
 
       services.ntfy-nixlab = {
         enable = true;
+        uid = lib.mkDefault 744;
+        gid = lib.mkDefault 744;
         listenAddress = lib.mkDefault (bindAddress "ntfy");
         dataDir = lib.mkDefault "${cfg.dataDir}/ntfy";
         openFirewall = lib.mkDefault cfg.openFirewall;

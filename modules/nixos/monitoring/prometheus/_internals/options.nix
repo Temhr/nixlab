@@ -98,6 +98,18 @@
     description = "Enable Prometheus Node Exporter for system metrics";
   };
 
+  uid = lib.mkOption {
+    type = lib.types.nullOr lib.types.int;
+    default = null;
+    description = "Pinned uid for the loki user (null = allocate dynamically).";
+  };
+
+  gid = lib.mkOption {
+    type = lib.types.nullOr lib.types.int;
+    default = null;
+    description = "Pinned gid for the loki group.";
+  };
+
   extraScrapeConfigs = lib.mkOption {
     type = lib.types.listOf lib.types.attrs;
     default = [];

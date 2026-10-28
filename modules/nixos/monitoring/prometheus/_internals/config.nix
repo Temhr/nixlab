@@ -34,6 +34,7 @@ in {
           group = "prometheus";
           home = cfg.dataDir;
           description = "Prometheus service user";
+          uid = cfg.uid;
           extraGroups =
             lib.optional
             (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable)
@@ -46,7 +47,7 @@ in {
       ([config.nixlab.mainUser] ++ cfg.extraUsers))
   );
 
-  users.groups.prometheus = {};
+  users.groups.prometheus = {gid = cfg.gid;};
 
   # ----------------------------------------------------------------------------
   # SERVICES - main unit, node exporter, maintenance exporters, and the

@@ -170,6 +170,18 @@
         description = "System group to run Grafana as.";
       };
 
+      uid = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "Pinned uid for the loki user (null = allocate dynamically).";
+      };
+
+      gid = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = "Pinned gid for the loki group.";
+      };
+
       # OPTIONAL: allow opting out of the mainUser group membership
       # without coupling to a specific external option name
       extraUsers = lib.mkOption {
@@ -404,6 +416,7 @@
               group = cfg.group;
               home = cfg.dataDir;
               description = "Grafana service user";
+              uid = cfg.uid;
             };
           }
         ]
@@ -412,7 +425,7 @@
           ([config.nixlab.mainUser] ++ cfg.extraUsers))
       );
 
-      users.groups.${cfg.group} = {};
+      users.groups.${cfg.group} = {gid = cfg.gid;};
 
       # ----------------------------------------------------------------------------
       # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
