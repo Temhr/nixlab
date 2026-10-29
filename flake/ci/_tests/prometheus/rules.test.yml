@@ -164,3 +164,40 @@ tests:
             exp_annotations:
               summary: "SMART self-assessment FAILED on h (sda)"
               description: "The drive reports a failing SMART status. Back up and replace it."
+
+  - interval: 1m
+    input_series:
+      - series: 'node_filesystem_readonly{instance="h", mountpoint="/data", device="d", fstype="ext4"}'
+        values: '1x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: FilesystemReadOnly
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: I.2
+              instance: h
+              mountpoint: /data
+              device: d
+              fstype: ext4
+            exp_annotations:
+              summary: "Filesystem went read-only on h"
+              description: "/data (d) is mounted read-only, usually after I/O errors. Check dmesg."
+
+  - interval: 1m
+    input_series:
+      - series: 'node_filesystem_size_bytes{instance="h", mountpoint="/", device="d", fstype="ext4"}'
+        values: '100x40'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ExpectedMountMissing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: I.2
+              mountpoint: /data
+            exp_annotations:
+            summary: "Expected mount /data is missing"
+            description: "node_filesystem_size_bytes has no series for /data: the mount is absent, unmounted or the host is not reporting."

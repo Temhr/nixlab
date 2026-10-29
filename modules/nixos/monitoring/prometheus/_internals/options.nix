@@ -165,6 +165,13 @@
   maintenance = {
     enable = lib.mkEnableOption "maintenance monitoring exporters and alerts";
 
+    expectedMounts = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      example = ["/data"];
+      description = "Mount points that must exist; ExpectedMountMissing fires when one is absent.";
+    };
+
     alerts.features = {
       traefik = lib.mkOption {
         type = lib.types.bool;

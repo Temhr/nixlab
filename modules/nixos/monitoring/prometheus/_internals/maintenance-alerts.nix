@@ -2,6 +2,7 @@
   features ? {},
   # Tests set this to false so expected labels do not have to contain the long `condition` label.
   conditionLabel ? true,
+  expectedMounts ? [],
 }: let
   # ── Helpers ────────────────────────────────────────────────────────────────
   # Collapse whitespace so multi-line exprs become a single readable line.
@@ -1060,6 +1061,60 @@ in rec {
           };
         }
       ];
+    }
+
+    # ═══════════════════════════════════════════════════════
+    # III. Filesystem integrity
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "filesystem_integrity";
+      interval = "1m";
+      rules =
+        [
+          {
+            alert = "FilesystemReadOnly";
+            expr = ''node_filesystem_readonly{${fsFilter}} == 1'';
+            for = "2m";
+            labels = {
+              severity = "critical";
+              category = "storage";
+              checklist_section = "I.2";
+            };
+            annotations = {
+              summary = "Filesystem went read-only on {{ $labels.instance }}";
+              description = "{{ $labels.mountpoint }} ({{ $labels.device }}) is mounted read-only, usually after I/O errors. Check dmesg.";
+            };
+          }
+          {
+            alert = "FilesystemDeviceError";
+            expr = ''node_filesystem_device_error{${fsFilter}} == 1'';
+            for = "5m";
+            labels = {
+              severity = "warning";
+              category = "storage";
+              checklist_section = "I.2";
+            };
+            annotations = {
+              summary = "Cannot read filesystem state on {{ $labels.instance }}";
+              description = "{{ $labels.mountpoint }} ({{ $labels.device }}) failed to report size (stale NFS mount or bad device).";
+            };
+          }
+        ]
+        ++ map (m: {
+          alert = "ExpectedMountMissing";
+          expr = ''absent(node_filesystem_size_bytes{mountpoint="${m}"})'';
+          for = "5m";
+          labels = {
+            severity = "critical";
+            category = "storage";
+            checklist_section = "I.2";
+          };
+          annotations = {
+            summary = "Expected mount ${m} is missing";
+            description = "node_filesystem_size_bytes has no series for ${m}: the mount is absent, unmounted or the host is not reporting.";
+          };
+        })
+        expectedMounts;
     }
 
     # ═══════════════════════════════════════════════════════

@@ -68,6 +68,7 @@
               (prometheusMaintenanceAlerts {
                 features = allFeatures;
                 conditionLabel = false;
+                expectedMounts = ["/data"];
               }).groups;
           }} -if json -of yaml -o alerts.yml
           cp ${./_tests/prometheus}/*.test.yml .

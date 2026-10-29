@@ -19,7 +19,10 @@
       alertmanagerWired = cfg.alertmanagerTargets != [];
       blackboxProbes = bb.enable && (bb.httpTargets != [] || bb.icmpTargets != [] || bb.sslTargets != []);
     };
-  alertGroups = import ./maintenance-alerts.nix {features = alertFeatures;};
+  alertGroups = import ./maintenance-alerts.nix {
+    features = alertFeatures;
+    expectedMounts = cfg.maintenance.expectedMounts;
+  };
 in {
   rules = {
     groups =

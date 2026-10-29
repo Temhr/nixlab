@@ -65,5 +65,6 @@
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.smartctl.enable = true;
     };
+    services.prometheus-nixlab.maintenance.expectedMounts = ["/data"];
   };
 }
