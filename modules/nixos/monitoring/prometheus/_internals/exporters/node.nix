@@ -38,6 +38,8 @@
       "--collector.netdev" # Network device statistics (default but explicit)
       # Disk usage prediction
       "--collector.filesystem.mount-points-exclude=^/(dev|proc|run|sys)($|/)"
+      # NFS client mounts are not checked here; the exports are watched on the NAS.
+      "--collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nfs|nfs4|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|erofs|sysfs|tracefs)$"
     ]
     ++ lib.optionals cfg.maintenance.enable [
       # Custom metrics from text files (when maintenance mode enabled)
