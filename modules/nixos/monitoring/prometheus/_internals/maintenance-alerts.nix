@@ -54,7 +54,7 @@
 
   # Filesystems that should never alert (virtual / duplicate mounts).
   # /nix/store is a bind mount of the root fs on NixOS and would double-alert.
-  fsFilter = ''fstype!~"tmpfs|overlay|squashfs|ramfs|devtmpfs|nsfs|erofs|fusectl|fuse.gvfsd-fuse|fuse.portal",mountpoint!~"/nix/store|/run/.*"'';
+  fsFilter = ''fstype!~"tmpfs|overlay|squashfs|ramfs|devtmpfs|nsfs|erofs|fusectl|fuse.gvfsd-fuse|fuse.portal|zfs",mountpoint!~"/nix/store|/run/.*"'';
 
   # Virtual network interfaces that routinely show drops/errors.
   netFilter = ''device!~"lo|veth.*|docker.*|br-.*|virbr.*"'';
@@ -1115,6 +1115,51 @@ in rec {
           };
         })
         expectedMounts;
+    }
+
+    # ═══════════════════════════════════════════════════════
+    # III. ZFS pools
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "zfs_health";
+      interval = "1m";
+      rules = [
+        {
+          alert = "ZpoolNotOnline";
+          expr = ''node_zfs_zpool_state{state!="online"} == 1'';
+          for = "2m";
+          labels = {
+            severity = "critical";
+            category = "storage";
+            checklist_section = "III.8";
+          };
+          annotations = {
+            summary = "ZFS pool {{ $labels.zpool }} is {{ $labels.state }} on {{ $labels.instance }}";
+            description = "Run zpool status -x. A degraded pool has lost redundancy.";
+          };
+        }
+        {
+          alert = "ZpoolLowFree";
+          expr = ''
+            min by (instance, pool) (
+              100 * label_replace(
+                node_filesystem_avail_bytes{fstype="zfs"} / node_filesystem_size_bytes{fstype="zfs"},
+                "pool", "$1", "device", "([^/@]+).*"
+              )
+            ) < 15
+          '';
+          for = "15m";
+          labels = {
+            severity = "warning";
+            category = "storage";
+            checklist_section = "III.8";
+          };
+          annotations = {
+            summary = "ZFS pool {{ $labels.pool }} is nearly full on {{ $labels.instance }}";
+            description = ''Only {{ $value | printf "%.1f" }}% free (warning below 15%).'';
+          };
+        }
+      ];
     }
 
     # ═══════════════════════════════════════════════════════

@@ -201,3 +201,22 @@ tests:
             exp_annotations:
             summary: "Expected mount /data is missing"
             description: "node_filesystem_size_bytes has no series for /data: the mount is absent, unmounted or the host is not reporting."
+
+  - interval: 1m
+    input_series:
+      - series: 'node_zfs_zpool_state{instance="h", zpool="tanks", state="degraded"}'
+        values: '1x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: ZpoolNotOnline
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: III.8
+              instance: h
+              zpool: tanks
+              state: degraded
+            exp_annotations:
+              summary: "ZFS pool tanks is degraded on h"
+              description: "Run zpool status -x. A degraded pool has lost redundancy."
