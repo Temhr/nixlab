@@ -354,8 +354,15 @@
 
               limits_config = {
                 retention_period = cfg.retention;
+                retention_stream = [
+                  {
+                    selector = ''{job="maintenance-log"}'';
+                    priority = 1;
+                    period = "17520h";
+                  }
+                ];
                 max_query_series = 10000;
-                max_query_lookback = cfg.retention;
+                max_query_lookback = "17520h";
                 # Guardrails: a runaway unit must not fill /data on a laptop.
                 ingestion_rate_mb = 4;
                 ingestion_burst_size_mb = 8;
@@ -545,7 +552,6 @@
                 stage.json {
                   expressions = {
                     timestamp = "timestamp",
-                    level     = "level",
                     section   = "section",
                     task      = "task",
                     status    = "status",
@@ -558,7 +564,6 @@
                 // Labels taken from the parsed JSON fields (empty string = same key name)
                 stage.labels {
                   values = {
-                    level   = "",
                     section = "",
                     status  = "",
                     user    = "",
