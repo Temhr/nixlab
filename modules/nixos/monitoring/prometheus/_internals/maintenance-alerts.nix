@@ -929,6 +929,140 @@ in rec {
     }
 
     # ═══════════════════════════════════════════════════════
+    # I. Drive health from the smartctl exporter (ATA, NVMe, SAS/SCSI)
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "smart_health";
+      interval = "5m";
+      rules = [
+        {
+          alert = "SMARTStatusFailed";
+          expr = "smartctl_device_smart_status == 0";
+          for = "5m";
+          labels = {
+            severity = "critical";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "SMART self-assessment FAILED on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "The drive reports a failing SMART status. Back up and replace it.";
+          };
+        }
+        {
+          alert = "SMARTErrorLogGrowing";
+          expr = "delta(smartctl_device_error_log_count[7d]) > 0";
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "SMART error log is growing on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "New entries appeared in the drive's error log during the last 7 days.";
+          };
+        }
+        {
+          alert = "SMARTSectorsGrowing";
+          expr = ''delta(smartctl_device_attribute{attribute_name=~"Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable",attribute_value_type="raw"}[7d]) > 0'';
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "Bad sectors increasing on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "{{ $labels.attribute_name }} grew in the last 7 days: the drive is wearing out.";
+          };
+        }
+        {
+          alert = "NVMeWearHigh";
+          expr = "smartctl_device_percentage_used > 80";
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "NVMe wear above 80% on {{ $labels.instance }} ({{ $labels.device }})";
+            description = ''{{ $value | printf "%.0f" }}% of the rated endurance is used. Plan a replacement.'';
+          };
+        }
+        {
+          alert = "NVMeCriticalWarning";
+          expr = "smartctl_device_critical_warning > 0";
+          labels = {
+            severity = "critical";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "NVMe critical warning on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "The controller raised a critical-warning flag (spare, temperature, reliability or read-only).";
+          };
+        }
+        {
+          alert = "NVMeMediaErrors";
+          expr = "delta(smartctl_device_media_errors[7d]) > 0";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "NVMe media errors on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "Unrecovered data integrity errors increased in the last 7 days.";
+          };
+        }
+        {
+          alert = "NVMeSpareLow";
+          expr = "smartctl_device_available_spare < smartctl_device_available_spare_threshold";
+          for = "1h";
+          labels = {
+            severity = "critical";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "NVMe spare capacity below threshold on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "The drive has used up its reserve of spare blocks.";
+          };
+        }
+        {
+          alert = "SCSIDefectsGrowing";
+          expr = "delta(smartctl_scsi_grown_defect_list[7d]) > 0";
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "Grown defects increasing on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "A SAS/SCSI drive added entries to its grown defect list.";
+          };
+        }
+        {
+          alert = "SCSIUncorrectedErrors";
+          expr = ''delta({__name__=~"smartctl_(read|write)_total_uncorrected_errors"}[7d]) > 0'';
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "Uncorrected I/O errors on {{ $labels.instance }} ({{ $labels.device }})";
+            description = "Uncorrected read or write errors increased in the last 7 days.";
+          };
+        }
+      ];
+    }
+
+    # ═══════════════════════════════════════════════════════
     # Recording Rules for Dashboard
     # (not passed through withCondition: only alerts get that label)
     # ═══════════════════════════════════════════════════════

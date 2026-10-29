@@ -146,3 +146,21 @@ tests:
             exp_annotations:
               summary: "Prometheus has no Alertmanager"
               description: "Alerts are evaluated but cannot be delivered."
+
+  - interval: 1m
+    input_series:
+      - series: 'smartctl_device_smart_status{instance="h", device="sda"}'
+        values: '0x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: SMARTStatusFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: hardware
+              checklist_section: I.1
+              instance: h
+              device: sda
+            exp_annotations:
+              summary: "SMART self-assessment FAILED on h (sda)"
+              description: "The drive reports a failing SMART status. Back up and replace it."

@@ -22,8 +22,9 @@ check "ntfy health"        cu ${MON_NTFY_AUTH:+-u "$MON_NTFY_AUTH"} "http://$H:$
 echo "prometheus"
 down=$(cu "http://$H:$P/api/v1/targets" | jq '[.data.activeTargets[]|select(.health!="up")]|length') || down=-1
 [ "$down" = 0 ] && ok "all scrape targets up" || bad "scrape targets not up: $down"
-badrules=$(cu "http://$H:$P/api/v1/rules" | jq '[.data.groups[].rules[]|select(.health!="ok")]|length') || badrules=-1
-[ "$badrules" = 0 ] && ok "all rules healthy" || bad "rules unhealthy: $badrules"
+badrules=$(cu "http://$H:$P/api/v1/rules" | jq '[.data.groups[].rules[]|select(.health=="err")]|length') || badrules=-1
+waiting=$(cu "http://$H:$P/api/v1/rules" | jq '[.data.groups[].rules[]|select(.health=="unknown")]|length') || waiting=0
+[ "$badrules" = 0 ] && ok "no rule errors ($waiting waiting for their first evaluation)" || bad "rules in error: $badrules"
 ams=$(cu "http://$H:$P/api/v1/alertmanagers" | jq '.data.activeAlertmanagers|length') || ams=0
 [ "${ams:-0}" -ge 1 ] && ok "alertmanager discovered" || bad "prometheus sees no alertmanager"
 echo "loki"
