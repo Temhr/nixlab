@@ -2,6 +2,7 @@
   flake.nixosModules.hosts--profl--desktop = {
     config,
     pkgs,
+    hostMeta ? {},
     ...
   }: {
     imports = [

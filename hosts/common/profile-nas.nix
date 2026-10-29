@@ -1,5 +1,5 @@
 {self, ...}: {
-  flake.nixosModules.hosts--profl--nas = {...}: {
+  flake.nixosModules.hosts--profl--nas = {hostMeta ? {}, ...}: {
     imports = [
       self.nixosModules.hosts--autom--backup-phone-media
     ];

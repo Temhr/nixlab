@@ -1,7 +1,6 @@
 {self, ...}: {
   flake.nixosModules.hosts--profl--base = {
     lib,
-    hostMeta ? {},
     ...
   }: {
     imports = [
