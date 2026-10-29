@@ -465,6 +465,10 @@
                 rule {
                   source_labels = ["__journal_priority_keyword"]
                   target_label  = "level"
+                  }
+                  rule {
+                    source_labels = ["__journal__transport"]
+                    target_label  = "transport"
                 }
               }
 
@@ -490,7 +494,7 @@
                 }
 
                 stage.label_keep {
-                  values = ["job", "host", "unit", "level"]
+                  values = ["job", "host", "unit", "level", "transport"]
                 }
               }
 
