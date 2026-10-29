@@ -807,6 +807,128 @@ in rec {
     }
 
     # ═══════════════════════════════════════════════════════
+    # VII. Self-health of Prometheus, Alertmanager, Loki and Alloy
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "stack_self_health";
+      core = true;
+      interval = "1m";
+      rules = [
+        {
+          alert = "PrometheusConfigReloadFailed";
+          expr = "prometheus_config_last_reload_successful == 0";
+          for = "5m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.21";
+          };
+          annotations = {
+            summary = "Prometheus failed to reload its configuration";
+            description = "The running configuration is stale. Run promtool check config and read the journal for the reason.";
+          };
+        }
+        {
+          alert = "PrometheusNoAlertmanager";
+          requires = "alertmanagerWired";
+          expr = "prometheus_notifications_alertmanagers_discovered < 1";
+          for = "10m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.22";
+          };
+          annotations = {
+            summary = "Prometheus has no Alertmanager";
+            description = "Alerts are evaluated but cannot be delivered.";
+          };
+        }
+        {
+          alert = "PrometheusNotificationsFailing";
+          expr = "rate(prometheus_notifications_errors_total[5m]) > 0";
+          for = "10m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.22";
+          };
+          annotations = {
+            summary = "Prometheus cannot reach Alertmanager";
+            description = "Errors sending alerts to {{ $labels.alertmanager }}.";
+          };
+        }
+        {
+          alert = "AlertmanagerNotifyFailing";
+          expr = "rate(alertmanager_notifications_failed_total[10m]) > 0";
+          for = "10m";
+          labels = {
+            severity = "critical";
+            category = "monitoring";
+            checklist_section = "VII.22";
+          };
+          annotations = {
+            summary = "Alertmanager notifications are failing";
+            description = "Integration {{ $labels.integration }} is failing; alerts are not reaching you.";
+          };
+        }
+        {
+          alert = "PrometheusWALCorruption";
+          expr = "increase(prometheus_tsdb_wal_corruptions_total[1h]) > 0";
+          labels = {
+            severity = "warning";
+            category = "monitoring";
+            checklist_section = "VII.21";
+          };
+          annotations = {
+            summary = "Prometheus WAL corruption";
+            description = "The TSDB reported WAL corruptions in the last hour.";
+          };
+        }
+        {
+          alert = "PrometheusCompactionFailing";
+          expr = "increase(prometheus_tsdb_compactions_failed_total[3h]) > 0";
+          labels = {
+            severity = "warning";
+            category = "monitoring";
+            checklist_section = "VII.21";
+          };
+          annotations = {
+            summary = "Prometheus TSDB compactions are failing";
+            description = "Check disk space and the Prometheus journal.";
+          };
+        }
+        {
+          alert = "LokiDiscardingSamples";
+          expr = "sum by (reason) (rate(loki_discarded_samples_total[10m])) > 0";
+          for = "10m";
+          labels = {
+            severity = "warning";
+            category = "monitoring";
+            checklist_section = "VII.23";
+          };
+          annotations = {
+            summary = "Loki is discarding log lines";
+            description = "Reason: {{ $labels.reason }}. A rate limit or stream limit is dropping logs.";
+          };
+        }
+        {
+          alert = "AlloyDroppingEntries";
+          expr = "rate(loki_write_dropped_entries_total[5m]) > 0";
+          for = "10m";
+          labels = {
+            severity = "warning";
+            category = "monitoring";
+            checklist_section = "VII.23";
+          };
+          annotations = {
+            summary = "Alloy is dropping log entries";
+            description = "Alloy cannot deliver entries to Loki.";
+          };
+        }
+      ];
+    }
+
+    # ═══════════════════════════════════════════════════════
     # Recording Rules for Dashboard
     # (not passed through withCondition: only alerts get that label)
     # ═══════════════════════════════════════════════════════

@@ -19,6 +19,7 @@
       backup = true;
       dns = true;
       blackboxProbes = true;
+      alertmanagerWired = true;
     };
 
     # Hubs are on nixpkgs-stable and agents on nixpkgs-unstable (hosts-meta.nix),

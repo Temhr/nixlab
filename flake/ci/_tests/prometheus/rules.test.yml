@@ -110,3 +110,39 @@ tests:
       - eval_time: 12m
         alertname: HighCPUTemperature
         exp_alerts: []
+
+  - interval: 1m
+    input_series:
+      - series: 'prometheus_config_last_reload_successful{instance="localhost:9090", job="prometheus"}'
+        values: '0x15'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: PrometheusConfigReloadFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: monitoring
+              checklist_section: VII.21
+              instance: "localhost:9090"
+              job: prometheus
+            exp_annotations:
+              summary: "Prometheus failed to reload its configuration"
+              description: "The running configuration is stale. Run promtool check config and read the journal for the reason."
+
+  - interval: 1m
+    input_series:
+      - series: 'prometheus_notifications_alertmanagers_discovered{instance="localhost:9090", job="prometheus"}'
+        values: '0x30'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: PrometheusNoAlertmanager
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: monitoring
+              checklist_section: VII.22
+              instance: "localhost:9090"
+              job: prometheus
+            exp_annotations:
+              summary: "Prometheus has no Alertmanager"
+              description: "Alerts are evaluated but cannot be delivered."
