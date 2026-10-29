@@ -18,6 +18,16 @@
           method: GET
           preferred_ip_protocol: "ip4"
 
+      http_2xx_insecure:
+        prober: http
+        timeout: 5s
+        http:
+          valid_status_codes: []
+          method: GET
+          preferred_ip_protocol: "ip4"
+          tls_config:
+            insecure_skip_verify: true
+
       dns_a:
         prober: dns
         timeout: 5s

@@ -1,4 +1,6 @@
 {self, ...}: {
+  flake.lib.serviceRegistry = import ./_internals/service-registry.nix;
+
   flake.nixosModules.servc--homepage-nixlab = {
     config,
     lib,
@@ -11,9 +13,9 @@
     cfg = config.services.homepage-nixlab;
 
     # Import configurations from their respective nix files
-    servicesConfig = import ./_services.nix {inherit allHosts config hostMeta;};
-    widgetsConfig = import ./_widgets.nix {inherit config;};
-    settingsConfig = import ./_settings.nix {inherit config;};
+    servicesConfig = import ./_internals/services.nix {inherit allHosts config hostMeta;};
+    widgetsConfig = import ./_internals/widgets.nix {inherit config;};
+    settingsConfig = import ./_internals/settings.nix {inherit config;};
 
     # Convert each to a JSON store path (remarshal converts to YAML at preStart)
     servicesJsonFile =

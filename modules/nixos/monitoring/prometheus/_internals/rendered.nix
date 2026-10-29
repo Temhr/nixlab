@@ -17,7 +17,7 @@
       backup = cfg.maintenance.exporters.backup.enable;
       dns = bb.enable && bb.dnsTargets != [];
       alertmanagerWired = cfg.alertmanagerTargets != [];
-      blackboxProbes = bb.enable && (bb.httpTargets != [] || bb.icmpTargets != [] || bb.sslTargets != []);
+      blackboxProbes = bb.enable && (bb.httpTargets != [] || bb.icmpTargets != [] || bb.sslTargets != [] || bb.tcpTargets != [] || bb.httpInsecureTargets != []);
     };
   alertGroups = import ./maintenance-alerts.nix {
     features = alertFeatures;

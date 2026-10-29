@@ -211,8 +211,8 @@
         };
         icmpTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = ["8.8.8.8" "1.1.1.1"];
-          description = "ICMP targets to ping";
+          default = [];
+          description = "ICMP targets to ping. Filled by the stack with the gateway and the other hub.";
         };
         sslTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -225,6 +225,17 @@
           default = [];
           example = ["1.1.1.1" "192.168.1.1"];
           description = "DNS servers to probe by resolving dnsQueryName. Enables DNSResolutionFailure.";
+        };
+        tcpTargets = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["127.0.0.1:8188"];
+          description = "host:port pairs probed with a TCP connect.";
+        };
+        httpInsecureTargets = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          description = "HTTP targets whose TLS certificate is not verified (internal CA, self-signed).";
         };
         dnsQueryName = lib.mkOption {
           type = lib.types.str;

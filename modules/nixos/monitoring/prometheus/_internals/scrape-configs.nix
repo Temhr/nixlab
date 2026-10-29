@@ -74,6 +74,10 @@
     (mkBlackboxJob "blackbox-ssl" "http_2xx" cfg.maintenance.exporters.blackbox.sslTargets)
     ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.dnsTargets != [])
     (mkBlackboxJob "blackbox-dns" "dns_a" cfg.maintenance.exporters.blackbox.dnsTargets)
+    ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.tcpTargets != [])
+    (mkBlackboxJob "blackbox-tcp" "tcp_connect" cfg.maintenance.exporters.blackbox.tcpTargets)
+    ++ lib.optional (cfg.maintenance.exporters.blackbox.enable && cfg.maintenance.exporters.blackbox.httpInsecureTargets != [])
+    (mkBlackboxJob "blackbox-http-insecure" "http_2xx_insecure" cfg.maintenance.exporters.blackbox.httpInsecureTargets)
   );
 in {
   # Export the configs

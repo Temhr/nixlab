@@ -697,7 +697,7 @@ in rec {
         {
           alert = "ProbeFailed";
           requires = "blackboxProbes";
-          expr = ''probe_success{job=~"blackbox-http|blackbox-icmp"} == 0'';
+          expr = ''probe_success{job=~"blackbox-http|blackbox-http-insecure|blackbox-icmp|blackbox-tcp"} == 0'';
           for = "5m";
           labels = {
             severity = "warning";

@@ -2,7 +2,7 @@
 # Homepage general settings
 # Docs: https://gethomepage.dev/en/configs/settings/
 {config}: let
-  registry = import ./_service-registry.nix {inherit config;};
+  registry = import ./service-registry.nix {inherit config;};
 
   groupColumns = {
     "AI & Inference" = 3;

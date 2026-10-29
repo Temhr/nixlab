@@ -12,7 +12,7 @@
   config,
   hostMeta,
 }: let
-  registry = import ./_service-registry.nix {inherit config;};
+  registry = import ./service-registry.nix {inherit config;};
   # ──────────────────────────────────────────────────────────────────────────
   # MASTER SERVICE DEFINITIONS
   # Add new services here. The attribute name is the key used in

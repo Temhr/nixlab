@@ -31,6 +31,11 @@
       then "0.0.0.0"
       else "127.0.0.1";
 
+    registry = self.lib.serviceRegistry {inherit config;};
+    registryTcpTargets =
+      lib.mapAttrsToList (_: e: "127.0.0.1:${toString e.port}")
+      (lib.filterAttrs (k: _: registry.enabled.${k} or false) (registry.endpoints or {}));
+
     mkIntegration = defaultTarget: what: {
       enable = lib.mkEnableOption "scraping and alerting for ${what}";
       target = lib.mkOption {
@@ -131,6 +136,24 @@
             firewall rule admits specific peers (agents pushing logs to a hub, a hub
             probing the other hub). Unlike `expose`, this opens no firewall port.
           '';
+        };
+      };
+
+      probes = {
+        gateway = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = hostMeta.gateway or null;
+          description = "Default gateway to ICMP-probe (from hostsMeta).";
+        };
+        hubs = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = ["nixnas1" "nixnas2"];
+          description = "Always-on hosts to ICMP-probe. This host is excluded. Never list laptops: they sleep.";
+        };
+        tcpFromRegistry = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "TCP-probe the loopback ports of the services enabled on this host (from the service registry).";
         };
       };
 
@@ -359,6 +382,15 @@
             ];
           }
         ];
+      };
+
+      services.prometheus-nixlab.maintenance.exporters.blackbox = {
+        icmpTargets = lib.mkDefault (
+          lib.optional (cfg.probes.gateway != null) cfg.probes.gateway
+          ++ lib.filter (a: a != (hostMeta.address or ""))
+          (map (h: self.lib.hostsMeta.${h}.address) cfg.probes.hubs)
+        );
+        tcpTargets = lib.mkIf cfg.probes.tcpFromRegistry (lib.mkDefault registryTcpTargets);
       };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
