@@ -18,6 +18,7 @@
       self.nixosModules.hosts--deskt--gui-shells
       self.nixosModules.hosts--deskt--ignore-lid
     ];
+    services.prometheus-nixlab.maintenance.expectedMounts = ["/data"];
 
     ## Automatic login for this user
     services.displayManager.autoLogin.user = config.nixlab.mainUser;
