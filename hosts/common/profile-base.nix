@@ -60,7 +60,6 @@
       openFirewall = false;
       dataDir = "/data";
       access.expose = ["grafana" "ntfy" "prometheus"];
-      access.interfaces = [hostMeta.ethIface hostMeta.wifiIface];
       loki.maintenance.enable = true;
       prometheus.maintenance.enable = true;
       prometheus.maintenance.exporters.smartctl.enable = true;

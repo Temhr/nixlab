@@ -120,7 +120,7 @@
         };
         expose = lib.mkOption {
           type = lib.types.listOf (lib.types.enum ["grafana" "ntfy" "alertmanager" "prometheus" "loki"]);
-          default = ["grafana" "ntfy"];
+          default = ["grafana" "ntfy" "prometheus"];
           description = "Which services to open on access.interfaces.";
         };
         peerReachable = lib.mkOption {
