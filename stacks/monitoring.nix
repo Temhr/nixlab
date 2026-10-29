@@ -393,6 +393,63 @@
         tcpTargets = lib.mkIf cfg.probes.tcpFromRegistry (lib.mkDefault registryTcpTargets);
       };
 
+      services.loki-nixlab.ruler = {
+        enable = lib.mkDefault true;
+        alertmanagerUrl = "http://127.0.0.1:${toString port.alertmanager}";
+        groups = [
+          {
+            name = "journal";
+            interval = "1m";
+            rules = [
+              {
+                alert = "JournalOOMKill";
+                expr = ''sum by (host) (count_over_time({job="systemd-journal", transport="kernel"} |~ "(?i)out of memory: kill|oom-kill" [5m])) > 0'';
+                labels = {
+                  severity = "critical";
+                  category = "os";
+                  checklist_section = "II.5";
+                  instance = "{{ $labels.host }}";
+                };
+                annotations.summary = "OOM kill on {{ $labels.host }}";
+              }
+              {
+                alert = "KernelFilesystemError";
+                expr = ''sum by (host) (count_over_time({job="systemd-journal", transport="kernel"} |~ "EXT4-fs error|XFS.*(Corruption|I/O error)|BTRFS (error|critical)|Remounting filesystem read-only|I/O error, dev" [5m])) > 0'';
+                labels = {
+                  severity = "critical";
+                  category = "storage";
+                  checklist_section = "III.8";
+                  instance = "{{ $labels.host }}";
+                };
+                annotations.summary = "Kernel filesystem or I/O error on {{ $labels.host }}";
+              }
+              {
+                alert = "NvidiaXid";
+                expr = ''sum by (host) (count_over_time({job="systemd-journal", transport="kernel"} |= "NVRM: Xid" [5m])) > 0'';
+                labels = {
+                  severity = "warning";
+                  category = "hardware";
+                  checklist_section = "I.1";
+                  instance = "{{ $labels.host }}";
+                };
+                annotations.summary = "NVIDIA Xid fault on {{ $labels.host }}";
+              }
+              {
+                alert = "SSHAuthFailureBurst";
+                expr = ''sum by (host) (count_over_time({job="systemd-journal", unit="sshd.service"} |~ "Failed password|Invalid user|authentication failure" [10m])) > 20'';
+                labels = {
+                  severity = "warning";
+                  category = "security";
+                  checklist_section = "IV.10";
+                  instance = "{{ $labels.host }}";
+                };
+                annotations.summary = "SSH authentication failure burst on {{ $labels.host }}";
+              }
+            ];
+          }
+        ];
+      };
+
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
       # This is the missing "synergy" piece: dashboards assume these exist,
       # nothing previously declared them.
