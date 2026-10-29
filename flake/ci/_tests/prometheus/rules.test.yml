@@ -64,3 +64,49 @@ tests:
             exp_annotations:
               summary: "Probe failing: http://x"
               description: "blackbox-http probe to http://x has failed for 5+ minutes"
+
+  # Load of 2.0 on one core fires after 30 minutes; the old 0.7/10m rule is gone.
+  - interval: 1m
+    input_series:
+      - series: 'node_load5{instance="h"}'
+        values: '2x40'
+      - series: 'node_cpu_seconds_total{instance="h", cpu="0", mode="idle"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: HighCPULoad
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: os
+              checklist_section: II.6
+              instance: h
+            exp_annotations:
+              summary: "High CPU load on h"
+              description: "5-min load average is 2.00 per core (threshold 1.5)"
+
+  # A 78 degree NVMe is a warning, and is not caught by the CPU temperature rules.
+  - interval: 1m
+    input_series:
+      - series: 'node_hwmon_temp_celsius{instance="h", chip="c1", sensor="temp1"}'
+        values: '78x15'
+      - series: 'node_hwmon_chip_names{instance="h", chip="c1", chip_name="nvme"}'
+        values: '1x15'
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: NVMeHighTemperature
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: hardware
+              checklist_section: I.1
+              instance: h
+              chip: c1
+              sensor: temp1
+              chip_name: nvme
+            exp_annotations:
+              summary: "High NVMe temperature on h"
+              description: "NVMe sensor temp1 is 78°C (warning above 75°C, critical above 85°C)"
+      - eval_time: 12m
+        alertname: HighCPUTemperature
+        exp_alerts: []

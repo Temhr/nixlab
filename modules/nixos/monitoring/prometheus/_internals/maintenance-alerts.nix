@@ -75,7 +75,7 @@ in rec {
             (
               node_hwmon_temp_celsius
               * on (instance, chip) group_left (chip_name)
-              node_hwmon_chip_names{chip_name=~"coretemp|k10temp|amdgpu|nvme"}
+              node_hwmon_chip_names{chip_name=~"coretemp|k10temp|amdgpu"}
             ) > 80 <= 90
           '';
           for = "5m";
@@ -95,7 +95,7 @@ in rec {
             (
               node_hwmon_temp_celsius
               * on (instance, chip) group_left (chip_name)
-              node_hwmon_chip_names{chip_name=~"coretemp|k10temp|amdgpu|nvme"}
+              node_hwmon_chip_names{chip_name=~"coretemp|k10temp|amdgpu"}
             ) > 90
           '';
           for = "2m";
@@ -107,6 +107,46 @@ in rec {
           annotations = {
             summary = "CRITICAL: temperature on {{ $labels.instance }} ({{ $labels.chip_name }}/{{ $labels.sensor }})";
             description = ''{{ $labels.chip_name }} sensor {{ $labels.sensor }} is {{ $value | printf "%.0f" }}°C - immediate attention required'';
+          };
+        }
+        {
+          alert = "NVMeHighTemperature";
+          expr = ''
+            (
+              node_hwmon_temp_celsius
+              * on (instance, chip) group_left (chip_name)
+              node_hwmon_chip_names{chip_name="nvme"}
+            ) > 75 <= 85
+          '';
+          for = "10m";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "High NVMe temperature on {{ $labels.instance }}";
+            description = ''NVMe sensor {{ $labels.sensor }} is {{ $value | printf "%.0f" }}°C (warning above 75°C, critical above 85°C)'';
+          };
+        }
+        {
+          alert = "NVMeCriticalTemperature";
+          expr = ''
+            (
+              node_hwmon_temp_celsius
+              * on (instance, chip) group_left (chip_name)
+              node_hwmon_chip_names{chip_name="nvme"}
+            ) > 85
+          '';
+          for = "5m";
+          labels = {
+            severity = "critical";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "CRITICAL: NVMe temperature on {{ $labels.instance }}";
+            description = ''NVMe sensor {{ $labels.sensor }} is {{ $value | printf "%.0f" }}°C - immediate attention required'';
           };
         }
         # 1. CPU Throttling
@@ -126,6 +166,7 @@ in rec {
                 sum by (instance, cpu) (rate(node_cpu_seconds_total{mode!~"idle|iowait|steal"}[5m])) > 0.5
               )
             ) > 0
+            unless on (instance) (max by (instance) (node_power_supply_online{type="Mains"}) == 0)
           '';
           for = "10m";
           labels = {
@@ -143,7 +184,7 @@ in rec {
         {
           alert = "FanSpeedLow";
           expr = ''
-            node_hwmon_fan_rpm < 1000
+            (node_hwmon_fan_rpm < 1000 and max_over_time(node_hwmon_fan_rpm[7d]) > 1500)
             and on (instance)
             (max by (instance) (node_hwmon_temp_celsius) > 55)
           '';
@@ -310,8 +351,8 @@ in rec {
         # 6. CPU Load
         {
           alert = "HighCPULoad";
-          expr = ''node_load5 / count(node_cpu_seconds_total{mode="idle"}) without (cpu, mode) > 0.7'';
-          for = "10m";
+          expr = ''node_load5 / count(node_cpu_seconds_total{mode="idle"}) without (cpu, mode) > 1.5'';
+          for = "30m";
           labels = {
             severity = "warning";
             category = "os";
@@ -319,7 +360,7 @@ in rec {
           };
           annotations = {
             summary = "High CPU load on {{ $labels.instance }}";
-            description = ''5-min load average is {{ $value | printf "%.2f" }} per core (threshold 0.7)'';
+            description = ''5-min load average is {{ $value | printf "%.2f" }} per core (threshold 1.5)'';
           };
         }
         # 6. Memory Usage
