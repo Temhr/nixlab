@@ -93,7 +93,7 @@ The four recurring ideas in this repo, explained once here — every other secti
 
 ### Self-Registering Modules
 
-Every contributing file — NixOS module, home-manager module, shared metadata, library function — registers its own output, keyed by its own name; only files nested inside underscored _directories use import by relative path.
+Every contributing file registers its own output, keyed by its own name. Only files nested inside underscored `_directories` are imported by relative path, and only by their owning module's entry file or by each other; everything else consumes a registered name (`self.nixosModules.*`, `self.lib.*`).
 
 | Mechanism | How it works |
 |---|---|
