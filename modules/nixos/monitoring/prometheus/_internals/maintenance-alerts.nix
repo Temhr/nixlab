@@ -1163,6 +1163,36 @@ in rec {
     }
 
     # ═══════════════════════════════════════════════════════
+    # I. Laptop battery health
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "battery_health";
+      interval = "5m";
+      rules = [
+        {
+          alert = "BatteryHealthDegraded";
+          expr = ''
+            (
+              (node_power_supply_energy_full{power_supply=~"BAT.*"} / node_power_supply_energy_full_design{power_supply=~"BAT.*"})
+              or
+              (node_power_supply_charge_full{power_supply=~"BAT.*"} / node_power_supply_charge_full_design{power_supply=~"BAT.*"})
+            ) * 100 < 60
+          '';
+          for = "1h";
+          labels = {
+            severity = "warning";
+            category = "hardware";
+            checklist_section = "I.1";
+          };
+          annotations = {
+            summary = "Battery wear on {{ $labels.instance }}";
+            description = ''{{ $labels.power_supply }} holds {{ $value | printf "%.0f" }}% of its design capacity'';
+          };
+        }
+      ];
+    }
+
+    # ═══════════════════════════════════════════════════════
     # Recording Rules for Dashboard
     # (not passed through withCondition: only alerts get that label)
     # ═══════════════════════════════════════════════════════

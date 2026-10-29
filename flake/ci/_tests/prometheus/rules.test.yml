@@ -199,8 +199,8 @@ tests:
               checklist_section: I.2
               mountpoint: /data
             exp_annotations:
-            summary: "Expected mount /data is missing"
-            description: "node_filesystem_size_bytes has no series for /data: the mount is absent, unmounted or the host is not reporting."
+              summary: "Expected mount /data is missing"
+              description: "node_filesystem_size_bytes has no series for /data: the mount is absent, unmounted or the host is not reporting."
 
   - interval: 1m
     input_series:
@@ -220,3 +220,23 @@ tests:
             exp_annotations:
               summary: "ZFS pool tanks is degraded on h"
               description: "Run zpool status -x. A degraded pool has lost redundancy."
+
+  - interval: 1m
+    input_series:
+      - series: 'node_power_supply_energy_full{instance="h", power_supply="BAT0"}'
+        values: '50x90'
+      - series: 'node_power_supply_energy_full_design{instance="h", power_supply="BAT0"}'
+        values: '100x90'
+    alert_rule_test:
+      - eval_time: 80m
+        alertname: BatteryHealthDegraded
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: hardware
+              checklist_section: I.1
+              instance: h
+              power_supply: BAT0
+            exp_annotations:
+              summary: "Battery wear on h"
+              description: "BAT0 holds 50% of its design capacity"
