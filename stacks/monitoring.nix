@@ -85,6 +85,7 @@
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab
       self.nixosModules.servc--ntfy-nixlab
+      self.nixosModules.servc--maintenance-log-nixlab
     ];
 
     options.services.nixlab-monitoring = {
@@ -448,6 +449,12 @@
             ];
           }
         ];
+      };
+
+      # The helper follows Loki's maintenance settings so the file Alloy tails and the file the helper writes are the same.
+      services.maintenance-log-nixlab = {
+        enable = lib.mkDefault svc.loki-nixlab.maintenance.enable;
+        logPath = lib.mkDefault svc.loki-nixlab.maintenance.logPath;
       };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.

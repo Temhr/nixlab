@@ -223,9 +223,6 @@
           ++ lib.optionals cfg.enableAlloy [
             "d /var/lib/alloy 0750 alloy alloy -"
             "d /var/lib/alloy/data 0750 alloy alloy -"
-          ]
-          ++ lib.optionals cfg.maintenance.enable [
-            "f ${cfg.maintenance.logPath} 0666 root root - -"
           ];
 
         # ----------------------------------------------------------------------------
@@ -661,18 +658,6 @@
             servicePort = cfg.port;
             extraPorts = lib.optionals cfg.openGrpcFirewall [cfg.grpcPort];
           });
-
-        # ----------------------------------------------------------------------------
-        # MAINTENANCE LOG HELPER SCRIPT
-        # ----------------------------------------------------------------------------
-        environment.systemPackages = lib.optionals cfg.maintenance.enable [
-          (pkgs.writeShellScriptBin "maintenance-log" ''
-            export PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gawk pkgs.gnugrep]}:$PATH
-            export MAINTENANCE_LOG=''${MAINTENANCE_LOG:-${lib.escapeShellArg cfg.maintenance.logPath}}
-            ${builtins.readFile ./maintenance-logger.sh}
-          '')
-          pkgs.jq
-        ];
       }
       # Automatic recovery from a corrupt write-ahead log.
       (nixlabLib.mkWalSelfHeal {
