@@ -33,6 +33,7 @@
   in {
     imports = [
       self.nixosModules.systm--ports-prometheus
+      self.nixosModules.servc--host-exporters-nixlab
     ];
 
     # Import options from separate file

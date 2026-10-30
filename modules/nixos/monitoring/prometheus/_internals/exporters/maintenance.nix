@@ -91,28 +91,10 @@ in {
       listenAddress = lib.mkDefault "127.0.0.1";
       configFile = blackboxConfig;
     };
-
-    smartctl = lib.mkIf (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
-      enable = true;
-      port = cfg.smartctlPort;
-      listenAddress = lib.mkDefault "127.0.0.1";
-      devices = cfg.maintenance.exporters.smartctl.devices;
-    };
   };
 
   # Additional systemd services
   services = {
-    prometheus-smartctl-exporter =
-      lib.mkIf
-      (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable) {
-        serviceConfig = {
-          AmbientCapabilities = ["CAP_SYS_RAWIO"];
-          CapabilityBoundingSet = ["CAP_SYS_RAWIO"];
-          DeviceAllow = ["/dev/sd* r" "/dev/nvme* r"];
-          PrivateDevices = lib.mkForce false;
-        };
-      };
-
     backup-status-exporter =
       lib.mkIf
       (cfg.maintenance.enable && cfg.maintenance.exporters.backup.enable) {

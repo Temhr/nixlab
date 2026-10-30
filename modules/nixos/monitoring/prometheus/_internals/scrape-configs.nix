@@ -46,7 +46,7 @@
       job_name = "node";
       static_configs = [
         {
-          targets = ["localhost:9100"];
+          targets = ["localhost:${toString config.services.host-exporters-nixlab.nodeExporter.port}"];
           labels = {
             instance = "localhost";
             alias = config.networking.hostName;

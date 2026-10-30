@@ -12,7 +12,6 @@
 
   # Import specialized configurations
   prometheusService = import ./services/prometheus.nix {inherit config lib pkgs nixlabLib;};
-  nodeExporterService = import ./exporters/node.nix {inherit config lib pkgs nixlabLib;};
   maintenanceExporters = import ./exporters/maintenance.nix {inherit config lib pkgs;};
   nginxConfig = import ./extras/nginx.nix {inherit config lib nixlabLib;};
 in {
@@ -76,7 +75,6 @@ in {
         requiredBy = ["prometheus.service"];
       };
       prometheus = prometheusService;
-      prometheus-node-exporter = lib.mkIf cfg.enableNodeExporter nodeExporterService;
 
       # Quarantine the head and WAL when Prometheus is up but its TSDB time is wrong.
       prometheus-tsdb-guard = {
@@ -116,6 +114,15 @@ in {
       OnBootSec = "15min";
       OnUnitActiveSec = "5min";
     };
+  };
+
+  # Transitional bridge: the node and smartctl exporters now live in servc--host-exporters-nixlab.
+  services.host-exporters-nixlab = {
+    nodeExporter.enable = lib.mkDefault cfg.enableNodeExporter;
+    nodeExporter.textfileDir = lib.mkIf cfg.maintenance.enable "/var/lib/node_exporter";
+    smartctl.enable = lib.mkDefault (cfg.maintenance.enable && cfg.maintenance.exporters.smartctl.enable);
+    smartctl.port = lib.mkDefault cfg.smartctlPort;
+    smartctl.devices = lib.mkDefault cfg.maintenance.exporters.smartctl.devices;
   };
 
   # Import exporter configurations
