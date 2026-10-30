@@ -56,9 +56,18 @@
       openFirewall = false;
       dataDir = "/data";
       access.expose = ["grafana" "ntfy" "prometheus"];
-      loki.maintenance.enable = true;
-      prometheus.maintenance.enable = true;
-      prometheus.maintenance.exporters.smartctl.enable = true;
+      notifications.ntfyAuth.enable = true;
+      loki = {
+        maintenance.enable = true;
+        retention = "168h"; # the maintenance log keeps its 2 years (S36)
+      };
+      prometheus = {
+        maintenance.enable = true;
+        maintenance.exporters.smartctl.enable = true;
+        scrapeInterval = "60s";
+        retention = "7d";
+        retentionSize = "4GB";
+      };
     };
   };
 }
