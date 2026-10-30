@@ -36,6 +36,62 @@
       lib.mapAttrsToList (_: e: "127.0.0.1:${toString e.port}")
       (lib.filterAttrs (k: _: registry.enabled.${k} or false) (registry.endpoints or {}));
 
+    # The maintenance-log pipeline for Alloy (moved here from the Loki module).
+    maintenanceAlloyConfig = ''
+      // Collect maintenance logs
+      local.file_match "maintenance" {
+        path_targets = [{
+          __address__ = "localhost",
+          __path__    = "${svc.loki-nixlab.maintenance.logPath}",
+        }]
+      }
+
+      loki.source.file "maintenance" {
+        targets    = local.file_match.maintenance.targets
+        forward_to = [loki.process.maintenance.receiver]
+      }
+
+      loki.process "maintenance" {
+        forward_to = [loki.write.local.receiver]
+
+        // Parse JSON logs
+        stage.json {
+          expressions = {
+            timestamp = "timestamp",
+            section   = "section",
+            task      = "task",
+            status    = "status",
+            notes     = "notes",
+            user      = "user",
+          }
+        }
+
+        // Extract labels
+        // Labels taken from the parsed JSON fields (empty string = same key name)
+        stage.labels {
+          values = {
+            section = "",
+            status  = "",
+            user    = "",
+          }
+        }
+
+        // Constant labels
+        stage.static_labels {
+          values = {
+            job  = "maintenance-log",
+            host = "${config.networking.hostName}",
+          }
+        }
+
+        // Parse timestamp
+        stage.timestamp {
+          source = "timestamp"
+          format = "RFC3339"
+        }
+      }
+    '';
+
     mkIntegration = defaultTarget: what: {
       enable = lib.mkEnableOption "scraping and alerting for ${what}";
       target = lib.mkOption {
@@ -86,6 +142,7 @@
       self.nixosModules.servc--prometheus-nixlab
       self.nixosModules.servc--ntfy-nixlab
       self.nixosModules.servc--maintenance-log-nixlab
+      self.nixosModules.servc--alloy-nixlab
     ];
 
     options.services.nixlab-monitoring = {
@@ -279,8 +336,6 @@
         enable = true;
         uid = lib.mkDefault 740;
         gid = lib.mkDefault 740;
-        alloyUid = lib.mkDefault 741;
-        alloyGid = lib.mkDefault 741;
         listenAddress = lib.mkDefault (bindAddress "loki");
         dataDir = lib.mkDefault "${cfg.dataDir}/loki";
         openFirewall = lib.mkDefault cfg.openFirewall;
@@ -465,6 +520,16 @@
         enable = lib.mkDefault svc.loki-nixlab.maintenance.enable;
         logPath = lib.mkDefault svc.loki-nixlab.maintenance.logPath;
         textfileDir = lib.mkIf cfg.prometheus.maintenance.enable "/var/lib/node_exporter";
+      };
+
+      services.alloy-nixlab = {
+        enable = lib.mkDefault svc.loki-nixlab.enableAlloy;
+        port = lib.mkDefault svc.loki-nixlab.alloyPort;
+        package = lib.mkDefault svc.loki-nixlab.alloyPackage;
+        lokiUrl = lib.mkDefault "http://127.0.0.1:${toString port.loki}/loki/api/v1/push";
+        uid = lib.mkDefault 741;
+        gid = lib.mkDefault 741;
+        extraConfig = lib.optionalString svc.loki-nixlab.maintenance.enable maintenanceAlloyConfig;
       };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.

@@ -118,18 +118,6 @@
           description = "Pinned gid for the loki group.";
         };
 
-        alloyUid = lib.mkOption {
-          type = lib.types.nullOr lib.types.int;
-          default = null;
-          description = "Pinned uid for the alloy user.";
-        };
-
-        alloyGid = lib.mkOption {
-          type = lib.types.nullOr lib.types.int;
-          default = null;
-          description = "Pinned gid for the alloy group.";
-        };
-
         # OPTIONAL: allow opting out of the mainUser group membership
         # without coupling to a specific external option name
         extraUsers = lib.mkOption {
@@ -213,17 +201,12 @@
         # ----------------------------------------------------------------------------
         # DIRECTORY SETUP - Create necessary directories with proper permissions
         # ----------------------------------------------------------------------------
-        systemd.tmpfiles.rules =
-          [
-            "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
-            "d ${cfg.dataDir}/chunks 0770 ${cfg.user} ${cfg.group} -"
-            "d ${cfg.dataDir}/index 0770 ${cfg.user} ${cfg.group} -"
-            "d ${cfg.dataDir}/wal 0770 ${cfg.user} ${cfg.group} -"
-          ]
-          ++ lib.optionals cfg.enableAlloy [
-            "d /var/lib/alloy 0750 alloy alloy -"
-            "d /var/lib/alloy/data 0750 alloy alloy -"
-          ];
+        systemd.tmpfiles.rules = [
+          "d ${cfg.dataDir} 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/chunks 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/index 0770 ${cfg.user} ${cfg.group} -"
+          "d ${cfg.dataDir}/wal 0770 ${cfg.user} ${cfg.group} -"
+        ];
 
         # ----------------------------------------------------------------------------
         # USER SETUP - Create dedicated system users
@@ -240,22 +223,12 @@
               };
             }
           ]
-          ++ lib.optional cfg.enableAlloy
-          {
-            alloy = {
-              isSystemUser = true;
-              group = "alloy";
-              description = "Grafana Alloy service user";
-              extraGroups = ["systemd-journal"];
-            };
-          }
           ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
-          (map (u: {${u} = {extraGroups = [cfg.group "alloy"];};})
+          (map (u: {${u} = {extraGroups = [cfg.group];};})
             ([config.nixlab.mainUser] ++ cfg.extraUsers))
         );
 
         users.groups.${cfg.group} = {};
-        users.groups.alloy = lib.mkIf cfg.enableAlloy {gid = cfg.alloyGid;};
 
         # ----------------------------------------------------------------------------
         # PERMISSIONS - fix ownership every boot, after dataDir is actually mounted
@@ -274,16 +247,6 @@
           group = cfg.group;
           requiredBy = ["loki.service"];
         };
-
-        systemd.services.alloy-permissions = lib.mkIf cfg.enableAlloy (
-          nixlabLib.mkDataDirPermissionsService {
-            inherit pkgs;
-            dataDir = "/var/lib/alloy";
-            user = "alloy";
-            group = "alloy";
-            requiredBy = ["alloy.service"];
-          }
-        );
 
         # ----------------------------------------------------------------------------
         # LOKI SERVICE - Configure the systemd service
@@ -459,184 +422,6 @@
               ${pkgs.remarshal}/bin/remarshal -i ${rulesJson} -o ${cfg.dataDir}/rules/fake/journal.yaml -if json -of yaml
             ''}
             chown -R ${cfg.user}:${cfg.group} ${cfg.dataDir}
-          '';
-        };
-
-        # ----------------------------------------------------------------------------
-        # GRAFANA ALLOY SERVICE - Enable if requested
-        # ----------------------------------------------------------------------------
-        systemd.services.alloy = lib.mkIf cfg.enableAlloy {
-          description = "Grafana Alloy Telemetry Collector";
-          wantedBy = ["multi-user.target"];
-          after = ["network.target" "loki.service" "alloy-permissions.service" "time-sync.target"];
-          wants = ["time-sync.target"];
-
-          serviceConfig =
-            nixlabLib.mkServiceHardening {
-              writablePaths = ["/var/lib/alloy"];
-              allowJIT = true;
-              extraHardening = true;
-            }
-            // {
-              Type = "simple";
-              User = "alloy";
-              Group = "alloy";
-              # Alloy reads process and journal metadata; keep /proc fully visible.
-              ProtectProc = "default";
-              ProcSubset = "all";
-              ExecStart = "${cfg.alloyPackage}/bin/alloy run --disable-reporting --server.http.listen-addr=127.0.0.1:${toString cfg.alloyPort} --storage.path=/var/lib/alloy/data /var/lib/alloy/config.alloy";
-              Restart = "on-failure";
-              RestartSec = "10s";
-            };
-
-          preStart = let
-            # Base configuration in Alloy's River configuration language
-            baseAlloyConfig = ''
-              // Loki client for sending logs
-              loki.write "local" {
-                endpoint {
-                  url = "http://127.0.0.1:${toString cfg.port}/loki/api/v1/push"
-                }
-              }
-
-              // Collect systemd journal logs
-              // journald exposes metadata as internal __journal_* labels. They are dropped
-              // unless relabelled to a name without the "__" prefix.
-              loki.relabel "journal" {
-                forward_to = []
-
-                rule {
-                  source_labels = ["__journal__systemd_unit"]
-                  target_label  = "unit"
-                }
-                rule {
-                  source_labels = ["__journal_priority_keyword"]
-                  target_label  = "level"
-                  }
-                  rule {
-                    source_labels = ["__journal__transport"]
-                    target_label  = "transport"
-                }
-              }
-
-              loki.source.journal "systemd" {
-                max_age       = "12h"
-                relabel_rules = loki.relabel.journal.rules
-                labels = {
-                  job  = "systemd-journal",
-                  host = "${config.networking.hostName}",
-                }
-
-                forward_to = [loki.process.systemd.receiver]
-              }
-
-              loki.process "systemd" {
-                forward_to = [loki.write.local.receiver]
-
-                stage.static_labels {
-                  values = {
-                    job  = "systemd-journal",
-                    host = "${config.networking.hostName}",
-                  }
-                }
-
-                stage.label_keep {
-                  values = ["job", "host", "unit", "level", "transport"]
-                }
-              }
-
-              // Collect system log files
-              local.file_match "varlogs" {
-                path_targets = [{
-                  __address__ = "localhost",
-                  __path__    = "/var/log/*.log",
-                }]
-              }
-
-              loki.source.file "varlogs" {
-                targets    = local.file_match.varlogs.targets
-                forward_to = [loki.process.varlogs.receiver]
-              }
-
-              loki.process "varlogs" {
-                forward_to = [loki.write.local.receiver]
-
-                stage.static_labels {
-                  values = {
-                    job  = "varlogs",
-                    host = "${config.networking.hostName}",
-                  }
-                }
-              }
-            '';
-
-            # Maintenance log configuration
-            maintenanceAlloyConfig = lib.optionalString cfg.maintenance.enable ''
-              // Collect maintenance logs
-              local.file_match "maintenance" {
-                path_targets = [{
-                  __address__ = "localhost",
-                  __path__    = "${cfg.maintenance.logPath}",
-                }]
-              }
-
-              loki.source.file "maintenance" {
-                targets    = local.file_match.maintenance.targets
-                forward_to = [loki.process.maintenance.receiver]
-              }
-
-              loki.process "maintenance" {
-                forward_to = [loki.write.local.receiver]
-
-                // Parse JSON logs
-                stage.json {
-                  expressions = {
-                    timestamp = "timestamp",
-                    section   = "section",
-                    task      = "task",
-                    status    = "status",
-                    notes     = "notes",
-                    user      = "user",
-                  }
-                }
-
-                // Extract labels
-                // Labels taken from the parsed JSON fields (empty string = same key name)
-                stage.labels {
-                  values = {
-                    section = "",
-                    status  = "",
-                    user    = "",
-                  }
-                }
-
-                // Constant labels
-                stage.static_labels {
-                  values = {
-                    job  = "maintenance-log",
-                    host = "${config.networking.hostName}",
-                  }
-                }
-
-                // Parse timestamp
-                stage.timestamp {
-                  source = "timestamp"
-                  format = "RFC3339"
-                }
-              }
-            '';
-
-            alloyConfig = baseAlloyConfig + maintenanceAlloyConfig;
-
-            # Write config to file using writeText to avoid shell escaping issues
-            configFile = pkgs.writeText "alloy-config.alloy" alloyConfig;
-          in ''
-            # Copy Alloy configuration
-            install -m 640 -o alloy -g alloy ${configFile} /var/lib/alloy/config.alloy
-
-            # Ensure data directory exists
-            mkdir -p /var/lib/alloy/data
-            chown -R alloy:alloy /var/lib/alloy
           '';
         };
 
