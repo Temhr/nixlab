@@ -53,6 +53,12 @@
     checks = lib.optionalAttrs (system == "x86_64-linux") (
       (lib.foldl' (acc: host: acc // perHost host) {} ["nixnas1" "nixsun"])
       // {
+        # The maintenance helper script must pass shellcheck.
+        maintenance-log-shellcheck = pkgs.runCommand "maintenance-log-shellcheck" {nativeBuildInputs = [pkgs.shellcheck];} ''
+          shellcheck -s bash ${self.lib.maintenanceLoggerScript}
+          touch $out
+        '';
+
         # Validates every rule, including the ones gated behind feature flags.
         prom-rules-all-features = pkgs.runCommand "prom-rules-all-features" {nativeBuildInputs = tools;} ''
           remarshal -i ${toJson "rules-all.json" {groups = (prometheusMaintenanceAlerts {features = allFeatures;}).groups;}} -if json -of yaml -o rules.yml

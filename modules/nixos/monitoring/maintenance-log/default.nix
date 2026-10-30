@@ -1,4 +1,7 @@
 {...}: {
+  # Exposed for flake/ci/monitoring-checks.nix (shellcheck).
+  flake.lib.maintenanceLoggerScript = ./maintenance-logger.sh;
+
   flake.nixosModules.servc--maintenance-log-nixlab = {
     config,
     lib,
@@ -25,8 +28,10 @@
         }
       ];
 
+      # Writable by wheel only: world-writable would let any local user forge audit entries.
       systemd.tmpfiles.rules = [
-        "f ${cfg.logPath} 0666 root root - -"
+        "f ${cfg.logPath} 0664 root wheel - -"
+        "z ${cfg.logPath} 0664 root wheel - -"
       ];
 
       environment.systemPackages = [
