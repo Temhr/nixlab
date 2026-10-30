@@ -1193,6 +1193,29 @@ in rec {
     }
 
     # ═══════════════════════════════════════════════════════
+    # X. Manual maintenance tracking
+    # ═══════════════════════════════════════════════════════
+    {
+      name = "maintenance_tracking";
+      interval = "5m";
+      rules = [
+        {
+          alert = "MaintenanceOverdue";
+          expr = "(time() - maintenance_last_completed_timestamp_seconds) > on (instance, section) (maintenance_cadence_seconds * 1.15)";
+          labels = {
+            severity = "warning";
+            category = "maintenance";
+            checklist_section = "{{ $labels.section }}";
+          };
+          annotations = {
+            summary = "Maintenance overdue: {{ $labels.section }} on {{ $labels.instance }}";
+            description = "Last completed {{ $value | humanizeDuration }} ago (cadence exceeded by 15%).";
+          };
+        }
+      ];
+    }
+
+    # ═══════════════════════════════════════════════════════
     # Recording Rules for Dashboard
     # (not passed through withCondition: only alerts get that label)
     # ═══════════════════════════════════════════════════════

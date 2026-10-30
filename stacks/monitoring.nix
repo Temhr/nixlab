@@ -316,19 +316,28 @@
           else "null";
         receivers =
           [{name = "null";}]
-          ++ lib.optionals cfg.notifications.useNtfy [(mkNtfyReceiver "ntfy" ["tags=warning"])]
+          ++ lib.optionals cfg.notifications.useNtfy [(mkNtfyReceiver "ntfy" ["tags=warning"]) (mkNtfyReceiver "ntfy-low" ["p=2" "tags=memo"])]
           ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
             (mkNtfyReceiver "ntfy-critical" ["p=5" "tags=rotating_light"])
           ];
 
-        route.routes = lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
-          {
-            receiver = "ntfy-critical";
-            matchers = ["severity=\"critical\""];
-            groupWait = "10s";
-            repeatInterval = "1h";
-          }
-        ];
+        route.routes =
+          lib.optionals cfg.notifications.useNtfy [
+            {
+              receiver = "ntfy-low";
+              matchers = ["category=\"maintenance\""];
+              groupWait = "1m";
+              repeatInterval = "72h";
+            }
+          ]
+          ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
+            {
+              receiver = "ntfy-critical";
+              matchers = ["severity=\"critical\""];
+              groupWait = "10s";
+              repeatInterval = "1h";
+            }
+          ];
       };
 
       services.ntfy-nixlab = {
@@ -455,6 +464,7 @@
       services.maintenance-log-nixlab = {
         enable = lib.mkDefault svc.loki-nixlab.maintenance.enable;
         logPath = lib.mkDefault svc.loki-nixlab.maintenance.logPath;
+        textfileDir = lib.mkIf cfg.prometheus.maintenance.enable "/var/lib/node_exporter";
       };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.

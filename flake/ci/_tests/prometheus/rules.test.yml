@@ -240,3 +240,23 @@ tests:
             exp_annotations:
               summary: "Battery wear on h"
               description: "BAT0 holds 50% of its design capacity"
+
+  - interval: 1m
+    input_series:
+      - series: 'maintenance_last_completed_timestamp_seconds{instance="h", section="X.30"}'
+        values: '0x10'
+      - series: 'maintenance_cadence_seconds{instance="h", section="X.30"}'
+        values: '100x10'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: MaintenanceOverdue
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: maintenance
+              checklist_section: X.30
+              instance: h
+              section: X.30
+            exp_annotations:
+              summary: "Maintenance overdue: X.30 on h"
+              description: "Last completed 5m 0s ago (cadence exceeded by 15%)."
