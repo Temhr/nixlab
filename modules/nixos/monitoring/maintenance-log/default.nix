@@ -9,6 +9,10 @@
     ...
   }: let
     cfg = config.services.maintenance-log-nixlab;
+    checklist = import ./_internals/checklist.nix;
+    checklistFile = pkgs.writeText "maintenance-checklist.tsv" (
+      lib.concatMapStringsSep "\n" (s: "${s.code}\t${s.name}\t${s.hint}") checklist
+    );
   in {
     options.services.maintenance-log-nixlab = {
       enable = lib.mkEnableOption "maintenance task logging helper";
@@ -38,6 +42,7 @@
         (pkgs.writeShellScriptBin "maintenance-log" ''
           export PATH=${lib.makeBinPath [pkgs.jq pkgs.coreutils pkgs.gawk pkgs.gnugrep]}:$PATH
           export MAINTENANCE_LOG=''${MAINTENANCE_LOG:-${lib.escapeShellArg cfg.logPath}}
+          export MAINTENANCE_CHECKLIST=''${MAINTENANCE_CHECKLIST:-${checklistFile}}
           ${builtins.readFile ./maintenance-logger.sh}
         '')
         pkgs.jq

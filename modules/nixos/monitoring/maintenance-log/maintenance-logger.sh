@@ -41,6 +41,17 @@ CHECKLIST_SECTIONS=(
   "X.31:Quarterly Tasks"
 )
 
+# When run through the NixOS wrapper, sections and hints come from checklist.nix.
+declare -A SECTION_HINT=()
+if [[ -n "${MAINTENANCE_CHECKLIST:-}" && -r "$MAINTENANCE_CHECKLIST" ]]; then
+  CHECKLIST_SECTIONS=()
+  while IFS=$'\t' read -r code name hint; do
+    [[ -n $code ]] || continue
+    CHECKLIST_SECTIONS+=("$code:$name")
+    SECTION_HINT["$code"]="$hint"
+  done < "$MAINTENANCE_CHECKLIST"
+fi
+
 # Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -194,27 +205,9 @@ log_section_task() {
   echo -e "\n${BLUE}Section: $section_code - $section_name${NC}"
   echo "────────────────────────────────────────────────────"
 
-  # Show common tasks for this section
-  case "$section_code" in
-    "I.1")
-      echo "Common tasks: CPU temp check, fan inspection, RAM test"
-      ;;
-    "I.2")
-      echo "Common tasks: Check disk space, verify inode usage"
-      ;;
-    "III.7")
-      echo "Common tasks: Verify backup success, check offsite sync, restore test"
-      ;;
-    "III.8")
-      echo "Common tasks: Run ZFS scrub, Btrfs balance, filesystem check"
-      ;;
-    "IV.13")
-      echo "Common tasks: Check cert expiry, verify ACME renewals"
-      ;;
-    "X.30")
-      echo "Common tasks: OS updates, ZFS scrub, backup restore test"
-      ;;
-  esac
+  if [[ -n "${SECTION_HINT[$section_code]:-}" ]]; then
+    echo "Common tasks: ${SECTION_HINT[$section_code]}"
+  fi
 
   local task status status_choice notes
   echo ""
