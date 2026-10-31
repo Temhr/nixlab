@@ -37,11 +37,11 @@
       }
     else rule;
 
-    # Adds a link to docs/runbooks/<alertname>.md as the `runbook` annotation (when runbookBase is set).
-    withRunbook = rule:
-      if runbookBase != null && rule ? alert
-      then rule // {annotations = (rule.annotations or {}) // {runbook = "${runbookBase}/${rule.alert}.md";};}
-      else rule;
+  # Adds a link to docs/runbooks/<alertname>.md as the `runbook` annotation (when runbookBase is set).
+  withRunbook = rule:
+    if runbookBase != null && rule ? alert
+    then rule // {annotations = (rule.annotations or {}) // {runbook = "${runbookBase}/${rule.alert}.md";};}
+    else rule;
 
   # Rules may carry `requires = "<feature>";`. They load only when that
   # feature flag is true. The attribute is stripped before output.
@@ -51,7 +51,12 @@
     builtins.filter (g: g.rules != []) (map (g:
       (removeAttrs g ["core"])
       // {
-        rules = map (r: stripGate (withRunbook (if conditionLabel then withCondition r else r))) (builtins.filter isEnabled g.rules);
+        rules = map (r:
+          stripGate (withRunbook (
+            if conditionLabel
+            then withCondition r
+            else r
+          ))) (builtins.filter isEnabled g.rules);
       })
     gs);
 

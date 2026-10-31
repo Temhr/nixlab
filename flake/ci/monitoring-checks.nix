@@ -56,10 +56,11 @@
         # Every alert needs docs/runbooks/<Alert>.md, unless it is listed in docs/runbooks/_todo.txt.
         runbook-coverage = pkgs.runCommand "runbook-coverage" {nativeBuildInputs = [pkgs.jq];} ''
           jq -r '.groups[].rules[] | select(.alert) | .alert' ${toJson "rules-all-names.json" {
-            groups = (prometheusMaintenanceAlerts {
-              features = allFeatures;
-              expectedMounts = ["/data"];
-            }).groups;
+            groups =
+              (prometheusMaintenanceAlerts {
+                features = allFeatures;
+                expectedMounts = ["/data"];
+              }).groups;
           }} | sort -u > alerts.txt
           missing=0
           for a in $(cat alerts.txt); do

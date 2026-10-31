@@ -143,6 +143,7 @@
       self.nixosModules.servc--ntfy-nixlab
       self.nixosModules.servc--maintenance-log-nixlab
       self.nixosModules.servc--alloy-nixlab
+      self.nixosModules.servc--monitoring-backup-nixlab
     ];
 
     options.services.nixlab-monitoring = {
@@ -521,6 +522,19 @@
         uid = lib.mkDefault 741;
         gid = lib.mkDefault 741;
         extraConfig = lib.optionalString svc.loki-nixlab.maintenance.enable maintenanceAlloyConfig;
+      };
+
+      services.monitoring-backup-nixlab = {
+        enable = lib.mkDefault true;
+        dir = lib.mkDefault "${cfg.dataDir}/backup";
+        sqliteFiles =
+          ["${cfg.dataDir}/grafana/data/grafana.db"]
+          ++ lib.optional (svc.ntfy-nixlab.cacheFile != "") svc.ntfy-nixlab.cacheFile
+          ++ lib.optional svc.ntfy-nixlab.auth.enable "${svc.ntfy-nixlab.dataDir}/user.db";
+        plainFiles = [
+          "/var/lib/private/alertmanager"
+          svc.loki-nixlab.maintenance.logPath
+        ];
       };
 
       # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
