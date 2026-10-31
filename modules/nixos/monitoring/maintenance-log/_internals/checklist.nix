@@ -174,18 +174,18 @@
     code = "X.29";
     name = "Weekly Tasks";
     hint = "Review alerts, backups, certificates, logs";
-    cadence = 8 * 86400;
+    cadence = null; # 8 * 86400;
   }
   {
     code = "X.30";
     name = "Monthly Tasks";
     hint = "OS updates, ZFS scrub, backup restore test";
-    cadence = 35 * 86400;
+    cadence = null; # 35 * 86400;
   }
   {
     code = "X.31";
     name = "Quarterly Tasks";
     hint = "Hardware cleaning, DR rehearsal, access audit";
-    cadence = 100 * 86400;
+    cadence = null; # 100 * 86400;
   }
 ]
