@@ -1,4 +1,7 @@
 {self, ...}: {
+  # Exposed for flake/ci/monitoring-checks.nix (dashboard lint).
+  flake.lib.grafanaDashboards = ./dashboards;
+
   flake.nixosModules.servc--grafana-nixlab = {
     config,
     lib,

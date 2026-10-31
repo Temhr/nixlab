@@ -34,7 +34,7 @@
     ## Shared system-wide default user option
     nixlab.mainUser = lib.mkDefault "temhr";
 
-    home-manager.verbose = true;                 # NixOS module option
+    home-manager.verbose = true; # NixOS module option
 
     services.timesyncd.enable = true;
     # Make time-sync.target mean "the clock is actually set". NixOS does not ship

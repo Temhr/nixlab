@@ -53,6 +53,18 @@
     checks = lib.optionalAttrs (system == "x86_64-linux") (
       (lib.foldl' (acc: host: acc // perHost host) {} ["nixnas1" "nixsun"])
       // {
+        # Dashboards must carry a uid and schemaVersion, use valid units and thresholds, and not clash.
+        dashboard-lint = pkgs.runCommand "dashboard-lint" {nativeBuildInputs = [pkgs.jq];} ''
+          cd ${self.lib.grafanaDashboards}
+          for f in *.json; do
+            jq -e '.uid and .title and .schemaVersion' "$f" >/dev/null || { echo "$f: needs uid, title and schemaVersion"; exit 1; }
+            jq -e '[.. | objects | select(has("steps")) | .steps[0].value] | all(. == null)' "$f" >/dev/null || { echo "$f: the first threshold step must be null"; exit 1; }
+            jq -e '[.. | objects | .unit? // empty] | index("days") | not' "$f" >/dev/null || { echo "$f: unit days is invalid (use d)"; exit 1; }
+          done
+          jq -s -e '[.[].uid] | length == (unique | length)' *.json >/dev/null || { echo "duplicate dashboard uids"; exit 1; }
+          touch $out
+        '';
+
         # The maintenance helper script must pass shellcheck.
         maintenance-log-shellcheck = pkgs.runCommand "maintenance-log-shellcheck" {nativeBuildInputs = [pkgs.shellcheck];} ''
           shellcheck -s bash ${self.lib.maintenanceLoggerScript}

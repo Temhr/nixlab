@@ -39,7 +39,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "red"
               },
               {
@@ -74,12 +74,12 @@
       },
       "targets": [
         {
-          "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"})",
+          "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"}) or vector(0)",
           "legendFormat": "Critical",
           "refId": "A"
         },
         {
-          "expr": "count(ALERTS{alertstate=\"firing\", severity=\"warning\"})",
+          "expr": "count(ALERTS{alertstate=\"firing\", severity=\"warning\"}) or vector(0)",
           "legendFormat": "Warning",
           "refId": "B"
         }
@@ -90,7 +90,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "green"
               },
               {
@@ -205,14 +205,17 @@
                 "id": "mappings",
                 "value": [
                   {
-                    "value": "critical",
-                    "text": "🔴 Critical",
-                    "color": "red"
-                  },
-                  {
-                    "value": "warning",
-                    "text": "🟡 Warning",
-                    "color": "orange"
+                    "type": "value",
+                    "options": {
+                      "critical": {
+                        "text": "🔴 Critical",
+                        "color": "red"
+                      },
+                      "warning": {
+                        "text": "🟡 Warning",
+                        "color": "orange"
+                      }
+                    }
                   }
                 ]
               }
@@ -259,7 +262,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "green"
               },
               {
@@ -418,7 +421,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "red"
               },
               {
@@ -435,7 +438,7 @@
               }
             ]
           },
-          "unit": "days"
+          "unit": "d"
         }
       }
     },
@@ -641,5 +644,8 @@
         ]
       }
     }
-  ]
+  ],
+  "id": null,
+  "uid": "maintenance-checklist",
+  "schemaVersion": 36
 }

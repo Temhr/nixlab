@@ -37,7 +37,7 @@
     {
       "id": 1,
       "type": "row",
-      "title": "\ud83c\udfca Pool State",
+      "title": "🏊 Pool State",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -73,7 +73,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "green"
               },
               {
@@ -214,7 +214,7 @@
     {
       "id": 4,
       "type": "row",
-      "title": "\ud83d\udcc1 Dataset I/O",
+      "title": "📁 Dataset I/O",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -356,7 +356,7 @@
     {
       "id": 9,
       "type": "row",
-      "title": "\ud83e\udde0 ARC (Adaptive Replacement Cache)",
+      "title": "🧠 ARC (Adaptive Replacement Cache)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -522,7 +522,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "red"
               },
               {
@@ -722,7 +722,7 @@
     {
       "id": 21,
       "type": "row",
-      "title": "\ud83d\udcdd ZIL (ZFS Intent Log)",
+      "title": "📝 ZIL (ZFS Intent Log)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -822,7 +822,7 @@
     {
       "id": 24,
       "type": "row",
-      "title": "\ud83d\udcbe Disk Space (mounted datasets)",
+      "title": "💾 Disk Space (mounted datasets)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -857,7 +857,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "value": 0,
+                "value": null,
                 "color": "green"
               },
               {
