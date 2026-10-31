@@ -27,7 +27,7 @@
     bindAddress = name:
       if cfg.listenAddress != null
       then cfg.listenAddress
-      else if (cfg.access.interfaces != [] && lib.elem name cfg.access.expose) || lib.elem name cfg.access.peerReachable
+      else if cfg.access.interfaces != [] && lib.elem name cfg.access.expose
       then "0.0.0.0"
       else "127.0.0.1";
 
@@ -185,15 +185,6 @@
           type = lib.types.listOf (lib.types.enum ["grafana" "ntfy" "alertmanager" "prometheus" "loki"]);
           default = ["grafana" "ntfy" "prometheus"];
           description = "Which services to open on access.interfaces.";
-        };
-        peerReachable = lib.mkOption {
-          type = lib.types.listOf (lib.types.enum ["grafana" "ntfy" "alertmanager" "prometheus" "loki"]);
-          default = [];
-          description = ''
-            Services that must listen beyond loopback because a source-restricted
-            firewall rule admits specific peers (agents pushing logs to a hub, a hub
-            probing the other hub). Unlike `expose`, this opens no firewall port.
-          '';
         };
       };
 
