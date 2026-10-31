@@ -1048,7 +1048,7 @@ in rec {
         }
         {
           alert = "SCSIUncorrectedErrors";
-          expr = ''delta({__name__=~"smartctl_(read|write)_total_uncorrected_errors"}[7d]) > 0'';
+          expr = ''delta(smartctl_read_total_uncorrected_errors[7d]) > 0 or delta(smartctl_write_total_uncorrected_errors[7d]) > 0'';
           for = "1h";
           labels = {
             severity = "warning";
