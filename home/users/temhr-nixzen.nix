@@ -10,5 +10,9 @@
 
     home.sessionVariables = {
     };
+
+
+    home-manager.verbose = true;                 # NixOS module option
+    home-manager.users.temhr.systemd.user.startServices = "legacy";  # bypass sd-switch
   };
 }

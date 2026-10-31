@@ -42,9 +42,6 @@
     environment.systemPackages = with pkgs; [
     ];
 
-    home-manager.verbose = true;                 # NixOS module option
-    home-manager.users.temhr.systemd.user.startServices = "legacy";  # bypass sd-switch
-
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     system.stateVersion = "24.11";
   };
