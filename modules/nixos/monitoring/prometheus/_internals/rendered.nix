@@ -22,6 +22,7 @@
   alertGroups = import ./maintenance-alerts.nix {
     features = alertFeatures;
     expectedMounts = cfg.maintenance.expectedMounts;
+    runbookBase = "https://github.com/Temhr/nixlab/blob/main/docs/runbooks";
   };
 in {
   rules = {

@@ -104,7 +104,7 @@
     ntfyUrl = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
     ntfyTemplate = {
       title = "[{{.status}}] {{(index .alerts 0).labels.host}}: {{(index .alerts 0).labels.alertname}}";
-      message = ''{{range .alerts}}{{.annotations.summary}}{{"\n"}}{{.annotations.description}}{{"\n\n"}}{{end}}'';
+      message = ''{{range .alerts}}{{.annotations.summary}}{{"\n"}}{{.annotations.description}}{{"\n"}}{{with .annotations.runbook}}{{.}}{{"\n"}}{{end}}{{"\n"}}{{end}}'';
     };
 
     # Tapping a notification opens Grafana (only when an external URL is resolved).
