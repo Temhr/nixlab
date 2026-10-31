@@ -34,6 +34,8 @@
     ## Shared system-wide default user option
     nixlab.mainUser = lib.mkDefault "temhr";
 
+    home-manager.verbose = true;                 # NixOS module option
+
     services.timesyncd.enable = true;
     # Make time-sync.target mean "the clock is actually set". NixOS does not ship
     # systemd-time-wait-sync by default, so without this nothing waits for NTP and
