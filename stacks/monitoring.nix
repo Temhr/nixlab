@@ -138,12 +138,12 @@
     imports = [
       self.nixosModules.nsops--alertmanager
       self.nixosModules.nsops--grafana
+      self.nixosModules.servc--alloy-nixlab
       self.nixosModules.servc--loki-nixlab
       self.nixosModules.servc--prometheus-nixlab
       self.nixosModules.servc--ntfy-nixlab
-      self.nixosModules.servc--maintenance-log-nixlab
-      self.nixosModules.servc--alloy-nixlab
-      self.nixosModules.servc--monitoring-backup-nixlab
+      self.nixosModules.systm--maintenance-log-nixlab
+      self.nixosModules.systm--monitoring-backup-nixlab
     ];
 
     options.services.nixlab-monitoring = {

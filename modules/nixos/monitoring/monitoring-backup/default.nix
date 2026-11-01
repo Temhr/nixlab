@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.servc--monitoring-backup-nixlab = {
+  flake.nixosModules.systm--monitoring-backup-nixlab = {
     config,
     lib,
     pkgs,

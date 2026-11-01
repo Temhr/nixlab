@@ -2,7 +2,7 @@
   # Exposed for flake/ci/monitoring-checks.nix (shellcheck); added in S39.
   flake.lib.maintenanceLoggerScript = ./maintenance-logger.sh;
 
-  flake.nixosModules.servc--maintenance-log-nixlab = {
+  flake.nixosModules.systm--maintenance-log-nixlab = {
     config,
     lib,
     pkgs,
