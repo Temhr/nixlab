@@ -2,7 +2,7 @@
 
 Modular NixOS configuration for laptops, desktops, and homelab servers — built on the **Dendritic Pattern** with **flake-parts**, where every file self-registers its own output (including its own metadata and library functions).
 
-New here? [Architecture at a Glance](#architecture-at-a-glance) is the one-minute version; [Core Concepts](#core-concepts) is the canonical explanation everything else links back to.
+New here? [Architecture at a Glance](#architecture-at-a-glance) is the one-minute version; [Core Concepts](#core-concepts) is the canonical explanation everything else links back to. Running the monitoring stack? Start at [Monitoring Stack](#monitoring-stack).
 
 Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs), with inspiration from [EmergentMind](https://www.youtube.com/@EmergentMind), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the NixOS community. Rewritten almost entirely with Claude.
 
@@ -26,6 +26,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 - [Repository Reference](#repository-reference)
   - [Repository Layout](#repository-layout)
   - [Top-Level Folder Reference](#top-level-folder-reference)
+- [Monitoring Stack](#monitoring-stack)
 - [Usage](#usage)
   - [First Install](#first-install-on-a-new-machine)
   - [Daily Commands](#daily-commands)
@@ -97,7 +98,7 @@ Every contributing file registers its own output, keyed by its own name. Only fi
 
 | Mechanism | How it works |
 |---|---|
-| **Discovery** | [import-tree](https://github.com/vic/import-tree) walks each top-level directory (`flake/`, `hosts/`, `home/`, ...) and evaluates every `.nix` file. Adding a file requires no edit anywhere else — see [Entry Point & Orchestration Files](#entry-point--orchestration-files). |
+| **Discovery** | [import-tree](https://github.com/vic/import-tree) walks each top-level directory (`flake/`, `hosts/`, `home/`, ...) and evaluates every `.nix` file **except paths containing an `_`-prefixed segment**. Adding a file requires no edit anywhere else — see [Entry Point & Orchestration Files](#entry-point--orchestration-files). |
 | **Registration** | Each file assigns into `flake.nixosModules.<name>`, `flake.homeModules.<name>`, or `flake.lib.<name>` — all declared as mergeable options (`lazyAttrsOf raw`, in `flake/schema/options.nix`), so [flake-parts](https://github.com/hercules-ci/flake-parts) deep-merges every contribution into one attrset. |
 | **Consumption** | Other files reference results only by registered name (`self.nixosModules.foo`, `self.lib.bar`) — never by path. Since `self` resolves lazily, this works regardless of tree position or evaluation order — see [Self-Registration in Practice](#self-registration-in-practice). |
 | **The contract** | Nothing is wired by path, so a file can move anywhere without breaking its dependents, as long as its registered name stays the same. |
@@ -216,7 +217,7 @@ A username existing as a login account (`systemUsers`) and as a home-manager pro
 | `flake/data/` | Pure attrsets, nothing else | No functions, no `mkOption` — safe to read/diff without evaluating logic |
 | `flake/schema/` | Option declarations + per-axis constructors (`mkMachineMeta`, `mkHostMeta`) | Validates/default-fills `data/` attrsets — a typo'd field gets a real error, not a silent failure |
 | `flake/builders/` | One file per axis (hardware, hosts, users) | Turns validated metadata into real configs — see [Builder Functions](#builder-functions) |
-| `flake/ci/` | Dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`) | Plumbing for the repo, not part of what it *means* |
+| `flake/ci/` | Dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`, `monitoring-checks.nix`, `_tests/`) | Plumbing for the repo, not part of what it *means* |
 | `flake/nixos-lib.nix`, `flake/pkgs.nix` | Cross-cutting helpers, not axis-specific | See [Entry Point & Orchestration Files](#entry-point--orchestration-files) |
 
 Rule of thumb: "is it data, a type/constructor, a generator, or tooling?" answers where a new file goes.
@@ -227,7 +228,7 @@ Rule of thumb: "is it data, a type/constructor, a generator, or tooling?" answer
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-`flake.nix` is a pure delegation layer. [flake-parts](https://github.com/hercules-ci/flake-parts) structures outputs as composable modules; [import-tree](https://github.com/vic/import-tree) auto-discovers every `.nix` file per top-level directory (see [Self-Registering Modules](#self-registering-modules)). Files prefixed `_` are leaf imports consumed by their parent module — still discovered and evaluated, but not a standalone registered output.
+`flake.nix` is a pure delegation layer. [flake-parts](https://github.com/hercules-ci/flake-parts) structures outputs as composable modules; [import-tree](https://github.com/vic/import-tree) auto-discovers every `.nix` file per top-level directory (see [Self-Registering Modules](#self-registering-modules)). **Paths with an `_`-prefixed segment (`_internals/`, `_tests/`, `_host-template.nix`) are skipped by import-tree**: they are never registered on their own and are only reached by relative `import` from their owning module (or, for `_tests/`, referenced by CI).
 
 ```nix
 outputs = inputs @ { flake-parts, ... }:
@@ -238,7 +239,7 @@ outputs = inputs @ { flake-parts, ... }:
       (inputs.import-tree ./hardware) # → hardw--* nixosModules
       (inputs.import-tree ./home)     # → home--* homeModules
       (inputs.import-tree ./hosts)    # → hosts--* nixosModules + nixosConfigurations
-      (inputs.import-tree ./modules)  # → servc--*, systm--* nixosModules
+      (inputs.import-tree ./modules)  # → servc--*, systm--* nixosModules (+ a few flake.lib hooks for CI)
       (inputs.import-tree ./stacks)   # → stack--* nixosModules
       (inputs.import-tree ./overlays) # → flake.overlays.*
       (inputs.import-tree ./shells)   # → perSystem.devShells.*
@@ -320,6 +321,8 @@ in {
 
 Because `self` resolves lazily, `builders/hosts.nix` can reference `self.lib.hostsMeta` before that attribute "arrives" from its own file — the same laziness that lets any module reference `self.nixosModules.*` regardless of load order. That's why `data/*.nix` can live anywhere without breaking the constructors or generators built on top of it.
 
+**Modules may also register `flake.lib` hooks for CI.** When CI needs something that lives inside a module (the rendered Prometheus config, the alert-rule generator, the Grafana dashboards directory, the maintenance-logger script), the owning module registers it by name (`self.lib.prometheusRendered`, `prometheusMaintenanceAlerts`, `grafanaDashboards`, `maintenanceLoggerScript`) and `flake/ci/monitoring-checks.nix` consumes it by name — still no cross-folder path imports.
+
 </details>
 
 ### Module Naming & Profile Composition
@@ -351,9 +354,9 @@ All NixOS modules register under `flake.nixosModules`; all home-manager modules 
 | `home--apps--` | Toggleable home-manager application modules |
 | `home--shell--` | Shell/dotfile modules |
 | `nsops--` | sops-nix secret wiring modules |
-| `servc--` | Self-hosted service modules — atomic, no knowledge of sibling services |
-| `stack--` | Multi-service integration bundles — imports ≥2 `servc--`/`nsops--` and wires them together (see [Top-Level Folder Reference](#top-level-folder-reference)) |
-| `systm--` | Cross-cutting system defaults (e.g. per-service port defaults) |
+| `servc--` | Self-hosted service modules — atomic, no knowledge of sibling services (e.g. `servc--prometheus-nixlab`) |
+| `stack--` | Multi-service integration bundles — imports ≥2 `servc--`/`nsops--` and wires them together (`stack--monitoring`; see [Top-Level Folder Reference](#top-level-folder-reference)) |
+| `systm--` | Cross-cutting system defaults and small helper modules — per-service port defaults (`systm--ports-*`) and non-service helpers (`systm--maintenance-log-nixlab`, `systm--monitoring-backup-nixlab`) |
 
 ```
 # nix flake show (abbreviated)
@@ -376,6 +379,8 @@ All NixOS modules register under `flake.nixosModules`; all home-manager modules 
 | NixOS | `hosts--profl--nas` | NAS-specific automation (phone media backup) | NAS hosts |
 | Home-manager | `home--profl--base` | git, ssh, fastfetch, XDG folders, ephemeral-app launchers, bash shell integration | Every user |
 | Home-manager | `home--profl--desktop` | Browsers, terminal emulators, virt-manager dconf tweak | Users whose resolved profile is `"desktop"` |
+
+> Importing `stack--monitoring` makes the stack *available*; it does nothing until a host sets `services.nixlab-monitoring.enable = true`. See [Monitoring Stack](#monitoring-stack).
 
 </details>
 
@@ -426,18 +431,26 @@ NixOS system accounts follow the identical shape via `mkSystemUsersForHost` / `h
   1. **Host file** — plain assignment (`services.foo-nixlab.port = 9999;`) always wins
   2. **`modules/ports.nix`** (`systm--ports-*`) — `lib.mkDefault <value>`, the fleet-wide default
   3. **Service module's own `default`** — lowest priority, a safety net if `ports.nix` isn't imported for that service
+
+  Stacks never set port numbers; they read the resolved values (`config.services.<x>-nixlab.port`).
+- **Override contract for stacks** — a stack sets tunables with `lib.mkDefault` (a host can override via the stack's aggregator option *or* directly on the underlying service), and sets *wiring* (datasources, scrape jobs, receivers, targets) as plain additive values. Extend wiring; don't replace it.
 - **Service hardening** — every `serviceConfig` routes through `nixlabLib.mkServiceHardening` rather than hand-rolled sandboxing. Exceptions override only the specific field that differs, never bypass the helper wholesale:
   ```nix
   serviceConfig = nixlabLib.mkServiceHardening {
-    writablePaths = [ cfg.dataDir ];
-    allowNetwork  = true;   # default; set false for network-isolated services
-    allowDevices  = false;  # set true for GPU/hardware access — also relaxes
-                            # ProtectKernelModules/Tunables/RestrictNamespaces
-    allowJIT      = false;  # set true for JIT runtimes (Next.js, Node.js, CUDA) —
-                            # relaxes MemoryDenyWriteExecute/SystemCallFilter
+    writablePaths    = [ cfg.dataDir ];
+    allowNetwork     = true;   # default; set false for network-isolated services
+    allowUnixSockets = true;   # default; set false to also forbid AF_UNIX
+    allowDevices     = false;  # set true for GPU/hardware access — also relaxes
+                               # ProtectKernelModules/Tunables/RestrictNamespaces
+    allowJIT         = false;  # set true for JIT runtimes (Next.js, Node.js, CUDA, Alloy) —
+                               # relaxes MemoryDenyWriteExecute/SystemCallFilter
+    extraHardening   = false;  # set true for the extra sandbox set (empty capability set,
+                               # ProtectProc=invisible, ProtectClock, UMask=0077, ...)
   } // { Type = "simple"; ExecStart = "..."; ... };
   ```
-- **Single source of truth for generated aggregates** — a derived fact needed by multiple files (e.g. "which services are enabled, and what group") lives in one `_<name>-registry.nix`, imported by every consumer — never copy-pasted maps that can drift (see `modules/nixos/homepage-dashboard/_service-registry.nix`).
+- **Durable data directories** — a service whose `dataDir` may sit on a separate mount gets a `<name>-permissions` oneshot from `nixlabLib.mkDataDirPermissionsService` (waits for the mount, then re-chowns), instead of relying on tmpfiles rules that can race the mount or miss uid drift.
+- **Self-healing state** — services with a write-ahead log opt into `nixlabLib.mkWalSelfHeal` (quarantine a corrupt WAL after a crash loop, with cooldown and retention) rather than hand-written recovery.
+- **Single source of truth for generated aggregates** — a derived fact needed by multiple files (e.g. "which services are enabled, and what group") lives in one `_<name>-registry.nix`, imported by every consumer — never copy-pasted maps that can drift (see `modules/nixos/homepage-dashboard/_service-registry.nix`; the monitoring stack reads it through `self.lib.serviceRegistry`).
 
 </details>
 
@@ -447,12 +460,14 @@ NixOS system accounts follow the identical shape via `mkSystemUsersForHost` / `h
 <summary><i>(click to expand)</i></summary>
 <p></p>
 
-[sops-nix](https://github.com/Mic92/sops-nix), age-encrypted, one `.yaml` per service under `sops/`. Each `nsops--<service>` module:
+[sops-nix](https://github.com/Mic92/sops-nix), age-encrypted, one encrypted file per service under `sops/` (`.yaml`, or `.env` with `format = "dotenv"` when the consumer wants `KEY=VALUE` — Alertmanager). Each `nsops--<service>` module:
 - `imports = [ self.nixosModules.servc--<service>-nixlab ];` — structural dependency (the secret is meaningless without the service)
-- Declares `sops.secrets.<KEY> = { sopsFile = ./<service>.yaml; owner = ...; restartUnits = [...]; };`
-- Wires the decrypted path into the service's own option (e.g. `services.<service>-nixlab.secretsEnvFile = config.sops.secrets.<KEY>.path;`) — never reaches into `systemd.services.*` directly, never touches an unrelated option
+- Declares `sops.secrets.<KEY> = { sopsFile = ./<service>.yaml; owner = ...; restartUnits = [...]; };` — a service may have several keys (Grafana has an admin password and a `secret_key`)
+- Wires each decrypted path into the service's own options (e.g. `services.<service>-nixlab.secretsEnvFile = config.sops.secrets.<KEY>.path;`) — never reaches into `systemd.services.*` directly, never touches an unrelated option. Where the service runs as a `DynamicUser` (Alertmanager), the file stays root-owned and systemd reads it via `EnvironmentFile`.
 
 `sops.age.keyFile` is set once, globally, in `hosts--core--sops` — never in an optional feature module, since every secret on every host depends on it.
+
+A stack may *consume* a secret declared by an `nsops--` module it imports (the monitoring stack reuses `ALERTMANAGER_ENV` to provision ntfy users), but never declares secrets itself.
 
 </details>
 
@@ -473,7 +488,10 @@ nixlab/
 │   ├── schema/                        # smart constructors (mk<axis>Meta, ...), validates attrsets
 │   ├── builders/                      # generates configs (nixosConfigurations, ...) from metadata
 │   ├── ci/                            # dev-facing tooling
-│   ├── nixos-lib.nix                  # service module helper functions
+│   │   ├── checks.nix, apps.nix, packages.nix
+│   │   ├── monitoring-checks.nix      # build-time validation of the monitoring stack
+│   │   └── _tests/prometheus/         # promtool rule unit tests
+│   ├── nixos-lib.nix                  # service module helper functions (nixlabLib)
 │   └── pkgs.nix                       # where overlays / .nixpkgsConfig are defined for pkgs
 │
 ├── hardware/                          # Machine-level hardware configurations
@@ -512,16 +530,22 @@ nixlab/
 │   |   ├── comfyui/
 │   |   ├── glance/
 │   |   ├── homepage-dashboard/
-│   |   ├── monitoring/                # alertmanager/, grafana/, loki/, ntfy/, prometheus/
+│   |   ├── monitoring/                # see "Monitoring Stack"
+│   |   │   ├── alertmanager/  alloy/  grafana/ (+ dashboards/)  host-exporters/
+│   |   │   ├── loki/  maintenance-log/  monitoring-backup/  ntfy/  prometheus/
 │   |   └── <service>.nix
 │   └── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
 │
 ├── stacks/                            # stack--* — multi-service integration bundles
-│   └── monitoring.nix
+│   └── monitoring.nix                 # stack--monitoring (the aggregator)
 │
 ├── sops/                              # Centralized secrets management
 │   ├── <service>.nix                  # Secret module declarations (nsops--*)
-│   └── <service>.yaml                 # Encrypted secrets per module
+│   └── <service>.yaml | .env          # Encrypted secrets per module
+│
+├── docs/
+│   ├── monitoring/                    # architecture & reference (as built)
+│   └── runbooks/                      # one page per alert (+ _template.md, _todo.txt)
 │
 ├── overlays/                          # flake.overlays.*
 │   └── default.nix, ...
@@ -544,7 +568,7 @@ Every top-level folder answers one question: *what kind of thing does a file in 
 
 ### `flake/` — orchestration: metadata, constructors, generators, dev tooling
 
-Every other folder depends on `flake/`; `flake/` depends on nothing else — it's the foundation, organized by *kind of thing* rather than *feature*.
+Every other folder depends on `flake/`; `flake/` depends on nothing else — it's the foundation, organized by *kind of thing* rather than *feature*. (CI files in `flake/ci/` are the one exception in spirit: they consume named `self.lib.*` hooks and `self.nixosConfigurations` for validation, never by path.)
 
 | File | Responsibility | Output | Must |
 |---|---|---|---|
@@ -553,15 +577,16 @@ Every other folder depends on `flake/`; `flake/` depends on nothing else — it'
 | `data/users-meta.nix` | Per-user identity: git name/email, default profile, per-host overrides, SSH keys, NixOS account facts | `flake.lib.usersMeta` | Same as above |
 | `schema/options.nix` | Declares `flake.lib` / `flake.homeModules` as mergeable `lazyAttrsOf` options — makes self-registration possible repo-wide | *(option declarations only)* | Export exactly one constructor (or option-decl file) per axis |
 | `schema/hardware.nix` | `mkMachineMeta`, consumed by `data/hardware-meta.nix` | `flake.lib.mkMachineMeta` | A typo'd field must error, never silently `null` |
-| `schema/hosts.nix` | `mkHostMeta` incl. `interfaces` derivation (ethernet + optional wifi), consumed by `data/hosts-meta.nix` | `flake.lib.mkHostMeta` | Same as above |
+| `schema/hosts.nix` | `mkHostMeta` incl. `interfaces` derivation (ethernet + optional wifi) and `gateway`/`nameservers`, consumed by `data/hosts-meta.nix` | `flake.lib.mkHostMeta` | Same as above |
 | `builders/hardware.nix` | `mkHardwareProfile` — reads `self.lib.hardwareMeta`, machine name → fs layout + boot/initrd/kernel config | `flake.lib.mkHardwareProfile` | Consume `self.lib.<axis>Meta` only — never import another `flake/` file by path |
 | `builders/hosts.nix` | `mkHost` + `mkCommonModules` — reads `hostsMeta`/`nixlabLib`/`overlays`/`nixpkgsConfig`, injects nixpkgs, sops-nix, overlays, `hostMeta` | `flake.lib.mkHost` | Same as above |
 | `builders/users.nix` | `mkHomeUser`, `mkHomeUsersForHost`, `mkSystemUser`, `mkSystemUsersForHost` — reads `hostsMeta`/`usersMeta` | `flake.lib.mkHomeUser`, `.mkHomeUsersForHost`, `.mkSystemUser`, `.mkSystemUsersForHost` | Same as above |
-| `nixos-lib.nix` | Shared helpers (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`), injected as `nixlabLib` via `specialArgs` | `flake.lib.nixlabLib` | Stay cross-cutting — a single-service function belongs in that service's module |
+| `nixos-lib.nix` | Shared helpers injected as `nixlabLib` via `specialArgs`: `mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`, `mkDataDirPermissionsService`, `mkWalSelfHeal` | `flake.lib.nixlabLib` | Stay cross-cutting — a single-service function belongs in that service's module |
 | `pkgs.nix` | Source of truth for `overlays` and `nixpkgsConfig` (`allowUnfree`, `nvidia.acceptLicense`), consumed by `perSystem` pkgs *and* every per-host pkgs set | `flake.lib.overlays`, `.nixpkgsConfig`, `perSystem._module.args.pkgs` | Never duplicated elsewhere |
 | `ci/checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks`, `flake.formatter` | Never referenced by host/user/machine config — repo plumbing only |
 | `ci/apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` | Same as above |
 | `ci/packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` | Same as above |
+| `ci/monitoring-checks.nix` | Build-time validation of the monitoring stack: `promtool`/`amtool` on rendered configs (one stable + one unstable host), rule unit tests (`ci/_tests/prometheus/*.test.yml`), runbook coverage, dashboard lint, shellcheck | `perSystem.checks` (x86_64-linux) | Consume `self.lib.prometheusRendered` / `prometheusMaintenanceAlerts` / `grafanaDashboards` / `maintenanceLoggerScript` by name; same "plumbing only" rule |
 
 ### `hardware/` — physical machine facts
 
@@ -579,7 +604,7 @@ Where a physical/logical machine becomes a bootable `nixosConfiguration` — hos
 - **`common/core/`** — universal, non-toggleable, imported by every host via `hosts--profl--base`. Optional content belongs in `apps/` with a real `enable` option instead.
 - **`common/apps/`, `common/desktop/`, `common/automation/`, `common/hardware/`** — toggleable/role-scoped modules with `lib.mkEnableOption`-style options, composed into profiles rather than imported directly.
 - **`common/debug/`** — opt-in diagnostics only; never in any `profile-*.nix`.
-- **`common/_host-template.nix`** — reference only, never imported (`_`-prefixed, excluded from registration).
+- **`common/_host-template.nix`** — reference only, never imported (`_`-prefixed, skipped by import-tree).
 
 ### `home/` — home-manager user identity & composition
 
@@ -597,19 +622,23 @@ The "one service, one file/directory, zero knowledge of any other service" tier 
 **Belongs in `modules/nixos/<service>/` only if all of:**
 1. Declares `options.services.<service>-nixlab.*` and nothing outside that namespace (beyond the user/group/unit it owns)
 2. `config` never sets an option under a *different* service's namespace (e.g. `servc--grafana-nixlab` must never set `services.prometheus-nixlab.*`) — that's the signal to move to `stacks/`
-3. `serviceConfig` is built from `nixlabLib.mkServiceHardening`, deviations via a named flag (`allowJIT`, `allowDevices`) — see [Coupling Principles](#coupling-principles)
-4. Provides its own escape-hatch options (e.g. `extraScrapeConfigs`, `provisioning.datasources`) for anything `stacks/` might inject, rather than a stack reaching into `systemd.services.*` directly
+3. `serviceConfig` is built from `nixlabLib.mkServiceHardening`, deviations via a named flag (`allowJIT`, `allowDevices`, `extraHardening`) — see [Coupling Principles](#coupling-principles)
+4. Provides its own escape-hatch options (e.g. `extraScrapeConfigs`, `provisioning.datasources`, `receivers`, `ruler.groups`) for anything `stacks/` might inject, rather than a stack reaching into `systemd.services.*` directly
 
 `ports.nix` is the one exception at this folder's root — genuinely cross-cutting (default ports for every service) rather than belonging to one service.
+
+`systm--` modules under `modules/nixos/` (e.g. `maintenance-log`, `monitoring-backup`) are *helper* modules rather than services: they obey rules 1, 2 and 4 but don't run a daemon of their own.
+
+**Known exception:** `servc--prometheus-nixlab` imports `systm--host-exporters-nixlab` and sets `services.host-exporters-nixlab.*` from its own options, so existing Prometheus configuration keeps working while node/smartctl exporters live in their own module. Treat it as a bridge, not a pattern to copy.
 
 ### `stacks/` — multi-service integration bundles
 
 Some services must communicate to work well together (Grafana needs Prometheus/Loki as datasources; Prometheus needs Alertmanager's address; Alertmanager needs a notification channel). That wiring can't live inside any one service module without giving it illegitimate knowledge of its siblings — `stacks/` is where it goes instead.
 
 **Belongs in `stacks/` (named `stack--<name>`) only if:**
-1. Imports **two or more** `servc--`/`nsops--` modules
+1. Imports **two or more** `servc--`/`nsops--` modules (`systm--` helper modules may also be imported)
 2. Sets at least one option belonging to a service *other than* the one it's adjacent to in the import list — real cross-wiring, not just co-importing (two services with no cross-reference don't need a stack; plain host-file composition suffices)
-3. Implements **no service logic of its own** — no `systemd.services.*`, no `users.users.*`; only sets options the underlying modules already declared
+3. Implements **no service logic of its own** — no `systemd.services.*`, no `users.users.*`; only sets options the underlying modules already declared. (Host-level exposure settings such as `networking.firewall.interfaces` are the one pragmatic exception: the monitoring stack uses it for interface-scoped access.)
 4. Exposes its own aggregator option (e.g. `services.nixlab-monitoring.*`) so a host consumes one coherent interface
 
 If a candidate satisfies #1 but not #2 — e.g. ComfyUI's three cooperating modules, which all target the *same* service's namespace rather than wiring peers together — it stays in `modules/`. The test: do two *different* services' option surfaces get touched, not do multiple files work together.
@@ -618,8 +647,13 @@ If a candidate satisfies #1 but not #2 — e.g. ComfyUI's three cooperating modu
 
 Secret material must never enter the Nix store; sops-nix decrypts at activation. The wiring from encrypted file to service option needs its own home, separate from both the service module and the secret content.
 
-- **One `.nix` + one `.yaml` pair per service**, named identically to the service (see [Secrets Management](#secrets-management)): imports the service module, declares `sops.secrets.*`, wires exactly one decrypted path into exactly one option the service already declared.
+- **One `.nix` + one encrypted file (`.yaml`, or `.env` for dotenv format) per service**, named identically to the service (see [Secrets Management](#secrets-management)): imports the service module, declares `sops.secrets.*`, wires each decrypted path into an option the service already declared.
 - Global settings (`sops.age.keyFile`) belong in `hosts/common/core/`, never in an optional `sops/*.nix` module.
+
+### `docs/`
+
+- **`docs/monitoring/monitoring.md`** — the as-built reference for the monitoring stack, written to be readable by a human *and* pasteable into an LLM prompt as context. Update it when monitoring code changes.
+- **`docs/runbooks/<AlertName>.md`** — one page per Prometheus alert. CI requires one for every alert unless it is listed in `docs/runbooks/_todo.txt`.
 
 ### `overlays/`, `shells/`, `cachix/`, `pkgs/`, `bin/`
 
@@ -629,7 +663,75 @@ Self-contained, single-purpose flake outputs with no cross-folder dependencies a
 - **`shells/`** — one file per `devShell`, registered in `perSystem.devShells.*`
 - **`cachix/`** — one file per binary cache substituter
 - **`pkgs/`** — custom package derivations, registered in `perSystem.packages` via `default.nix`
-- **`bin/`** — scripts run directly by a human, never referenced by any Nix module. If a script needs to be *part of* config (installed as a package, run by a systemd unit), it belongs in the relevant service module instead.
+- **`bin/`** — scripts run directly by a human, never referenced by any Nix module (today: `mon-check.sh`, `mon-snapshot.sh`, `mon-unitdiff.sh`). If a script needs to be *part of* config (installed as a package, run by a systemd unit — like `maintenance-log`), it belongs in the relevant service module instead.
+
+</details>
+
+---
+
+## Monitoring Stack
+
+<details open>
+<summary><i>(click to collapse)</i></summary>
+<p></p>
+
+A self-hosted observability stack built as atomic service modules plus **one aggregator stack** (`stack--monitoring`, `stacks/monitoring.nix`). A host enables it with `services.nixlab-monitoring.enable = true`; the stack wires everything else. **Full reference: [`docs/monitoring/monitoring.md`](docs/monitoring/monitoring.md).**
+
+```
+ exporters (node, smartctl, blackbox, /metrics of each service)
+        │ scrape
+        ▼
+   Prometheus ── rules ──► Alertmanager ── webhook ──► ntfy ──► phone / browser
+        ▲                        ▲
+        │ datasource             │ ruler alerts
+   Grafana ◄── datasource ── Loki ◄── push ── Alloy ◄── journald, /var/log/*.log, maintenance log
+```
+
+| Component | Module | Role |
+|---|---|---|
+| Prometheus | `servc--prometheus-nixlab` | Metrics + ~62 alert rules grouped by maintenance-checklist section; self-heals a wrong-clock/corrupt TSDB |
+| Host exporters | `systm--host-exporters-nixlab` | node_exporter and smartctl_exporter (usable without Prometheus) |
+| Alertmanager | `servc--alertmanager-nixlab` | Routing (critical → max priority, everything else → default), inhibition |
+| ntfy | `servc--ntfy-nixlab` | Push notifications; optional auth with declaratively provisioned users |
+| Loki | `servc--loki-nixlab` | Logs (31-day default, 2 years for maintenance records) + LogQL ruler |
+| Alloy | `servc--alloy-nixlab` | Ships journal, `/var/log/*.log` and maintenance log to Loki |
+| Grafana | `servc--grafana-nixlab` | Provisioned datasources and dashboards (maintenance checklist, system overview, opt-in ZFS) |
+| Maintenance log | `systm--maintenance-log-nixlab` | `maintenance-log` CLI; JSONL records → Loki and last-completed metrics → Prometheus |
+| Monitoring backup | `systm--monitoring-backup-nixlab` | Nightly consistent copies of Grafana/ntfy/Alertmanager state |
+| **Aggregator** | `stack--monitoring` | Datasources, scrape jobs, receivers/routes, ruler, uids, URLs, interface-scoped firewall, backups |
+
+**Key design points**
+- **Atomic modules, one stack.** Service modules know nothing of each other; they expose escape hatches (`extraScrapeConfigs`, `provisioning.datasources`, `receivers`, `ruler.groups`, …) that the stack fills.
+- **Rendered, validated config.** Each service builds its config as a Nix attrset → JSON → YAML in its `dataDir` at start. The same attrsets are exposed as `self.lib.prometheusRendered` etc., so `nix flake check` runs `promtool`/`amtool`, rule unit tests, dashboard lint, shellcheck and a runbook-coverage check without a running host.
+- **Loopback by default.** Services bind `127.0.0.1` unless listed in `access.expose` *and* a wired interface is named in `access.interfaces`; the firewall is opened per interface, never for Wi-Fi.
+- **Alerts are documented and explain themselves.** Every alert carries a `checklist_section`, a generated `condition` label, and a runbook link (`docs/runbooks/`).
+- **Resilient to its own failures.** Services order after `time-sync.target`; a TSDB guard timer and `mkWalSelfHeal` quarantine bad state; an `absent_over_time` self-alert plus an inhibit rule keep notifications trustworthy.
+
+**Hosts.** Every host is self-contained: `hosts--profl--base` enables the whole stack on each one, and nothing depends on another host. Defaults (scrape 60 s, 7 d retention, ntfy auth, maintenance alerts on) live in that profile. Services bind loopback until a host names its wired interfaces in `access.interfaces`.
+
+**Per-host overrides** (the profile already enables the stack)
+```nix
+services.nixlab-monitoring = {
+  access.interfaces = [ "eno1" ];                 # reach Grafana/ntfy/Prometheus from the LAN
+  prometheus.retentionSize = lib.mkForce "20GB";  # profile values are plain assignments
+};
+services.prometheus-nixlab.maintenance.expectedMounts = [ "/data" ];
+services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];   # ZFS host only
+```
+
+**Operating it** (run on the host)
+```bash
+bin/mon-check.sh                     # units, endpoints, scrape targets, rules, Alertmanager link, Loki
+MON_NTFY_AUTH=reader:<pw> bin/mon-check.sh --fire-test   # end-to-end: alert → Alertmanager → ntfy
+bin/mon-snapshot.sh /tmp/before      # capture units/configs/listeners; diff before vs after a change
+bin/mon-unitdiff.sh /run/current-system ./result         # diff generated units between two closures
+sudo maintenance-log --section II.4 --task "Applied updates" --status completed
+nix flake check                      # includes all monitoring checks
+```
+
+**Adding things** — an alert (rule in `maintenance-alerts.nix` + runbook + test), a dashboard (JSON in `grafana/dashboards/`), a scrape target (`extraScrapeConfigs`), or a receiver (`services.alertmanager-nixlab.receivers`): step-by-step in [`docs/monitoring/monitoring.md` §15](docs/monitoring/monitoring.md#15-extending-the-stack).
+
+**Giving an LLM context.** `docs/monitoring/monitoring.md` opens with a self-contained *context card* (§0); paste that alone for quick questions, or the whole file for deep work.
 
 </details>
 
@@ -672,9 +774,11 @@ lboot     # sudo nixos-rebuild boot   --flake $NIXLAB && sudo reboot
 lfup      # nix flake update         --flake $NIXLAB
 nixhelp   # print the full alias reference
 
-nix flake check          # eval + pre-commit checks (formatting, dead code, merge conflicts)
+nix flake check          # eval + pre-commit checks + monitoring checks (promtool, amtool, rule tests, dashboards, runbooks)
 nix run .#build-all      # build every nixosConfiguration without switching
 nix fmt                  # run alejandra across the whole tree
+
+bin/mon-check.sh         # monitoring health on the current host (see Monitoring Stack)
 ```
 
 </details>
@@ -729,7 +833,7 @@ No raw `hardware-configuration.nix` is pasted anywhere — `mkHardwareProfile` r
 <hostname> = mkHostMeta {
   address = "10.0.0.XXX";
   ethIface = "enp0s31f6";            # Find with: ip link
-  wifiIface = "wlp3s0";              # Find with: ip link (omit if no wifi)
+  wifiIface = "wlp3s0";              # Find with: ip link (omit or "" if no wifi)
   hostId = "XXXXXXXX";               # Generate with: head -c 8 /etc/machine-id
   nixpkgsInput = "nixpkgs-stable";   # or "nixpkgs-unstable"
   homeUsers = [ "temhr" ];           # usernames that get a home-manager profile here
@@ -747,7 +851,7 @@ No raw `hardware-configuration.nix` is pasted anywhere — `mkHardwareProfile` r
     modules = [
       self.nixosModules.hardw--<machine>        # note: machine name, not hostname
       self.nixosModules.hosts--<hostname>
-      self.nixosModules.hosts--profl--base      # required for all hosts
+      self.nixosModules.hosts--profl--base      # required for all hosts (includes stack--monitoring, inactive until enabled)
       self.nixosModules.hosts--profl--desktop   # desktop/laptop machines
       # self.nixosModules.hosts--profl--nas     # NAS/server machines
       self.nixosModules.servc--glance-nixlab
@@ -769,6 +873,8 @@ No raw `hardware-configuration.nix` is pasted anywhere — `mkHardwareProfile` r
       openFirewall = true;
       dataDir = "/data/glance";
     };
+
+    # services.nixlab-monitoring.enable = true;   # see "Monitoring Stack"
 
     system.stateVersion = "24.11";
   };
@@ -861,7 +967,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
 
 Service modules live in `modules/nixos/<service>/` (see [Top-Level Folder Reference](#top-level-folder-reference) for what belongs here). Secrets are managed separately in `sops/`.
 
-> Shared helpers (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`) are available in any module via `{ nixlabLib, ... }:` — see `flake/nixos-lib.nix`, and [Coupling Principles](#coupling-principles) for `mkServiceHardening`'s flags.
+> Shared helpers (`mkNginxVirtualHost`, `mkFirewallPorts`, `mkServiceHardening`, `mkSslAssertion`, `mkDataDirPermissionsService`, `mkWalSelfHeal`) are available in any module via `{ nixlabLib, ... }:` — see `flake/nixos-lib.nix`, and [Coupling Principles](#coupling-principles) for `mkServiceHardening`'s flags.
 
 #### 1. (Optional) Add a dedicated port default `modules/ports.nix`
 
@@ -936,7 +1042,11 @@ services.<service>-nixlab = {
 };
 ```
 
-#### 4. Validate and deploy
+#### 4. (Optional) Make it observable
+
+Expose `/metrics`, then add a scrape job in `stacks/monitoring.nix` (or per host via `services.prometheus-nixlab.extraScrapeConfigs`), alerts in `maintenance-alerts.nix` with a runbook in `docs/runbooks/`, and a rule test. Details: [`docs/monitoring/monitoring.md` §15](docs/monitoring/monitoring.md#15-extending-the-stack).
+
+#### 5. Validate and deploy
 
 ```bash
 git add -A
@@ -970,6 +1080,7 @@ sudo nixos-rebuild switch --flake .#<hostname>
         sopsFile = cfg.secretsFile;
         owner = "<service>";
         restartUnits = ["<service>.service"];
+        # format = "dotenv";   # when the file is KEY=VALUE lines (see sops/alertmanager.nix)
       };
       services.<service>-nixlab.secretsEnvFile =
         config.sops.secrets."<service>_env".path;

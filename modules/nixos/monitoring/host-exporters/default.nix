@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.servc--host-exporters-nixlab = {
+  flake.nixosModules.systm--host-exporters-nixlab = {
     config,
     lib,
     pkgs,
