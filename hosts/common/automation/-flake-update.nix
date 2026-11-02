@@ -18,6 +18,8 @@
       ## Git Repository Updates
       cd "/home/${config.nixlab.mainUser}/nixlab" || exit 1
 
+      echo "git remote set-url origin git@github.com:temhr/nixlab.git"
+
       echo "Pulling the latest version of the repository..."
       # Use the sops-managed GitHub nixlab key with full paths
       GIT_SSH_COMMAND="${pkgs.openssh}/bin/ssh -i /run/secrets/ssh_key_github -o BatchMode=yes -o StrictHostKeyChecking=no" \
