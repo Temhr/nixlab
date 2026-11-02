@@ -208,7 +208,7 @@
           # package has since changed (upgrade, override, etc.) — or we can't
           # prove it hasn't (first run) — the cache is wiped before Homepage
           # starts, so a new build can never serve HTML/manifests left over
-          # from an old one, which is exactly what caused nixsun's outage.
+          # from an old one.
           cachePkgMarker = "/var/cache/homepage/.package-path";
         in ''
           [ -d "${cfg.dataDir}/config" ] || mkdir -p "${cfg.dataDir}/config"

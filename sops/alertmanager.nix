@@ -27,7 +27,8 @@
           SLACK_WEBHOOK_URL_CRITICAL=https://hooks.slack.com/services/T.../B.../yyy
           PAGERDUTY_ROUTING_KEY=abc123
           SMTP_PASSWORD=hunter2
-          NTFY_PASSWORD=supersecret
+          NTFY_ALERTMANAGER_PASSWORD=supersecret
+          NTFY_READER_PASSWORD=supersecret
       '';
     };
 

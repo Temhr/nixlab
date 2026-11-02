@@ -1,6 +1,3 @@
-# ============================================================================
-# FILE: prometheus/exporters/maintenance.nix
-# ============================================================================
 {
   config,
   lib,
@@ -48,7 +45,6 @@
   '';
 
   mkBackupExporterScript = pkgs.writeShellScript "backup-exporter" ''
-    #!${pkgs.bash}/bin/bash
     set -euo pipefail
 
     METRICS_DIR="/var/lib/node_exporter"

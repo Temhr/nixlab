@@ -109,13 +109,13 @@
       lokiUrl = lib.mkOption {
         type = lib.types.str;
         default = "http://127.0.0.1:3100/loki/api/v1/push";
-        description = "Loki push endpoint. On an agent this points at the hub.";
+        description = "Loki push endpoint.";
       };
 
       afterLocalLoki = lib.mkOption {
         type = lib.types.bool;
         default = true;
-        description = "Order Alloy after the local loki.service. Agents (no local Loki) set this to false.";
+        description = "Order Alloy after the local loki.service. Set false when Loki does not run on this host.";
       };
 
       extraConfig = lib.mkOption {

@@ -5,6 +5,6 @@
 1. `systemctl status prometheus-node-exporter`
 2. `journalctl -u prometheus-node-exporter -n 50 --no-pager`
 3. `curl -s localhost:9100/metrics | head -n5`
-**Fix.** Restart the exporter; if it fails again, read the journal for the cause (a recent S6, S15, S22 or S25 change).
+**Fix.** Restart the exporter; if it fails again, read the journal for the cause (a recent configuration change).
 **Escalate when.** The exporter is up but Prometheus still reports the target down: check `curl -s localhost:9090/api/v1/targets`.
 **Related.** ServiceDown.

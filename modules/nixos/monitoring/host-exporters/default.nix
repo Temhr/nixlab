@@ -19,7 +19,7 @@
         "--collector.netclass" # Network interface properties
         "--collector.netdev" # Network device statistics
         "--collector.filesystem.mount-points-exclude=^/(dev|proc|run|sys)($|/)"
-        # NFS client mounts are not checked here; the exports are watched on the NAS (S29, Edit 7).
+        # NFS client mounts are not checked here.
         "--collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nfs|nfs4|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|erofs|sysfs|tracefs)$"
       ]
       ++ lib.optionals (node.textfileDir != null) [
@@ -43,7 +43,7 @@
         listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "localhost";
-          description = "Address to bind. Agents bind their own address so the hub can scrape them.";
+          description = "Address to bind.";
         };
         textfileDir = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
@@ -63,7 +63,7 @@
         listenAddress = lib.mkOption {
           type = lib.types.str;
           default = "127.0.0.1";
-          description = "Address to bind. Agents bind their own address so the hub can scrape them.";
+          description = "Address to bind.";
         };
         devices = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -76,7 +76,7 @@
 
     config = lib.mkMerge [
       (lib.mkIf node.enable {
-        # The prometheus module defines this user (and wins) on hubs; agents get this minimal one.
+        # The prometheus module defines this user (and wins) when it is enabled; otherwise this minimal one is used.
         users.users.${cfg.user} = lib.mkDefault {
           isSystemUser = true;
           group = cfg.user;

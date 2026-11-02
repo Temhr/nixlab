@@ -19,8 +19,8 @@ tests:
               job: node
               instance: localhost
             exp_annotations:
-              summary: "Host localhost is unreachable"
-              description: "node_exporter on localhost has not responded for 5+ minutes (machine off, asleep or network down)"
+              summary: "Node exporter down on localhost"
+              description: "node_exporter on localhost has not responded for 5+ minutes (stopped or crashed)"
 
   # 5% free is critical, and must NOT also trigger the warning band (10 to 20%).
   - interval: 1m
@@ -65,7 +65,7 @@ tests:
               summary: "Probe failing: http://x"
               description: "blackbox-http probe to http://x has failed for 5+ minutes"
 
-  # Load of 2.0 on one core fires after 30 minutes; the old 0.7/10m rule is gone.
+  # Load of 2.0 on one core fires after 30 minutes.
   - interval: 1m
     input_series:
       - series: 'node_load5{instance="h"}'
@@ -241,22 +241,3 @@ tests:
               summary: "Battery wear on h"
               description: "BAT0 holds 50% of its design capacity"
 
-  - interval: 1m
-    input_series:
-      - series: 'maintenance_last_completed_timestamp_seconds{instance="h", section="X.30"}'
-        values: '0x10'
-      - series: 'maintenance_cadence_seconds{instance="h", section="X.30"}'
-        values: '100x10'
-    alert_rule_test:
-      - eval_time: 5m
-        alertname: MaintenanceOverdue
-        exp_alerts:
-          - exp_labels:
-              severity: warning
-              category: maintenance
-              checklist_section: X.30
-              instance: h
-              section: X.30
-            exp_annotations:
-              summary: "Maintenance overdue: X.30 on h"
-              description: "Last completed 5m 0s ago (cadence exceeded by 15%)."

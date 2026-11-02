@@ -1,5 +1,5 @@
 {...}: {
-  # Exposed for flake/ci/monitoring-checks.nix (shellcheck); added in S39.
+  # Exposed for flake/ci/monitoring-checks.nix (shellcheck).
   flake.lib.maintenanceLoggerScript = ./maintenance-logger.sh;
 
   flake.nixosModules.systm--maintenance-log-nixlab = {
@@ -14,14 +14,13 @@
       lib.concatMapStringsSep "\n" (s: "${s.code}\t${s.name}\t${s.hint}") checklist
     );
 
-    # Two metric lines per section that has a cadence (last completion, 0 when never done).
-    cadenceLines =
+    # One metric line per checklist section: last completion time, 0 when never done.
+    lastCompletedLines =
       lib.concatMapStringsSep "\n" (s: ''
-        echo 'maintenance_cadence_seconds{section="${s.code}"} ${toString s.cadence}'
         v=$(awk -F'\t' -v s='${s.code}' '$1==s {print $2}' "$last")
         echo "maintenance_last_completed_timestamp_seconds{section=\"${s.code}\"} ''${v:-0}"
       '')
-      (lib.filter (s: s.cadence != null) checklist);
+      checklist;
   in {
     options.services.maintenance-log-nixlab = {
       enable = lib.mkEnableOption "maintenance task logging helper";
@@ -94,8 +93,7 @@
               | awk -F'\t' '{ if ($2 > m[$1]) m[$1] = $2 } END { for (s in m) print s "\t" m[s] }' > "$last"
             {
               echo '# TYPE maintenance_last_completed_timestamp_seconds gauge'
-              echo '# TYPE maintenance_cadence_seconds gauge'
-              ${cadenceLines}
+              ${lastCompletedLines}
             } > "$tmp"
             rm -f "$last"
             chmod 644 "$tmp"

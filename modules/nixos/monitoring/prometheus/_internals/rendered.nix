@@ -9,7 +9,6 @@
   cfg = config.services.prometheus-nixlab;
   scrapeConfigs = import ./scrape-configs.nix {inherit config lib;};
 
-  alertRulesConfig = import ./alerts.nix;
   bb = cfg.maintenance.exporters.blackbox;
   alertFeatures =
     cfg.maintenance.alerts.features
@@ -27,8 +26,7 @@
 in {
   rules = {
     groups =
-      alertRulesConfig.groups
-      ++ alertGroups.core
+      alertGroups.core
       ++ lib.optionals cfg.maintenance.enable alertGroups.maintenance;
   };
 

@@ -196,13 +196,6 @@
           description = "Open firewall ports";
         };
 
-        extraUsers = lib.mkOption {
-          type = lib.types.listOf lib.types.str;
-          default = [];
-          example = ["alice"];
-          description = "Unused: the upstream module runs Alertmanager as a DynamicUser, so there is no persistent group to join.";
-        };
-
         # OPTIONAL: Validate config with amtool at build time (default: true).
         # Must be set to false when the config references $ENV_VAR secrets that
         # are not visible inside the Nix build sandbox.
@@ -243,7 +236,7 @@
           example = ["alertmanager-2.example.com" "alertmanager-3.example.com"];
           description = ''
             Addresses of other Alertmanager instances to peer with for HA.
-            Port ${toString 9094} (clusterPort) is used automatically.
+            clusterPort is used automatically.
           '';
         };
 

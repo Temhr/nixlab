@@ -80,7 +80,7 @@
         externalUrl = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
           default = null;
-          example = "http://10.0.0.251:9093/";
+          example = "http://10.0.0.10:2586";
           description = "URL that links, redirects and notifications point to when no domain is set. Null keeps the previous fallback.";
         };
 
@@ -129,13 +129,13 @@
         uid = lib.mkOption {
           type = lib.types.nullOr lib.types.int;
           default = null;
-          description = "Pinned uid for the loki user (null = allocate dynamically).";
+          description = "Pinned uid for the ntfy user (null = allocate dynamically).";
         };
 
         gid = lib.mkOption {
           type = lib.types.nullOr lib.types.int;
           default = null;
-          description = "Pinned gid for the loki group.";
+          description = "Pinned gid for the ntfy group.";
         };
 
         # OPTIONAL: allow opting out of the mainUser group membership
@@ -555,195 +555,3 @@
     };
   };
 }
-/*
-================================================================================
-USAGE EXAMPLES
-================================================================================
-
-Minimal (localhost only, no auth, in-memory cache):
-----------------------------------------------------
-services.ntfy-nixlab = {
-  enable = true;
-};
-# Access at: http://127.0.0.1:2586
-
-
-With domain and SSL (recommended for internet-facing):
-------------------------------------------------------
-services.ntfy-nixlab = {
-  enable = true;
-  domain    = "ntfy.example.com";
-  enableSSL = true;
-
-  # Persist messages across restarts
-  cacheFile    = "/var/lib/ntfy/cache.db";
-  cacheDuration = "24h";
-};
-
-
-With authentication enabled (deny-all default):
------------------------------------------------
-services.ntfy-nixlab = {
-  enable    = true;
-  domain    = "ntfy.example.com";
-  enableSSL = true;
-  cacheFile = "/var/lib/ntfy/cache.db";
-
-  auth = {
-    enable        = true;
-    defaultAccess = "deny-all";   # or "read-only" for public read
-  };
-};
-
-# After first start, add users via:
-#   sudo -u ntfy ntfy user add --role=admin myuser
-#   sudo -u ntfy ntfy user add myreader
-#   sudo -u ntfy ntfy access myreader mytopic read
-
-
-With file attachments:
-----------------------
-services.ntfy-nixlab = {
-  enable    = true;
-  domain    = "ntfy.example.com";
-  enableSSL = true;
-  cacheFile = "/var/lib/ntfy/cache.db";
-
-  attachments = {
-    enable           = true;
-    sizeLimit        = "25M";
-    totalSizeLimit   = "10G";
-    expiryDuration   = "6h";
-  };
-};
-
-
-With email-to-ntfy SMTP bridge:
---------------------------------
-services.ntfy-nixlab = {
-  enable    = true;
-  domain    = "ntfy.example.com";
-  enableSSL = true;
-  cacheFile = "/var/lib/ntfy/cache.db";
-
-  smtp = {
-    enable        = true;
-    listenAddress = "0.0.0.0:25";
-    domain        = "ntfy.example.com";
-    addrPrefix    = "ntfy-";  # send to ntfy-mytopic@ntfy.example.com
-  };
-};
-# Ensure port 25 is open and your MX record points here.
-# Email sent to ntfy-<topic>@ntfy.example.com publishes to <topic>.
-
-
-Full configuration:
--------------------
-services.ntfy-nixlab = {
-  enable        = true;
-  port          = 2586;
-  listenAddress = "127.0.0.1";
-  domain        = "ntfy.example.com";
-  enableSSL     = true;
-
-  cacheFile     = "/var/lib/ntfy/cache.db";
-  cacheDuration = "24h";
-
-  dataDir = "/data/ntfy";
-
-  attachments = {
-    enable         = true;
-    sizeLimit      = "50M";
-    totalSizeLimit = "20G";
-    expiryDuration = "12h";
-  };
-
-  auth = {
-    enable        = true;
-    defaultAccess = "deny-all";
-  };
-
-  rateLimit = {
-    globalTopicLimit    = 25000;
-    subscriberRateLimit = true;
-  };
-
-  # Firebase key managed by sops-nix
-  firebaseKeyFile = config.sops.secrets.ntfy-firebase-key.path;
-
-  openFirewall = true;
-};
-
-
-================================================================================
-INITIAL SETUP
-================================================================================
-
-1. Verify ntfy is running:
-   curl http://localhost:2586/v1/health
-   # Returns: {"healthy":true}
-
-2. Publish a test message:
-   curl -d "Hello from ntfy" http://localhost:2586/test-topic
-
-3. Subscribe via SSE (keep open in a terminal):
-   curl -s http://localhost:2586/test-topic/sse
-
-4. If auth is enabled, create the admin user first:
-   sudo -u ntfy ntfy user add --role=admin admin
-   # then use -u admin:password in curl or the web UI
-
-5. View the web UI (if enableWebUI = true):
-   http://localhost:2586  (or your domain)
-
-
-================================================================================
-PROMETHEUS INTEGRATION
-================================================================================
-
-ntfy exposes metrics at /metrics (Prometheus format).
-Add to your prometheus-nixlab scrape configs:
-
-  scrape_configs:
-    - job_name: "ntfy"
-      static_configs:
-        - targets: ["localhost:2586"]
-      metrics_path: /metrics
-      # If auth is enabled, supply credentials:
-      # basic_auth:
-      #   username: prometheus
-      #   password_file: /run/secrets/ntfy-prometheus-password
-
-
-================================================================================
-TROUBLESHOOTING
-================================================================================
-
-Check service status:
-  sudo systemctl status ntfy
-
-View logs:
-  sudo journalctl -u ntfy -f
-
-Inspect the generated config:
-  sudo cat /var/lib/ntfy/server.yml
-
-List users (if auth enabled):
-  sudo -u ntfy ntfy user list
-
-Check access control:
-  sudo -u ntfy ntfy access
-
-Test publish (no auth):
-  curl -d "test" http://localhost:2586/my-topic
-
-Test publish (with auth):
-  curl -u user:pass -d "test" http://localhost:2586/my-topic
-
-Common issues:
-  - 403 Forbidden:    Auth is enabled; check credentials and topic ACLs
-  - SSE disconnects:  Verify proxy_read_timeout in nginx (needs to be high)
-  - Attachments fail: Ensure cacheFile is set (required for attachment support)
-  - Port 25 blocked:  Many cloud providers block port 25; check security groups
-*/
-

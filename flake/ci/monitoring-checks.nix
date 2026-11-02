@@ -22,8 +22,7 @@
       alertmanagerWired = true;
     };
 
-    # Hubs are on nixpkgs-stable and agents on nixpkgs-unstable (hosts-meta.nix),
-    # so one of each is validated.
+    # One host per nixpkgs channel is validated (see hosts-meta.nix): nixnas1 (stable), nixsun (unstable).
     perHost = host: let
       hostConfig = self.nixosConfigurations.${host}.config;
       rendered = prometheusRendered {
@@ -94,7 +93,7 @@
         prom-rules-all-features = pkgs.runCommand "prom-rules-all-features" {nativeBuildInputs = tools;} ''
           remarshal -i ${toJson "rules-all.json" {groups = (prometheusMaintenanceAlerts {features = allFeatures;}).groups;}} -if json -of yaml -o rules.yml
           promtool check rules rules.yml
-            touch $out
+          touch $out
         '';
 
         # Runs the unit tests in ./_tests/prometheus against the rules (without the condition label).

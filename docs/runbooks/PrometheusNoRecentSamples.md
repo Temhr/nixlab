@@ -1,5 +1,5 @@
 # PrometheusNoRecentSamples
-**What it means.** Prometheus recorded no sample for itself in 10 minutes: it is running but not storing (the August to October 2026 failure).
+**What it means.** Prometheus recorded no sample for itself in 10 minutes: it is running but not storing.
 **Likely causes.** Clock jump (TSDB head in the future); disk full; WAL corruption.
 **First three commands.**
 1. `journalctl -u prometheus -n 50 --no-pager | grep -i -E 'out of bounds|error'`

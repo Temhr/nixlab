@@ -61,7 +61,7 @@
       notifications.ntfyAuth.enable = true;
       loki = {
         maintenance.enable = true;
-        retention = "168h"; # the maintenance log keeps its 2 years (S36)
+        retention = "168h"; # the maintenance log keeps its 2 years regardless
       };
       prometheus = {
         maintenance.enable = true;

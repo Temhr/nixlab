@@ -1,6 +1,3 @@
-# ============================================================================
-# FILE: prometheus/config.nix
-# ============================================================================
 {
   config,
   lib,
@@ -49,21 +46,9 @@ in {
   users.groups.prometheus = {gid = cfg.gid;};
 
   # ----------------------------------------------------------------------------
-  # SERVICES - main unit, node exporter, maintenance exporters, and the
-  # PERMISSIONS oneshot that fixes dataDir ownership every boot, after
-  # dataDir is actually mounted.
-  #
-  # This module hardcodes the "prometheus" user/group rather than exposing
-  # cfg.user/cfg.group options, so prometheus-permissions does the same —
-  # fixes both the tmpfiles-vs-separate-mount race and any UID/GID drift on
-  # cfg.dataDir across a rebuild. Does not cover /var/lib/node_exporter: that
-  # directory is managed by systemd's own StateDirectory= mechanism on the
-  # node-exporter unit, which already re-asserts ownership at every start.
-  #
-  # All merged into one assignment: this file returns a plain attrset, not
-  # something passed through lib.mkMerge, so systemd.services can only be
-  # assigned once here or Nix sees two definitions of the same attribute
-  # path and throws.
+  # SERVICES - prometheus, its permissions oneshot, the TSDB guard and the maintenance
+  # exporters. The user and group are hardcoded to "prometheus". systemd.services is
+  # assigned once because this file returns a plain attrset (no mkMerge).
   # ----------------------------------------------------------------------------
   systemd.services =
     {
@@ -116,7 +101,7 @@ in {
     };
   };
 
-  # Transitional bridge: the node and smartctl exporters now live in servc--host-exporters-nixlab.
+  # The node and smartctl exporters live in systm--host-exporters-nixlab; map Prometheus' options onto it.
   services.host-exporters-nixlab = {
     nodeExporter.enable = lib.mkDefault cfg.enableNodeExporter;
     nodeExporter.textfileDir = lib.mkIf cfg.maintenance.enable "/var/lib/node_exporter";

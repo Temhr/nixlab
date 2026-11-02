@@ -125,7 +125,7 @@
       externalUrl = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        example = "http://10.0.0.251:9093/";
+        example = "http://10.0.0.10:3101/";
         description = "URL that links, redirects and notifications point to when no domain is set. Null keeps the previous fallback.";
       };
 
@@ -176,13 +176,13 @@
       uid = lib.mkOption {
         type = lib.types.nullOr lib.types.int;
         default = null;
-        description = "Pinned uid for the loki user (null = allocate dynamically).";
+        description = "Pinned uid for the grafana user (null = allocate dynamically).";
       };
 
       gid = lib.mkOption {
         type = lib.types.nullOr lib.types.int;
         default = null;
-        description = "Pinned gid for the loki group.";
+        description = "Pinned gid for the grafana group.";
       };
 
       # OPTIONAL: allow opting out of the mainUser group membership

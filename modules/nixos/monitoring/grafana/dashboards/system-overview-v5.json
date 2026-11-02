@@ -3647,7 +3647,7 @@
     {
       "id": 430,
       "type": "bargauge",
-      "title": "Days since last completed (cadence sections)",
+      "title": "Days since last completed, by section",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -3661,7 +3661,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "(time() - maintenance_last_completed_timestamp_seconds) / 86400",
+          "expr": "(time() - (maintenance_last_completed_timestamp_seconds > 0)) / 86400",
           "legendFormat": "{{instance}} {{section}}",
           "instant": true,
           "datasource": {

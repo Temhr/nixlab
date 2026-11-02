@@ -159,8 +159,6 @@ in rec {
           };
         }
         # 1. CPU Throttling
-        # Fixed: the two sides of `and` need matching labels (instance, cpu);
-        # previously the `mode` label on the right side meant it could never match.
         # Aggregated per host so a 16-core box doesn't raise 16 alerts.
         {
           alert = "CPUThrottling";
@@ -237,7 +235,7 @@ in rec {
             description = ''{{ $labels.mountpoint }} ({{ $labels.device }}) only has {{ $value | printf "%.1f" }}% free'';
           };
         }
-        # 2. Disk fill prediction (new)
+        # 2. Disk fill prediction
         {
           alert = "DiskWillFillIn24h";
           expr = ''
@@ -325,7 +323,7 @@ in rec {
             description = ''{{ $value | printf "%.0f" }} process(es) killed due to out-of-memory in the last hour'';
           };
         }
-        # 5. Clock drift (new)
+        # 5. Clock drift
         {
           alert = "ClockDrift";
           expr = "abs(node_timex_offset_seconds) > 0.1";
@@ -340,7 +338,7 @@ in rec {
             description = ''System clock is {{ $value | printf "%.2f" }}s off - check NTP/chrony/timesyncd'';
           };
         }
-        # 5. Clock not synchronised (new)
+        # 5. Clock not synchronised
         # ClockDrift only fires if timesyncd/chrony reports a large offset. This
         # catches the case where the kernel itself says the clock is unsynced.
         {
@@ -403,8 +401,7 @@ in rec {
           };
         }
         # 6. High I/O Wait
-        # Fixed: the old second clause compared a per-second rate against 50 (max possible is 1),
-        # so the alert could never fire. Now average iowait across cores per host.
+        # Average iowait across cores per host.
         {
           alert = "HighIOWait";
           expr = ''avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 30'';
@@ -430,7 +427,7 @@ in rec {
       interval = "5m";
       rules = [
         # 7. Backup Job Failures (requires custom exporter)
-        # Rewritten as `time() - ts` so $value is the age and can be shown.
+        # `time() - ts` makes $value the age, so it can be shown.
         {
           alert = "BackupJobFailed";
           requires = "backup";
@@ -519,8 +516,7 @@ in rec {
           };
         }
         # 13. Certificate Expiring Soon
-        # Fixed: expr is in days but was formatted with humanizeDuration (expects seconds).
-        # Also ignores probes with no TLS (expiry metric = 0) and bands the warning at 7-30 days.
+        # Ignores probes with no TLS (expiry metric = 0); the warning band is 7-30 days.
         {
           alert = "CertificateExpiringSoon";
           expr = ''((probe_ssl_earliest_cert_expiry - time()) / 86400 < 30 >= 7) and probe_ssl_earliest_cert_expiry > 0'';
@@ -559,8 +555,7 @@ in rec {
       name = "service_health";
       interval = "30s";
       rules = [
-        # 14. Host Down (new) - ServiceDown deliberately excludes job="node",
-        # which meant a whole machine disappearing raised no alert at all.
+        # 14. Host Down (ServiceDown deliberately excludes job="node")
         {
           alert = "HostDown";
           expr = ''up{job="node"} == 0'';
@@ -571,8 +566,8 @@ in rec {
             checklist_section = "V.14";
           };
           annotations = {
-            summary = "Host {{ $labels.instance }} is unreachable";
-            description = "node_exporter on {{ $labels.instance }} has not responded for 5+ minutes (machine off, asleep or network down)";
+            summary = "Node exporter down on {{ $labels.instance }}";
+            description = "node_exporter on {{ $labels.instance }} has not responded for 5+ minutes (stopped or crashed)";
           };
         }
         # 14. Service Down
@@ -622,8 +617,7 @@ in rec {
           };
         }
         # 16. High HTTP Error Rate
-        # Changed to a ratio: 10 errors/sec is unreachable on a homelab.
-        # Requires >0.05 req/s so idle services don't flap on a single 5xx.
+        # Ratio-based; requires >0.05 req/s so idle services don't flap on a single 5xx.
         {
           alert = "HighHTTPErrorRate";
           requires = "traefik";
@@ -658,8 +652,7 @@ in rec {
       interval = "30s";
       rules = [
         # 18. Container Restart Loop
-        # Fixed: container_last_seen is a timestamp gauge, so rate() of it is ~1 for every
-        # running container (the old rule fired for all of them). Count start-time changes instead.
+        # Counts start-time changes (container_last_seen is a timestamp gauge, so rate() of it says nothing).
         {
           alert = "ContainerRestartLoop";
           requires = "containers";
@@ -676,7 +669,7 @@ in rec {
           };
         }
         # 18. High Container Memory Usage
-        # Fixed: containers with no limit report limit=0 (division -> +Inf -> always firing).
+        # Containers with no limit report limit=0 and are excluded.
         {
           alert = "ContainerHighMemory";
           requires = "containers";
@@ -750,8 +743,8 @@ in rec {
       core = true;
       interval = "1m";
       rules = [
-        # 19. Prometheus has stopped recording its own samples: every scrape rejected as out-of-bounds, so
-        # `up` was empty everywhere while /-/healthy still returned OK.
+        # 19. Prometheus is running but recording nothing for itself (for example every scrape
+        # rejected as out of bounds after a clock jump) while /-/healthy still returns OK.
         {
           alert = "PrometheusNoRecentSamples";
           expr = ''absent_over_time(up{job="prometheus"}[10m])'';
@@ -1195,29 +1188,6 @@ in rec {
           annotations = {
             summary = "Battery wear on {{ $labels.instance }}";
             description = ''{{ $labels.power_supply }} holds {{ $value | printf "%.0f" }}% of its design capacity'';
-          };
-        }
-      ];
-    }
-
-    # ═══════════════════════════════════════════════════════
-    # X. Manual maintenance tracking
-    # ═══════════════════════════════════════════════════════
-    {
-      name = "maintenance_tracking";
-      interval = "5m";
-      rules = [
-        {
-          alert = "MaintenanceOverdue";
-          expr = "(time() - maintenance_last_completed_timestamp_seconds) > on (instance, section) (maintenance_cadence_seconds * 1.15)";
-          labels = {
-            severity = "warning";
-            category = "maintenance";
-            checklist_section = "{{ $labels.section }}";
-          };
-          annotations = {
-            summary = "Maintenance overdue: {{ $labels.section }} on {{ $labels.instance }}";
-            description = "Last completed {{ $value | humanizeDuration }} ago (cadence exceeded by 15%).";
           };
         }
       ];

@@ -36,7 +36,7 @@
       lib.mapAttrsToList (_: e: "127.0.0.1:${toString e.port}")
       (lib.filterAttrs (k: _: registry.enabled.${k} or false) (registry.endpoints or {}));
 
-    # The maintenance-log pipeline for Alloy (moved here from the Loki module).
+    # Alloy pipeline for the maintenance log.
     maintenanceAlloyConfig = ''
       // Collect maintenance logs
       local.file_match "maintenance" {
@@ -154,9 +154,8 @@
         default = null;
         description = ''
           Force one bind address for every service. Null (the default) binds each
-          service on its own: services in access.expose (when access.interfaces is
-          non-empty) and in access.peerReachable listen on 0.0.0.0, everything
-          else on loopback.
+          service on its own: services in access.expose listen on 0.0.0.0 when
+          access.interfaces is non-empty; everything else listens on loopback.
         '';
       };
 
@@ -195,10 +194,10 @@
           default = hostMeta.gateway or null;
           description = "Default gateway to ICMP-probe (from hostsMeta).";
         };
-        hubs = lib.mkOption {
+        hosts = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = ["nixnas1" "nixnas2"];
-          description = "Always-on hosts to ICMP-probe. This host is excluded. Never list laptops: they sleep.";
+          default = [];
+          description = "Other hosts (names in hostsMeta) to ICMP-probe in addition to the gateway. Empty by default: every host monitors only itself.";
         };
         tcpFromRegistry = lib.mkOption {
           type = lib.types.bool;
@@ -363,28 +362,19 @@
           else "null";
         receivers =
           [{name = "null";}]
-          ++ lib.optionals cfg.notifications.useNtfy [(mkNtfyReceiver "ntfy" ["tags=warning"]) (mkNtfyReceiver "ntfy-low" ["p=2" "tags=memo"])]
+          ++ lib.optionals cfg.notifications.useNtfy [(mkNtfyReceiver "ntfy" ["tags=warning"])]
           ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
             (mkNtfyReceiver "ntfy-critical" ["p=5" "tags=rotating_light"])
           ];
 
-        route.routes =
-          lib.optionals cfg.notifications.useNtfy [
-            {
-              receiver = "ntfy-low";
-              matchers = ["category=\"maintenance\""];
-              groupWait = "1m";
-              repeatInterval = "72h";
-            }
-          ]
-          ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
-            {
-              receiver = "ntfy-critical";
-              matchers = ["severity=\"critical\""];
-              groupWait = "10s";
-              repeatInterval = "1h";
-            }
-          ];
+        route.routes = lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
+          {
+            receiver = "ntfy-critical";
+            matchers = ["severity=\"critical\""];
+            groupWait = "10s";
+            repeatInterval = "1h";
+          }
+        ];
       };
 
       services.ntfy-nixlab = {
@@ -412,6 +402,10 @@
       networking.firewall.interfaces = lib.genAttrs cfg.access.interfaces (_: {
         allowedTCPPorts = map (name: port.${name}) cfg.access.expose;
       });
+
+      # ntfy-provision writes these passwords into ntfy's user database, so a rotated
+      # secret has to re-run it.
+      sops.secrets.ALERTMANAGER_ENV.restartUnits = lib.mkIf cfg.notifications.ntfyAuth.enable ["ntfy-provision.service"];
 
       services.ntfy-nixlab.auth = lib.mkIf cfg.notifications.ntfyAuth.enable {
         enable = true;
@@ -445,7 +439,7 @@
         icmpTargets = lib.mkDefault (
           lib.optional (cfg.probes.gateway != null) cfg.probes.gateway
           ++ lib.filter (a: a != (hostMeta.address or ""))
-          (map (h: self.lib.hostsMeta.${h}.address) cfg.probes.hubs)
+          (map (h: self.lib.hostsMeta.${h}.address) cfg.probes.hosts)
         );
         tcpTargets = lib.mkIf cfg.probes.tcpFromRegistry (lib.mkDefault registryTcpTargets);
       };
@@ -537,9 +531,7 @@
         ];
       };
 
-      # NEW — Grafana ↔ Prometheus/Loki datasource auto-provisioning.
-      # This is the missing "synergy" piece: dashboards assume these exist,
-      # nothing previously declared them.
+      # Grafana datasources (dashboards reference these uids).
       services.grafana-nixlab.provisioning.datasources = [
         {
           name = "Prometheus";
@@ -566,8 +558,7 @@
         }
       ];
 
-      # NEW — Prometheus scrapes ntfy's own /metrics, closing the last gap
-      # in "every service in this stack is observed by every other."
+      # Prometheus scrapes every service in the stack.
       services.prometheus-nixlab.extraScrapeConfigs =
         [
           (scrapeJob "ntfy" (loopback port.ntfy))

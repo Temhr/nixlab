@@ -1,6 +1,3 @@
-# ============================================================================
-# FILE: prometheus/options.nix
-# ============================================================================
 {
   lib,
   pkgs,
@@ -30,7 +27,7 @@
   externalUrl = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;
-    example = "http://10.0.0.251:9093/";
+    example = "http://10.0.0.10:9090/";
     description = "URL that links, redirects and notifications point to when no domain is set. Null keeps the previous fallback.";
   };
 
@@ -119,13 +116,13 @@
   uid = lib.mkOption {
     type = lib.types.nullOr lib.types.int;
     default = null;
-    description = "Pinned uid for the loki user (null = allocate dynamically).";
+    description = "Pinned uid for the prometheus user (null = allocate dynamically).";
   };
 
   gid = lib.mkOption {
     type = lib.types.nullOr lib.types.int;
     default = null;
-    description = "Pinned gid for the loki group.";
+    description = "Pinned gid for the prometheus group.";
   };
 
   extraScrapeConfigs = lib.mkOption {
@@ -212,7 +209,7 @@
         icmpTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
           default = [];
-          description = "ICMP targets to ping. Filled by the stack with the gateway and the other hub.";
+          description = "ICMP targets to ping. Filled by the stack with the gateway and probes.hosts.";
         };
         sslTargets = lib.mkOption {
           type = lib.types.listOf lib.types.str;
@@ -283,7 +280,3 @@
     };
   };
 }
-# NOTE: Maintenance options are defined inline in options.nix above
-# If you wanted to split them further, you could create:
-# prometheus/options/maintenance.nix and import it in options.nix
-
