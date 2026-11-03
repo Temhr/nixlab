@@ -15,6 +15,7 @@
   flake.lib.nixpkgsConfig = {
     allowUnfree = true;
     nvidia.acceptLicense = true;
+    problems.handlers."gtk+".broken = "warn";
   };
 
   perSystem = {system, ...}: {
