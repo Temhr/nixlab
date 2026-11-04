@@ -404,7 +404,15 @@ in rec {
         # Average iowait across cores per host.
         {
           alert = "HighIOWait";
-          expr = ''avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 30'';
+          expr = ''
+            (
+              avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 30
+            )
+            and on (instance)
+            (
+              max by (instance) (rate(node_disk_io_time_seconds_total[5m])) > 0.8
+            )
+          '';
           for = "10m";
           labels = {
             severity = "warning";
