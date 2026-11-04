@@ -420,7 +420,7 @@ in rec {
             checklist_section = "II.6";
           };
           annotations = {
-            summary = "High I/O wait on {{ $labels.instance }}";
+            summary = "High I/O wait on {{ $labels.instance }} paired with disk saturation signal (a bottleneck)";
             description = ''CPU spending {{ $value | printf "%.1f" }}% of its time waiting for I/O (threshold 30%)'';
           };
         }
