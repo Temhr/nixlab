@@ -114,7 +114,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Single 0-100% roll-up of system health, taken from the system:health_score:percentage recording rule. 100% means nothing is wrong. Check that rule's definition for exactly what counts against the score."
     },
     {
       "id": 2,
@@ -229,7 +230,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Alerts currently firing as critical or warning, plus pending ones (condition is true but hasn't yet lasted the rule's 'for' duration). Anything above zero deserves a look; the Active Alerts table below shows which ones."
     },
     {
       "id": 201,
@@ -273,7 +275,8 @@
             ]
           }
         }
-      }
+      },
+      "description": "Number of systemd units currently in the failed state. Should be 0. The 'Systemd Failed Units' graph further down shows which units; investigate with systemctl status <unit> and journalctl -u <unit>."
     },
     {
       "id": 202,
@@ -326,7 +329,8 @@
           },
           "noValue": "n/a"
         }
-      }
+      },
+      "description": "Highest temperature reported by any hwmon sensor (CPU, board, drives) right now. Sustained high readings usually point to cooling problems or throttling; see 'Temperature Sensors' for the per-sensor breakdown."
     },
     {
       "id": 3,
@@ -356,7 +360,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Time since the last boot. A low value you weren't expecting means an unplanned reboot, crash or power loss."
     },
     {
       "id": 203,
@@ -397,7 +402,8 @@
           ],
           "values": false
         }
-      }
+      },
+      "description": "Kernel release currently running (from node_uname_info). If it differs from the newest installed generation after an upgrade, a reboot is still pending."
     },
     {
       "id": 4,
@@ -444,7 +450,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Percent of the root (/) filesystem in use, calculated from free bytes. Free bytes include space reserved for root, so the space actually usable by normal users can be slightly less than this shows."
     },
     {
       "id": 5,
@@ -491,7 +498,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Percent of RAM not available to applications (1 - MemAvailable/MemTotal). Reclaimable cache counts as available, so a high value here means genuine memory pressure rather than just a full page cache."
     },
     {
       "id": 204,
@@ -542,13 +550,14 @@
           "min": 0,
           "max": 100
         }
-      }
+      },
+      "description": "Percent of swap space in use. Some swap use is normal for cold pages; sustained high use together with Memory Pressure or Memory Paging Activity means the machine is short on RAM."
     },
     {
       "id": 100,
       "type": "table",
       "title": "🔔 Active Alerts (firing + pending) — with rule condition",
-      "description": "Built from the ALERTS metric. `condition` is the PromQL expression and `for` duration that triggered the alert (added automatically by withCondition in maintenance-alerts.nix). Use a cell's inspect icon to read long values; click an alertname to open it in Prometheus.",
+      "description": "Built from the ALERTS metric. 'condition' is the PromQL expression and 'for' duration that triggered the alert (added automatically by withCondition in maintenance-alerts.nix). Use a cell's inspect icon to read long values; click an alertname to open it in Prometheus.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -785,7 +794,8 @@
           ],
           "values": false
         }
-      }
+      },
+      "description": "Count of firing alerts grouped by their 'category' label (for example os), from the system:alerts_by_category:count recording rule. Shows which area of the system is unhealthy."
     },
     {
       "id": 206,
@@ -843,7 +853,8 @@
           ],
           "values": false
         }
-      }
+      },
+      "description": "Count of firing alerts grouped by their 'checklist_section' label (for example II.6), from the system:alerts_by_section:count recording rule. Maps alerts back to the matching section of the maintenance checklist."
     },
     {
       "type": "row",
@@ -902,7 +913,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Average CPU busy percentage across all cores over the last 5 minutes (100 - idle). I/O wait is not counted as idle here, so a machine stalled on disk can show high usage while doing very little real work."
     },
     {
       "type": "timeseries",
@@ -927,13 +939,17 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100
+          "max": 100,
+          "custom": {
+            "axisLabel": "CPU busy (%)"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Average CPU busy percentage across all cores over time (100 - idle, 5m rate). I/O wait counts as busy here, so compare with IO Pressure when usage looks high but nothing is actually working hard."
     },
     {
       "type": "timeseries",
@@ -973,14 +989,16 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "lineWidth": 2
+            "lineWidth": 2,
+            "axisLabel": "Load per core"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Load average divided by core count for 1, 5 and 15 minute windows. 1.0 means every core is occupied on average; sustained values above 1 mean tasks are queuing. On Linux, load also counts tasks stuck waiting on disk, so a failing or stalled drive can raise load without raising CPU use."
     },
     {
       "type": "timeseries",
@@ -1005,14 +1023,16 @@
         "defaults": {
           "unit": "percent",
           "custom": {
-            "fillOpacity": 20
+            "fillOpacity": 20,
+            "axisLabel": "Time stalled (%)"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Pressure Stall Information (PSI): share of time at least some tasks were waiting for CPU time. Rising values mean CPU contention even if overall usage looks fine."
     },
     {
       "type": "timeseries",
@@ -1045,7 +1065,8 @@
         "defaults": {
           "unit": "percent",
           "custom": {
-            "fillOpacity": 20
+            "fillOpacity": 20,
+            "axisLabel": "Time stalled (%)"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1069,7 +1090,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Pressure Stall Information (PSI) for memory. 'Some processes waiting' = at least one task was stalled on memory; 'All processes blocked' = every non-idle task was stalled. Sustained non-zero 'all blocked' means the machine is thrashing."
     },
     {
       "type": "row",
@@ -1136,7 +1158,8 @@
             "fillOpacity": 10,
             "stacking": {
               "mode": "normal"
-            }
+            },
+            "axisLabel": "Memory"
           },
           "min": 0
         }
@@ -1144,7 +1167,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Stacked view of RAM: applications (Used), buffers, cache (page cache plus reclaimable slab) and free. Cache is handed back on demand, so a small Free slice is normal; a growing 'Used (apps)' slice is what to watch."
     },
     {
       "type": "timeseries",
@@ -1177,14 +1201,16 @@
         "defaults": {
           "unit": "bytes",
           "custom": {
-            "fillOpacity": 20
+            "fillOpacity": 20,
+            "axisLabel": "Swap"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Swap used and free over time. Steady growth suggests a memory leak or too little RAM. Use together with Memory Paging Activity to tell whether swap is actively being read and written or just holding cold pages."
     },
     {
       "type": "row",
@@ -1237,13 +1263,17 @@
                 "color": "red"
               }
             ]
+          },
+          "custom": {
+            "axisLabel": "Space used (%)"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Percent used for each real mounted filesystem. Virtual filesystems (tmpfs, overlay, squashfs and similar) and the /nix/store and /run mounts are excluded. See 'Estimated Time Until Disk Full' for the trend."
     },
     {
       "type": "timeseries",
@@ -1285,13 +1315,17 @@
                 "color": "red"
               }
             ]
+          },
+          "custom": {
+            "axisLabel": "Inodes used (%)"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Percent of inodes used per filesystem (same exclusions as Disk Space Usage). A filesystem can be unable to create files while still showing free space if it runs out of inodes, which happens with millions of small files."
     },
     {
       "type": "timeseries",
@@ -1322,13 +1356,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "iops"
+          "unit": "iops",
+          "custom": {
+            "axisLabel": "I/O operations per second"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Completed read and write operations per second for each block device (5m rate). A high count is only a problem if the disk is also saturated or slow; compare with Disk Utilization and Disk IO Latency."
     },
     {
       "id": 209,
@@ -1358,13 +1396,15 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "fillOpacity": 15
+            "fillOpacity": 15,
+            "axisLabel": "Device busy (%)"
           },
           "unit": "percent",
           "min": 0,
           "max": 100
         }
-      }
+      },
+      "description": "Share of time each device had I/O in flight (like iostat %util). Near 100% on a spinning disk means it is saturated; on SSD/NVMe the number is less meaningful because they service requests in parallel. Low utilization alongside high I/O wait or IO Pressure suggests stuck or very slow I/O rather than heavy load."
     },
     {
       "id": 210,
@@ -1426,7 +1466,7 @@
           "values": false
         }
       },
-      "description": "Only filesystems whose free space is shrinking appear. Red < 1 day, orange < 1 week."
+      "description": "Projection based on how free space has changed over the last 6 hours, extrapolated linearly. Only filesystems whose free space is shrinking appear. Red < 1 day, orange < 1 week. A one-off large write can make it look more urgent than it is."
     },
     {
       "type": "timeseries",
@@ -1459,7 +1499,8 @@
         "defaults": {
           "unit": "percent",
           "custom": {
-            "fillOpacity": 20
+            "fillOpacity": 20,
+            "axisLabel": "Time stalled (%)"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1483,7 +1524,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Pressure Stall Information (PSI) for disk I/O. 'Some processes waiting' = at least one task was stalled on I/O; 'All processes blocked' = every non-idle task was stalled. Measures the impact on the workload, so it catches slow or stuck devices that utilization numbers can miss."
     },
     {
       "type": "row",
@@ -1524,7 +1566,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Total inbound traffic across physical network interfaces (loopback, veth, docker and bridge devices excluded), 5 minute average."
     },
     {
       "type": "stat",
@@ -1554,7 +1597,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Total outbound traffic across physical network interfaces (loopback, veth, docker and bridge devices excluded), 5 minute average."
     },
     {
       "type": "timeseries",
@@ -1587,14 +1631,16 @@
         "defaults": {
           "unit": "Bps",
           "custom": {
-            "fillOpacity": 10
+            "fillOpacity": 10,
+            "axisLabel": "Throughput"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Inbound (rx) and outbound (tx) throughput for each physical network interface, 5 minute average. Loopback, veth, docker and bridge devices are excluded."
     },
     {
       "type": "row",
@@ -1649,13 +1695,17 @@
                 "color": "red"
               }
             ]
+          },
+          "custom": {
+            "axisLabel": "Temperature"
           }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Every hwmon temperature sensor (CPU cores, motherboard, drives and so on), labelled by sensor and chip. Look for sustained high readings or sudden jumps."
     },
     {
       "id": 207,
@@ -1712,13 +1762,14 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "fillOpacity": 15
+            "fillOpacity": 15,
+            "axisLabel": "Clock frequency"
           },
           "unit": "hertz",
           "noValue": "no cpufreq metrics"
         }
       },
-      "description": "CPUThrottling fires when cores run below 60% of rated max under load."
+      "description": "Minimum, average and maximum current clock speed across cores, compared with the rated maximum. CPUThrottling fires when cores run below 60% of rated max under load. Low frequency at idle is normal power saving; low frequency under load suggests thermal or power throttling."
     },
     {
       "id": 208,
@@ -1751,7 +1802,8 @@
             "fillOpacity": 15,
             "thresholdsStyle": {
               "mode": "line"
-            }
+            },
+            "axisLabel": "Offset from reference"
           },
           "unit": "s",
           "thresholds": {
@@ -1769,7 +1821,7 @@
           }
         }
       },
-      "description": "ClockDrift fires above 0.1 s for 10 min."
+      "description": "Difference between the system clock and its time reference (node_timex_offset_seconds). ClockDrift fires above 0.1 s for 10 min. Large offsets cause TLS, authentication and log-correlation problems."
     },
     {
       "type": "timeseries",
@@ -1805,13 +1857,17 @@
               }
             ]
           },
-          "noValue": "✅ No failed units"
+          "noValue": "✅ No failed units",
+          "custom": {
+            "axisLabel": "Failed (1 = failed)"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "One line per systemd unit currently in the failed state (value 1). An empty graph means every unit is healthy. Investigate with systemctl status <unit> and journalctl -u <unit>."
     },
     {
       "type": "row",
@@ -1860,7 +1916,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Whether each scrape target was reachable over time (the 'up' metric: 1 = scraped successfully, 0 = down or unreachable). The prometheus and node jobs are excluded."
     },
     {
       "type": "timeseries",
@@ -1886,7 +1943,8 @@
         "defaults": {
           "custom": {
             "fillOpacity": 70,
-            "lineWidth": 2
+            "lineWidth": 2,
+            "axisLabel": "Firing alerts"
           }
         },
         "overrides": [
@@ -1925,7 +1983,8 @@
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Number of alerts firing over time, split by severity. Shows whether problems are brief blips or persistent, and when they started."
     },
     {
       "id": 101,
@@ -1994,7 +2053,8 @@
           }
         },
         "overrides": []
-      }
+      },
+      "description": "One row per alert name showing when it was firing over the selected time range. Useful for correlating alerts: which fired together, and which came first."
     },
     {
       "id": 217,
@@ -2110,7 +2170,8 @@
                 ]
               }
             ]
-          }
+          },
+          "description": "Every Prometheus scrape target and whether it could be reached (up: 1 = yes, 0 = no)."
         },
         {
           "id": 212,
@@ -2140,12 +2201,13 @@
           "fieldConfig": {
             "defaults": {
               "custom": {
-                "fillOpacity": 15
+                "fillOpacity": 15,
+                "axisLabel": "Scrape time"
               },
               "unit": "s"
             }
           },
-          "description": "Slow scrapes are an early sign of an overloaded exporter."
+          "description": "Longest scrape time per job. Slow scrapes are an early sign of an overloaded exporter or network problem, and scrapes that approach the scrape timeout will start failing."
         },
         {
           "id": 213,
@@ -2176,7 +2238,8 @@
             "defaults": {
               "unit": "short"
             }
-          }
+          },
+          "description": "Number of active time series held in Prometheus's in-memory head block. Memory use scales with this; a sudden jump usually means a label cardinality explosion."
         },
         {
           "id": 214,
@@ -2207,7 +2270,8 @@
             "defaults": {
               "unit": "bytes"
             }
-          }
+          },
+          "description": "Disk space used by Prometheus's persisted data blocks (the write-ahead log is not included). Grows until the retention limit starts removing old blocks."
         },
         {
           "id": 215,
@@ -2252,7 +2316,7 @@
               }
             }
           },
-          "description": "Non-zero means an alert/recording rule is erroring and silently not firing."
+          "description": "Rule evaluations that errored in the last hour. Non-zero means an alert or recording rule is erroring and silently not firing; check the Prometheus Rules page or logs for the failing rule."
         },
         {
           "id": 216,
@@ -2300,7 +2364,8 @@
                 ]
               }
             }
-          }
+          },
+          "description": "Duration of the most recent evaluation of the slowest rule group. If it approaches the group's evaluation interval, evaluations can be delayed or skipped and alerts may lag."
         }
       ]
     },
@@ -2344,12 +2409,14 @@
           "fieldConfig": {
             "defaults": {
               "custom": {
-                "fillOpacity": 15
+                "fillOpacity": 15,
+                "axisLabel": "CPU (% of one core)"
               },
               "unit": "percent",
               "noValue": "no container metrics"
             }
-          }
+          },
+          "description": "CPU used by each container, as a percentage of a single core (200% = two cores fully used), 5 minute average."
         },
         {
           "id": 219,
@@ -2379,12 +2446,14 @@
           "fieldConfig": {
             "defaults": {
               "custom": {
-                "fillOpacity": 15
+                "fillOpacity": 15,
+                "axisLabel": "Working-set memory"
               },
               "unit": "bytes",
               "noValue": "no container metrics"
             }
-          }
+          },
+          "description": "Working-set memory per container: memory actively in use, excluding easily reclaimable cache."
         },
         {
           "id": 220,
@@ -2448,7 +2517,7 @@
               "values": false
             }
           },
-          "description": "Matches the ContainerHighMemory alert (90%)."
+          "description": "Working-set memory as a percentage of each container's memory limit. Containers with no limit are omitted. Matches the ContainerHighMemory alert (90%)."
         },
         {
           "id": 221,
@@ -2510,7 +2579,8 @@
               ],
               "values": false
             }
-          }
+          },
+          "description": "How many times each container has started in the last 24 hours, detected from changes in its start time. Repeated non-zero values point to crash loops or out-of-memory kills."
         }
       ]
     },
@@ -2557,12 +2627,14 @@
                 "fillOpacity": 15,
                 "stacking": {
                   "mode": "normal"
-                }
+                },
+                "axisLabel": "Requests per second"
               },
               "unit": "reqps",
               "noValue": "no traefik metrics"
             }
-          }
+          },
+          "description": "Requests per second handled by Traefik, stacked by HTTP status code. Watch for growth in 4xx (client or routing problems) and 5xx (backend failures)."
         },
         {
           "id": 224,
@@ -2595,7 +2667,8 @@
                 "fillOpacity": 15,
                 "thresholdsStyle": {
                   "mode": "line"
-                }
+                },
+                "axisLabel": "5xx share of requests"
               },
               "unit": "percentunit",
               "thresholds": {
@@ -2615,7 +2688,7 @@
               "min": 0
             }
           },
-          "description": "HighHTTPErrorRate fires above 5%."
+          "description": "Fraction of each service's requests that returned a 5xx error (0.05 = 5%). HighHTTPErrorRate fires above 5%."
         },
         {
           "id": 225,
@@ -2685,7 +2758,8 @@
                 ]
               }
             }
-          }
+          },
+          "description": "Result of each blackbox probe over time (probe_success): success or failure per target. A failing band means the endpoint was unreachable or failed its check."
         },
         {
           "id": 226,
@@ -2718,7 +2792,8 @@
                 "fillOpacity": 15,
                 "thresholdsStyle": {
                   "mode": "line"
-                }
+                },
+                "axisLabel": "Round-trip time"
               },
               "unit": "s",
               "thresholds": {
@@ -2737,7 +2812,7 @@
               "noValue": "no blackbox metrics"
             }
           },
-          "description": "HighNetworkLatency fires above 100 ms."
+          "description": "Ping round-trip time to each target, measured by the blackbox exporter. HighNetworkLatency fires above 100 ms."
         }
       ]
     },
@@ -2813,7 +2888,7 @@
               "values": false
             }
           },
-          "description": "BackupJobFailed fires after 24 h."
+          "description": "How long since each backup job last completed successfully. BackupJobFailed fires after 24 h."
         },
         {
           "id": 229,
@@ -2843,13 +2918,14 @@
           "fieldConfig": {
             "defaults": {
               "custom": {
-                "fillOpacity": 15
+                "fillOpacity": 15,
+                "axisLabel": "Backup size"
               },
               "unit": "bytes",
               "noValue": "no backup metrics"
             }
           },
-          "description": "BackupSizeAnomaly fires on a >30% change vs last week."
+          "description": "Size of each backup job's most recent output over time. BackupSizeAnomaly fires on a >30% change vs last week; a sudden drop can mean missing data, a spike unexpected growth."
         },
         {
           "id": 230,
@@ -2911,7 +2987,7 @@
               "values": false
             }
           },
-          "description": "Orange under 30 days, red under 7."
+          "description": "Time until each probed TLS certificate expires. Orange under 30 days, red under 7."
         }
       ]
     },
@@ -2939,7 +3015,8 @@
           "options": {
             "mode": "markdown",
             "content": "# Weekly Tasks\n\n## Critical\n- [ ] Review all Prometheus alerts\n- [ ] Check backup completion\n- [ ] Verify storage pool health\n- [ ] Inspect certificate expiry\n- [ ] Review system logs\n\n## Routine\n- [ ] Check service status dashboard\n- [ ] Monitor resource utilization trends\n- [ ] Review network connectivity\n\n---\n**Last completed:** _[Manual entry]_"
-          }
+          },
+          "description": "Weekly maintenance checklist: tasks to work through each week, critical items first. Tick them off as you go and log completion in the Maintenance row."
         },
         {
           "id": 502,
@@ -2954,7 +3031,8 @@
           "options": {
             "mode": "markdown",
             "content": "# Monthly Tasks\n\n## System Updates\n- [ ] Apply NixOS updates\n- [ ] Update firmware\n- [ ] Review kernel changes\n\n## Storage\n- [ ] Run ZFS/Btrfs scrub\n- [ ] Test backup restore\n- [ ] Verify snapshot retention\n\n## Security\n- [ ] Audit firewall rules\n- [ ] Review SSH access logs\n- [ ] Rotate credentials\n- [ ] Check fail2ban effectiveness\n\n## Database\n- [ ] Run vacuum/analyze\n- [ ] Check index bloat\n\n---\n**Last completed:** _[Manual entry]_"
-          }
+          },
+          "description": "Monthly maintenance checklist: tasks to work through each month. Tick them off as you go and log completion in the Maintenance row."
         },
         {
           "id": 503,
@@ -2969,7 +3047,8 @@
           "options": {
             "mode": "markdown",
             "content": "# Quarterly Tasks\n\n## Hardware\n- [ ] Deep hardware cleaning\n- [ ] RAID consistency check\n- [ ] Replace aging components\n\n## Disaster Recovery\n- [ ] DR rehearsal/test\n- [ ] Update recovery playbooks\n- [ ] Test cold site backups\n\n## Security\n- [ ] Full access audit\n- [ ] Network device scan\n- [ ] Review security baselines\n- [ ] License compliance check\n\n## Documentation\n- [ ] Update network map\n- [ ] Review service inventory\n- [ ] Update runbooks\n\n---\n**Last completed:** _[Manual entry]_"
-          }
+          },
+          "description": "Quarterly maintenance checklist: tasks to work through each quarter. Tick them off as you go and log completion in the Maintenance row."
         }
       ]
     },
@@ -3007,13 +3086,17 @@
         "defaults": {
           "unit": "percent",
           "min": 0,
-          "max": 100
+          "max": 100,
+          "custom": {
+            "axisLabel": "CPU busy (%)"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Busy percentage for each individual core (100 - idle, so I/O wait counts as busy). Reveals single-threaded bottlenecks that the all-core average hides."
     },
     {
       "type": "timeseries",
@@ -3044,13 +3127,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ops"
+          "unit": "ops",
+          "custom": {
+            "axisLabel": "Events per second"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "System-wide rate of context switches and hardware interrupts. Sudden sustained spikes can point to a runaway process or a misbehaving driver or device."
     },
     {
       "type": "timeseries",
@@ -3081,13 +3168,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps"
+          "unit": "Bps",
+          "custom": {
+            "axisLabel": "Throughput"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Bytes read from and written to each block device per second (5m rate)."
     },
     {
       "type": "timeseries",
@@ -3118,13 +3209,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s"
+          "unit": "s",
+          "custom": {
+            "axisLabel": "Average latency per I/O"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Average time per completed read or write over 5 minutes, per device. Spinning disks are typically in the milliseconds, SSDs well under 1 ms. Rising latency with little throughput suggests a failing or contended device. Gaps mean no I/O happened in the window."
     },
     {
       "type": "timeseries",
@@ -3171,13 +3266,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "pps"
+          "unit": "pps",
+          "custom": {
+            "axisLabel": "Packets per second"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Packet errors and drops per second, receive and transmit, per interface. Should sit at zero; persistent non-zero values point to cable, driver or buffer problems."
     },
     {
       "type": "timeseries",
@@ -3216,13 +3315,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "short",
+          "custom": {
+            "axisLabel": "Connections"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Established TCP connections, sockets in TIME_WAIT, and total allocated TCP sockets. Large TIME_WAIT counts mean many short-lived connections; allocated sockets approaching system limits can cause connection failures."
     },
     {
       "type": "timeseries",
@@ -3269,13 +3372,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "short",
+          "custom": {
+            "axisLabel": "Paging rate per second"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "Rates from /proc/vmstat: 'Pages In/Out' (pgpgin/pgpgout) count data moved to and from disk in KiB per second; 'Swap In/Out' count memory pages swapped per second. Sustained swap activity means the machine is short on RAM."
     },
     {
       "type": "timeseries",
@@ -3306,13 +3413,17 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "short",
+          "custom": {
+            "axisLabel": "File descriptors"
+          }
         }
       },
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
-      }
+      },
+      "description": "System-wide open file handles allocated versus the kernel maximum. If allocated approaches maximum, processes start failing with 'too many open files'."
     },
     {
       "type": "row",
@@ -3381,7 +3492,8 @@
           ],
           "values": false
         }
-      }
+      },
+      "description": "Each drive's overall SMART self-assessment (1 = PASSED). PASSED only means no attribute has crossed its failure threshold: a drive can pass while accumulating reallocated or pending sectors, so also check the raw SMART attributes."
     },
     {
       "id": 401,
@@ -3412,10 +3524,12 @@
         "defaults": {
           "unit": "celsius",
           "custom": {
-            "fillOpacity": 10
+            "fillOpacity": 10,
+            "axisLabel": "Temperature"
           }
         }
-      }
+      },
+      "description": "Temperature each drive reports via SMART. Spinning disks generally prefer to stay below about 50 °C; SSDs tolerate more but may throttle when hot."
     },
     {
       "id": 402,
@@ -3446,10 +3560,12 @@
         "defaults": {
           "unit": "percent",
           "custom": {
-            "fillOpacity": 10
+            "fillOpacity": 10,
+            "axisLabel": "Endurance used (%)"
           }
         }
-      }
+      },
+      "description": "Percentage of the NVMe drive's rated write endurance already consumed (from the drive's own counter). 100% means the rated lifetime has been reached; plan replacement well before that."
     },
     {
       "type": "row",
@@ -3522,7 +3638,8 @@
           ],
           "values": false
         }
-      }
+      },
+      "description": "How long since each listed systemd timer (nixos-upgrade, flake-update, backup-home, nixlab-gpull, nix-gc) last triggered. A value far beyond the timer's schedule means it is stuck, disabled or failing to run."
     },
     {
       "type": "row",
@@ -3564,10 +3681,12 @@
         "defaults": {
           "unit": "short",
           "custom": {
-            "fillOpacity": 10
+            "fillOpacity": 10,
+            "axisLabel": "Errors per interval"
           }
         }
-      }
+      },
+      "description": "Journal entries at error severity or worse (err, crit, alert, emerg), counted per systemd unit in each graph interval. Spikes identify the noisy or failing service."
     },
     {
       "id": 421,
@@ -3598,10 +3717,12 @@
         "defaults": {
           "unit": "short",
           "custom": {
-            "fillOpacity": 10
+            "fillOpacity": 10,
+            "axisLabel": "Failures per interval"
           }
         }
-      }
+      },
+      "description": "Failed password and invalid-user attempts logged by sshd, per host and graph interval. Bursts indicate brute-force scans; consider fail2ban or limiting SSH exposure."
     },
     {
       "id": 422,
@@ -3631,7 +3752,8 @@
         "showTime": true,
         "wrapLogMessage": true,
         "sortOrder": "Descending"
-      }
+      },
+      "description": "Kernel log lines matching error, fail or warn (case-insensitive). The place to spot disk I/O errors, hardware faults, driver crashes and NFS timeouts."
     },
     {
       "type": "row",
@@ -3704,7 +3826,8 @@
           ],
           "values": false
         }
-      }
+      },
+      "description": "Days since each maintenance checklist section was last marked completed. Rising values highlight overdue work."
     },
     {
       "id": 431,
@@ -3735,7 +3858,8 @@
         "wrapLogMessage": true,
         "sortOrder": "Descending"
       },
-      "timeFrom": "90d"
+      "timeFrom": "90d",
+      "description": "Maintenance log entries with a failed or skipped status over the last 90 days: work that still needs attention."
     },
     {
       "id": 432,
@@ -3765,7 +3889,8 @@
         "showTime": true,
         "wrapLogMessage": true,
         "sortOrder": "Descending"
-      }
+      },
+      "description": "Most recent entries from the maintenance log, all statuses."
     }
   ],
   "annotations": {

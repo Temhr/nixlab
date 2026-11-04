@@ -50,7 +50,7 @@
       "id": 2,
       "type": "stat",
       "title": "Pool State",
-      "description": "Each possible state is shown. The active one has value 1.",
+      "description": "Each possible pool state is shown; the active one has value 1. Anything other than 'online' needs attention (degraded = redundancy lost, faulted or suspended = pool unavailable or I/O halted).",
       "gridPos": {
         "h": 4,
         "w": 6,
@@ -131,7 +131,7 @@
       "id": 3,
       "type": "timeseries",
       "title": "Pool State History",
-      "description": "1 = pool was in this state. Watch for degraded/faulted/suspended spikes.",
+      "description": "1 = pool was in this state. Online should stay at 1 and the others at 0. Watch for degraded, faulted or suspended spikes.",
       "gridPos": {
         "h": 4,
         "w": 18,
@@ -160,7 +160,10 @@
         "defaults": {
           "unit": "short",
           "min": 0,
-          "max": 1
+          "max": 1,
+          "custom": {
+            "axisLabel": "State (1 = active)"
+          }
         },
         "overrides": [
           {
@@ -245,14 +248,18 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "iops"
+          "unit": "iops",
+          "custom": {
+            "axisLabel": "I/O operations per second"
+          }
         }
       },
       "options": {
         "tooltip": {
           "mode": "multi"
         }
-      }
+      },
+      "description": "Read and write operations per second for each dataset in the selected pool(s), 5 minute average. Shows which datasets generate the I/O."
     },
     {
       "id": 6,
@@ -276,20 +283,24 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps"
+          "unit": "Bps",
+          "custom": {
+            "axisLabel": "Throughput"
+          }
         }
       },
       "options": {
         "tooltip": {
           "mode": "multi"
         }
-      }
+      },
+      "description": "Bytes read and written per second for each dataset in the selected pool(s), 5 minute average."
     },
     {
       "id": 7,
       "type": "timeseries",
       "title": "Dataset File Activity (links/unlinks)",
-      "description": "nunlinks = file deletes, nunlinked = completed deletes",
+      "description": "nunlinks = file deletes requested, nunlinked = deletes completed. A persistent gap between the two may mean delete processing is lagging.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -308,7 +319,10 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ops"
+          "unit": "ops",
+          "custom": {
+            "axisLabel": "File operations per second"
+          }
         }
       },
       "options": {
@@ -321,7 +335,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "Dataset ZIL Commit Rate",
-      "description": "ZIL commits per dataset. High commit counts with stalls indicate sync write pressure.",
+      "description": "ZIL commits per dataset, plus stalls and errors. High commit counts with stalls indicate sync write pressure; any errors need investigating.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -344,7 +358,10 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ops"
+          "unit": "ops",
+          "custom": {
+            "axisLabel": "Events per second"
+          }
         }
       },
       "options": {
@@ -385,7 +402,8 @@
         "defaults": {
           "unit": "bytes"
         }
-      }
+      },
+      "description": "Current size of the ARC, ZFS's in-RAM read cache. Normally grows to fill available RAM up to ARC Max and shrinks under memory pressure."
     },
     {
       "id": 11,
@@ -407,7 +425,8 @@
         "defaults": {
           "unit": "bytes"
         }
-      }
+      },
+      "description": "Upper limit for ARC size (c_max). Defaults scale with RAM and can be changed with the zfs_arc_max module parameter."
     },
     {
       "id": 12,
@@ -429,7 +448,8 @@
         "defaults": {
           "unit": "bytes"
         }
-      }
+      },
+      "description": "Lower limit the ARC will shrink to under memory pressure (c_min)."
     },
     {
       "id": 13,
@@ -451,7 +471,8 @@
         "defaults": {
           "unit": "bytes"
         }
-      }
+      },
+      "description": "The size ARC is currently aiming for (c). It adapts up and down with demand and memory pressure; actual size converges toward it."
     },
     {
       "id": 14,
@@ -473,7 +494,8 @@
         "defaults": {
           "unit": "bytes"
         }
-      }
+      },
+      "description": "Portion of the ARC holding cached file data."
     },
     {
       "id": 15,
@@ -495,7 +517,8 @@
         "defaults": {
           "unit": "bytes"
         }
-      }
+      },
+      "description": "Portion of the ARC holding metadata such as directory entries and block pointers."
     },
     {
       "id": 16,
@@ -539,7 +562,8 @@
       },
       "options": {
         "showThresholdMarkers": true
-      }
+      },
+      "description": "Percent of cache lookups served from RAM instead of disk, over 5 minutes. 90%+ is typical for steady workloads. A low value can mean the working set is larger than the ARC, or a one-off large scan, so judge it over time."
     },
     {
       "id": 17,
@@ -571,20 +595,24 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ops"
+          "unit": "ops",
+          "custom": {
+            "axisLabel": "Cache lookups per second"
+          }
         }
       },
       "options": {
         "tooltip": {
           "mode": "multi"
         }
-      }
+      },
+      "description": "Cache lookups per second: total hits and misses, plus demand data and metadata hits. Misses go to disk; rising misses with falling hits suggest the working set no longer fits in the ARC."
     },
     {
       "id": 18,
       "type": "timeseries",
       "title": "ARC MRU / MFU Size",
-      "description": "MRU = Most Recently Used, MFU = Most Frequently Used. Healthy ARC balances both.",
+      "description": "MRU = Most Recently Used, MFU = Most Frequently Used. Healthy ARC balances both. Ghost lists track recently evicted entries; hits on them tell ZFS which side to grow.",
       "gridPos": {
         "h": 5,
         "w": 10,
@@ -611,7 +639,10 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes"
+          "unit": "bytes",
+          "custom": {
+            "axisLabel": "Cache size"
+          }
         }
       },
       "options": {
@@ -662,20 +693,24 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes"
+          "unit": "bytes",
+          "custom": {
+            "axisLabel": "Cache size"
+          }
         }
       },
       "options": {
         "tooltip": {
           "mode": "multi"
         }
-      }
+      },
+      "description": "Total ARC size compared with its target (c) and the min/max limits, plus the data, metadata and anonymous (dirty, not yet written) portions."
     },
     {
       "id": 20,
       "type": "timeseries",
       "title": "Prefetch Hits vs Misses",
-      "description": "High prefetch miss rate means prefetcher is not predicting access patterns well.",
+      "description": "High prefetch miss rate means the prefetcher is not predicting access patterns well. Predictive and prescient hits are demand reads that were satisfied by earlier prefetching.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -710,7 +745,10 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ops"
+          "unit": "ops",
+          "custom": {
+            "axisLabel": "Cache lookups per second"
+          }
         }
       },
       "options": {
@@ -735,7 +773,7 @@
       "id": 22,
       "type": "timeseries",
       "title": "ZIL Commit Activity",
-      "description": "commit_count = sync writes committed. stall = waiting on ZIL. suspend = ZIL suspended (serious).",
+      "description": "commit_count = sync writes committed. stall = waiting on ZIL. suspend = ZIL suspended (serious). Errors should always be zero.",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -766,7 +804,10 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "ops"
+          "unit": "ops",
+          "custom": {
+            "axisLabel": "Events per second"
+          }
         }
       },
       "options": {
@@ -779,7 +820,7 @@
       "id": 23,
       "type": "timeseries",
       "title": "ZIL Transaction Bytes",
-      "description": "itx_copied = small writes copied into ZIL. itx_needcopy = larger writes. itx_indirect = indirect.",
+      "description": "itx_copied = small writes copied into the ZIL. itx_needcopy = larger writes. itx_indirect = indirect writes. The metaslab lines show where ZIL blocks are allocated (normal pool vs SLOG device).",
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -810,7 +851,10 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps"
+          "unit": "Bps",
+          "custom": {
+            "axisLabel": "Throughput"
+          }
         }
       },
       "options": {
@@ -907,14 +951,18 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes"
+          "unit": "bytes",
+          "custom": {
+            "axisLabel": "Space"
+          }
         }
       },
       "options": {
         "tooltip": {
           "mode": "multi"
         }
-      }
+      },
+      "description": "Free (available) and total bytes for each mounted ZFS dataset. Falling free space with a flat total means it is filling up. Datasets in the same pool share that pool's free space unless they have quotas."
     }
   ]
 }
