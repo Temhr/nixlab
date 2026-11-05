@@ -58,7 +58,7 @@
       openFirewall = false;
       dataDir = "/data";
       access.expose = ["grafana" "ntfy" "prometheus"];
-      notifications.ntfyAuth.enable = true;
+      notifications.ntfyAuth.enable = false;
       loki = {
         maintenance.enable = true;
         retention = "168h"; # the maintenance log keeps its 2 years regardless

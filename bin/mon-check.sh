@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runtime verification for the nixlab monitoring stack. Run ON the host.
 # Env: MON_HOST (default 127.0.0.1), MON_*_PORT, MON_UNITS, MON_NTFY_AUTH (user:pass), MON_TOPIC
+# ntfy auth is on by default, so --fire-test needs MON_NTFY_AUTH=reader:<password>.
 set -u
 H=${MON_HOST:-127.0.0.1}
 P=${MON_PROM_PORT:-9090}; L=${MON_LOKI_PORT:-3100}; G=${MON_GRAFANA_PORT:-3101}
@@ -39,7 +40,16 @@ if [ "${1:-}" = "--fire-test" ]; then
     && ok "alert posted as $name" || bad "post failed"
   echo "  waiting for delivery: Alertmanager's group_wait is 30 s, so expect 30 to 60 s; gives up at 90 s. Do not Ctrl-C."
   for i in $(seq 1 18); do
-    if cu ${MON_NTFY_AUTH:+-u "$MON_NTFY_AUTH"} "http://$H:$N/$T/json?poll=1&since=5m" | grep -q "$name"; then
+    out=$(curl -sS --max-time 5 -w '\n%{http_code}' ${MON_NTFY_AUTH:+-u "$MON_NTFY_AUTH"} \
+      "http://$H:$N/$T/json?poll=1&since=5m" 2>&1) || true
+    code=${out##*$'\n'}
+    case $code in
+      401 | 403)
+        echo
+        bad "ntfy refused the read (HTTP $code): set MON_NTFY_AUTH=reader:<password> (the alert itself was posted)"
+        exit 1 ;;
+    esac
+    if grep -q "$name" <<<"$out"; then
       echo; ok "alert reached ntfy after about $((i*5)) s"; exit $fail; fi
     printf '.'; sleep 5
   done
