@@ -59,6 +59,7 @@
       dataDir = "/data";
       access.expose = ["grafana" "ntfy" "prometheus"];
       notifications.ntfyAuth.enable = false;
+      notifications.topics.storage.matchers = ["category=~\"storage|backup\""];
       loki = {
         maintenance.enable = true;
         retention = "168h"; # the maintenance log keeps its 2 years regardless

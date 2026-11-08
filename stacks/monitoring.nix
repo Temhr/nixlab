@@ -101,7 +101,8 @@
       };
     };
 
-    ntfyUrl = "http://127.0.0.1:${toString port.ntfy}/${cfg.notifications.ntfyTopic}";
+    # ── ntfy topics ───────────────────────────────────────────────────────────
+    ntfyUrlFor = topic: "http://127.0.0.1:${toString port.ntfy}/${topic}";
     ntfyTemplate = {
       title = "[{{.status}}] {{(index .alerts 0).labels.host}}: {{(index .alerts 0).labels.alertname}}";
       message = ''{{range .alerts}}{{.annotations.summary}}{{"\n"}}{{.annotations.description}}{{"\n"}}{{with .annotations.runbook}}{{.}}{{"\n"}}{{end}}{{"\n"}}{{end}}'';
@@ -110,7 +111,8 @@
     # Tapping a notification opens Grafana (only when an external URL is resolved).
     clickParams = lib.optional (svc.grafana-nixlab.externalUrl != null) "click=${lib.escapeURL svc.grafana-nixlab.externalUrl}";
 
-    mkNtfyReceiver = name: extraParams: let
+    # Alertmanager receiver that publishes to one ntfy topic.
+    mkNtfyReceiverTo = topic: name: extraParams: let
       params =
         lib.optionals cfg.notifications.formatMessages [
           "tpl=1"
@@ -123,7 +125,7 @@
       inherit name;
       webhook_configs = [
         ({
-            url = ntfyUrl + lib.optionalString (params != []) "?${lib.concatStringsSep "&" params}";
+            url = ntfyUrlFor topic + lib.optionalString (params != []) "?${lib.concatStringsSep "&" params}";
             send_resolved = true;
           }
           // lib.optionalAttrs cfg.notifications.ntfyAuth.enable {
@@ -134,6 +136,34 @@
           })
       ];
     };
+    mkNtfyReceiver = mkNtfyReceiverTo cfg.notifications.ntfyTopic;
+
+    # Extra topics: <ntfyTopic>-<name>, one receiver and one route each.
+    topicName = n: "${cfg.notifications.ntfyTopic}-${n}";
+    segments = lib.mapAttrsToList (n: t: {inherit n t;}) cfg.notifications.topics;
+    segmentReceivers = map ({
+      n,
+      t,
+    }:
+      mkNtfyReceiverTo (topicName n) "ntfy-topic-${n}"
+      (lib.optional (t.priority != null) "p=${toString t.priority}"
+        ++ lib.optional (t.tags != []) "tags=${lib.concatStringsSep "," t.tags}"))
+    segments;
+    # Topics that also feed the catch-all come first (continue = true); topics that don't
+    # come last, because a route with continue = false ends matching.
+    segmentRoutes = let
+      mk = {
+        n,
+        t,
+      }: {
+        receiver = "ntfy-topic-${n}";
+        matchers = t.matchers;
+        continue = t.alsoCatchAll;
+      };
+    in
+      map mk (lib.filter (x: x.t.alsoCatchAll) segments)
+      ++ map mk (lib.filter (x: !x.t.alsoCatchAll) segments);
+    allTopics = [cfg.notifications.ntfyTopic] ++ map topicName (lib.attrNames cfg.notifications.topics);
   in {
     imports = [
       self.nixosModules.nsops--alertmanager
@@ -297,6 +327,48 @@
           default = true;
           description = "Route severity=critical to a separate ntfy receiver with max priority and a warning tag.";
         };
+
+        topics = lib.mkOption {
+          default = {};
+          example = lib.literalExpression ''
+            {
+              storage = {matchers = ["category=~\"storage|backup\""];};
+              security = {matchers = ["category=\"security\""]; priority = 4;};
+              urgent = {matchers = ["severity=\"critical\""]; priority = 5; alsoCatchAll = false;};
+            }
+          '';
+          description = ''
+            Extra ntfy topics, published as <ntfyTopic>-<name> (e.g. alerts-storage).
+            An alert goes to every topic whose matchers it satisfies. The catch-all
+            topic still receives everything unless a matching topic sets
+            alsoCatchAll = false. The alertmanager and reader ntfy users are granted
+            access to each topic automatically.
+          '';
+          type = lib.types.attrsOf (lib.types.submodule {
+            options = {
+              matchers = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                example = ["severity=\"critical\""];
+                description = "Alertmanager matchers; an alert must satisfy all of them.";
+              };
+              priority = lib.mkOption {
+                type = lib.types.nullOr (lib.types.ints.between 1 5);
+                default = null;
+                description = "ntfy priority for this topic (1 min .. 5 max). Null leaves ntfy's default.";
+              };
+              tags = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+                description = "ntfy tags (emoji shortcodes) added to messages on this topic.";
+              };
+              alsoCatchAll = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Also deliver to the catch-all topic. False keeps matching alerts out of it.";
+              };
+            };
+          });
+        };
       };
 
       integrations = {
@@ -307,6 +379,13 @@
     };
 
     config = lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = lib.all (n: builtins.match "[A-Za-z0-9_-]+" n != null) (lib.attrNames cfg.notifications.topics);
+          message = "services.nixlab-monitoring.notifications.topics: names may only contain letters, digits, '-' and '_'.";
+        }
+      ];
+
       # Override contract (hosts/<name>.nix):
       #   * Tunables set here are lib.mkDefault: override via services.nixlab-monitoring.*
       #     OR directly on services.<x>-nixlab.* — both work.
@@ -362,19 +441,28 @@
           else "null";
         receivers =
           [{name = "null";}]
-          ++ lib.optionals cfg.notifications.useNtfy [(mkNtfyReceiver "ntfy" ["tags=warning"])]
+          ++ lib.optionals cfg.notifications.useNtfy ([(mkNtfyReceiver "ntfy" ["tags=warning"])] ++ segmentReceivers)
           ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
             (mkNtfyReceiver "ntfy-critical" ["p=5" "tags=rotating_light"])
           ];
 
-        route.routes = lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
-          {
-            receiver = "ntfy-critical";
-            matchers = ["severity=\"critical\""];
-            groupWait = "10s";
-            repeatInterval = "1h";
-          }
-        ];
+        # Order matters: topic routes first (continue = true lets an alert reach several
+        # topics), then critical, then a final catch-all so alerts that matched a topic
+        # still reach the base topic. Alerts matching no topic fall to the root receiver as before.
+        route.routes =
+          lib.optionals cfg.notifications.useNtfy segmentRoutes
+          ++ lib.optionals (cfg.notifications.useNtfy && cfg.notifications.separateCritical) [
+            {
+              receiver = "ntfy-critical";
+              matchers = ["severity=\"critical\""];
+              groupWait = "10s";
+              repeatInterval = "1h";
+            }
+          ]
+          ++ lib.optional (cfg.notifications.useNtfy && segments != []) {
+            receiver = "ntfy";
+            repeatInterval = "4h"; # same as the root route, so unmatched alerts behave as before
+          };
       };
 
       services.ntfy-nixlab = {
@@ -415,22 +503,22 @@
           {
             name = "alertmanager";
             passwordEnvVar = "NTFY_ALERTMANAGER_PASSWORD";
-            topics = [
-              {
-                topic = cfg.notifications.ntfyTopic;
+            topics =
+              map (t: {
+                topic = t;
                 access = "write-only";
-              }
-            ];
+              })
+              allTopics;
           }
           {
             name = "reader";
             passwordEnvVar = "NTFY_READER_PASSWORD";
-            topics = [
-              {
-                topic = cfg.notifications.ntfyTopic;
+            topics =
+              map (t: {
+                topic = t;
                 access = "read-only";
-              }
-            ];
+              })
+              allTopics;
           }
         ];
       };

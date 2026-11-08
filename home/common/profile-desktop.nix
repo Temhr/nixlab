@@ -10,7 +10,7 @@
       self.homeModules.home--apps--terminal-emulators
       self.homeModules.home--apps--virtualization
     ];
-    brave.enable = lib.mkDefault true;
+    brave.enable = lib.mkDefault false;
     chrome.enable = lib.mkDefault true;
     zen.enable = lib.mkDefault true;
     ghostty.enable = lib.mkDefault true;

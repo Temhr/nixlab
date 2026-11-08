@@ -12,10 +12,10 @@
       poolName = "tanks";
       mountPoint = "/mirror";
       devices = [
-        "/dev/disk/by-id/scsi-35000cca073b298e0"#P1
-        "/dev/disk/by-id/scsi-35000cca073739368"#P2
-        "/dev/disk/by-id/scsi-35000cca073b28880"#P3
-        "/dev/disk/by-id/scsi-35000cca073b23fdc"#P4
+        "/dev/disk/by-id/scsi-35000cca073b298e0" #P1
+        "/dev/disk/by-id/scsi-35000cca073739368" #P2
+        "/dev/disk/by-id/scsi-35000cca073b28880" #P3
+        "/dev/disk/by-id/scsi-35000cca073b23fdc" #P4
       ];
       enableMonitoring = true;
       #alertEmail = "your-email@example.com";  # Optional: for email alerts
