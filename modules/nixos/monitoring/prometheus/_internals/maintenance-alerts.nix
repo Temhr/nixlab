@@ -1134,6 +1134,25 @@ in rec {
       interval = "1m";
       rules = [
         {
+          alert = "ZpoolMemberMissing";
+          expr = "zfs_expected_device_present == 0";
+          for = "1m";
+          labels = {severity = "critical"; category = "storage"; checklist_section = "III.8";};
+          annotations = {
+            summary = "ZFS member disk {{ $labels.device }} is missing on {{ $labels.instance }}";
+            description = "The by-id path is gone. ZFS may still report the pool ONLINE until I/O reaches the disk.";
+          };
+        }
+        {
+          alert = "ZpoolMemberReonlined";
+          expr = "time() - zfs_device_last_auto_online_timestamp_seconds < 3600 and zfs_device_last_auto_online_timestamp_seconds > 0";
+          labels = {severity = "warning"; category = "storage"; checklist_section = "III.8";};
+          annotations = {
+            summary = "ZFS disk {{ $labels.device }} was automatically re-onlined on {{ $labels.instance }}";
+            description = "The disk disappeared and returned. Check for a loose cable/slot or a flaky drive: zpool status, SMART, journalctl -t zfs-member-reconcile.";
+          };
+        }
+        {
           alert = "ZpoolNotOnline";
           expr = ''node_zfs_zpool_state{state!="online"} == 1'';
           for = "2m";

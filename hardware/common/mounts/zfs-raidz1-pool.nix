@@ -145,6 +145,59 @@
         };
 
         # ZFS health monitoring service
+        systemd.services.zfs-member-reconcile = lib.mkIf cfg.enableMonitoring {
+          description = "Export ZFS member-disk status and re-online returned disks";
+          path = [config.boot.zfs.package pkgs.coreutils pkgs.gawk pkgs.util-linux];
+          serviceConfig = {
+            Type = "oneshot";
+            StateDirectory = "zfs-member-reconcile";
+          };
+          script = ''
+            pool="${cfg.poolName}"
+            dir=/var/lib/node_exporter
+            stamps=/var/lib/zfs-member-reconcile
+            now=$(date +%s)
+            status=$(zpool status "$pool" 2>/dev/null || true)
+            tmp=$(mktemp -p "$dir" .zfs_devices.XXXXXX)
+            : > "$tmp"
+
+            ${lib.concatMapStringsSep "\n" (d: let
+              n = baseNameOf d;
+            in ''
+              if [ -e "${d}" ]; then present=1; else present=0; fi
+              state=$(printf '%s\n' "$status" | awk -v n="${n}" '$1 == n { print $2; exit }')
+              [ -n "$state" ] || state=UNKNOWN
+              last=0
+              [ -f "$stamps/${n}" ] && last=$(cat "$stamps/${n}")
+
+              # Disk is back at the OS level but ZFS still has it REMOVED/UNAVAIL: online it (5 min cooldown)
+              if [ "$present" = 1 ] && { [ "$state" = REMOVED ] || [ "$state" = UNAVAIL ]; } && [ $((now - last)) -ge 300 ]; then
+                logger -t zfs-member-reconcile "${n} is present but ZFS reports $state; running zpool online"
+                zpool online "$pool" "${n}" || logger -t zfs-member-reconcile "zpool online ${n} failed"
+                echo "$now" > "$stamps/${n}"
+                last=$now
+              fi
+
+              online=0
+              [ "$state" = ONLINE ] && online=1
+              printf 'zfs_expected_device_present{pool="%s",device="%s"} %s\n' "$pool" "${n}" "$present" >> "$tmp"
+              printf 'zfs_expected_device_online{pool="%s",device="%s"} %s\n' "$pool" "${n}" "$online" >> "$tmp"
+              printf 'zfs_device_last_auto_online_timestamp_seconds{pool="%s",device="%s"} %s\n' "$pool" "${n}" "$last" >> "$tmp"
+            '') cfg.devices}
+
+            chmod 644 "$tmp"
+            mv "$tmp" "$dir/zfs_devices.prom"
+          '';
+        };
+
+        systemd.timers.zfs-member-reconcile = lib.mkIf cfg.enableMonitoring {
+          wantedBy = ["timers.target"];
+          timerConfig = {
+            OnBootSec = "1min";
+            OnUnitActiveSec = "30s";
+          };
+        };
+
         systemd.services.zfs-health-check = lib.mkIf cfg.enableMonitoring {
           description = "ZFS Pool Health Check";
           path =
