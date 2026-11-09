@@ -2,6 +2,13 @@
 # Runtime verification for the nixlab monitoring stack. Run ON the host.
 # Env: MON_HOST (default 127.0.0.1), MON_*_PORT, MON_UNITS, MON_NTFY_AUTH (user:pass), MON_TOPIC
 # ntfy auth is on by default, so --fire-test needs MON_NTFY_AUTH=reader:<password>.
+# To test a topic: MON_EXTRA_LABELS='"category":"storage"' MON_TOPIC=alerts-storage ... --fire-test
+
+# PW=$(sudo sed -n 's/^NTFY_READER_PASSWORD=//p' /run/secrets/ALERTMANAGER_ENV)
+# MON_EXTRA_LABELS='"category":"storage"' MON_TOPIC=alerts-storage \
+# MON_NTFY_AUTH=reader:$PW bin/mon-check.sh --fire-test
+
+
 set -u
 H=${MON_HOST:-127.0.0.1}
 P=${MON_PROM_PORT:-9090}; L=${MON_LOKI_PORT:-3100}; G=${MON_GRAFANA_PORT:-3101}
@@ -36,7 +43,7 @@ if [ "${1:-}" = "--fire-test" ]; then
   id=$(date +%H%M%S); name="MonCheckTest$id"        # unique per run, so an old notification can never satisfy the grep
   now=$(date -u +%FT%TZ); end=$(date -u -d '+3 min' +%FT%TZ)
   cu -XPOST "http://$H:$A/api/v2/alerts" -H 'Content-Type: application/json' \
-    -d "[{\"labels\":{\"alertname\":\"$name\",\"severity\":\"warning\",\"instance\":\"moncheck\"},\"startsAt\":\"$now\",\"endsAt\":\"$end\"}]" \
+    -d "[{\"labels\":{\"alertname\":\"$name\",\"severity\":\"warning\",\"instance\":\"moncheck\"${MON_EXTRA_LABELS:+,$MON_EXTRA_LABELS}},\"startsAt\":\"$now\",\"endsAt\":\"$end\"}]" \
     && ok "alert posted as $name" || bad "post failed"
   echo "  waiting for delivery: Alertmanager's group_wait is 30 s, so expect 30 to 60 s; gives up at 90 s. Do not Ctrl-C."
   for i in $(seq 1 18); do
