@@ -145,6 +145,61 @@
         };
 
         # ZFS health monitoring service
+        systemd.services.zfs-integrity-metrics = lib.mkIf cfg.enableMonitoring {
+          description = "Export ZFS error counters and scrub history";
+          path = [config.boot.zfs.package pkgs.jq pkgs.coreutils];
+          serviceConfig = {
+            Type = "oneshot";
+            StateDirectory = "zfs-integrity-metrics";
+          };
+          script = ''
+            pool="${cfg.poolName}"
+            dir=/var/lib/node_exporter
+            state=/var/lib/zfs-integrity-metrics
+            now=$(date +%s)
+
+            json=$(zpool status -j --json-int "$pool")
+
+            # scan_stats only describes the latest scan (a resilver overwrites a scrub),
+            # so remember the last scrub that finished.
+            fn=$(jq -r --arg p "$pool" '.pools[$p].scan_stats.function // ""' <<<"$json")
+            st=$(jq -r --arg p "$pool" '.pools[$p].scan_stats.state // ""' <<<"$json")
+            if [ "$fn" = SCRUB ] && [ "$st" = FINISHED ]; then
+              jq -r --arg p "$pool" '.pools[$p].scan_stats | "\(.end_time) \(.errors)"' <<<"$json" > "$state/last-scrub"
+            fi
+            # No scrub known yet: start the "overdue" clock at first run.
+            [ -s "$state/last-scrub" ] || echo "$now 0" > "$state/last-scrub"
+            read -r scrub_end scrub_errors < "$state/last-scrub"
+
+            tmp=$(mktemp -p "$dir" .zfs_integrity.XXXXXX)
+            {
+              echo '# TYPE zfs_vdev_errors gauge'
+              jq -r --arg p "$pool" '
+                .pools[$p].vdevs | .. | objects | select(has("vdev_type"))
+                | . as $v
+                | ("read_errors","write_errors","checksum_errors") as $k
+                | "zfs_vdev_errors{pool=\"\($p)\",device=\"\($v.name)\",vdev_type=\"\($v.vdev_type)\",type=\"\($k | sub("_errors";""))\"} \($v[$k] // 0)"
+              ' <<<"$json"
+              echo '# TYPE zfs_pool_error_count gauge'
+              echo "zfs_pool_error_count{pool=\"$pool\"} $(jq -r --arg p "$pool" '.pools[$p].error_count // 0' <<<"$json")"
+              echo '# TYPE zfs_last_scrub_end_timestamp_seconds gauge'
+              echo "zfs_last_scrub_end_timestamp_seconds{pool=\"$pool\"} $scrub_end"
+              echo '# TYPE zfs_last_scrub_errors gauge'
+              echo "zfs_last_scrub_errors{pool=\"$pool\"} $scrub_errors"
+            } > "$tmp"
+            chmod 644 "$tmp"
+            mv "$tmp" "$dir/zfs_integrity.prom"
+          '';
+        };
+
+        systemd.timers.zfs-integrity-metrics = lib.mkIf cfg.enableMonitoring {
+          wantedBy = ["timers.target"];
+          timerConfig = {
+            OnBootSec = "2min";
+            OnUnitActiveSec = "1min";
+          };
+        };
+
         systemd.services.zfs-member-reconcile = lib.mkIf cfg.enableMonitoring {
           description = "Export ZFS member-disk status and re-online returned disks";
           path = [config.boot.zfs.package pkgs.coreutils pkgs.gawk pkgs.util-linux];
