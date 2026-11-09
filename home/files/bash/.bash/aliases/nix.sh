@@ -41,3 +41,4 @@ alias repast-gpu="nix develop $NIXLAB#repast-gpu"
 
 # --- Quick reference for NixOS aliases ---
 alias nixhelp='echo "LOCAL: lswitch ltest lboot lfup | REMOTE: rswitch rtest rboot rfup | GC: ndel nixgc"'
+alias nhelp='echo "LOCAL: lswitch ltest lboot lfup | REMOTE: rswitch rtest rboot rfup | GC: ndel nixgc"'
