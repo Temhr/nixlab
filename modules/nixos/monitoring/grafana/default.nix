@@ -236,10 +236,10 @@
           use extraDashboards instead.
         '';
         default = {
-          maintenance = {
-            path = "${dashboardsDir}/maintenance-checklist.json";
-            folder = "maintenance";
-          };
+          #maintenance = {
+          #  path = "${dashboardsDir}/maintenance-checklist.json";
+          #  folder = "maintenance";
+          #};
           system-overview-v5 = {
             path = "${dashboardsDir}/system-overview-v5.json";
             folder = "maintenance";
