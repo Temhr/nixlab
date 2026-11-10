@@ -244,7 +244,7 @@
       "title": "Missing Disks",
       "description": "Configured pool disks whose /dev/disk/by-id path no longer exists (OS view, updated every 30s). Independent of what ZFS reports.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 0,
         "y": 6
@@ -293,7 +293,7 @@
       "title": "Not Online in ZFS",
       "description": "Configured disks that 'zpool status' does not list as ONLINE. May lag behind 'Missing Disks' on an idle pool, because ZFS only notices a failed disk when I/O reaches it.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 6,
         "y": 6
@@ -342,7 +342,7 @@
       "title": "Auto-Onlined (1h)",
       "description": "Disks that came back and were automatically re-onlined by zfs-member-reconcile in the last hour. A disk that keeps showing up here is flaky.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 12,
         "y": 6
@@ -391,7 +391,7 @@
       "title": "Disk Errors",
       "description": "Sum of read, write and checksum errors across member disks. Counters stay until 'zpool clear'.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 18,
         "y": 6
@@ -440,10 +440,10 @@
       "title": "Pool Data Errors",
       "description": "Permanent data errors ZFS could not repair. Run 'zpool status -v' to list the affected files.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "targets": [
         {
@@ -489,10 +489,10 @@
       "title": "Last Scrub Age",
       "description": "Time since the last completed scrub. Weekly autoScrub is expected; yellow after 8 days, red after 10 (the ZpoolScrubOverdue threshold).",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 6,
-        "y": 8
+        "y": 9
       },
       "targets": [
         {
@@ -542,10 +542,10 @@
       "title": "Last Scrub Errors",
       "description": "Unrepaired errors found by the last completed scrub. Stays until the next clean scrub finishes.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 12,
-        "y": 8
+        "y": 9
       },
       "targets": [
         {
@@ -591,10 +591,10 @@
       "title": "Firing ZFS Alerts",
       "description": "Number of currently firing alerts whose name starts with Zpool.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 6,
         "x": 18,
-        "y": 8
+        "y": 9
       },
       "targets": [
         {
@@ -643,7 +643,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 12
       },
       "targets": [
         {
@@ -706,7 +706,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 10
+        "y": 12
       },
       "targets": [
         {
@@ -769,7 +769,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 20
       },
       "targets": [
         {
@@ -802,7 +802,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 20
       },
       "targets": [
         {
@@ -852,7 +852,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 28
       }
     },
     {
@@ -863,7 +863,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 29
       },
       "targets": [
         {
@@ -898,7 +898,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 29
       },
       "targets": [
         {
@@ -934,7 +934,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 37
       },
       "targets": [
         {
@@ -969,7 +969,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 37
       },
       "targets": [
         {
@@ -1008,7 +1008,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 45
       }
     },
     {
@@ -1019,7 +1019,7 @@
         "h": 3,
         "w": 4,
         "x": 0,
-        "y": 44
+        "y": 46
       },
       "targets": [
         {
@@ -1042,7 +1042,7 @@
         "h": 3,
         "w": 4,
         "x": 4,
-        "y": 44
+        "y": 46
       },
       "targets": [
         {
@@ -1065,7 +1065,7 @@
         "h": 3,
         "w": 4,
         "x": 8,
-        "y": 44
+        "y": 46
       },
       "targets": [
         {
@@ -1088,7 +1088,7 @@
         "h": 3,
         "w": 4,
         "x": 12,
-        "y": 44
+        "y": 46
       },
       "targets": [
         {
@@ -1111,7 +1111,7 @@
         "h": 3,
         "w": 4,
         "x": 16,
-        "y": 44
+        "y": 46
       },
       "targets": [
         {
@@ -1134,7 +1134,7 @@
         "h": 3,
         "w": 4,
         "x": 20,
-        "y": 44
+        "y": 46
       },
       "targets": [
         {
@@ -1157,7 +1157,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 47
+        "y": 49
       },
       "targets": [
         {
@@ -1202,7 +1202,7 @@
         "h": 5,
         "w": 10,
         "x": 4,
-        "y": 47
+        "y": 49
       },
       "targets": [
         {
@@ -1246,7 +1246,7 @@
         "h": 5,
         "w": 10,
         "x": 14,
-        "y": 47
+        "y": 49
       },
       "targets": [
         {
@@ -1288,7 +1288,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 52
+        "y": 54
       },
       "targets": [
         {
@@ -1344,7 +1344,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 52
+        "y": 54
       },
       "targets": [
         {
@@ -1395,7 +1395,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 62
       }
     },
     {
@@ -1407,7 +1407,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 61
+        "y": 63
       },
       "targets": [
         {
@@ -1454,7 +1454,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 61
+        "y": 63
       },
       "targets": [
         {
@@ -1501,7 +1501,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 71
       }
     },
     {
@@ -1513,7 +1513,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 70
+        "y": 72
       },
       "targets": [
         {
@@ -1566,7 +1566,7 @@
         "h": 8,
         "w": 16,
         "x": 8,
-        "y": 70
+        "y": 72
       },
       "targets": [
         {
