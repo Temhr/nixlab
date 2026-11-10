@@ -1137,7 +1137,11 @@ in rec {
           alert = "ZpoolDeviceErrors";
           expr = "zfs_vdev_errors > 0";
           for = "2m";
-          labels = {severity = "warning"; category = "storage"; checklist_section = "III.8";};
+          labels = {
+            severity = "warning";
+            category = "storage";
+            checklist_section = "III.8";
+          };
           annotations = {
             summary = "ZFS {{ $labels.type }} errors on {{ $labels.device }} ({{ $labels.pool }}) on {{ $labels.instance }}";
             description = "A vdev reports non-zero read/write/checksum errors while the pool may still be ONLINE. Investigate with zpool status -v and SMART, then zpool clear once resolved.";
@@ -1147,7 +1151,11 @@ in rec {
           alert = "ZpoolDataErrors";
           expr = "zfs_pool_error_count > 0";
           for = "1m";
-          labels = {severity = "critical"; category = "storage"; checklist_section = "III.8";};
+          labels = {
+            severity = "critical";
+            category = "storage";
+            checklist_section = "III.8";
+          };
           annotations = {
             summary = "ZFS pool {{ $labels.pool }} has permanent data errors on {{ $labels.instance }}";
             description = "Run zpool status -v to list affected files.";
@@ -1157,7 +1165,11 @@ in rec {
           alert = "ZpoolScrubOverdue";
           expr = "time() - zfs_last_scrub_end_timestamp_seconds > 10 * 86400";
           for = "1h";
-          labels = {severity = "warning"; category = "storage"; checklist_section = "III.8";};
+          labels = {
+            severity = "warning";
+            category = "storage";
+            checklist_section = "III.8";
+          };
           annotations = {
             summary = "No completed scrub of {{ $labels.pool }} in over 10 days on {{ $labels.instance }}";
             description = "Weekly autoScrub is enabled; check zfs-scrub.service/timer and zpool status.";
@@ -1167,7 +1179,11 @@ in rec {
           alert = "ZpoolScrubErrors";
           expr = "zfs_last_scrub_errors > 0";
           for = "5m";
-          labels = {severity = "warning"; category = "storage"; checklist_section = "III.8";};
+          labels = {
+            severity = "warning";
+            category = "storage";
+            checklist_section = "III.8";
+          };
           annotations = {
             summary = "Last scrub of {{ $labels.pool }} finished with errors on {{ $labels.instance }}";
             description = "Run zpool status -v. This stays until the next clean scrub.";
@@ -1177,7 +1193,11 @@ in rec {
           alert = "ZpoolMemberMissing";
           expr = "zfs_expected_device_present == 0";
           for = "1m";
-          labels = {severity = "critical"; category = "storage"; checklist_section = "III.8";};
+          labels = {
+            severity = "critical";
+            category = "storage";
+            checklist_section = "III.8";
+          };
           annotations = {
             summary = "ZFS member disk {{ $labels.device }} is missing on {{ $labels.instance }}";
             description = "The by-id path is gone. ZFS may still report the pool ONLINE until I/O reaches the disk.";
@@ -1186,7 +1206,11 @@ in rec {
         {
           alert = "ZpoolMemberReonlined";
           expr = "time() - zfs_device_last_auto_online_timestamp_seconds < 3600 and zfs_device_last_auto_online_timestamp_seconds > 0";
-          labels = {severity = "warning"; category = "storage"; checklist_section = "III.8";};
+          labels = {
+            severity = "warning";
+            category = "storage";
+            checklist_section = "III.8";
+          };
           annotations = {
             summary = "ZFS disk {{ $labels.device }} was automatically re-onlined on {{ $labels.instance }}";
             description = "The disk disappeared and returned. Check for a loose cable/slot or a flaky drive: zpool status, SMART, journalctl -t zfs-member-reconcile.";

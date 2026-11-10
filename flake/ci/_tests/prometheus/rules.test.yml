@@ -221,6 +221,184 @@ tests:
               summary: "ZFS pool tanks is degraded on h"
               description: "Run zpool status -x. A degraded pool has lost redundancy."
 
+  # A ZFS member disk whose by-id path is gone fires after 1 minute, and only
+  # for that disk (the present one stays quiet).
+  - interval: 1m
+    input_series:
+      - series: 'zfs_expected_device_present{pool="tanks", device="scsi-aaa", instance="localhost"}'
+        values: '1 1 1 0 0 0 0 0 0'
+      - series: 'zfs_expected_device_present{pool="tanks", device="scsi-bbb", instance="localhost"}'
+        values: '1x8'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: ZpoolMemberMissing
+        exp_alerts: []
+      - eval_time: 3m30s
+        alertname: ZpoolMemberMissing
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: ZpoolMemberMissing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              device: scsi-aaa
+              instance: localhost
+            exp_annotations:
+              summary: "ZFS member disk scsi-aaa is missing on localhost"
+              description: "The by-id path is gone. ZFS may still report the pool ONLINE until I/O reaches the disk."
+
+  # ZpoolMemberMissing resolves once the disk returns.
+  - interval: 1m
+    input_series:
+      - series: 'zfs_expected_device_present{pool="tanks", device="scsi-aaa", instance="localhost"}'
+        values: '1 0 0 0 0 1 1 1'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: ZpoolMemberMissing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              device: scsi-aaa
+              instance: localhost
+            exp_annotations:
+              summary: "ZFS member disk scsi-aaa is missing on localhost"
+              description: "The by-id path is gone. ZFS may still report the pool ONLINE until I/O reaches the disk."
+      - eval_time: 7m
+        alertname: ZpoolMemberMissing
+        exp_alerts: []
+
+  # An automatic re-online fires for an hour, and not for a disk that was never
+  # onlined (timestamp 0). time() is seconds since the start of the test, so a
+  # timestamp of 600 means "auto-onlined 10 minutes in".
+  - interval: 1m
+    input_series:
+      - series: 'zfs_device_last_auto_online_timestamp_seconds{pool="tanks", device="scsi-aaa", instance="localhost"}'
+        values: '600+0x130'
+      - series: 'zfs_device_last_auto_online_timestamp_seconds{pool="tanks", device="scsi-bbb", instance="localhost"}'
+        values: '0+0x130'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: ZpoolMemberReonlined
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              device: scsi-aaa
+              instance: localhost
+            exp_annotations:
+              summary: "ZFS disk scsi-aaa was automatically re-onlined on localhost"
+              description: "The disk disappeared and returned. Check for a loose cable/slot or a flaky drive: zpool status, SMART, journalctl -t zfs-member-reconcile."
+      - eval_time: 100m
+        alertname: ZpoolMemberReonlined
+        exp_alerts: []
+
+  # Non-zero checksum errors fire after 2 minutes; the zero read counter does not.
+  - interval: 1m
+    input_series:
+      - series: 'zfs_vdev_errors{pool="tanks", device="scsi-aaa", vdev_type="disk", type="checksum", instance="localhost"}'
+        values: '0 0 0 3 3 3 3 3 3'
+      - series: 'zfs_vdev_errors{pool="tanks", device="scsi-aaa", vdev_type="disk", type="read", instance="localhost"}'
+        values: '0x8'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: ZpoolDeviceErrors
+        exp_alerts: []
+      - eval_time: 7m
+        alertname: ZpoolDeviceErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              device: scsi-aaa
+              vdev_type: disk
+              type: checksum
+              instance: localhost
+            exp_annotations:
+              summary: "ZFS checksum errors on scsi-aaa (tanks) on localhost"
+              description: "A vdev reports non-zero read/write/checksum errors while the pool may still be ONLINE. Investigate with zpool status -v and SMART, then zpool clear once resolved."
+
+  # Permanent data errors are critical.
+  - interval: 1m
+    input_series:
+      - series: 'zfs_pool_error_count{pool="tanks", instance="localhost"}'
+        values: '0 0 2 2 2 2'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: ZpoolDataErrors
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: ZpoolDataErrors
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              instance: localhost
+            exp_annotations:
+              summary: "ZFS pool tanks has permanent data errors on localhost"
+              description: "Run zpool status -v to list affected files."
+
+  # A scrub older than 10 days fires after 1 hour; a recent one does not. The
+  # timestamps are negative so that time() - timestamp is already ~11 days (or
+  # 1 hour) at the start of the test, without 16,000 samples of history.
+  - interval: 1m
+    input_series:
+      - series: 'zfs_last_scrub_end_timestamp_seconds{pool="tanks", instance="localhost"}'
+        values: '-950400+0x130'
+      - series: 'zfs_last_scrub_end_timestamp_seconds{pool="fresh", instance="localhost"}'
+        values: '-3600+0x130'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ZpoolScrubOverdue
+        exp_alerts: []
+      - eval_time: 90m
+        alertname: ZpoolScrubOverdue
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              instance: localhost
+            exp_annotations:
+              summary: "No completed scrub of tanks in over 10 days on localhost"
+              description: "Weekly autoScrub is enabled; check zfs-scrub.service/timer and zpool status."
+
+  # A scrub that finished with errors fires after 5 minutes; a clean pool does not.
+  - interval: 1m
+    input_series:
+      - series: 'zfs_last_scrub_errors{pool="tanks", instance="localhost"}'
+        values: '0 0 4 4 4 4 4 4 4 4'
+      - series: 'zfs_last_scrub_errors{pool="clean", instance="localhost"}'
+        values: '0x9'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ZpoolScrubErrors
+        exp_alerts: []
+      - eval_time: 9m
+        alertname: ZpoolScrubErrors
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              category: storage
+              checklist_section: III.8
+              pool: tanks
+              instance: localhost
+            exp_annotations:
+              summary: "Last scrub of tanks finished with errors on localhost"
+              description: "Run zpool status -v. This stays until the next clean scrub."
+
   - interval: 1m
     input_series:
       - series: 'node_power_supply_energy_full{instance="h", power_supply="BAT0"}'
