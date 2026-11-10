@@ -38,6 +38,6 @@
       })
       config.mirrorPeers);
     config.systemd.network.wait-online.enable = true;
-    config.systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} user"];
+    config.systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} users"];
   };
 }
