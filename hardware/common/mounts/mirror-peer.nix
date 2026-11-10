@@ -23,8 +23,8 @@
 
             # Soft-ish behaviour: error out instead of blocking forever
             "soft"
-            "timeo=50"            # 5s per attempt (units are tenths of a second)
-            "retrans=3"           # retries before returning an error
+            "timeo=50" # 5s per attempt (units are tenths of a second)
+            "retrans=3" # retries before returning an error
             "x-systemd.mount-timeout=10"
 
             # Read-only, as your description says

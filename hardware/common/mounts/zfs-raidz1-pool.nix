@@ -282,7 +282,10 @@
         # NFS server configuration
         nfsMirrorServer = lib.mkIf cfg.nfs.enable {
           enable = true;
-          exportPath = if cfg.nfs.exportPath != "" then cfg.nfs.exportPath else cfg.mountPoint;
+          exportPath =
+            if cfg.nfs.exportPath != ""
+            then cfg.nfs.exportPath
+            else cfg.mountPoint;
           allowedNetwork = cfg.nfs.allowedNetwork;
           exportOptions = cfg.nfs.exportOptions;
         };
