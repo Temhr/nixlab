@@ -244,8 +244,8 @@
       "title": "Missing Disks",
       "description": "Configured pool disks whose /dev/disk/by-id path no longer exists (OS view, updated every 30s). Independent of what ZFS reports.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
+        "h": 2,
+        "w": 6,
         "x": 0,
         "y": 6
       },
@@ -293,9 +293,9 @@
       "title": "Not Online in ZFS",
       "description": "Configured disks that 'zpool status' does not list as ONLINE. May lag behind 'Missing Disks' on an idle pool, because ZFS only notices a failed disk when I/O reaches it.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 3,
+        "h": 2,
+        "w": 6,
+        "x": 6,
         "y": 6
       },
       "targets": [
@@ -342,9 +342,9 @@
       "title": "Auto-Onlined (1h)",
       "description": "Disks that came back and were automatically re-onlined by zfs-member-reconcile in the last hour. A disk that keeps showing up here is flaky.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 6,
+        "h": 2,
+        "w": 6,
+        "x": 12,
         "y": 6
       },
       "targets": [
@@ -391,9 +391,9 @@
       "title": "Disk Errors",
       "description": "Sum of read, write and checksum errors across member disks. Counters stay until 'zpool clear'.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 9,
+        "h": 2,
+        "w": 6,
+        "x": 18,
         "y": 6
       },
       "targets": [
@@ -440,10 +440,10 @@
       "title": "Pool Data Errors",
       "description": "Permanent data errors ZFS could not repair. Run 'zpool status -v' to list the affected files.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 12,
-        "y": 6
+        "h": 2,
+        "w": 6,
+        "x": 0,
+        "y": 8
       },
       "targets": [
         {
@@ -489,10 +489,10 @@
       "title": "Last Scrub Age",
       "description": "Time since the last completed scrub. Weekly autoScrub is expected; yellow after 8 days, red after 10 (the ZpoolScrubOverdue threshold).",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 15,
-        "y": 6
+        "h": 2,
+        "w": 6,
+        "x": 6,
+        "y": 8
       },
       "targets": [
         {
@@ -542,10 +542,10 @@
       "title": "Last Scrub Errors",
       "description": "Unrepaired errors found by the last completed scrub. Stays until the next clean scrub finishes.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 18,
-        "y": 6
+        "h": 2,
+        "w": 6,
+        "x": 12,
+        "y": 8
       },
       "targets": [
         {
@@ -591,10 +591,10 @@
       "title": "Firing ZFS Alerts",
       "description": "Number of currently firing alerts whose name starts with Zpool.",
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 21,
-        "y": 6
+        "h": 2,
+        "w": 6,
+        "x": 18,
+        "y": 8
       },
       "targets": [
         {
