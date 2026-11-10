@@ -3,6 +3,7 @@
     imports = [
       (self.lib.mkHardwareProfile "m720q-nas1") # explicit — no config lookup, no ambiguity
       self.nixosModules.hardw--mounts--zfs-raidz1-pool
+      self.nixosModules.hardw--mounts--nfs-mirror-server
       self.nixosModules.hardw--mounts--mirror-peer
     ];
     mirrorPeers = ["nixnas2"];
