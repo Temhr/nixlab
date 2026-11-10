@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.hardw--mounts--mirror-peer = {
+  flake.nixosModules.hardw--mounts--nfs-mirror-client = {
     allHosts,
     config,
     lib,
