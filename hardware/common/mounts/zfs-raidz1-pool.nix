@@ -60,23 +60,8 @@
           };
           exportOptions = lib.mkOption {
             type = lib.types.str;
-            default = "rw,no_root_squash,fsid=0,no_subtree_check";
+            default = "ro,root_squash,fsid=0,no_subtree_check";
             description = "NFS export options";
-          };
-          lockdPort = lib.mkOption {
-            type = lib.types.int;
-            default = 4001;
-            description = "Fixed port for rpc.lockd";
-          };
-          mountdPort = lib.mkOption {
-            type = lib.types.int;
-            default = 4002;
-            description = "Fixed port for rpc.mountd";
-          };
-          statdPort = lib.mkOption {
-            type = lib.types.int;
-            default = 4000;
-            description = "Fixed port for rpc.statd";
           };
         };
       };
@@ -295,36 +280,11 @@
         };
 
         # NFS server configuration
-        services.nfs.server = lib.mkIf cfg.nfs.enable (let
-          nfsExportPath =
-            if cfg.nfs.exportPath != ""
-            then cfg.nfs.exportPath
-            else cfg.mountPoint;
-        in {
+        nfsMirrorServer = lib.mkIf cfg.nfs.enable {
           enable = true;
-          exports = ''
-            ${nfsExportPath} ${cfg.nfs.allowedNetwork}(${cfg.nfs.exportOptions})
-          '';
-          lockdPort = cfg.nfs.lockdPort;
-          mountdPort = cfg.nfs.mountdPort;
-          statdPort = cfg.nfs.statdPort;
-          extraNfsdConfig = "";
-        });
-
-        # Don't start the NFS server (and its exportfs) until the pool is mounted,
-        # otherwise it exports the bare /mirror directory on the root disk.
-        systemd.services.nfs-server.unitConfig.RequiresMountsFor = lib.mkIf cfg.nfs.enable [
-          (
-            if cfg.nfs.exportPath != ""
-            then cfg.nfs.exportPath
-            else cfg.mountPoint
-          )
-        ];
-
-        # Open firewall ports for NFS
-        networking.firewall = lib.mkIf cfg.nfs.enable {
-          allowedTCPPorts = [111 2049 cfg.nfs.statdPort cfg.nfs.lockdPort cfg.nfs.mountdPort 20048];
-          allowedUDPPorts = [111 2049 cfg.nfs.statdPort cfg.nfs.lockdPort cfg.nfs.mountdPort 20048];
+          exportPath = if cfg.nfs.exportPath != "" then cfg.nfs.exportPath else cfg.mountPoint;
+          allowedNetwork = cfg.nfs.allowedNetwork;
+          exportOptions = cfg.nfs.exportOptions;
         };
 
         # IMPORTANT: You must also set networking.hostId in your main configuration!

@@ -12,9 +12,28 @@
     };
     config.fileSystems = lib.mkMerge (map (peer: {
         "/mnt/mir${peer}" = {
-          device = "${allHosts.${peer}.address}:/mirror";
+          device = "${allHosts.${peer}.address}:/";
           fsType = "nfs";
-          options = ["x-systemd.automount" "noauto" "_netdev" "x-systemd.after=network-online.target" "x-systemd.idle-timeout=60"];
+          options = [
+            "x-systemd.automount"
+            "noauto"
+            "_netdev"
+            "x-systemd.after=network-online.target"
+            "x-systemd.idle-timeout=60"
+
+            # Soft-ish behaviour: error out instead of blocking forever
+            "soft"
+            "timeo=50"            # 5s per attempt (units are tenths of a second)
+            "retrans=3"           # retries before returning an error
+            "x-systemd.mount-timeout=10"
+
+            # Read-only, as your description says
+            "ro"
+
+            # Reasonable defaults for a LAN mirror
+            "nfsvers=4.2"
+            "nofail"
+          ];
         };
       })
       config.mirrorPeers);

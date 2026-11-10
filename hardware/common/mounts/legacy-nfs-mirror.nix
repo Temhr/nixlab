@@ -1,24 +1,13 @@
 # candidate to migrate onto the ZFS module later if nixnas2's disks ever get converted
-{...}: {
+{self, ...}: {
   flake.nixosModules.hardw--mounts--legacy-nfs-mirror = {config, ...}: {
+    imports = [self.nixosModules.hardw--mounts--nfs-mirror-server];
+    nfsMirrorServer.enable = true;
     fileSystems."/mirror" = {
       device = "/dev/disk/by-label/mirror";
       fsType = "ext4";
-      options = ["defaults" "auto" "nofail" "x-systemd.device-timeout=10s"];
+      options = ["defaults" "nofail" "x-systemd.device-timeout=10s"];
     };
-    services.nfs.server = {
-      enable = true;
-      exports = ''/mirror 10.0.0.0/255.255.255.0(rw,no_root_squash,fsid=0,no_subtree_check) '';
-      # fixed rpc.statd port; for firewall
-      lockdPort = 4001;
-      mountdPort = 4002;
-      statdPort = 4000;
-      extraNfsdConfig = '''';
-    };
-    networking.firewall = {
-      allowedTCPPorts = [111 2049 4000 4001 4002 20048];
-      allowedUDPPorts = [111 2049 4000 4001 4002 20048];
-    };
-    systemd.tmpfiles.rules = ["d /mirror 1744 ${config.nixlab.mainUser} user "];
+    systemd.tmpfiles.rules = ["d /mirror 0755 ${config.nixlab.mainUser} users -"];
   };
 }
