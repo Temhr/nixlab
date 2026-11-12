@@ -28,7 +28,7 @@
             "x-systemd.mount-timeout=10"
 
             # Read-only, as your description says
-            "ro"
+            "rw"
 
             # Reasonable defaults for a LAN mirror
             "nfsvers=4.2"
@@ -38,6 +38,6 @@
       })
       config.mirrorPeers);
     config.systemd.network.wait-online.enable = true;
-    config.systemd.tmpfiles.rules = ["d /mnt 1744 ${config.nixlab.mainUser} users"];
+    config.systemd.tmpfiles.rules = ["d /mnt 0755 ${config.nixlab.mainUser} users"];
   };
 }

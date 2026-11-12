@@ -21,7 +21,7 @@
           };
           exportOptions = lib.mkOption {
             type = lib.types.str;
-            default = "ro,root_squash,fsid=0,no_subtree_check";
+            default = "rw,no_root_squash,fsid=0,no_subtree_check";
           };
         };
         config = lib.mkIf cfg.enable {

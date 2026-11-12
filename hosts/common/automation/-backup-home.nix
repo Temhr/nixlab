@@ -430,7 +430,7 @@
         Type = "oneshot";
         User = "root";
       };
-      path = [pkgs.rsync "/root"];
+      path = [pkgs.rsync];
       startAt = "03:30:00";
     };
   };
