@@ -40,10 +40,6 @@
           id = "WQ2UB3E-QP6SQQ2-2VC7CUC-QIE44TU-YVESRAM-DBPBMIR-NNRJF4B-RBAZSAV";
           addresses = ["dynamic"];
         };
-        "Pixel 3a XL" = {
-          id = "4CCPARZ-D55MZPY-OMRVLQL-YAQJFKY-5RZXAFQ-MZJ4VSC-E5ZS7VQ-VRCFGAY";
-          addresses = ["dynamic"];
-        };
       };
       folders = {
         "mirror" = {
@@ -57,14 +53,14 @@
           path = "/mirror/phshare/photos";
           id = "Phone media";
           label = "Phone media";
-          devices = ["Pixel 8 Pro" "Pixel 3a XL"];
+          devices = ["Pixel 8 Pro"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
         "Docs" = {
           path = "/mirror/phshare/docs";
           id = "Docs";
           label = "Docs";
-          devices = ["Pixel 8 Pro" "Pixel 3a XL"];
+          devices = ["Pixel 8 Pro"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
         };
       };
