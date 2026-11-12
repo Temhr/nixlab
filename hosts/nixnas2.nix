@@ -25,6 +25,7 @@
       enableGuiAuth = false; # No username/password prompt
       user = "${config.nixlab.mainUser}";
       group = "users";
+      dataDir = "/data/syncthing";
       guiAddress = "0.0.0.0";
       configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;
