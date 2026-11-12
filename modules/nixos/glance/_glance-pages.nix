@@ -119,6 +119,14 @@
                 url = "https://video.fedihost.co/feeds/videos.xml?videoChannelId=8";
                 title = "FediHost Podcast (Peertube)";
               }
+              {
+                url = "https://video.canadiancivil.com/feeds/videos.xml?videoChannelId=1378";
+                title = "Canadian Civil (Peertube)";
+              }
+              {
+                url = "https://video.canadiancivil.com/feeds/videos.xml?videoChannelId=304";
+                title = "Paige Saunders (Peertube)";
+              }
             ];
           }
           {
