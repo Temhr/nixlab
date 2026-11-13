@@ -30,7 +30,7 @@
       #umask = "0007";
       devices = {
         "nixnas1" = {
-          id = "FLLLT4M-KQYRPWS-Q6F2RNK-FW4LQ3E-ENZKNBI-VP3PJ4Q-HYWCKP3-2RQM3AB";
+          id = "WDYF63J-EG42F27-MLXYVKH-R6QQ4PM-TRLBPX6-D4UQ7BG-EJTFC5Z-IZFPSAQ";
           addresses = ["dynamic"];
           introducer = false;
         };

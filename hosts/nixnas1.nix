@@ -32,7 +32,7 @@
       #mask = "0007";
       devices = {
         "nixnas2" = {
-          id = "2PZM5WE-FIU62B2-HABKBHT-5D6S2KW-U2YDFGH-5OIM4I3-PC4OOZI-YGBVHAQ";
+          id = "M53I7MY-EZDTPI7-5HEHC7V-HIM4KWZ-P2IIR3Y-Y6AX4QV-G2NTY4K-YKURGQF";
           addresses = ["dynamic"];
           introducer = false;
         };
