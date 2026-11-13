@@ -262,7 +262,7 @@
         # OPTIONAL: Supplementary groups for the Syncthing user
         extraGroups = lib.mkOption {
           type = lib.types.listOf lib.types.str;
-          default = [];
+          default = [config.nixlab.mainUser];
           example = ["users"];
           description = ''
             Supplementary groups added to the Syncthing user, e.g. the group

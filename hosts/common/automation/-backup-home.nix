@@ -71,7 +71,7 @@
           # WARNING: can pull in unexpected files
 
           # Make backed-up directories and files group-accessible (0700 -> 0770)
-          "--chmod=g+rwx"
+          #"--chmod=g+rwx"
 
 
           # =========================
@@ -121,7 +121,7 @@
           "--inplace"
 
           # Make backed-up directories and files group-accessible (0700 -> 0770)
-          "--chmod=g+rwx"
+          #"--chmod=g+rwx"
 
           # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
           "--exclude=*/.config/*"

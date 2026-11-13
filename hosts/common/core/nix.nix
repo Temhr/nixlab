@@ -1,5 +1,6 @@
 {...}: {
   flake.nixosModules.hosts--core--nix = {
+    config,
     inputs,
     lib,
     ...
@@ -17,6 +18,8 @@
 
         ## Optimize storage (only for incoming/new files)
         auto-optimise-store = true;
+
+        allowed-users = ["@wheel" config.nixlab.mainUser];
       };
       # Opinionated: disable channels
       channel.enable = false;
