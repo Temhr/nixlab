@@ -70,6 +70,9 @@
           # Useful to avoid broken backups
           # WARNING: can pull in unexpected files
 
+          # Make backed-up directories group-accessible (0700 -> 0770)
+          "--chmod=Dg+rwx"
+
 
           # =========================
           # INCLUDE ONLY THESE
@@ -116,6 +119,9 @@
           "--delete-delay"
           "--partial"
           "--inplace"
+
+          # Make backed-up directories group-accessible (0700 -> 0770)
+          "--chmod=Dg+rwx"
 
           # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
           "--exclude=*/.config/*"
