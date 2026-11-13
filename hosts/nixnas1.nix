@@ -26,8 +26,8 @@
       enable = true;
       enableGuiAuth = false; # No username/password prompt
       dataDir = "/data/syncthing";
+      configDir = "/data/syncthing";
       guiAddress = "0.0.0.0";
-      configDir = "/home/${config.nixlab.mainUser}/.config/syncthing";
       openFirewall = true;
       devices = {
         "nixnas2" = {
