@@ -27,6 +27,7 @@
       configDir = "/data/syncthing";
       guiAddress = "0.0.0.0";
       openFirewall = true;
+      user = "${config.nixlab.mainUser}";
       extraGroups = ["users"];
       umask = "0007";
       devices = {

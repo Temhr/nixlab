@@ -8,6 +8,6 @@
       fsType = "ext4";
       options = ["defaults" "nofail" "x-systemd.device-timeout=10s"];
     };
-    systemd.tmpfiles.rules = ["d /mirror 0775 ${config.nixlab.mainUser} users -"];
+    systemd.tmpfiles.rules = ["d /mirror 0755 ${config.nixlab.mainUser} users -"];
   };
 }
