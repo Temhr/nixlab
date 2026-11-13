@@ -117,7 +117,7 @@
 
         # Create mount point directory
         systemd.tmpfiles.rules = [
-          "d ${mountPoint} 0755 ${config.nixlab.mainUser} users"
+          "d ${mountPoint} 0775 ${config.nixlab.mainUser} users"
         ];
 
         # Delegate pool rename to the dedicated module, passing poolName + devices
