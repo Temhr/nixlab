@@ -70,8 +70,8 @@
           # Useful to avoid broken backups
           # WARNING: can pull in unexpected files
 
-          # Make backed-up directories group-accessible (0700 -> 0770)
-          "--chmod=Dg+rwx"
+          # Make backed-up directories and files group-accessible (0700 -> 0770)
+          "--chmod=g+rwx"
 
 
           # =========================
@@ -120,8 +120,8 @@
           "--partial"
           "--inplace"
 
-          # Make backed-up directories group-accessible (0700 -> 0770)
-          "--chmod=Dg+rwx"
+          # Make backed-up directories and files group-accessible (0700 -> 0770)
+          "--chmod=g+rwx"
 
           # EXCLUDE TROUBLESOME SHELF ITEMS (by name)
           "--exclude=*/.config/*"
