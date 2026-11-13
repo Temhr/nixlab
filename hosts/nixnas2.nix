@@ -27,6 +27,8 @@
       configDir = "/data/syncthing";
       guiAddress = "0.0.0.0";
       openFirewall = true;
+      extraGroups = ["users"];
+      umask = "0007";
       devices = {
         "nixnas1" = {
           id = "FLLLT4M-KQYRPWS-Q6F2RNK-FW4LQ3E-ENZKNBI-VP3PJ4Q-HYWCKP3-2RQM3AB";

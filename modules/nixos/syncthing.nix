@@ -258,6 +258,31 @@
           example = ["alice"];
           description = "Extra users to add to the groups";
         };
+
+        # OPTIONAL: Supplementary groups for the Syncthing user
+        extraGroups = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["users"];
+          description = ''
+            Supplementary groups added to the Syncthing user, e.g. the group
+            that owns a synced folder. Groups must exist (declare them with
+            users.groups.<name> = {} if needed). Membership is applied when
+            the service starts, so it needs a restart after changing.
+          '';
+        };
+
+        # OPTIONAL: umask for the Syncthing service
+        umask = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "0007";
+          description = ''
+            UMask for the Syncthing service. Set to "0007" when sharing
+            folders via a group, so files Syncthing creates stay
+            group-writable. null leaves the systemd default (0022).
+          '';
+        };
       };
     };
 
@@ -305,6 +330,8 @@
             description = "Syncthing daemon user";
           };
         }
+        ++ lib.optional (cfg.extraGroups != [])
+        {${cfg.user}.extraGroups = cfg.extraGroups;}
         ++ lib.optionals (config.nixlab ? mainUser && config.nixlab.mainUser != "")
         (map (u: {${u} = {extraGroups = [cfg.group];};})
           ([config.nixlab.mainUser] ++ cfg.extraUsers))
@@ -419,6 +446,9 @@
           }
           // lib.optionalAttrs (cfg.secretsEnvFile != null) {
             EnvironmentFile = cfg.secretsEnvFile;
+          }
+          // lib.optionalAttrs (cfg.umask != null) {
+            UMask = cfg.umask;
           };
       };
 
