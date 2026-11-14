@@ -2,6 +2,7 @@
 {...}: {
   flake.homeModules.home--shell--bash = {
     allHosts,
+    config,
     flakePath,
     lib,
     pkgs,
@@ -44,13 +45,13 @@
         ".bash/aliases/ssh.sh".source = pkgs.writeText "ssh.sh" ''
           # aliases/ssh.sh — SSH shortcuts generated from allHosts (managed by Nix)
 
-          alias nixace='ssh  temhr@${allHosts.nixace.address}'
-          alias nixnas1='ssh temhr@${allHosts.nixnas1.address}'
-          alias nixnas2='ssh temhr@${allHosts.nixnas2.address}'
-          alias nixsun='ssh  temhr@${allHosts.nixsun.address}'
-          alias nixtop='ssh  temhr@${allHosts.nixtop.address}'
-          alias nixvat='ssh  temhr@${allHosts.nixvat.address}'
-          alias nixzen='ssh  temhr@${allHosts.nixzen.address}'
+          alias nixace='ssh  ${config.home.username}@${allHosts.nixace.address}'
+          alias nixnas1='ssh ${config.home.username}@${allHosts.nixnas1.address}'
+          alias nixnas2='ssh ${config.home.username}@${allHosts.nixnas2.address}'
+          alias nixsun='ssh  ${config.home.username}@${allHosts.nixsun.address}'
+          alias nixtop='ssh  ${config.home.username}@${allHosts.nixtop.address}'
+          alias nixvat='ssh  ${config.home.username}@${allHosts.nixvat.address}'
+          alias nixzen='ssh  ${config.home.username}@${allHosts.nixzen.address}'
         '';
       }
       // aliasHomeFiles;

@@ -72,7 +72,7 @@
         # Set the command to run.
         ExecStart = "${flakeUpdateShellScript}";
         Type = "oneshot";
-        # Run as the temhr user
+        # Run as the mainUser
         User = config.nixlab.mainUser;
         # Set the working directory
         WorkingDirectory = "/home/${config.nixlab.mainUser}/nixlab";

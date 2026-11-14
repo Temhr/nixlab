@@ -141,8 +141,8 @@
                   passwordFile = config.sops.secrets.MATRIX_HERMES-BOT_PASSWORD.path;
                 }
                 {
-                  username = "temhr";
-                  passwordFile = config.sops.secrets.MATRIX_TEMHR_PASSWORD.path;
+                  username = "mainUser";
+                  passwordFile = config.sops.secrets.MATRIX_mainUser_PASSWORD.path;
                 }
               ]
             '';

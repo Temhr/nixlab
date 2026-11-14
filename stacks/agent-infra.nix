@@ -10,8 +10,8 @@
     hermesCfg = config.services.hermes-agent;
 
     # Every proper-prefix directory of `path`, shallowest first, EXCLUDING
-    # `path` itself — e.g. for "/home/temhr/nixlab" this is
-    # ["/home" "/home/temhr"]. These need +x (traversal) only, not +r,
+    # `path` itself — e.g. for "/home/mainUser/nixlab" this is
+    # ["/home" "/home/mainUser"]. These need +x (traversal) only, not +r,
     # so the hermes group can pass through without being able to list
     # unrelated sibling files.
     ancestorsOf = path: let
@@ -62,7 +62,7 @@
       gitRepoPaths = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [];
-        example = ["/home/temhr/nixlab"];
+        example = ["/home/mainUser/nixlab"];
         description = ''
           Git repositories the git MCP server can operate on. Each path
           becomes its own named MCP server (git-0, git-1, ...) since
