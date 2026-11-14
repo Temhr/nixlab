@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.servc--wifi-hotspot-nixlab = {
+  flake.nixosModules.systm--wifi-hotspot-nixlab = {
     config,
     lib,
     pkgs,

@@ -7,7 +7,7 @@
   }: let
     cfg = config.services.wifi-hotspot-nixlab;
   in {
-    imports = [self.nixosModules.servc--wifi-hotspot-nixlab];
+    imports = [self.nixosModules.systm--wifi-hotspot-nixlab];
 
     options.services.wifi-hotspot-nixlab.secretsFile = lib.mkOption {
       type = lib.types.path;
