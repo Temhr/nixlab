@@ -121,7 +121,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: critical
-              category: monitoring
+              category: observability
               checklist_section: VII.21
               instance: "localhost:9090"
               job: prometheus
@@ -139,7 +139,7 @@ tests:
         exp_alerts:
           - exp_labels:
               severity: critical
-              category: monitoring
+              category: observability
               checklist_section: VII.22
               instance: "localhost:9090"
               job: prometheus

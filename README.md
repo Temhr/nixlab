@@ -2,7 +2,7 @@
 
 Modular NixOS configuration for laptops, desktops, and homelab servers — built on the **Dendritic Pattern** with **flake-parts**, where every file self-registers its own output (including its own metadata and library functions).
 
-New here? [Architecture at a Glance](#architecture-at-a-glance) is the one-minute version; [Core Concepts](#core-concepts) is the canonical explanation everything else links back to. Running the monitoring stack? Start at [Monitoring Stack](#monitoring-stack).
+New here? [Architecture at a Glance](#architecture-at-a-glance) is the one-minute version; [Core Concepts](#core-concepts) is the canonical explanation everything else links back to. Running the observability stack? Start at [Observability Stack](#observability-stack).
 
 Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/nix-starter-configs), with inspiration from [EmergentMind](https://www.youtube.com/@EmergentMind), [Vimjoyer](https://www.youtube.com/@vimjoyer), and the NixOS community. Rewritten almost entirely with Claude.
 
@@ -26,7 +26,7 @@ Adapted from [Misterio77's nix-starter-configs](https://github.com/Misterio77/ni
 - [Repository Reference](#repository-reference)
   - [Repository Layout](#repository-layout)
   - [Top-Level Folder Reference](#top-level-folder-reference)
-- [Monitoring Stack](#monitoring-stack)
+- [Observability Stack](#observability-stack)
 - [Usage](#usage)
   - [First Install](#first-install-on-a-new-machine)
   - [Daily Commands](#daily-commands)
@@ -217,7 +217,7 @@ A username existing as a login account (`systemUsers`) and as a home-manager pro
 | `flake/data/` | Pure attrsets, nothing else | No functions, no `mkOption` — safe to read/diff without evaluating logic |
 | `flake/schema/` | Option declarations + per-axis constructors (`mkMachineMeta`, `mkHostMeta`) | Validates/default-fills `data/` attrsets — a typo'd field gets a real error, not a silent failure |
 | `flake/builders/` | One file per axis (hardware, hosts, users) | Turns validated metadata into real configs — see [Builder Functions](#builder-functions) |
-| `flake/ci/` | Dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`, `monitoring-checks.nix`, `_tests/`) | Plumbing for the repo, not part of what it *means* |
+| `flake/ci/` | Dev-facing tooling (`checks.nix`, `apps.nix`, `packages.nix`, `observability-checks.nix`, `_tests/`) | Plumbing for the repo, not part of what it *means* |
 | `flake/nixos-lib.nix`, `flake/pkgs.nix` | Cross-cutting helpers, not axis-specific | See [Entry Point & Orchestration Files](#entry-point--orchestration-files) |
 
 Rule of thumb: "is it data, a type/constructor, a generator, or tooling?" answers where a new file goes.
@@ -321,7 +321,7 @@ in {
 
 Because `self` resolves lazily, `builders/hosts.nix` can reference `self.lib.hostsMeta` before that attribute "arrives" from its own file — the same laziness that lets any module reference `self.nixosModules.*` regardless of load order. That's why `data/*.nix` can live anywhere without breaking the constructors or generators built on top of it.
 
-**Modules may also register `flake.lib` hooks for CI.** When CI needs something that lives inside a module (the rendered Prometheus config, the alert-rule generator, the Grafana dashboards directory, the maintenance-logger script), the owning module registers it by name (`self.lib.prometheusRendered`, `prometheusMaintenanceAlerts`, `grafanaDashboards`, `maintenanceLoggerScript`) and `flake/ci/monitoring-checks.nix` consumes it by name — still no cross-folder path imports.
+**Modules may also register `flake.lib` hooks for CI.** When CI needs something that lives inside a module (the rendered Prometheus config, the alert-rule generator, the Grafana dashboards directory, the maintenance-logger script), the owning module registers it by name (`self.lib.prometheusRendered`, `prometheusMaintenanceAlerts`, `grafanaDashboards`, `maintenanceLoggerScript`) and `flake/ci/observability-checks.nix` consumes it by name — still no cross-folder path imports.
 
 </details>
 
@@ -355,15 +355,15 @@ All NixOS modules register under `flake.nixosModules`; all home-manager modules 
 | `home--shell--` | Shell/dotfile modules |
 | `nsops--` | sops-nix secret wiring modules |
 | `servc--` | Self-hosted service modules — atomic, no knowledge of sibling services (e.g. `servc--prometheus-nixlab`) |
-| `stack--` | Multi-service integration bundles — imports ≥2 `servc--`/`nsops--` and wires them together (`stack--monitoring`; see [Top-Level Folder Reference](#top-level-folder-reference)) |
-| `systm--` | Cross-cutting system defaults and small helper modules — per-service port defaults (`systm--ports-*`) and non-service helpers (`systm--maintenance-log-nixlab`, `systm--monitoring-backup-nixlab`) |
+| `stack--` | Multi-service integration bundles — imports ≥2 `servc--`/`nsops--` and wires them together (`stack--observability`; see [Top-Level Folder Reference](#top-level-folder-reference)) |
+| `systm--` | Cross-cutting system defaults and small helper modules — per-service port defaults (`systm--ports-*`) and non-service helpers (`systm--maintenance-log-nixlab`, `systm--observability-backup-nixlab`) |
 
 ```
 # nix flake show (abbreviated)
 ├───nixosConfigurations
 │   ├───nixace, nixnas1, nixnas2, nixsun, nixtop, nixvat, nixzen
 ├───nixosModules
-│   ├───hardw--zb17g4-p5, hardw--profl--workstation-nvidia, hosts--nixace, servc--glance-nixlab, stack--monitoring, ...
+│   ├───hardw--zb17g4-p5, hardw--profl--workstation-nvidia, hosts--nixace, servc--glance-nixlab, stack--observability, ...
 ├───homeModules
 │   ├───home--profl--base, home--profl--desktop, home--core--config-git, home--apps--browsers, ...
 ```
@@ -374,13 +374,13 @@ All NixOS modules register under `flake.nixosModules`; all home-manager modules 
 |---|---|---|---|
 | Hardware | *(function)* `mkHardwareProfile "<machine>"` | Universal fs layout, per-machine boot/initrd/kernel facts from `hardwareMeta`, CPU microcode | Called directly by each machine file |
 | Hardware | `hardw--profl--workstation-nvidia` | nvidia driver + local `/data` mount + mirror-peer NFS mounts | The 5 nvidia-equipped workstation/laptop machines |
-| NixOS | `hosts--profl--base` | Boot loader, networking, nix settings, ssh, sops, `stack--monitoring`, home-manager wiring, automation timers | Every host |
+| NixOS | `hosts--profl--base` | Boot loader, networking, nix settings, ssh, sops, `stack--observability`, home-manager wiring, automation timers | Every host |
 | NixOS | `hosts--profl--desktop` | Dev/gaming/media/productivity/virtualization toggles, desktop-only concerns | Desktop/laptop hosts |
 | NixOS | `hosts--profl--nas` | NAS-specific automation (phone media backup) | NAS hosts |
 | Home-manager | `home--profl--base` | git, ssh, fastfetch, XDG folders, ephemeral-app launchers, bash shell integration | Every user |
 | Home-manager | `home--profl--desktop` | Browsers, terminal emulators, virt-manager dconf tweak | Users whose resolved profile is `"desktop"` |
 
-> Importing `stack--monitoring` makes the stack *available*; it does nothing until a host sets `services.nixlab-monitoring.enable = true`. See [Monitoring Stack](#monitoring-stack).
+> Importing `stack--observability` makes the stack *available*; it does nothing until a host sets `services.nixlab-observability.enable = true`. See [Observability Stack](#observability-stack).
 
 </details>
 
@@ -450,7 +450,7 @@ NixOS system accounts follow the identical shape via `mkSystemUsersForHost` / `h
   ```
 - **Durable data directories** — a service whose `dataDir` may sit on a separate mount gets a `<name>-permissions` oneshot from `nixlabLib.mkDataDirPermissionsService` (waits for the mount, then re-chowns), instead of relying on tmpfiles rules that can race the mount or miss uid drift.
 - **Self-healing state** — services with a write-ahead log opt into `nixlabLib.mkWalSelfHeal` (quarantine a corrupt WAL after a crash loop, with cooldown and retention) rather than hand-written recovery.
-- **Single source of truth for generated aggregates** — a derived fact needed by multiple files (e.g. "which services are enabled, and what group") lives in one `_<name>-registry.nix`, imported by every consumer — never copy-pasted maps that can drift (see `modules/nixos/homepage-dashboard/_service-registry.nix`; the monitoring stack reads it through `self.lib.serviceRegistry`).
+- **Single source of truth for generated aggregates** — a derived fact needed by multiple files (e.g. "which services are enabled, and what group") lives in one `_<name>-registry.nix`, imported by every consumer — never copy-pasted maps that can drift (see `modules/nixos/homepage-dashboard/_service-registry.nix`; the observability stack reads it through `self.lib.serviceRegistry`).
 
 </details>
 
@@ -467,7 +467,7 @@ NixOS system accounts follow the identical shape via `mkSystemUsersForHost` / `h
 
 `sops.age.keyFile` is set once, globally, in `hosts--core--sops` — never in an optional feature module, since every secret on every host depends on it.
 
-A stack may *consume* a secret declared by an `nsops--` module it imports (the monitoring stack reuses `ALERTMANAGER_ENV` to provision ntfy users), but never declares secrets itself.
+A stack may *consume* a secret declared by an `nsops--` module it imports (the observability stack reuses `ALERTMANAGER_ENV` to provision ntfy users), but never declares secrets itself.
 
 </details>
 
@@ -489,7 +489,7 @@ nixlab/
 │   ├── builders/                      # generates configs (nixosConfigurations, ...) from metadata
 │   ├── ci/                            # dev-facing tooling
 │   │   ├── checks.nix, apps.nix, packages.nix
-│   │   ├── monitoring-checks.nix      # build-time validation of the monitoring stack
+│   │   ├── observability-checks.nix      # build-time validation of the observability stack
 │   │   └── _tests/prometheus/         # promtool rule unit tests
 │   ├── nixos-lib.nix                  # service module helper functions (nixlabLib)
 │   └── pkgs.nix                       # where overlays / .nixpkgsConfig are defined for pkgs
@@ -530,21 +530,21 @@ nixlab/
 │   |   ├── comfyui/
 │   |   ├── glance/
 │   |   ├── homepage-dashboard/
-│   |   ├── monitoring/                # see "Monitoring Stack"
+│   |   ├── observability/                # see "Observability Stack"
 │   |   │   ├── alertmanager/  alloy/  grafana/ (+ dashboards/)  host-exporters/
-│   |   │   ├── loki/  maintenance-log/  monitoring-backup/  ntfy/  prometheus/
+│   |   │   ├── loki/  maintenance-log/  observability-backup/  ntfy/  prometheus/
 │   |   └── <service>.nix
 │   └── ports.nix                      # systm--ports-* per-service defaults (mkDefault)
 │
 ├── stacks/                            # stack--* — multi-service integration bundles
-│   └── monitoring.nix                 # stack--monitoring (the aggregator)
+│   └── observability.nix                 # stack--observability (the aggregator)
 │
 ├── sops/                              # Centralized secrets management
 │   ├── <service>.nix                  # Secret module declarations (nsops--*)
 │   └── <service>.yaml | .env          # Encrypted secrets per module
 │
 ├── docs/
-│   ├── monitoring/                    # architecture & reference (as built)
+│   ├── observability/                    # architecture & reference (as built)
 │   └── runbooks/                      # one page per alert (+ _template.md, _todo.txt)
 │
 ├── overlays/                          # flake.overlays.*
@@ -586,7 +586,7 @@ Every other folder depends on `flake/`; `flake/` depends on nothing else — it'
 | `ci/checks.nix` | Pre-commit hooks (alejandra, deadnix, merge-conflict guards) + formatter | `perSystem.checks`, `flake.formatter` | Never referenced by host/user/machine config — repo plumbing only |
 | `ci/apps.nix` | `build-all` app — validates every `nixosConfiguration` | `perSystem.apps.build-all` | Same as above |
 | `ci/packages.nix` | Imports `pkgs/` into perSystem | `perSystem.packages` | Same as above |
-| `ci/monitoring-checks.nix` | Build-time validation of the monitoring stack: `promtool`/`amtool` on rendered configs (one stable + one unstable host), rule unit tests (`ci/_tests/prometheus/*.test.yml`), runbook coverage, dashboard lint, shellcheck | `perSystem.checks` (x86_64-linux) | Consume `self.lib.prometheusRendered` / `prometheusMaintenanceAlerts` / `grafanaDashboards` / `maintenanceLoggerScript` by name; same "plumbing only" rule |
+| `ci/observability-checks.nix` | Build-time validation of the observability stack: `promtool`/`amtool` on rendered configs (one stable + one unstable host), rule unit tests (`ci/_tests/prometheus/*.test.yml`), runbook coverage, dashboard lint, shellcheck | `perSystem.checks` (x86_64-linux) | Consume `self.lib.prometheusRendered` / `prometheusMaintenanceAlerts` / `grafanaDashboards` / `maintenanceLoggerScript` by name; same "plumbing only" rule |
 
 ### `hardware/` — physical machine facts
 
@@ -627,7 +627,7 @@ The "one service, one file/directory, zero knowledge of any other service" tier 
 
 `ports.nix` is the one exception at this folder's root — genuinely cross-cutting (default ports for every service) rather than belonging to one service.
 
-`systm--` modules under `modules/nixos/` (e.g. `maintenance-log`, `monitoring-backup`) are *helper* modules rather than services: they obey rules 1, 2 and 4 but don't run a daemon of their own.
+`systm--` modules under `modules/nixos/` (e.g. `maintenance-log`, `observability-backup`) are *helper* modules rather than services: they obey rules 1, 2 and 4 but don't run a daemon of their own.
 
 **Known exception:** `servc--prometheus-nixlab` imports `systm--host-exporters-nixlab` and sets `services.host-exporters-nixlab.*` from its own options, so existing Prometheus configuration keeps working while node/smartctl exporters live in their own module. Treat it as a bridge, not a pattern to copy.
 
@@ -638,8 +638,8 @@ Some services must communicate to work well together (Grafana needs Prometheus/L
 **Belongs in `stacks/` (named `stack--<name>`) only if:**
 1. Imports **two or more** `servc--`/`nsops--` modules (`systm--` helper modules may also be imported)
 2. Sets at least one option belonging to a service *other than* the one it's adjacent to in the import list — real cross-wiring, not just co-importing (two services with no cross-reference don't need a stack; plain host-file composition suffices)
-3. Implements **no service logic of its own** — no `systemd.services.*`, no `users.users.*`; only sets options the underlying modules already declared. (Host-level exposure settings such as `networking.firewall.interfaces` are the one pragmatic exception: the monitoring stack uses it for interface-scoped access.)
-4. Exposes its own aggregator option (e.g. `services.nixlab-monitoring.*`) so a host consumes one coherent interface
+3. Implements **no service logic of its own** — no `systemd.services.*`, no `users.users.*`; only sets options the underlying modules already declared. (Host-level exposure settings such as `networking.firewall.interfaces` are the one pragmatic exception: the observability stack uses it for interface-scoped access.)
+4. Exposes its own aggregator option (e.g. `services.nixlab-observability.*`) so a host consumes one coherent interface
 
 If a candidate satisfies #1 but not #2 — e.g. ComfyUI's three cooperating modules, which all target the *same* service's namespace rather than wiring peers together — it stays in `modules/`. The test: do two *different* services' option surfaces get touched, not do multiple files work together.
 
@@ -652,7 +652,7 @@ Secret material must never enter the Nix store; sops-nix decrypts at activation.
 
 ### `docs/`
 
-- **`docs/monitoring/monitoring.md`** — the as-built reference for the monitoring stack, written to be readable by a human *and* pasteable into an LLM prompt as context. Update it when monitoring code changes.
+- **`docs/observability/observability.md`** — the as-built reference for the observability stack, written to be readable by a human *and* pasteable into an LLM prompt as context. Update it when monitoring code changes.
 - **`docs/runbooks/<AlertName>.md`** — one page per Prometheus alert. CI requires one for every alert unless it is listed in `docs/runbooks/_todo.txt`.
 
 ### `overlays/`, `shells/`, `cachix/`, `pkgs/`, `bin/`
@@ -669,13 +669,13 @@ Self-contained, single-purpose flake outputs with no cross-folder dependencies a
 
 ---
 
-## Monitoring Stack
+## Observability Stack
 
 <details open>
 <summary><i>(click to collapse)</i></summary>
 <p></p>
 
-A self-hosted observability stack built as atomic service modules plus **one aggregator stack** (`stack--monitoring`, `stacks/monitoring.nix`). A host enables it with `services.nixlab-monitoring.enable = true`; the stack wires everything else. **Full reference: [`docs/monitoring/monitoring.md`](docs/monitoring/monitoring.md).**
+A self-hosted observability stack built as atomic service modules plus **one aggregator stack** (`stack--observability`, `stacks/observability.nix`). A host enables it with `services.nixlab-observability.enable = true`; the stack wires everything else. **Full reference: [`docs/observability/observability.md`](docs/observability/observability.md).**
 
 ```
  exporters (node, smartctl, blackbox, /metrics of each service)
@@ -697,8 +697,8 @@ A self-hosted observability stack built as atomic service modules plus **one agg
 | Alloy | `servc--alloy-nixlab` | Ships journal, `/var/log/*.log` and maintenance log to Loki |
 | Grafana | `servc--grafana-nixlab` | Provisioned datasources and dashboards (maintenance checklist, system overview, opt-in ZFS) |
 | Maintenance log | `systm--maintenance-log-nixlab` | `maintenance-log` CLI; JSONL records → Loki and last-completed metrics → Prometheus |
-| Monitoring backup | `systm--monitoring-backup-nixlab` | Nightly consistent copies of Grafana/ntfy/Alertmanager state |
-| **Aggregator** | `stack--monitoring` | Datasources, scrape jobs, receivers/routes, ruler, uids, URLs, interface-scoped firewall, backups |
+| Observability backup | `systm--observability-backup-nixlab` | Nightly consistent copies of Grafana/ntfy/Alertmanager state |
+| **Aggregator** | `stack--observability` | Datasources, scrape jobs, receivers/routes, ruler, uids, URLs, interface-scoped firewall, backups |
 
 **Key design points**
 - **Atomic modules, one stack.** Service modules know nothing of each other; they expose escape hatches (`extraScrapeConfigs`, `provisioning.datasources`, `receivers`, `ruler.groups`, …) that the stack fills.
@@ -711,12 +711,12 @@ A self-hosted observability stack built as atomic service modules plus **one agg
 
 **Per-host overrides** (the profile already enables the stack)
 ```nix
-services.nixlab-monitoring = {
+services.nixlab-observability = {
   access.interfaces = [ "eno1" ];                 # reach Grafana/ntfy/Prometheus from the LAN
   prometheus.retentionSize = lib.mkForce "20GB";  # profile values are plain assignments
 };
 services.prometheus-nixlab.maintenance.expectedMounts = [ "/data" ];
-services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];   # ZFS host only
+services.grafana-nixlab.extraDashboards = [ "zfs-observability" ];   # ZFS host only
 ```
 
 **Operating it** (run on the host)
@@ -726,12 +726,12 @@ MON_NTFY_AUTH=reader:<pw> bin/mon-check.sh --fire-test   # end-to-end: alert →
 bin/mon-snapshot.sh /tmp/before      # capture units/configs/listeners; diff before vs after a change
 bin/mon-unitdiff.sh /run/current-system ./result         # diff generated units between two closures
 sudo maintenance-log --section II.4 --task "Applied updates" --status completed
-nix flake check                      # includes all monitoring checks
+nix flake check                      # includes all observability checks
 ```
 
-**Adding things** — an alert (rule in `maintenance-alerts.nix` + runbook + test), a dashboard (JSON in `grafana/dashboards/`), a scrape target (`extraScrapeConfigs`), or a receiver (`services.alertmanager-nixlab.receivers`): step-by-step in [`docs/monitoring/monitoring.md` §15](docs/monitoring/monitoring.md#15-extending-the-stack).
+**Adding things** — an alert (rule in `maintenance-alerts.nix` + runbook + test), a dashboard (JSON in `grafana/dashboards/`), a scrape target (`extraScrapeConfigs`), or a receiver (`services.alertmanager-nixlab.receivers`): step-by-step in [`docs/observability/observability.md` §15](docs/observability/observability.md#15-extending-the-stack).
 
-**Giving an LLM context.** `docs/monitoring/monitoring.md` opens with a self-contained *context card* (§0); paste that alone for quick questions, or the whole file for deep work.
+**Giving an LLM context.** `docs/observability/observability.md` opens with a self-contained *context card* (§0); paste that alone for quick questions, or the whole file for deep work.
 
 </details>
 
@@ -774,11 +774,11 @@ lboot     # sudo nixos-rebuild boot   --flake $NIXLAB && sudo reboot
 lfup      # nix flake update         --flake $NIXLAB
 nixhelp   # print the full alias reference
 
-nix flake check          # eval + pre-commit checks + monitoring checks (promtool, amtool, rule tests, dashboards, runbooks)
+nix flake check          # eval + pre-commit checks + observability checks (promtool, amtool, rule tests, dashboards, runbooks)
 nix run .#build-all      # build every nixosConfiguration without switching
 nix fmt                  # run alejandra across the whole tree
 
-bin/mon-check.sh         # monitoring health on the current host (see Monitoring Stack)
+bin/mon-check.sh         # monitoring health on the current host (see Observability Stack)
 ```
 
 </details>
@@ -851,7 +851,7 @@ No raw `hardware-configuration.nix` is pasted anywhere — `mkHardwareProfile` r
     modules = [
       self.nixosModules.hardw--<machine>        # note: machine name, not hostname
       self.nixosModules.hosts--<hostname>
-      self.nixosModules.hosts--profl--base      # required for all hosts (includes stack--monitoring, inactive until enabled)
+      self.nixosModules.hosts--profl--base      # required for all hosts (includes stack--observability, inactive until enabled)
       self.nixosModules.hosts--profl--desktop   # desktop/laptop machines
       # self.nixosModules.hosts--profl--nas     # NAS/server machines
       self.nixosModules.servc--glance-nixlab
@@ -874,7 +874,7 @@ No raw `hardware-configuration.nix` is pasted anywhere — `mkHardwareProfile` r
       dataDir = "/data/glance";
     };
 
-    # services.nixlab-monitoring.enable = true;   # see "Monitoring Stack"
+    # services.nixlab-observability.enable = true;   # see "Observability Stack"
 
     system.stateVersion = "24.11";
   };
@@ -1044,7 +1044,7 @@ services.<service>-nixlab = {
 
 #### 4. (Optional) Make it observable
 
-Expose `/metrics`, then add a scrape job in `stacks/monitoring.nix` (or per host via `services.prometheus-nixlab.extraScrapeConfigs`), alerts in `maintenance-alerts.nix` with a runbook in `docs/runbooks/`, and a rule test. Details: [`docs/monitoring/monitoring.md` §15](docs/monitoring/monitoring.md#15-extending-the-stack).
+Expose `/metrics`, then add a scrape job in `stacks/observability.nix` (or per host via `services.prometheus-nixlab.extraScrapeConfigs`), alerts in `maintenance-alerts.nix` with a runbook in `docs/runbooks/`, and a rule test. Details: [`docs/observability/observability.md` §15](docs/observability/observability.md#15-extending-the-stack).
 
 #### 5. Validate and deploy
 

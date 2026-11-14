@@ -20,7 +20,7 @@
     ...
   }: {
     ## SELF-HOSTED SERVICES
-    services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
+    services.grafana-nixlab.extraDashboards = ["zfs-observability"];
 
     services.syncthing-nixlab = {
       enable = true;

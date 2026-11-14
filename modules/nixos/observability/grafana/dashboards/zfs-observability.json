@@ -1,11 +1,11 @@
 {
   "id": null,
-  "uid": "zfs-pool-monitoring",
-  "title": "ZFS Pool Monitoring",
+  "uid": "zfs-pool-observability",
+  "title": "ZFS Pool Observability",
   "tags": [
     "zfs",
     "storage",
-    "monitoring"
+    "observability"
   ],
   "timezone": "browser",
   "schemaVersion": 36,

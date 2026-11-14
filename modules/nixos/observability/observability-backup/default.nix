@@ -1,14 +1,14 @@
 {...}: {
-  flake.nixosModules.systm--monitoring-backup-nixlab = {
+  flake.nixosModules.systm--observability-backup-nixlab = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    cfg = config.services.monitoring-backup-nixlab;
+    cfg = config.services.observability-backup-nixlab;
   in {
-    options.services.monitoring-backup-nixlab = {
-      enable = lib.mkEnableOption "consistent copies of the monitoring stack's state";
+    options.services.observability-backup-nixlab = {
+      enable = lib.mkEnableOption "consistent copies of the observability stack's state";
 
       dir = lib.mkOption {
         type = lib.types.str;
@@ -30,8 +30,8 @@
     };
 
     config = lib.mkIf cfg.enable {
-      systemd.services.monitoring-backup = {
-        description = "Copy monitoring state for backup";
+      systemd.services.observability-backup = {
+        description = "Copy observability state for backup";
         path = [pkgs.sqlite pkgs.coreutils];
         serviceConfig = {
           Type = "oneshot";
@@ -51,7 +51,7 @@
         '';
       };
 
-      systemd.timers.monitoring-backup = {
+      systemd.timers.observability-backup = {
         wantedBy = ["timers.target"];
         timerConfig = {
           OnCalendar = "03:15";

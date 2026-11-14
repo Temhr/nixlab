@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runtime verification for the nixlab monitoring stack. Run ON the host.
+# Runtime verification for the nixlab observability stack. Run ON the host.
 # Env: MON_HOST (default 127.0.0.1), MON_*_PORT, MON_UNITS, MON_NTFY_AUTH (user:pass), MON_TOPIC
 # ntfy auth is on by default, so --fire-test needs MON_NTFY_AUTH=reader:<password>.
 # To test a topic: MON_EXTRA_LABELS='"category":"storage"' MON_TOPIC=alerts-storage ... --fire-test

@@ -1,12 +1,12 @@
-# Nixlab Monitoring Stack — Architecture & Reference
+# Nixlab Observability Stack — Architecture & Reference
 
 > **State of this document:** reflects the repo **after Stage 8** of
-> `nixlab-monitoring-fix-guide.md` (Stages 1–8 applied). Stages 9–14 are
+> `nixlab-observability-fix-guide.md` (Stages 1–8 applied). Stages 9–14 are
 > pending and are called out as *(pending, Stage N)* wherever they would
 > change what's written here. §13 holds the changelog and the open items.
 
-Derived from every file in the monitoring stack: the aggregator
-(`stacks/monitoring.nix`), the five service modules (loki + alloy,
+Derived from every file in the observability stack: the aggregator
+(`stacks/observability.nix`), the five service modules (loki + alloy,
 prometheus, alertmanager, grafana, ntfy), the two `nsops--*` secrets joiners
 (grafana, alertmanager), the Grafana dashboards, the Prometheus alert/recording
 rules, and the `maintenance-log` helper script. It is written so you (or
@@ -16,10 +16,10 @@ code base** — paste this file into a prompt and Claude has the whole picture.
 This file is the companion to `nixlab-module-template.md`. That file explains
 *how every module is written* (naming, options order, `nixlabLib` helpers,
 the `servc--` / `nsops--` / `systm--` split). This file explains *what the
-monitoring modules actually do and how they connect*. Section references like
+observability modules actually do and how they connect*. Section references like
 "template §8" point into that file.
 
-**Sources.** Besides the monitoring modules themselves, this was
+**Sources.** Besides the observability modules themselves, this was
 cross-checked against `modules/ports.nix`, the full `flake/nixos-lib.nix`
 (`nixlabLib`, including `mkWalSelfHeal`, which template §8 doesn't cover), and
 the repo `README.md` (flake architecture). Still not seen: host files
@@ -33,7 +33,7 @@ as designed in the guide *(outputs not reviewed)*.
 
 ## 0. One-paragraph summary
 
-One flake module, `stack--monitoring`, turns on and cross-wires five services
+One flake module, `stack--observability`, turns on and cross-wires five services
 on a single host: **Prometheus** (metrics + alert/recording rules),
 **Alertmanager** (routing/dedup), **ntfy** (push notifications), **Loki** (log
 store) with **Grafana Alloy** (log collector), and **Grafana** (dashboards,
@@ -78,7 +78,7 @@ Loki. The stack never owns port numbers: it reads each service's resolved port.
 | Loki | `servc--loki-nixlab` | `services.loki-nixlab` | `loki` | 3100 (gRPC 9096; firewall opening pending change, Stage 9a) | `loki` | `/data/loki` |
 | Alloy | (part of loki module) | `…loki-nixlab.enableAlloy` | `alloy` | `alloyPort` = 12345 (loopback; UI + `/metrics`; default set in `ports.nix`) | `alloy` | `/var/lib/alloy` (fixed) |
 | Grafana | `servc--grafana-nixlab` | `services.grafana-nixlab` | `grafana` | 3101 | `grafana` | `/data/grafana` |
-| Stack aggregator | `stack--monitoring` | `services.nixlab-monitoring` | — | — | — | `/data` root |
+| Stack aggregator | `stack--observability` | `services.nixlab-observability` | — | — | — | `/data` root |
 | Secrets joiners | `nsops--grafana`, `nsops--alertmanager` | add `.secretsFile` to the service namespace | — | — | — | — |
 
 Optional exporters, only present when `prometheus-nixlab.maintenance.enable`:
@@ -97,9 +97,9 @@ admin user can read data directories.
 ## 2. File layout
 
 ```
-/nixlab/stacks/monitoring.nix                                   # stack--monitoring aggregator (§3)
+/nixlab/stacks/observability.nix                                   # stack--observability aggregator (§3)
 
-/nixlab/modules/nixos/monitoring/
+/nixlab/modules/nixos/observability/
 ├── loki/
 │   ├── default.nix                    # Loki + Alloy + maintenance-log wrapper (§5)
 │   └── maintenance-logger.sh          # `maintenance-log` CLI, embedded via builtins.readFile (§5.4)
@@ -121,13 +121,13 @@ admin user can read data directories.
 │   └── dashboards/
 │       ├── maintenance-checklist.json # base dashboard "maintenance"
 │       ├── system-overview-v5.json    # base dashboard "system-overview-v5"
-│       └── zfs-monitoring.json        # opt-in via extraDashboards
+│       └── zfs-observability.json        # opt-in via extraDashboards
 └── ntfy/default.nix                   # ntfy server (§10)
 
 /nixlab/sops/grafana.nix        + grafana.yaml        # nsops--grafana (§11)
 /nixlab/sops/alertmanager.nix   + alertmanager.yaml   # nsops--alertmanager (§11)
 
-/nixlab/bin/monitoring-smoke.sh                                 # health/targets/rules/alerts/Loki-labels smoke test (not a module)
+/nixlab/bin/observability-smoke.sh                                 # health/targets/rules/alerts/Loki-labels smoke test (not a module)
 ```
 
 Absolute root on disk: `/home/temhr/nixlab/`. Only Prometheus uses the
@@ -140,7 +140,7 @@ multi-file `_internals/` pattern (template §1).
   file registers itself into `flake.nixosModules.<name>`. Names in play:
   `servc--{loki,prometheus,alertmanager,grafana,ntfy}-nixlab`,
   `systm--ports-{loki,grafana,prometheus,alertmanager,ntfy}`,
-  `nsops--{grafana,alertmanager}`, `stack--monitoring`. Everything references
+  `nsops--{grafana,alertmanager}`, `stack--observability`. Everything references
   everything else by `self.nixosModules.<name>`, never by path.
 - **Layer rules** (README): `servc--` modules are atomic and know nothing about
   sibling services; all cross-service knowledge lives in `stacks/`; a stack
@@ -149,8 +149,8 @@ multi-file `_internals/` pattern (template §1).
 - **`nixlabLib`** is `flake.lib.nixlabLib`, injected into every NixOS module's
   `specialArgs` by `mkHost` (alongside `allHosts`, `hostMeta`, `self`, `inputs`).
 - **Enablement.** Per the README, `hosts--profl--base` (every host) composes
-  `stack--monitoring`, so the module is available everywhere and
-  `services.nixlab-monitoring.enable` is the per-host switch *(host files not
+  `stack--observability`, so the module is available everywhere and
+  `services.nixlab-observability.enable` is the per-host switch *(host files not
   verified)*. Scrape targets are all `localhost`, so each host that enables the
   stack monitors **only itself**; there is no cross-host aggregation.
 - **`nixlab.mainUser`** is derived (`lib.mkDefault hostsMeta.<host>.primaryUser`);
@@ -160,10 +160,10 @@ multi-file `_internals/` pattern (template §1).
 
 ---
 
-## 3. The stack aggregator — `stack--monitoring`
+## 3. The stack aggregator — `stack--observability`
 
-`/nixlab/stacks/monitoring.nix`. Enabled with
-`services.nixlab-monitoring.enable = true`. Imports `nsops--alertmanager`,
+`/nixlab/stacks/observability.nix`. Enabled with
+`services.nixlab-observability.enable = true`. Imports `nsops--alertmanager`,
 `nsops--grafana` (each of which imports its own `servc--*`), plus
 `servc--loki-nixlab`, `servc--prometheus-nixlab`, `servc--ntfy-nixlab`.
 
@@ -252,9 +252,9 @@ the stack (or a host) rather than editing a `servc--` module.
 ### 3.4 Typical host config
 
 ```nix
-imports = [ self.nixosModules.stack--monitoring ];
+imports = [ self.nixosModules.stack--observability ];
 
-services.nixlab-monitoring = {
+services.nixlab-observability = {
   enable = true;
   loki.maintenance.enable = true;        # maintenance-log CLI + log ingestion
   prometheus.maintenance.enable = true;  # without this: NO alert rules at all
@@ -269,7 +269,7 @@ services.prometheus-nixlab.maintenance.exporters = {
   blackbox.dnsTargets  = ["1.1.1.1"];     # enables blackbox-dns job + DNSResolutionFailure
   backup.enable = true;                   # enables backup exporter + its alerts
 };
-services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
+services.grafana-nixlab.extraDashboards = ["zfs-observability"];
 services.grafana-nixlab.domain = "grafana.lan.example"; # adds nginx vhost, opens 80/443
 services.grafana-nixlab.port = 3200;                    # ports: plain assignment on the service
 ```
@@ -584,7 +584,7 @@ column is on. 27 alerts load by default.
 | | HighHTTPErrorRate † | warn | V.16 | traefik 5xx ratio > 5 % and > 0.05 req/s | 5m | `traefik` |
 | container_health (30s) | ContainerRestartLoop † | warn | VI.18 | `changes(container_start_time_seconds[15m]) > 2` | 5m | `containers` |
 | | ContainerHighMemory † | warn | VI.18 | > 90 % of a non-zero limit | 5m | `containers` |
-| monitoring_stack (1m) | PrometheusNoRecentSamples | crit | VII.21 | `absent_over_time(up{job="prometheus"}[10m])` | 5m | |
+| observability_stack (1m) | PrometheusNoRecentSamples | crit | VII.21 | `absent_over_time(up{job="prometheus"}[10m])` | 5m | |
 | | PrometheusSamplesOutOfBounds | crit | VII.21 | out-of-bounds sample counter increases | 10m | |
 | | PrometheusHeadInFuture | crit | VII.21 | TSDB head > 1 h ahead of wall clock | 5m | |
 | | PrometheusRuleEvaluationFailures | warn | VII.22 | rule eval failures increase | 5m | |
@@ -634,7 +634,7 @@ via `GF_*` environment variables.
 | `credentialsFile` | null | **string** path to raw admin password → `GF_SECURITY_ADMIN_PASSWORD__FILE`. Only applied when Grafana first creates its DB. |
 | `secretKeyFile` | null | → `GF_SECURITY_SECRET_KEY__FILE`; warning emitted if null. Changing it on an existing DB makes stored secrets unreadable. |
 | `dashboards` | attrset of `{path, folder, editable, updateInterval}` | module-owned base set: `maintenance` → `maintenance-checklist.json`, `system-overview-v5` → `system-overview-v5.json` |
-| `extraDashboards` | `[]` | names of extra JSON files in the module's `dashboards/` dir (e.g. `"zfs-monitoring"`); placed in folder `maintenance`, editable |
+| `extraDashboards` | `[]` | names of extra JSON files in the module's `dashboards/` dir (e.g. `"zfs-observability"`); placed in folder `maintenance`, editable |
 | `provisioning.datasources` | `[]` | `{name, type, url, access="proxy", isDefault, editable, jsonData}`; `type` is lower-cased (plugin ids are case-sensitive) |
 
 Strings (not `path`) for the two secret options so literals never get copied
@@ -671,12 +671,12 @@ Because of the uid-mismatch cleanup, **give every dashboard JSON a stable
 | File | uid | What it is |
 |---|---|---|
 | `maintenance-checklist.json` | *(none; uid + Loki panels pending, Stage 12c)* | "System Maintenance Checklist". Health gauge, active alerts by severity, resource overview; for each checklist family I–VI an "Automated Checks" table (query `ALERTS{checklist_section=~"<family>\\..*", alertstate="firing"}`; the pattern was corrected in Stage 1, the old `<family>\\.*` form never matched `I.1`-style codes) next to a "Manual Tasks" markdown checklist (weekly/monthly/quarterly, with commands); storage and cert-expiry timeseries, service uptime matrix, weekly/monthly/quarterly summaries, alert history. |
-| `system-overview-v5.json` | `system-maintenance-overview-v5` | "System Monitoring & Maintenance Dashboard v5". Hidden vars `DS_PROMETHEUS` (datasource) and `prometheus_url` (constant `http://localhost:9090`). Rows: Health overview (health score, alerts by severity, failed units, hottest sensor, uptime, kernel, root FS, RAM, swap, **active-alerts table showing the `condition` label** with link to Prometheus, firing by category/section); CPU; Memory; Storage & Disk (usage, inodes, IO, busy %, **time-until-disk-full**); Network; Hardware & System info (temps, CPU freq, clock offset, failed units); Service monitoring (uptime history, alert counts, alert timeline). Collapsed rows: Monitoring Stack Health (scrape targets, TSDB, rule failures), Containers, Web & Network Probes (traefik, blackbox), Backups & Certificates, Maintenance Checklists. Plus Extended Metrics. Annotation: firing alerts. |
-| `zfs-monitoring.json` | `zfs-pool-monitoring` | "ZFS Pool Monitoring" (opt-in). Var `zpool`; rows for pool state, dataset I/O, ARC, ZIL, mounted-dataset space. Uses `node_zfs_*` metrics. |
+| `system-overview-v5.json` | `system-maintenance-overview-v5` | "System Monitoring & Maintenance Dashboard v5". Hidden vars `DS_PROMETHEUS` (datasource) and `prometheus_url` (constant `http://localhost:9090`). Rows: Health overview (health score, alerts by severity, failed units, hottest sensor, uptime, kernel, root FS, RAM, swap, **active-alerts table showing the `condition` label** with link to Prometheus, firing by category/section); CPU; Memory; Storage & Disk (usage, inodes, IO, busy %, **time-until-disk-full**); Network; Hardware & System info (temps, CPU freq, clock offset, failed units); Service monitoring (uptime history, alert counts, alert timeline). Collapsed rows: Observability Stack Health (scrape targets, TSDB, rule failures), Containers, Web & Network Probes (traefik, blackbox), Backups & Certificates, Maintenance Checklists. Plus Extended Metrics. Annotation: firing alerts. |
+| `zfs-observability.json` | `zfs-pool-observability` | "ZFS Pool Observability" (opt-in). Var `zpool`; rows for pool state, dataset I/O, ARC, ZIL, mounted-dataset space. Uses `node_zfs_*` metrics. |
 
 ### 9.5 Adding a dashboard
 
-1. Drop `<name>.json` in `modules/nixos/monitoring/grafana/dashboards/`
+1. Drop `<name>.json` in `modules/nixos/observability/grafana/dashboards/`
    (include a stable `uid`; reference the default datasource or the
    `${DS_PROMETHEUS}` variable pattern).
 2. `git add` it (flakes only see tracked files).
@@ -734,7 +734,7 @@ in `.sops.yaml`. Joiners never set it.
 
 ## 12. Cross-cutting conventions (from the module template)
 
-Every monitoring module follows template §3–§8, §10:
+Every observability module follows template §3–§8, §10:
 
 - Dedicated `<name>-permissions.service` oneshot (`mkDataDirPermissionsService`)
   is `requiredBy` the main unit and in its `after`: present for `loki`, `alloy`,
@@ -855,12 +855,12 @@ applying the fixes.
 ## 14. Prompts you can hand to Claude
 
 Attach this file (plus `nixlab-module-template.md` for code generation, and
-`nixlab-monitoring-fix-guide.md` when continuing the work) and fill in the
+`nixlab-observability-fix-guide.md` when continuing the work) and fill in the
 blanks.
 
 **Understand / debug**
 
-> Using the attached nixlab monitoring stack reference, explain why
+> Using the attached nixlab observability stack reference, explain why
 > `<symptom, e.g. "no alerts reach my phone" / "Grafana panel X is empty">`.
 > Trace the data path through §1 and §3.2, check §13.2 for related open items,
 > and tell me which commands to run (`journalctl -u <unit>`, curl endpoints,
@@ -902,16 +902,16 @@ blanks.
 
 > Generate a new `servc--<service>-nixlab` module (and `nsops--` joiner if it
 > has secrets) per the nixlab module template, then show the exact edits to
-> `stacks/monitoring.nix`: add it to `port`, a `mkDefault` basics block,
+> `stacks/observability.nix`: add it to `port`, a `mkDefault` basics block,
 > and the cross-wiring (scrape job, datasource, receiver) through existing
 > injection options only.
 
 ---
 
-*Reference source (state after Stage 8): `stacks/monitoring.nix`; `modules/nixos/monitoring/{loki,
+*Reference source (state after Stage 8): `stacks/observability.nix`; `modules/nixos/observability/{loki,
 prometheus,alertmanager,grafana,ntfy}` (including `prometheus/_internals/*`,
 `loki/maintenance-logger.sh`, and the three Grafana dashboard JSON files);
 `sops/{grafana,alertmanager}.nix`. Cross-referenced against
 `modules/ports.nix`, `flake/nixos-lib.nix` (full `nixlabLib` source), the repo
 `README.md`, `nixlab-module-template.md` for shared conventions, and the
-command output from applying Stages 0–3 of `nixlab-monitoring-fix-guide.md`.*
+command output from applying Stages 0–3 of `nixlab-observability-fix-guide.md`.*

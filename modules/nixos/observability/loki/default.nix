@@ -144,7 +144,7 @@
           };
         };
 
-        # Maintenance monitoring options
+        # Maintenance observability options
         maintenance = {
           enable = lib.mkEnableOption "maintenance task logging integration";
 

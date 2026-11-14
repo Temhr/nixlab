@@ -42,7 +42,7 @@
     "glance" = "Social & Feeds";
   };
 
-  # Ports for the services that have one; used by the monitoring stack to probe them.
+  # Ports for the services that have one; used by the observability stack to probe them.
   endpoints = {
     "comfyui" = {port = config.services.comfyui-p5000.port or 8188;};
     "ollama-cpu" = {port = config.services.ollama-stack.ollamaPort or 11434;};

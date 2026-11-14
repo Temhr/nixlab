@@ -31,7 +31,7 @@
     ]);
   };
 
-  # Exposed for flake/ci/monitoring-checks.nix, which consumes them by name.
+  # Exposed for flake/ci/observability-checks.nix, which consumes them by name.
   flake.lib.prometheusRendered = import ./_internals/rendered.nix;
   flake.lib.prometheusMaintenanceAlerts = import ./_internals/maintenance-alerts.nix;
 }

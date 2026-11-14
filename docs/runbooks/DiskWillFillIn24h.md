@@ -11,6 +11,6 @@
 
 **Fix.** Find what is growing and stop or throttle it, then free the space it used. If growth is expected (a big copy), make sure there is enough room for it to finish.
 
-**Escalate when.** It is on `/`, `/data` or `/nix`, where a full disk affects the whole system and the monitoring stack itself.
+**Escalate when.** It is on `/`, `/data` or `/nix`, where a full disk affects the whole system and the observability stack itself.
 
 **Related alerts.** LowDiskSpace, CriticalDiskSpace, HighInodeUsage.

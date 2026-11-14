@@ -1,4 +1,4 @@
-# Build-time validation of the monitoring stack's generated configuration.
+# Build-time validation of the observability stack's generated configuration.
 {
   self,
   lib,

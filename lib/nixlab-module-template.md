@@ -36,7 +36,7 @@ both.
 
 Rule of thumb: single `.nix` file until the module needs a private data file
 (e.g. `glance/_glance-pages.nix`, `homepage-dashboard/_services.nix`) or is
-naturally split into sub-concerns (e.g. `monitoring/prometheus/_internals/*`
+naturally split into sub-concerns (e.g. `observability/prometheus/_internals/*`
 splits config/exporters/alerts/scrape-configs). Then promote it to a
 directory with `default.nix` as the entry point.
 

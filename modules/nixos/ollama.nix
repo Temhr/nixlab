@@ -221,7 +221,7 @@
       #
       # Two independent units since ollama and open-webui are two separately
       # owned data directories in this one module (the same shape as Loki +
-      # Alloy in the monitoring stack).
+      # Alloy in the observability stack).
       # --------------------------------------------------------------------------
       systemd.services.ollama-permissions = nixlabLib.mkDataDirPermissionsService {
         inherit pkgs;

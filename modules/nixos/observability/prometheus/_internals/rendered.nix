@@ -1,7 +1,7 @@
 # Rendered Prometheus configuration and rule groups.
 # Imported by services/prometheus.nix (to write the files on the host)
 # and registered as self.lib.prometheusRendered by prometheus/default.nix
-# (so flake/ci/monitoring-checks.nix can validate them at build time).
+# (so flake/ci/observability-checks.nix can validate them at build time).
 {
   config,
   lib,

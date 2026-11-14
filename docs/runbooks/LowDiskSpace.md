@@ -9,7 +9,7 @@
 2. `du -xh --max-depth=2 <mountpoint> | sort -h | tail -15`
 3. `nix-store --gc --print-dead | tail -1` (only on `/`)
 
-**Fix.** Clear what you can: `sudo nix-collect-garbage -d` on `/`, old logs, caches. On `/data`, review Loki and Prometheus retention (`services.nixlab-monitoring.{loki,prometheus}.retention` and `retentionSize`).
+**Fix.** Clear what you can: `sudo nix-collect-garbage -d` on `/`, old logs, caches. On `/data`, review Loki and Prometheus retention (`services.nixlab-observability.{loki,prometheus}.retention` and `retentionSize`).
 
 **Escalate when.** It is dropping fast (see DiskWillFillIn24h) or reaches CriticalDiskSpace.
 

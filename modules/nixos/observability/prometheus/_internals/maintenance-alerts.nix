@@ -737,7 +737,7 @@ in rec {
     }
 
     # ═══════════════════════════════════════════════════════
-    # VII. Monitoring Stack Self-Health
+    # VII. Observability Stack Self-Health
     #
     # Prometheus stores its own metrics (and the ALERTS series) in the same TSDB
     # that can go bad, so "metric X is high" rules are unreliable for this
@@ -747,7 +747,7 @@ in rec {
     # notifications still go out even when ALERTS can't be stored for Grafana.
     # ═══════════════════════════════════════════════════════
     {
-      name = "monitoring_stack";
+      name = "observability_stack";
       core = true;
       interval = "1m";
       rules = [
@@ -759,7 +759,7 @@ in rec {
           for = "5m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.21";
           };
           annotations = {
@@ -775,7 +775,7 @@ in rec {
           for = "10m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.21";
           };
           annotations = {
@@ -790,7 +790,7 @@ in rec {
           for = "5m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.21";
           };
           annotations = {
@@ -805,7 +805,7 @@ in rec {
           for = "5m";
           labels = {
             severity = "warning";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.22";
           };
           annotations = {
@@ -830,7 +830,7 @@ in rec {
           for = "5m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.21";
           };
           annotations = {
@@ -845,7 +845,7 @@ in rec {
           for = "10m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.22";
           };
           annotations = {
@@ -859,7 +859,7 @@ in rec {
           for = "10m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.22";
           };
           annotations = {
@@ -873,7 +873,7 @@ in rec {
           for = "10m";
           labels = {
             severity = "critical";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.22";
           };
           annotations = {
@@ -886,7 +886,7 @@ in rec {
           expr = "increase(prometheus_tsdb_wal_corruptions_total[1h]) > 0";
           labels = {
             severity = "warning";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.21";
           };
           annotations = {
@@ -899,7 +899,7 @@ in rec {
           expr = "increase(prometheus_tsdb_compactions_failed_total[3h]) > 0";
           labels = {
             severity = "warning";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.21";
           };
           annotations = {
@@ -913,7 +913,7 @@ in rec {
           for = "10m";
           labels = {
             severity = "warning";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.23";
           };
           annotations = {
@@ -927,7 +927,7 @@ in rec {
           for = "10m";
           labels = {
             severity = "warning";
-            category = "monitoring";
+            category = "observability";
             checklist_section = "VII.23";
           };
           annotations = {

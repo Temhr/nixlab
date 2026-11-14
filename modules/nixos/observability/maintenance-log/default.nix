@@ -1,5 +1,5 @@
 {...}: {
-  # Exposed for flake/ci/monitoring-checks.nix (shellcheck).
+  # Exposed for flake/ci/observability-checks.nix (shellcheck).
   flake.lib.maintenanceLoggerScript = ./maintenance-logger.sh;
 
   flake.nixosModules.systm--maintenance-log-nixlab = {

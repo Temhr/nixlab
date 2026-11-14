@@ -4,7 +4,7 @@
   "title": "System Monitoring & Maintenance Dashboard v5",
   "tags": [
     "maintenance",
-    "monitoring",
+    "observability",
     "system",
     "homelab",
     "nixos"
@@ -2059,7 +2059,7 @@
     {
       "id": 217,
       "type": "row",
-      "title": "🩺 Monitoring Stack Health",
+      "title": "🩺 Observability Stack Health",
       "gridPos": {
         "h": 1,
         "w": 24,

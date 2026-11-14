@@ -414,7 +414,7 @@
             # When Prometheus has stopped recording its own samples, everything else it says is unreliable.
             {
               sourceMatchers = ["alertname=\"PrometheusNoRecentSamples\""];
-              targetMatchers = ["category=\"monitoring\"" "alertname!=\"PrometheusNoRecentSamples\""];
+              targetMatchers = ["category=\"observability\"" "alertname!=\"PrometheusNoRecentSamples\""];
               equal = ["instance"];
             }
           ];

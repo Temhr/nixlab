@@ -160,7 +160,7 @@
 
   # Maintenance options (defined inline)
   maintenance = {
-    enable = lib.mkEnableOption "maintenance monitoring exporters and alerts";
+    enable = lib.mkEnableOption "maintenance observability exporters and alerts";
 
     expectedMounts = lib.mkOption {
       type = lib.types.listOf lib.types.str;

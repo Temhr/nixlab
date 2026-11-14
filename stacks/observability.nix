@@ -1,11 +1,11 @@
 {self, ...}: {
-  flake.nixosModules.stack--monitoring = {
+  flake.nixosModules.stack--observability = {
     config,
     lib,
     hostMeta ? {},
     ...
   }: let
-    cfg = config.services.nixlab-monitoring;
+    cfg = config.services.nixlab-observability;
     svc = config.services;
 
     # Resolved ports. Single source of truth: ports.nix (mkDefault) or a plain
@@ -173,11 +173,11 @@
       self.nixosModules.servc--prometheus-nixlab
       self.nixosModules.servc--ntfy-nixlab
       self.nixosModules.systm--maintenance-log-nixlab
-      self.nixosModules.systm--monitoring-backup-nixlab
+      self.nixosModules.systm--observability-backup-nixlab
     ];
 
-    options.services.nixlab-monitoring = {
-      enable = lib.mkEnableOption "nixlab monitoring stack (Prometheus + Loki + Grafana + Alertmanager + ntfy)";
+    options.services.nixlab-observability = {
+      enable = lib.mkEnableOption "nixlab observability stack (Prometheus + Loki + Grafana + Alertmanager + ntfy)";
 
       listenAddress = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -261,7 +261,7 @@
       };
 
       prometheus = {
-        maintenance.enable = lib.mkEnableOption "maintenance monitoring integration";
+        maintenance.enable = lib.mkEnableOption "maintenance observability integration";
         scrapeInterval = lib.mkOption {
           type = lib.types.str;
           default = "30s";
@@ -382,12 +382,12 @@
       assertions = [
         {
           assertion = lib.all (n: builtins.match "[A-Za-z0-9_-]+" n != null) (lib.attrNames cfg.notifications.topics);
-          message = "services.nixlab-monitoring.notifications.topics: names may only contain letters, digits, '-' and '_'.";
+          message = "services.nixlab-observability.notifications.topics: names may only contain letters, digits, '-' and '_'.";
         }
       ];
 
       # Override contract (hosts/<name>.nix):
-      #   * Tunables set here are lib.mkDefault: override via services.nixlab-monitoring.*
+      #   * Tunables set here are lib.mkDefault: override via services.nixlab-observability.*
       #     OR directly on services.<x>-nixlab.* — both work.
       #   * Wiring (datasources, scrape jobs, receivers, alertmanagerTargets) is plain and
       #     additive; extend it, don't replace it.
@@ -606,7 +606,7 @@
         extraConfig = lib.optionalString svc.loki-nixlab.maintenance.enable maintenanceAlloyConfig;
       };
 
-      services.monitoring-backup-nixlab = {
+      services.observability-backup-nixlab = {
         enable = lib.mkDefault true;
         dir = lib.mkDefault "${cfg.dataDir}/backup";
         sqliteFiles =

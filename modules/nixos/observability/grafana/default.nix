@@ -1,5 +1,5 @@
 {self, ...}: {
-  # Exposed for flake/ci/monitoring-checks.nix (dashboard lint).
+  # Exposed for flake/ci/observability-checks.nix (dashboard lint).
   flake.lib.grafanaDashboards = ./dashboards;
 
   flake.nixosModules.servc--grafana-nixlab = {
@@ -254,24 +254,24 @@
         description = ''
           Names of additional dashboards to provision on this host.
           Each name must match a JSON file in the module's own dashboards/
-          directory (e.g. "zfs-monitoring" loads dashboards/zfs-monitoring.json).
+          directory (e.g. "zfs-observability" loads dashboards/zfs-observability.json).
 
           All extra dashboards are placed in the "maintenance" folder and are
           editable by default.
 
           Example — enable the ZFS dashboard on a host that has ZFS:
 
-            services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];
+            services.grafana-nixlab.extraDashboards = [ "zfs-observability" ];
 
           Example — enable multiple extra dashboards:
 
             services.grafana-nixlab.extraDashboards = [
-              "zfs-monitoring"
+              "zfs-observability"
               "docker"
               "nginx"
             ];
         '';
-        example = ["zfs-monitoring" "docker"];
+        example = ["zfs-observability" "docker"];
       };
 
       prometheusUrl = lib.mkOption {
@@ -374,7 +374,7 @@
             services.grafana-nixlab.extraDashboards references JSON files that do
             not exist in the module's dashboards/ directory:
               ${lib.concatStringsSep "\n  " (map (n: "${n}.json") missing)}
-            Add the missing files to modules/nixos/monitoring/grafana/dashboards/ and run
+            Add the missing files to modules/nixos/observability/grafana/dashboards/ and run
             `git add` so the flake can see them.
           '';
         }

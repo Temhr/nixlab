@@ -28,7 +28,7 @@
 
       self.nixosModules.nsops--homepage
       self.nixosModules.nsops--ssh-keys
-      self.nixosModules.stack--monitoring
+      self.nixosModules.stack--observability
     ];
 
     ## Shared system-wide default user option
@@ -53,7 +53,7 @@
       openFirewall = true;
       dataDir = "/data/homepage";
     };
-    services.nixlab-monitoring = {
+    services.nixlab-observability = {
       enable = true;
       openFirewall = false;
       dataDir = "/data";
