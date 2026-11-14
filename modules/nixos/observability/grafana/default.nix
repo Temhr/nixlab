@@ -254,24 +254,24 @@
         description = ''
           Names of additional dashboards to provision on this host.
           Each name must match a JSON file in the module's own dashboards/
-          directory (e.g. "zfs-observability" loads dashboards/zfs-observability.json).
+          directory (e.g. "zfs-monitoring" loads dashboards/zfs-monitoring.json).
 
           All extra dashboards are placed in the "maintenance" folder and are
           editable by default.
 
           Example — enable the ZFS dashboard on a host that has ZFS:
 
-            services.grafana-nixlab.extraDashboards = [ "zfs-observability" ];
+            services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];
 
           Example — enable multiple extra dashboards:
 
             services.grafana-nixlab.extraDashboards = [
-              "zfs-observability"
+              "zfs-monitoring"
               "docker"
               "nginx"
             ];
         '';
-        example = ["zfs-observability" "docker"];
+        example = ["zfs-monitoring" "docker"];
       };
 
       prometheusUrl = lib.mkOption {

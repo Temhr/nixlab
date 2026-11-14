@@ -716,7 +716,7 @@ services.nixlab-observability = {
   prometheus.retentionSize = lib.mkForce "20GB";  # profile values are plain assignments
 };
 services.prometheus-nixlab.maintenance.expectedMounts = [ "/data" ];
-services.grafana-nixlab.extraDashboards = [ "zfs-observability" ];   # ZFS host only
+services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];   # ZFS host only
 ```
 
 **Operating it** (run on the host)

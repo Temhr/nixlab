@@ -137,7 +137,7 @@ Common: gateway 10.0.0.1, /24, DNS 9.9.9.9 + 1.1.1.1. `nvidia-smi` segfaults on 
 **Consequences baked into the code**
 - SAS/SCSI drives (nixnas1) expose `smartctl_scsi_*` rather than ATA attributes, hence the separate SCSI alert rules.
 - Battery, ZFS, NVMe and fan alerts match nothing on hosts without those sensors; they simply never fire.
-- The `zfs-observability` dashboard is opt-in (`extraDashboards`), used on nixnas1.
+- The `zfs-monitoring` dashboard is opt-in (`extraDashboards`), used on nixnas1.
 - CI validates one host per nixpkgs channel: `nixnas1` (stable) and `nixsun` (unstable).
 - Laptops sleep; since each host only watches itself, nothing alerts about *another* host being off.
 
@@ -176,7 +176,7 @@ modules/nixos/observability/
 ├── alertmanager/default.nix                           servc--alertmanager-nixlab
 ├── alloy/default.nix                                  servc--alloy-nixlab
 ├── grafana/default.nix                                servc--grafana-nixlab, flake.lib.grafanaDashboards
-├── grafana/dashboards/{maintenance-checklist,system-overview-v5,zfs-observability}.json
+├── grafana/dashboards/{maintenance-checklist,system-overview-v5,zfs-monitoring}.json
 ├── host-exporters/default.nix                         systm--host-exporters-nixlab
 ├── loki/default.nix                                   servc--loki-nixlab
 ├── maintenance-log/default.nix                        systm--maintenance-log-nixlab, flake.lib.maintenanceLoggerScript
@@ -395,7 +395,7 @@ Custom unit `grafana` (user/group `grafana`, `extraHardening`, `UMask=0027`). Co
 |---|---|---|
 | `maintenance-checklist.json` | `maintenance-checklist` | Health score gauge, active alerts by severity, resource overview; for each checklist section I–VI an *automated* table (`ALERTS{checklist_section=~"I\\..*"}`) beside a *manual tasks* markdown panel; cert expiry timeline; uptime matrix; weekly/monthly/quarterly summaries; alert history |
 | `system-overview-v5.json` | `system-maintenance-overview-v5` | Health score, alerts by severity, failed units, hottest sensor, uptime, kernel, root FS, RAM, swap; firing/pending alert table with `condition` and Prometheus deep-link; firing by category/section; CPU, memory, pressure, disk, inode, IO, time-to-full, network, hwmon temperatures, CPU frequency, clock offset, failed units; service uptime; alert timeline; collapsed rows: **Observability Stack Health**, **Containers**, **Web & Network Probes**, **Backups & Certificates**, **Maintenance Checklists**; Extended metrics; Drive health (SMART, temperature, NVMe wear); Timers; Logs (Loki: journal errors by unit, failed SSH logins, kernel warnings); Maintenance (days since last completed, failed/skipped entries, recent entries) |
-| `zfs-observability.json` (opt-in: `extraDashboards=["zfs-observability"]`) | `zfs-pool-observability` | Pool state, dataset I/O, ARC, ZIL, dataset space; `$zpool` variable |
+| `zfs-monitoring.json` (opt-in: `extraDashboards=["zfs-monitoring"]`) | `zfs-pool-monitoring` | Pool state, dataset I/O, ARC, ZIL, dataset space; `$zpool` variable |
 
 Dashboards use the hidden datasource variable `DS_PROMETHEUS` (resolves to the default Prometheus datasource) and the fixed Loki uid `loki`. Dashboard-only metrics that need other exporters (containers, traefik, backups) show "no … metrics" placeholders until enabled.
 
@@ -758,5 +758,5 @@ services.nixlab-observability = {
 };
 
 services.prometheus-nixlab.maintenance.expectedMounts = [ "/data" ];
-services.grafana-nixlab.extraDashboards = [ "zfs-observability" ];   # ZFS host only
+services.grafana-nixlab.extraDashboards = [ "zfs-monitoring" ];   # ZFS host only
 ```

@@ -121,7 +121,7 @@ admin user can read data directories.
 │   └── dashboards/
 │       ├── maintenance-checklist.json # base dashboard "maintenance"
 │       ├── system-overview-v5.json    # base dashboard "system-overview-v5"
-│       └── zfs-observability.json        # opt-in via extraDashboards
+│       └── zfs-monitoring.json        # opt-in via extraDashboards
 └── ntfy/default.nix                   # ntfy server (§10)
 
 /nixlab/sops/grafana.nix        + grafana.yaml        # nsops--grafana (§11)
@@ -269,7 +269,7 @@ services.prometheus-nixlab.maintenance.exporters = {
   blackbox.dnsTargets  = ["1.1.1.1"];     # enables blackbox-dns job + DNSResolutionFailure
   backup.enable = true;                   # enables backup exporter + its alerts
 };
-services.grafana-nixlab.extraDashboards = ["zfs-observability"];
+services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
 services.grafana-nixlab.domain = "grafana.lan.example"; # adds nginx vhost, opens 80/443
 services.grafana-nixlab.port = 3200;                    # ports: plain assignment on the service
 ```
@@ -634,7 +634,7 @@ via `GF_*` environment variables.
 | `credentialsFile` | null | **string** path to raw admin password → `GF_SECURITY_ADMIN_PASSWORD__FILE`. Only applied when Grafana first creates its DB. |
 | `secretKeyFile` | null | → `GF_SECURITY_SECRET_KEY__FILE`; warning emitted if null. Changing it on an existing DB makes stored secrets unreadable. |
 | `dashboards` | attrset of `{path, folder, editable, updateInterval}` | module-owned base set: `maintenance` → `maintenance-checklist.json`, `system-overview-v5` → `system-overview-v5.json` |
-| `extraDashboards` | `[]` | names of extra JSON files in the module's `dashboards/` dir (e.g. `"zfs-observability"`); placed in folder `maintenance`, editable |
+| `extraDashboards` | `[]` | names of extra JSON files in the module's `dashboards/` dir (e.g. `"zfs-monitoring"`); placed in folder `maintenance`, editable |
 | `provisioning.datasources` | `[]` | `{name, type, url, access="proxy", isDefault, editable, jsonData}`; `type` is lower-cased (plugin ids are case-sensitive) |
 
 Strings (not `path`) for the two secret options so literals never get copied
@@ -672,7 +672,7 @@ Because of the uid-mismatch cleanup, **give every dashboard JSON a stable
 |---|---|---|
 | `maintenance-checklist.json` | *(none; uid + Loki panels pending, Stage 12c)* | "System Maintenance Checklist". Health gauge, active alerts by severity, resource overview; for each checklist family I–VI an "Automated Checks" table (query `ALERTS{checklist_section=~"<family>\\..*", alertstate="firing"}`; the pattern was corrected in Stage 1, the old `<family>\\.*` form never matched `I.1`-style codes) next to a "Manual Tasks" markdown checklist (weekly/monthly/quarterly, with commands); storage and cert-expiry timeseries, service uptime matrix, weekly/monthly/quarterly summaries, alert history. |
 | `system-overview-v5.json` | `system-maintenance-overview-v5` | "System Monitoring & Maintenance Dashboard v5". Hidden vars `DS_PROMETHEUS` (datasource) and `prometheus_url` (constant `http://localhost:9090`). Rows: Health overview (health score, alerts by severity, failed units, hottest sensor, uptime, kernel, root FS, RAM, swap, **active-alerts table showing the `condition` label** with link to Prometheus, firing by category/section); CPU; Memory; Storage & Disk (usage, inodes, IO, busy %, **time-until-disk-full**); Network; Hardware & System info (temps, CPU freq, clock offset, failed units); Service monitoring (uptime history, alert counts, alert timeline). Collapsed rows: Observability Stack Health (scrape targets, TSDB, rule failures), Containers, Web & Network Probes (traefik, blackbox), Backups & Certificates, Maintenance Checklists. Plus Extended Metrics. Annotation: firing alerts. |
-| `zfs-observability.json` | `zfs-pool-observability` | "ZFS Pool Observability" (opt-in). Var `zpool`; rows for pool state, dataset I/O, ARC, ZIL, mounted-dataset space. Uses `node_zfs_*` metrics. |
+| `zfs-monitoring.json` | `zfs-pool-monitoring` | "ZFS Pool Monitoring" (opt-in). Var `zpool`; rows for pool state, dataset I/O, ARC, ZIL, mounted-dataset space. Uses `node_zfs_*` metrics. |
 
 ### 9.5 Adding a dashboard
 

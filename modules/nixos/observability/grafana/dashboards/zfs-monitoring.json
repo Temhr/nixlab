@@ -1,7 +1,7 @@
 {
   "id": null,
-  "uid": "zfs-pool-observability",
-  "title": "ZFS Pool Observability",
+  "uid": "zfs-pool-monitoring",
+  "title": "ZFS Pool Monitoring",
   "tags": [
     "zfs",
     "storage",
