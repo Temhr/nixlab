@@ -182,6 +182,31 @@
                 type = lib.types.enum ["sendreceive" "sendonly" "receiveonly"];
                 default = "sendreceive";
                 description = "Folder type: sendreceive, sendonly, or receiveonly";
+              };;
+              ignorePerms = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Ignore permission bits entirely (false = sync them)";
+              };
+              sendOwnership = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Send file ownership (user/group) to other devices";
+              };
+              syncOwnership = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Apply ownership received from other devices (needs root or CAP_CHOWN)";
+              };
+              sendXattrs = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Send extended attributes / ACLs";
+              };
+              syncXattrs = lib.mkOption {
+                type = lib.types.bool;
+                default = false;
+                description = "Apply received extended attributes / ACLs";
               };
             };
           });
@@ -429,6 +454,13 @@
                 else name;
               devices = folder.devices;
               type = folder.type;
+              inherit (folder)
+                ignorePerms
+                sendOwnership
+                syncOwnership
+                sendXattrs
+                syncXattrs
+                ;
             })
             cfg.folders;
         };
