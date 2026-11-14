@@ -5,6 +5,7 @@
       # so any NixOS user option is valid here.
       account = {
         isNormalUser = true;
+        uid = 1000; # pinned
         group = "temhr";
         homeMode = "770";
         extraGroups = ["wheel" "networkmanager" "adbusers" "kvm" "video" "render" "users" "guest"];
@@ -12,7 +13,9 @@
       };
 
       # Optional extra attrs for users.groups.<account.group>.
-      groupConfig = {};
+      groupConfig = {
+        gid = 1000; # pinned
+      };
 
       # home-manager layer, further describing the account NixOS already defined.
       home = {
@@ -42,7 +45,7 @@
         extraGroups = []; # no wheel, no networkmanager, nothing
         initialPassword = ""; # empty password, local login only
       };
-      groupConfig.gid = 1100;
+      groupConfig.gid = 1100; # pinned
     };
 
     # rhmet = {
