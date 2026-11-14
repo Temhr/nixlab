@@ -15,7 +15,6 @@
     ];
   };
   flake.nixosModules.hosts--nixnas1 = {
-    config,
     pkgs,
     ...
   }: {
