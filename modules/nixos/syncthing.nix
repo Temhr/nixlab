@@ -182,7 +182,7 @@
                 type = lib.types.enum ["sendreceive" "sendonly" "receiveonly"];
                 default = "sendreceive";
                 description = "Folder type: sendreceive, sendonly, or receiveonly";
-              };;
+              };
               ignorePerms = lib.mkOption {
                 type = lib.types.bool;
                 default = false;
