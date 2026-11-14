@@ -38,6 +38,12 @@
           label = "mirror";
           devices = ["nixnas1"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
+          ignorePerms = false;
+          syncOwnership = true;
+          sendOwnership = true;
+          # optional: also carry extended attributes / ACLs
+          # syncXattrs = true;
+          # sendXattrs = true;
         };
       };
     };
