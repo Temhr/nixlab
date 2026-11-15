@@ -14,7 +14,7 @@
       self.nixosModules.servc--syncthing-nixlab
     ];
   };
-  flake.nixosModules.hosts--nixnas2 = {pkgs, ...}: {
+  flake.nixosModules.hosts--nixnas2 = {config, pkgs, ...}: {
     ## SELF-HOSTED SERVICES
     services.syncthing-nixlab = {
       enable = true;
