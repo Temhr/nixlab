@@ -1,4 +1,10 @@
-{inputs, ...}: {
+{inputs, ...}: let
+  # CUDA 13 dropped Pascal (sm_61). Force CUDA 12.9 inside the extra nixpkgs
+  # instances that are configured for the P5000.
+  cuda12Overlay = f: _p: {
+    cudaPackages = f.cudaPackages_12_9 or f.cudaPackages_12;
+  };
+in {
   flake.overlays = {
     additions = final: _prev: import ../pkgs final.pkgs;
 
@@ -22,6 +28,7 @@
     unstable-packages = final: _prev: {
       unstable = import inputs.nixpkgs-unstable {
         system = final.stdenv.hostPlatform.system;
+        overlays = [cuda12Overlay];
         config.allowUnfree = true;
         config.cudaSupport = true;
         config.cudaCapabilities = ["6.1"];
@@ -31,6 +38,7 @@
     stable-packages = final: _prev: {
       stable = import inputs.nixpkgs-stable {
         system = final.stdenv.hostPlatform.system;
+        overlays = [cuda12Overlay];
         config.allowUnfree = true;
         config.cudaSupport = true;
         config.cudaCapabilities = ["6.1"];

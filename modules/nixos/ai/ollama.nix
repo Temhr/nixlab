@@ -482,10 +482,6 @@
           extraPorts = lib.optionals (cfg.domain == null) [cfg.ollamaPort];
         });
 
-      # CUDA toolkit only needed for GPU mode
-      environment.systemPackages = lib.mkIf (cfg.acceleration == "cuda-p5000") [
-        pkgs.cudaPackages_12_9.cudatoolkit
-      ];
     };
   };
 }

@@ -87,15 +87,22 @@
         description = "Install ComfyUI Extensions and Custom Nodes";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
-        after = ["comfyui-pytorch-setup.service"];
+        after = ["comfyui-pytorch-setup.service" "network-online.target"];
+        wants = ["network-online.target"];
         requires = ["comfyui-pytorch-setup.service"];
+
+        # Custom-node requirements must never replace the torch family that
+        # comfyui-pytorch-setup installed (constraints.txt is written there).
+        # A conflicting node then fails to install instead of breaking PyTorch.
+        environment.PIP_CONSTRAINT = "${cfg.dataDir}/venv/constraints.txt";
 
         serviceConfig = {
           Type = "oneshot";
-          User = "comfyui";
-          Group = "comfyui";
+          User = cfg.user;
+          Group = cfg.group;
           RemainAfterExit = true;
           WorkingDirectory = cfg.dataDir;
+          TimeoutStartSec = "infinity";
         };
 
         path = [pkgs.git pkgs.python311];
@@ -234,10 +241,11 @@
       # ----------------------------------------------------------------------------
       # CREATE SYMLINK - Link custom nodes to ComfyUI directory
       # ----------------------------------------------------------------------------
+      # The custom_nodes symlink inside the (writable) ComfyUI copy is created by
+      # comfyui-patch in comfyui-p5000.nix. Do NOT point a tmpfiles rule at
+      # ${pkgs.comfyui}/... — that is the read-only Nix store.
       systemd.tmpfiles.rules = [
-        "d ${cfg.dataDir}/custom_nodes 0770 comfyui comfyui -"
-        # Create symlink from ComfyUI installation to custom nodes directory
-        "L+ ${pkgs.comfyui}/share/comfyui/custom_nodes - - - - ${cfg.dataDir}/custom_nodes"
+        "d ${cfg.dataDir}/custom_nodes 0770 ${cfg.user} ${cfg.group} -"
       ];
     };
   };

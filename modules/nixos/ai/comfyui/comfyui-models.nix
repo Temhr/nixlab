@@ -125,14 +125,14 @@
       # MODEL DIRECTORIES - Create subdirectories for different model types
       # ----------------------------------------------------------------------------
       systemd.tmpfiles.rules = [
-        "d ${cfg.dataDir}/models/checkpoints 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/vae 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/loras 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/controlnet 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/upscale_models 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/clip 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/clip_vision 0770 comfyui comfyui -"
-        "d ${cfg.dataDir}/models/embeddings 0770 comfyui comfyui -"
+        "d ${cfg.dataDir}/models/checkpoints 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/vae 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/loras 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/controlnet 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/upscale_models 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/clip 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/clip_vision 0770 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.dataDir}/models/embeddings 0770 ${cfg.user} ${cfg.group} -"
       ];
 
       # ----------------------------------------------------------------------------
@@ -142,12 +142,13 @@
         description = "Download ComfyUI Models";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
-        after = ["comfyui-pytorch-setup.service"];
+        after = ["comfyui-permissions.service" "network-online.target"];
+        wants = ["network-online.target"];
 
         serviceConfig = {
           Type = "oneshot";
-          User = "comfyui";
-          Group = "comfyui";
+          User = cfg.user;
+          Group = cfg.group;
           RemainAfterExit = true;
           WorkingDirectory = cfg.dataDir;
           # Models can be large, allow plenty of time
@@ -194,16 +195,16 @@
 
             # Try with wget first (better resume support), fallback to curl.
             # Pass HF_TOKEN as Authorization header when set (needed for gated models).
-            if [ -n "''${HF_TOKEN:-}" ]; then
+            if [ -n "''${HF_TOKEN:-}" ] && [[ "$url" == https://huggingface.co/* ]]; then
               ${pkgs.wget}/bin/wget -c --header="Authorization: Bearer ''${HF_TOKEN}" -O "$output.partial" "$url" || \
-              ${pkgs.curl}/bin/curl -L -C - -H "Authorization: Bearer ''${HF_TOKEN}" -o "$output.partial" "$url" || {
+              ${pkgs.curl}/bin/curl -fL -C - -H "Authorization: Bearer ''${HF_TOKEN}" -o "$output.partial" "$url" || {
                 echo "Error: Failed to download $model_name"
                 rm -f "$output.partial"
                 return 1
               }
             else
               ${pkgs.wget}/bin/wget -c -O "$output.partial" "$url" || \
-              ${pkgs.curl}/bin/curl -L -C - -o "$output.partial" "$url" || {
+              ${pkgs.curl}/bin/curl -fL -C - -o "$output.partial" "$url" || {
                 echo "Error: Failed to download $model_name"
                 rm -f "$output.partial"
                 return 1
@@ -219,7 +220,7 @@
             # Download Stable Diffusion 1.5
             echo "Downloading Stable Diffusion 1.5..."
             download_model \
-              "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" \
+              "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" \
               "$MODELS_DIR/checkpoints/sd_v1-5-pruned-emaonly.safetensors" \
               || echo "Warning: Failed to download SD 1.5"
           ''}
@@ -319,8 +320,8 @@
 
         serviceConfig = {
           Type = "oneshot";
-          User = "comfyui";
-          Group = "comfyui";
+          User = cfg.user;
+          Group = cfg.group;
           RemainAfterExit = true;
         };
 

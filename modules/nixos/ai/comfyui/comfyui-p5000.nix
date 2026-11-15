@@ -7,7 +7,13 @@
     ...
   }: let
     cfg = config.services.comfyui-p5000;
-    pytorchWheels = pkgs.pytorchCu118Wheels;
+    # Python used for the venv. If ComfyUI's requirements need a newer Python,
+    # switch to pkgs.python312 (PyTorch cu126 wheels exist for it too).
+    py = pkgs.python311;
+
+    # Last PyTorch release with a prebuilt Pascal (sm_61) wheel is 2.14 (cu126).
+    torchSpec = "torch==2.14.0 torchvision==0.29.0 torchaudio";
+    torchIndex = "https://download.pytorch.org/whl/cu126";
   in {
     imports = [
       self.nixosModules.systm--ports-comfyui
@@ -147,13 +153,16 @@
       };
 
       # ----------------------------------------------------------------------------
-      # COMFYUI PATCH - Fix PyTorch 2.2 compatibility
+      # COMFYUI SOURCE SYNC - copy the Nix-store source into a writable dir
+      #
+      # Re-copies whenever the pkgs.comfyui store path changes, so bumping the
+      # version in the overlay actually takes effect.
       # ----------------------------------------------------------------------------
       systemd.services.comfyui-patch = {
-        description = "Patch ComfyUI for PyTorch 2.2 compatibility";
+        description = "Sync ComfyUI source into the data dir";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
-        after = ["comfyui-pytorch-setup.service" "comfyui-pytorch-setup.service"];
+        after = ["comfyui-permissions.service"];
 
         serviceConfig = {
           Type = "oneshot";
@@ -163,63 +172,43 @@
         };
 
         script = ''
-          # Copy ComfyUI to a writable location if not already done
-          COMFYUI_SRC="${pkgs.comfyui}/share/comfyui"
-          COMFYUI_PATCHED="${cfg.dataDir}/comfyui"
+          SRC="${pkgs.comfyui}/share/comfyui"
+          DST="${cfg.dataDir}/comfyui"
+          SENTINEL="${cfg.dataDir}/.comfyui-src"
 
-          if [ ! -d "$COMFYUI_PATCHED" ]; then
-            echo "Copying ComfyUI to writable location..."
-            cp -r "$COMFYUI_SRC" "$COMFYUI_PATCHED"
-            chmod -R u+w "$COMFYUI_PATCHED"
+          if [ ! -d "$DST" ] || ! grep -qxF "$SRC" "$SENTINEL" 2>/dev/null; then
+            echo "Syncing ComfyUI from $SRC"
+            rm -rf "$DST"
+            cp -r "$SRC" "$DST"
+            chmod -R u+w "$DST"
+            echo "$SRC" > "$SENTINEL"
           fi
 
-          # Create symlink to custom_nodes directory
-          if [ ! -L "$COMFYUI_PATCHED/custom_nodes" ]; then
-            echo "Removing default custom_nodes and creating symlink..."
-            rm -rf "$COMFYUI_PATCHED/custom_nodes"
-            ln -sf "${cfg.dataDir}/custom_nodes" "$COMFYUI_PATCHED/custom_nodes"
-          fi
-
-          # Patch ops.py for PyTorch 2.2 compatibility
-          OPS_FILE="$COMFYUI_PATCHED/comfy/ops.py"
-
-          if grep -q "torch.compiler.is_compiling()" "$OPS_FILE"; then
-            echo "Patching ops.py for PyTorch 2.2 compatibility..."
-
-            # Replace torch.compiler.is_compiling() with a compatibility check
-            sed -i 's/if torch.compiler.is_compiling():/if hasattr(torch.compiler, "is_compiling") and torch.compiler.is_compiling():/' "$OPS_FILE"
-
-            echo "Patch applied successfully"
-          else
-            echo "ops.py already patched or doesn't need patching"
-          fi
-
-          echo "ComfyUI patched and custom_nodes symlink created"
+          # custom_nodes lives in the data dir so it survives upgrades
+          mkdir -p "${cfg.dataDir}/custom_nodes"
+          rm -rf "$DST/custom_nodes"
+          ln -sfn "${cfg.dataDir}/custom_nodes" "$DST/custom_nodes"
         '';
       };
 
       # ----------------------------------------------------------------------------
-      # PYTORCH INSTALLER - installs from Nix store wheels; no network at boot
+      # PYTHON ENV - PyTorch (cu126, includes sm_61) + ComfyUI's own requirements
       #
-      # The wheels (torch, torchvision, torchaudio) are fetched into the Nix store
-      # as Fixed Output Derivations during `nixos-rebuild`, not at runtime. This
-      # means:
-      #   - No internet access required at boot
-      #   - Hashes are pinned and verified by Nix
-      #   - Reproducible across rebuilds
-      #
-      # A version sentinel file ($VENV_DIR/.pytorch-version) records what was
-      # installed. The service re-runs if the sentinel is absent or stale, so a
-      # `nixos-rebuild switch` that changes the wheel derivations will trigger a
-      # clean reinstall.
+      # NOTE: this needs network access at setup time (PyTorch index + PyPI).
+      # A sentinel records torch spec + python + ComfyUI store path; the venv is
+      # rebuilt whenever any of them changes.
       # ----------------------------------------------------------------------------
       systemd.services.comfyui-pytorch-setup = {
-        description = "Install PyTorch 2.2 cu118 for ComfyUI (P5000 / sm_61) from Nix store";
+        description = "Install PyTorch cu126 (Pascal) and ComfyUI requirements";
         wantedBy = ["comfyui.service"];
         before = ["comfyui.service"];
-        after = ["comfyui-permissions.service"];
-
-        # No After = network.target — we don't need the network.
+        after = [
+          "comfyui-permissions.service"
+          "comfyui-patch.service"
+          "network-online.target"
+        ];
+        wants = ["network-online.target"];
+        requires = ["comfyui-patch.service"];
 
         environment = {
           LD_LIBRARY_PATH = lib.makeLibraryPath [
@@ -227,6 +216,7 @@
             pkgs.glib
             pkgs.zlib
           ];
+          HOME = cfg.dataDir;
         };
 
         serviceConfig = {
@@ -235,100 +225,49 @@
           Group = cfg.group;
           RemainAfterExit = true;
           WorkingDirectory = cfg.dataDir;
+          TimeoutStartSec = "infinity";
         };
 
-        path = [pkgs.python311];
+        path = [py pkgs.coreutils pkgs.gnugrep];
 
         script = ''
-                    set -e
-                    VENV_DIR="${cfg.dataDir}/venv"
+          set -e
+          VENV="${cfg.dataDir}/venv"
+          SENTINEL="$VENV/.setup-version"
+          WANT="${torchSpec} ${torchIndex} ${py} ${pkgs.comfyui}"
 
-                    # The sentinel records the store path of the torch wheel that was last
-                    # installed. If it matches the current derivation output, skip the install.
-                    SENTINEL="$VENV_DIR/.pytorch-version"
-                    EXPECTED_TORCH="${pytorchWheels.torch}"
+          if [ -x "$VENV/bin/python" ] && [ "$(cat "$SENTINEL" 2>/dev/null)" = "$WANT" ]; then
+            echo "Python env up to date — skipping"
+            exit 0
+          fi
 
-                    # Skip only if sentinel matches AND venv python actually exists
-                    if [ -f "$SENTINEL" ] && grep -qF "$EXPECTED_TORCH" "$SENTINEL" 2>/dev/null \
-                      && [ -x "$VENV_DIR/bin/python" ]; then
-                      echo "PyTorch already installed from $EXPECTED_TORCH — skipping"
-                      exit 0
-                    fi
+          echo "(Re)creating venv..."
+          rm -rf "$VENV"
+          ${py}/bin/python -m venv "$VENV"
+          "$VENV/bin/pip" install --upgrade pip
 
-                    # (Re)create the venv on first run or after a wheel change
-                    if [ -d "$VENV_DIR" ]; then
-                      echo "Wheel derivation changed — removing stale venv..."
-                      rm -rf "$VENV_DIR"
-                    fi
+          echo "Installing PyTorch (cu126)..."
+          "$VENV/bin/pip" install ${torchSpec} --index-url ${torchIndex}
 
-                    echo "Creating Python virtual environment..."
-                    ${pkgs.python311}/bin/python -m venv "$VENV_DIR"
+          # Freeze the torch family so later installs can't replace it
+          "$VENV/bin/pip" freeze | grep -iE '^(torch|torchvision|torchaudio)==' > "$VENV/constraints.txt"
+          cat "$VENV/constraints.txt"
 
-                    # pip parses wheel filenames for compatibility tags — the name must be exact.
-                    # We renamed the files in the Nix store to strip '%2B', so we symlink them
-                    # back to their original names in a temp directory before installing.
-                    WHEEL_DIR=$(mktemp -d)
-                    ln -s "${pytorchWheels.torch}"      "$WHEEL_DIR/torch-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
-                    ln -s "${pytorchWheels.torchvision}" "$WHEEL_DIR/torchvision-0.17.2+cu118-cp311-cp311-linux_x86_64.whl"
-                    ln -s "${pytorchWheels.torchaudio}"  "$WHEEL_DIR/torchaudio-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
+          # ComfyUI's requirements, minus the torch lines we installed above
+          REQ="$(mktemp)"
+          grep -viE '^(torch|torchvision|torchaudio)([<>=! ]|$)' \
+            "${cfg.dataDir}/comfyui/requirements.txt" > "$REQ"
+          echo "Installing ComfyUI requirements..."
+          "$VENV/bin/pip" install -r "$REQ" -c "$VENV/constraints.txt"
+          rm -f "$REQ"
 
-                    echo "Installing PyTorch 2.2.2+cu118 from Nix store..."
-                    "$VENV_DIR/bin/pip" install --no-deps \
-                      "$WHEEL_DIR/torch-2.2.2+cu118-cp311-cp311-linux_x86_64.whl" \
-                      "$WHEEL_DIR/torchvision-0.17.2+cu118-cp311-cp311-linux_x86_64.whl" \
-                      "$WHEEL_DIR/torchaudio-2.2.2+cu118-cp311-cp311-linux_x86_64.whl"
+          echo "$WANT" > "$SENTINEL"
 
-                    rm -rf "$WHEEL_DIR"
-
-                    echo "Installing ComfyUI dependencies (includes torch deps)..."
-                    "$VENV_DIR/bin/pip" install --no-cache-dir \
-                      filelock \
-                      sympy \
-                      networkx \
-                      jinja2 \
-                      fsspec \
-                      "typing-extensions>=4.8.0" \
-                      "numpy<2" \
-                      pillow \
-                      safetensors \
-                      aiohttp \
-                      pyyaml \
-                      tqdm \
-                      psutil \
-                      scipy \
-                      einops \
-                      opencv-python \
-                      matplotlib \
-                      transformers \
-                      accelerate \
-                      sentencepiece \
-                      kornia \
-                      torchsde \
-                      spandrel \
-                      soundfile \
-                      av \
-                      pydantic \
-                      pydantic-settings \
-                      alembic \
-                      comfyui-frontend-package \
-                      comfyui-workflow-templates \
-                      comfyui-embedded-docs
-
-                    # Force numpy<2 — other deps may have pulled in numpy 2.x
-                    echo "Pinning numpy<2 for PyTorch 2.2 compatibility..."
-                    "$VENV_DIR/bin/pip" install --force-reinstall "numpy<2"
-
-                    # Write sentinel so we can skip this on the next boot
-                    echo "$EXPECTED_TORCH" > "$SENTINEL"
-
-                    echo "PyTorch setup complete!"
-                    echo "Testing CUDA availability..."
-                    "$VENV_DIR/bin/python" -c "
+          "$VENV/bin/python" - <<'PY'
           import torch
-          print(f'PyTorch version: {torch.__version__}')
-          print(f'CUDA available: {torch.cuda.is_available()}')
-          print(f'CUDA device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')
-          " || echo "Warning: CUDA test failed — check nvidia drivers"
+          print("torch", torch.__version__, "| cuda available:", torch.cuda.is_available())
+          print("arch list:", torch.cuda.get_arch_list())  # must contain sm_61
+          PY
         '';
       };
 
@@ -367,7 +306,6 @@
               pkgs.stdenv.cc.cc.lib
               pkgs.glib
               pkgs.zlib
-              pkgs.cudatoolkit
               pkgs.linuxPackages.nvidia_x11
               pkgs.libGL
               pkgs.libGLU
@@ -419,12 +357,6 @@
           inherit (cfg) domain listenAddress;
           servicePort = cfg.port;
         });
-
-      # Include CUDA toolkit in system packages
-      environment.systemPackages = [
-        pkgs.cudatoolkit
-        pkgs.comfyui
-      ];
     };
   };
 }
@@ -435,16 +367,9 @@ COMFYUI P5000 MODULE - GPU-ACCELERATED STABLE DIFFUSION
 
 This module provides ComfyUI with CUDA support for the NVIDIA Quadro P5000 GPU.
 
-IMPORTANT: ComfyUI needs PyTorch built with CUDA support. Ensure your nixpkgs
-has CUDA support enabled.
-
-Add to your configuration.nix:
-```nix
-nixpkgs.config = {
-  allowUnfree = true;
-  cudaSupport = true;
-};
-```
+PyTorch comes from PyTorch's cu126 wheel index into a venv (cu126 is the last
+build that still includes Pascal / sm_61; 2.14 is the last release with it).
+The ComfyUI source version is set in overlays/_comfyui-p5000.nix.
 
 USAGE
 -----
