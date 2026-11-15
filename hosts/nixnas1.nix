@@ -14,7 +14,7 @@
       self.nixosModules.servc--syncthing-nixlab
     ];
   };
-  flake.nixosModules.hosts--nixnas1 = {pkgs, ...}: {
+  flake.nixosModules.hosts--nixnas1 = {config, pkgs, ...}: {
     ## SELF-HOSTED SERVICES
     services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
 
@@ -23,6 +23,8 @@
       enableGuiAuth = false; # No username/password prompt
       dataDir = "/data/syncthing";
       configDir = "/data/syncthing";
+      user = config.nixlab.mainUser;
+      group = config.nixlab.mainUser;
       guiAddress = "0.0.0.0";
       openFirewall = true;
       #mask = "0007";
@@ -45,8 +47,8 @@
           devices = ["nixnas2"];
           type = "sendreceive"; # or "sendonly" or "receiveonly" or "sendreceive"
           ignorePerms = false;
-          syncOwnership = true;
-          sendOwnership = true;
+          #syncOwnership = true;
+          #sendOwnership = true;
           # optional: also carry extended attributes / ACLs
           # syncXattrs = true;
           # sendXattrs = true;
