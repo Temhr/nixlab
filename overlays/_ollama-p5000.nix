@@ -21,13 +21,14 @@
   };
 in {
   ollama-cuda-p5000 =
-    (pinnedPkgs.ollama-cuda.override {
-      cudaArches = ["sm_61" "sm_75" "sm_80" "sm_86" "sm_89" "sm_90"];
-    }).overrideAttrs (old: {
-      pname = "ollama-cuda-p5000";
-      name = "ollama-cuda-p5000-${old.version}";
-      vendorHash = "sha256-1mzJrZUHH2ouP6I+LVojHbft7No5AumqKZVq0I/Ubsg=";
-    });
+  (pinnedPkgs.ollama-cuda.override {
+    cudaPackages = pinnedPkgs.cudaPackages_12_9;   # or cudaPackages_12 if that alias exists in your pin
+    cudaArches = ["sm_61"]; # "sm_75" "sm_80" "sm_86" "sm_89" "sm_90"
+  }).overrideAttrs (old: {
+    pname = "ollama-cuda-p5000";
+    name = "ollama-cuda-p5000-${old.version}";
+    vendorHash = "sha256-1mzJrZUHH2ouP6I+LVojHbft7No5AumqKZVq0I/Ubsg=";
+  });
 
   ollama = stablePkgs.ollama;
   open-webui = webuiPkgs.open-webui;
