@@ -14,7 +14,11 @@
       self.nixosModules.servc--syncthing-nixlab
     ];
   };
-  flake.nixosModules.hosts--nixnas1 = {config, pkgs, ...}: {
+  flake.nixosModules.hosts--nixnas1 = {
+    config,
+    pkgs,
+    ...
+  }: {
     ## SELF-HOSTED SERVICES
     services.grafana-nixlab.extraDashboards = ["zfs-monitoring"];
 

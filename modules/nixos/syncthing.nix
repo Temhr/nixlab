@@ -454,7 +454,8 @@
                 else name;
               devices = folder.devices;
               type = folder.type;
-              inherit (folder)
+              inherit
+                (folder)
                 ignorePerms
                 sendOwnership
                 syncOwnership

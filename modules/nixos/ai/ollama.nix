@@ -481,7 +481,6 @@
           servicePort = cfg.webuiPort;
           extraPorts = lib.optionals (cfg.domain == null) [cfg.ollamaPort];
         });
-
     };
   };
 }
