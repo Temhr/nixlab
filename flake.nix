@@ -48,6 +48,13 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    observability = {
+      url = "git+file:///home/temhr/flakes/observability?ref=main"; # dev only; replaced by the tag in 5.8
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-unstable.follows = "nixpkgs-unstable";
+      inputs.sops-nix.follows = "sops-nix";
+      inputs.flake-parts.follows = "flake-parts";
+    };
   };
 
   # ================================================================

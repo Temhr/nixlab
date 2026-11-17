@@ -28,7 +28,7 @@
 
       self.nixosModules.nsops--homepage
       self.nixosModules.nsops--ssh-keys
-      self.nixosModules.stack--observability
+      self.nixosModules.stack--observability-nixlab
     ];
 
     ## Shared system-wide default user option
