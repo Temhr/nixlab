@@ -1,7 +1,7 @@
 # ComfyUI overlay for P5000 — source tree only.
 # Python deps (PyTorch cu126 + ComfyUI requirements) are installed into a venv
 # by the comfyui-pytorch-setup service in comfyui-p5000.nix.
-final: prev: {
+_: prev: {
   comfyui = prev.stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "comfyui";
     # Newest tag: https://github.com/Comfy-Org/ComfyUI/releases
