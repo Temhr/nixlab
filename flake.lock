@@ -366,16 +366,16 @@
       "locked": {
         "lastModified": 1794932445,
         "narHash": "sha256-oHtEIdoQohrasfYvDaGoJLpJ0+YVzr+NLWBYdQk/08U=",
-        "ref": "main",
+        "owner": "Temhr",
+        "repo": "observability",
         "rev": "f345f07e5ea75fdae15f3b459082a3578eb93ba6",
-        "revCount": 31,
-        "type": "git",
-        "url": "file:///home/temhr/flakes/observability"
+        "type": "github"
       },
       "original": {
-        "ref": "main",
-        "type": "git",
-        "url": "file:///home/temhr/flakes/observability"
+        "owner": "Temhr",
+        "ref": "v0.1.0",
+        "repo": "observability",
+        "type": "github"
       }
     },
     "pre-commit-hooks": {
