@@ -364,16 +364,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1794932445,
-        "narHash": "sha256-oHtEIdoQohrasfYvDaGoJLpJ0+YVzr+NLWBYdQk/08U=",
+        "lastModified": 1794993533,
+        "narHash": "sha256-HygjHWtRAf89s+sNfkmwx53yWeC/c+k83Dxm3Ru7vpY=",
         "owner": "Temhr",
         "repo": "observability",
-        "rev": "f345f07e5ea75fdae15f3b459082a3578eb93ba6",
+        "rev": "2c0419f6a284ce46026f333211eadcd4286a4554",
         "type": "github"
       },
       "original": {
         "owner": "Temhr",
-        "ref": "v0.1.0",
+        "ref": "v0.2.0",
         "repo": "observability",
         "type": "github"
       }
