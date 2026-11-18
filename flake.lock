@@ -373,7 +373,7 @@
       },
       "original": {
         "owner": "Temhr",
-        "ref": "v0.1.0",
+        "ref": "v0.2.0",
         "repo": "observability",
         "type": "github"
       }
