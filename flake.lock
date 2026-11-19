@@ -364,11 +364,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795119373,
-        "narHash": "sha256-UCqtFsN9fVHz4XwibpVSZaShuEGU8itJooa4BGeEvTU=",
+        "lastModified": 1795124614,
+        "narHash": "sha256-DPxrl5k2udLs7KDMRxJSYVDnE2VO513B5yVrKz/9rnw=",
         "owner": "Temhr",
         "repo": "observability",
-        "rev": "3049c821dc0428fcb396a8aac6d9897b2f0806b8",
+        "rev": "0be9947b234277bed68e32fe391e87cdbdabb7d3",
         "type": "github"
       },
       "original": {
