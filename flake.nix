@@ -49,7 +49,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     observability = {
-      url = "github:Temhr/observability/v0.2.0";
+      url = "github:Temhr/observability/v0.2.1";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-unstable.follows = "nixpkgs-unstable";
       inputs.sops-nix.follows = "sops-nix";
