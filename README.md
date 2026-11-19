@@ -689,10 +689,10 @@ Monitoring — Prometheus, Alertmanager, ntfy, Loki, Alloy, Grafana, exporters, 
 ```
  observability flake                        nixlab
  ───────────────────                        ──────────────────────────────────────────
- stack--observability (aggregator)  ◄──────  stacks/observability-nixlab.nix   (adapter: facts → options)
- servc--observability-* services             hosts/common/profile-{base,desktop,nas}.nix (fleet policy)
- nsops--observability-* (optional)  ◄──────  sops/alertmanager.env, sops/grafana.yaml   (encrypted files)
- lib.observabilityHostChecks        ◄──────  flake/ci/observability-integration.nix     (CI on real hosts)
+ stack--observability (aggregator)  ◄─  stacks/observability-nixlab.nix   (adapter: facts → options)
+ servc--observability-* services        hosts/common/profile-{base,desktop,nas}.nix (fleet policy)
+ nsops--observability-* (optional)  ◄─  sops/alertmanager.env, sops/grafana.yaml   (encrypted files)
+ lib.observabilityHostChecks        ◄─  flake/ci/observability-integration.nix     (CI on real hosts)
 ```
 
 **The adapter** (`stacks/observability-nixlab.nix`, module `stack--observability-nixlab`, imported by `hosts--profl--base`) only translates:
