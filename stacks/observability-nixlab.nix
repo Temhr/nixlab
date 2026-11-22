@@ -16,6 +16,8 @@
       self.nixosModules.nsops--alertmanager
       self.nixosModules.nsops--grafana
     ];
+
+    # Old option names: they still work in 0.3 through compat aliases (Stage B renames them).
     services.nixlab-observability = {
       publicHost = lib.mkDefault (hostMeta.address or null);
       probes.gateway = lib.mkDefault (hostMeta.gateway or null);
@@ -29,5 +31,11 @@
     services.alloy-nixlab.extraUsers = mainUsers;
     services.ntfy-nixlab.extraUsers = mainUsers;
     services.prometheus-nixlab.extraUsers = mainUsers;
+
+    # New in 0.3: these options have no old spelling, so they use their new names even in Stage A.
+    # They keep behaviour nixlab relied on before the extraction (Part 8).
+    services.observability.integrations.nvidia.enable = lib.mkDefault true;
+    services.observability-prometheus.maintenance.alerts.features.zfsMembers = lib.mkDefault true;
+    services.observability-grafana.timersRegex = lib.mkDefault "nixos-upgrade.timer|flake-update.timer|backup-home.timer|nixlab-gpull.timer|nix-gc.timer";
   };
 }
