@@ -1,0 +1,301 @@
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixace/sops-secrets.json /home/temhr/obs-baseline/after3/nixace/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixace/sops-secrets.json	2026-11-19 17:15:48.424091270 -0500
++++ /home/temhr/obs-baseline/after3/nixace/sops-secrets.json	2026-11-22 05:47:16.094995883 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixace/units.json /home/temhr/obs-baseline/after3/nixace/units.json
+--- /home/temhr/obs-baseline/before3/nixace/units.json	2026-11-19 17:15:47.343085493 -0500
++++ /home/temhr/obs-baseline/after3/nixace/units.json	2026-11-22 05:47:15.079990995 -0500
+@@ -128,8 +128,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.3.1/bin/grafana server --homepath=/nix/store/grafana-13.3.1/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixnas1/sops-secrets.json /home/temhr/obs-baseline/after3/nixnas1/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixnas1/sops-secrets.json	2026-11-19 17:13:12.407258887 -0500
++++ /home/temhr/obs-baseline/after3/nixnas1/sops-secrets.json	2026-11-22 05:45:41.491541091 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixnas1/units.json /home/temhr/obs-baseline/after3/nixnas1/units.json
+--- /home/temhr/obs-baseline/before3/nixnas1/units.json	2026-11-19 17:13:11.072251778 -0500
++++ /home/temhr/obs-baseline/after3/nixnas1/units.json	2026-11-22 05:45:40.161534710 -0500
+@@ -130,8 +130,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.0.13/bin/grafana server --homepath=/nix/store/grafana-13.0.13/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixnas2/sops-secrets.json /home/temhr/obs-baseline/after3/nixnas2/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixnas2/sops-secrets.json	2026-11-19 17:14:00.524515270 -0500
++++ /home/temhr/obs-baseline/after3/nixnas2/sops-secrets.json	2026-11-22 05:46:23.904744773 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixnas2/units.json /home/temhr/obs-baseline/after3/nixnas2/units.json
+--- /home/temhr/obs-baseline/before3/nixnas2/units.json	2026-11-19 17:13:59.229508366 -0500
++++ /home/temhr/obs-baseline/after3/nixnas2/units.json	2026-11-22 05:46:22.622738612 -0500
+@@ -130,8 +130,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.0.13/bin/grafana server --homepath=/nix/store/grafana-13.0.13/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixsun/sops-secrets.json /home/temhr/obs-baseline/after3/nixsun/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixsun/sops-secrets.json	2026-11-19 17:16:40.341368884 -0500
++++ /home/temhr/obs-baseline/after3/nixsun/sops-secrets.json	2026-11-22 05:48:13.464272459 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixsun/units.json /home/temhr/obs-baseline/after3/nixsun/units.json
+--- /home/temhr/obs-baseline/before3/nixsun/units.json	2026-11-19 17:16:39.270363155 -0500
++++ /home/temhr/obs-baseline/after3/nixsun/units.json	2026-11-22 05:48:12.313266905 -0500
+@@ -128,8 +128,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.3.1/bin/grafana server --homepath=/nix/store/grafana-13.3.1/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixtop/sops-secrets.json /home/temhr/obs-baseline/after3/nixtop/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixtop/sops-secrets.json	2026-11-19 17:17:43.384706343 -0500
++++ /home/temhr/obs-baseline/after3/nixtop/sops-secrets.json	2026-11-22 05:49:01.251503236 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixtop/units.json /home/temhr/obs-baseline/after3/nixtop/units.json
+--- /home/temhr/obs-baseline/before3/nixtop/units.json	2026-11-19 17:17:42.351700811 -0500
++++ /home/temhr/obs-baseline/after3/nixtop/units.json	2026-11-22 05:49:00.072497538 -0500
+@@ -128,8 +128,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.3.1/bin/grafana server --homepath=/nix/store/grafana-13.3.1/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixvat/sops-secrets.json /home/temhr/obs-baseline/after3/nixvat/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixvat/sops-secrets.json	2026-11-19 17:18:56.265096882 -0500
++++ /home/temhr/obs-baseline/after3/nixvat/sops-secrets.json	2026-11-22 05:49:57.833776904 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixvat/units.json /home/temhr/obs-baseline/after3/nixvat/units.json
+--- /home/temhr/obs-baseline/before3/nixvat/units.json	2026-11-19 17:18:55.220091279 -0500
++++ /home/temhr/obs-baseline/after3/nixvat/units.json	2026-11-22 05:49:56.515770524 -0500
+@@ -128,8 +128,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.3.1/bin/grafana server --homepath=/nix/store/grafana-13.3.1/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixzen/sops-secrets.json /home/temhr/obs-baseline/after3/nixzen/sops-secrets.json
+--- /home/temhr/obs-baseline/before3/nixzen/sops-secrets.json	2026-11-19 17:19:54.333408335 -0500
++++ /home/temhr/obs-baseline/after3/nixzen/sops-secrets.json	2026-11-22 05:50:48.404021841 -0500
+@@ -8,7 +8,7 @@
+     "restartUnits": [
+       "alertmanager.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/alertmanager.env"
++    "sopsFile": "/nix/store/source/sops/alertmanager.env"
+   },
+   "GRAFANA_ADMIN_PASSWORD": {
+     "format": "yaml",
+@@ -19,7 +19,7 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   },
+   "GRAFANA_SECRET_KEY": {
+     "format": "yaml",
+@@ -30,6 +30,6 @@
+     "restartUnits": [
+       "grafana.service"
+     ],
+-    "sopsFile": "/nix/store/source/sops/grafana.yaml"
++    "sopsFile": "/nix/store/source/sops/grafana.yaml"
+   }
+ }
+diff -ru -x toplevel /home/temhr/obs-baseline/before3/nixzen/units.json /home/temhr/obs-baseline/after3/nixzen/units.json
+--- /home/temhr/obs-baseline/before3/nixzen/units.json	2026-11-19 17:19:53.306402824 -0500
++++ /home/temhr/obs-baseline/after3/nixzen/units.json	2026-11-22 05:50:47.180015909 -0500
+@@ -128,8 +128,8 @@
+       "CapabilityBoundingSet": "",
+       "ExecStart": "/nix/store/grafana-13.3.1/bin/grafana server --homepath=/nix/store/grafana-13.3.1/share/grafana",
+       "ExecStartPre": [
+-        "+/nix/store/grafana-setup",
+-        "/nix/store/grafana-provision"
++        "+/nix/store/grafana-setup",
++        "/nix/store/grafana-provision"
+       ],
+       "Group": "grafana",
+       "LockPersonality": true,
