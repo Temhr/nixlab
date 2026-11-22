@@ -22,7 +22,7 @@
       publicHost = lib.mkDefault (hostMeta.address or null);
       probes.gateway = lib.mkDefault (hostMeta.gateway or null);
       probes.tcpTargets = lib.mkDefault registryTcpTargets;
-      integrations.nvidia.enable = lib.mkDefault true; # Part 11.2 narrows this
+      integrations.nvidia.enable = lib.mkDefault (builtins.elem "nvidia" config.services.xserver.videoDrivers);
     };
     services.observability-prometheus.maintenance.alerts.features.zfsMembers = lib.mkDefault true;
     services.observability-grafana.timersRegex = lib.mkDefault "nixos-upgrade.timer|flake-update.timer|backup-home.timer|nixlab-gpull.timer|nix-gc.timer";
