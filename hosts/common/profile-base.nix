@@ -53,7 +53,7 @@
       openFirewall = true;
       dataDir = "/data/homepage";
     };
-    services.nixlab-observability = {
+    services.observability = {
       enable = true;
       openFirewall = false;
       dataDir = "/data";

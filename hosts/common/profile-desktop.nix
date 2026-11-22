@@ -19,8 +19,8 @@
       self.nixosModules.hosts--deskt--gui-shells
       self.nixosModules.hosts--deskt--ignore-lid
     ];
-    services.prometheus-nixlab.maintenance.expectedMounts = ["/data"];
-    services.nixlab-observability.access.interfaces = [hostMeta.ethIface hostMeta.wifiIface];
+    services.observability-prometheus.maintenance.expectedMounts = ["/data"];
+    services.observability.access.interfaces = [hostMeta.ethIface hostMeta.wifiIface];
 
     ## Automatic login for this user
     services.displayManager.autoLogin.user = config.nixlab.mainUser;

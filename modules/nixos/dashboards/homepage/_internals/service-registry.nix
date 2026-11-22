@@ -10,11 +10,11 @@
     "bookstack" = config.services.bookstack-nixlab.enable or false;
     "wikijs" = config.services.wikijs-custom.enable or false;
     "zola" = config.services.zola-nixlab.enable or false;
-    "alertmanager" = config.services.alertmanager-nixlab.enable or false;
-    "grafana" = config.services.grafana-nixlab.enable or false;
-    "ntfy" = config.services.ntfy-nixlab.enable or false; # confirm exact name
-    "prometheus" = config.services.prometheus-nixlab.enable or false;
-    "loki" = config.services.loki-nixlab.enable or false;
+    "alertmanager" = config.services.observability-alertmanager.enable or false;
+    "grafana" = config.services.observability-grafana.enable or false;
+    "ntfy" = config.services.observability-ntfy.enable or false; # confirm exact name
+    "prometheus" = config.services.observability-prometheus.enable or false;
+    "loki" = config.services.observability-loki.enable or false;
     "home-assistant" = config.services.homeassistant-custom.enable or false;
     "node-red" = config.services.nodered-service.enable or false;
     "syncthing" = config.services.syncthing-nixlab.enable or false;
