@@ -20,7 +20,6 @@
   flake.nixosModules.hosts--nixvat = {
     config,
     inputs,
-    lib,
     pkgs,
     ...
   }: {
@@ -92,11 +91,6 @@
     ## $ nix search wget
     environment.systemPackages = with pkgs; [
     ];
-
-    # CANARY PINS: remove in the commit before the merge to main (§10.4).
-    system.autoUpgrade.enable = lib.mkForce false; # else the 02:00 upgrade puts main back
-    systemd.timers.flake-update.enable = lib.mkForce false; # else it runs `nix flake update` here
-    systemd.timers.nixlab-gpull.enable = lib.mkForce false;
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     system.stateVersion = "24.11";
