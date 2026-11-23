@@ -135,10 +135,10 @@
             "collapse-after" = 30;
             cache = "3h";
             feeds = [
-              {
-                url = "https://brennan.day/feed.xml";
-                title = "blog - Brennan Day";
-              }
+              #{
+              #  url = "https://brennan.day/feed.xml";
+              #  title = "blog - Brennan Day";
+              #}
               {
                 url = "https://emilygorcenski.com/index.xml";
                 title = "blog - Emily Gorcenski";
