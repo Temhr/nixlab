@@ -5,7 +5,7 @@ _: prev: {
   comfyui = prev.stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "comfyui";
     # Newest tag: https://github.com/Comfy-Org/ComfyUI/releases
-    version = "0.46.0";
+    version = "0.46.0"; # <- update version
 
     src = prev.fetchFromGitHub {
       owner = "Comfy-Org";
