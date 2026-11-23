@@ -12,7 +12,7 @@ _: prev: {
       repo = "ComfyUI";
       rev = "v${finalAttrs.version}";
       # Build once, then paste the real hash from the "got:" line.
-      hash = "sha256-2F43abzhKX/fKdmPa+bhS9/hB0q4SqzpVYThKlNwYMU="; #prev.lib.fakeHash;
+      hash = "WO3xkaRVxDbfiRJC+RfljSOOdj6CAkflgZxv4cKe4vs="; #prev.lib.fakeHash;
     };
 
     dontConfigure = true;
