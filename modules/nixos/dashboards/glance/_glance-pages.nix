@@ -188,6 +188,10 @@
                 title = "NixOS -  Farid Zakaria's Blog";
               }
               {
+                url = "https://not-a-number.io/index.xml";
+                title = "NixOS -  Not A Number - Pol Dellaiera";
+              }
+              {
                 url = "https://luj.fr/feed.xml";
                 title = "NixOS -  Julien Malka (aka Luj)'s Blog";
               }
